@@ -1,0 +1,10 @@
+có cách nào để hỏi askuser question đủ mọi câu hỏi không? phải sửa lại setting hay gì, viết thêm script hoặc dùng tool,repo nào khác? tôi tin rằng đã có người muốn giải quyết vấn đề này rồi chứ.
+và rồi có các ý sau nữa:
+1. kể cả ở dự án "orch" trước và hiện tại "stockforge", dù tôi đã bật terminal claude code bằng "css nathanleewindy --dangerously-skip-permissions", trong quá trình chạy tôi vẫn cần rất nhiều lần phải manual accept harness permissions.
+- tôi cho phép agent toàn quyền làm việc trong folder "C:\htdocs\stockforge", nhưng dường như có một giới hạn nào đó của harness, bỏ qua cả dangerously-skip-permissions, để yêu cầu tôi phải grant lại.
+=> liệu có tạo thành script hay cách nào được không, để tự động detect apply hoặc set all permissions sẵn. vì block permission này làm autonomous mode bị stop.
+2. ngoài các metadata, decision, memory, summary, etc... mà llm thu thập được từ cả human và agent, subagent, thì context chat/runtime của claude code cũng là thông tin quan trọng để tracing ngược, nhưng hiện tại dường như chưa được thực hiện và chưa mang lại giá trị.
+- session claude code, ngoài việc được bật /remote-control để interactive với người dùng, thu thập thông tin human prompt, agent response... thì nó là source-of-truth cho chính agent và cả human về sau này, khi cần detect deepdive hoặc các tiến trình self-upgrade.
+- với claude code, có thể dùng "/export" và chọn "save to file" để xuất ra file ".txt" và treat nó như file ".md"
+- với việc tổ chức, linking, tham chiếu, kho dữ liệu "raw" này hoàn toàn hữu dụng cho các việc tra cứu, decision making, brainstorming, tracing, debugging, ... là vô giá khi được tích lũy và tổ chức lâu dài.
+đặc biệt trong chế độ autonomous running, khi các agent, subagent tự tương tác, trao đổi thông tin và ra quyết định qua lại, liên tục, thì context mang lại lợi thế lớn giúp việc tracing hiệu quả.

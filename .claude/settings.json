@@ -1,0 +1,379 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(pytest:*)",
+      "Bash(mypy:*)",
+      "Bash(ruff:*)",
+      "Bash(ruff check:*)",
+      "Bash(ruff format:*)",
+      "Bash(python -m mypy:*)",
+      "Bash(./scripts/drift-check/run-all.sh:*)",
+      "Read(*)",
+      "Write(apps/**)",
+      "Write(packages/**)",
+      "Write(specs/**)",
+      "Write(bdd/**)",
+      "Write(eval-sets/**)",
+      "Write(agent-workspace/memory/sessions/**)",
+      "Write(agent-workspace/memory/patterns-discovered/**)",
+      "Write(agent-workspace/memory/drift-logs/**)",
+      "Write(agent-workspace/memory/thesis-log/**)",
+      "Write(agent-workspace/memory/post-mortems/**)",
+      "Write(agent-workspace/memory/decisions/**)",
+      "Write(agent-workspace/memory/checkpoints/**)",
+      "Write(agent-workspace/memory/observations/**)",
+      "Write(agent-workspace/memory/sync-tracker/**)",
+      "Write(agent-workspace/memory/self-awareness/**)",
+      "Write(agent-workspace/session-plans/**)",
+      "Write(agent-workspace/quality-reports/**)",
+      "Write(agent-workspace/ubiquitous-language/**)",
+      "Write(agent-workspace/calibration/**)",
+      "Write(agent-workspace/research/**)",
+      "Write(agent-workspace/proposals/**)",
+      "Write(agent-workspace/raw-sessions/**)",
+      "Write(human-workspace/q-and-a/pending/**)",
+      "Write(human-workspace/notifications/**)",
+      "Write(.claude/agents/**)",
+      "Write(.claude/skills/**)",
+      "Write(.claude/commands/**)",
+      "Write(scripts/**)",
+      "Write(obsidian-vault/wiki/**)",
+      "Write(docs/**)",
+      "Write(prompts/**)",
+      "Edit(apps/**)",
+      "Edit(packages/**)",
+      "Edit(specs/**)",
+      "Edit(bdd/**)",
+      "Edit(docs/**)",
+      "Edit(prompts/**)",
+      "Edit(agent-workspace/memory/project.md)",
+      "Edit(agent-workspace/memory/current-execution.md)",
+      "Edit(agent-workspace/memory/agent-notes.md)",
+      "Edit(agent-workspace/memory/mistake-log.md)",
+      "Edit(agent-workspace/memory/decisions/**)",
+      "Edit(agent-workspace/memory/checkpoints/**)",
+      "Edit(agent-workspace/memory/sessions/**)",
+      "Edit(agent-workspace/memory/observations/**)",
+      "Edit(agent-workspace/memory/patterns-discovered/**)",
+      "Edit(agent-workspace/memory/sync-tracker/**)",
+      "Edit(agent-workspace/memory/self-awareness/**)",
+      "Edit(agent-workspace/proposals/**)",
+      "Edit(agent-workspace/session-plans/**)",
+      "Edit(agent-workspace/research/**)",
+      "Edit(agent-workspace/raw-sessions/**)",
+      "Edit(human-workspace/q-and-a/pending/**)",
+      "Edit(human-workspace/notifications/**)",
+      "Edit(.claude/agents/**)",
+      "Edit(.claude/skills/**)",
+      "Edit(.claude/commands/**)",
+      "Edit(.claude/settings.json)",
+      "Edit(.gitignore)",
+      "Edit(scripts/**)",
+      "Edit(agent-workspace/ubiquitous-language/glossary.md)",
+      "Edit(agent-workspace/ubiquitous-language/domain-mapping.md)",
+      "Edit(obsidian-vault/wiki/**)",
+      "Write(agent-workspace/learning-data/index/**)",
+      "Write(agent-workspace/learning-data/dogfood/**)",
+      "Write(agent-workspace/learning-data/loop/**)",
+      "Edit(agent-workspace/learning-data/index/**)",
+      "Edit(agent-workspace/learning-data/dogfood/**)",
+      "Edit(agent-workspace/learning-data/loop/**)"
+    ],
+    "deny": [
+      "Write(PROJECT_CHARTER.md)",
+      "Write(agent-workspace/constitution/**)",
+      "Write(obsidian-vault/raw/**)",
+      "Write(eval-sets/baseline-results/**)",
+      "Write(human-workspace/user_prompt/**)",
+      "Write(human-workspace/decisions/**)",
+      "Write(human-workspace/q-and-a/answered/**)",
+      "Write(human-workspace/q-and-a/stale/**)",
+      "Edit(PROJECT_CHARTER.md)",
+      "Edit(AGENT_OPERATING_MANUAL.md)",
+      "Edit(agent-workspace/constitution/**)",
+      "Edit(obsidian-vault/raw/**)",
+      "Edit(eval-sets/baseline-results/**)",
+      "Edit(human-workspace/user_prompt/**)",
+      "Edit(human-workspace/decisions/**)",
+      "Edit(human-workspace/q-and-a/answered/**)",
+      "Edit(human-workspace/q-and-a/stale/**)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(rm -rf:*)",
+      "Bash(DROP:*)",
+      "Bash(DELETE FROM:*)",
+      "Read(agent-workspace/learning-data/events/**)",
+      "Read(agent-workspace/learning-data/archive/**)",
+      "Write(agent-workspace/learning-data/events/**)",
+      "Write(agent-workspace/learning-data/archive/**)",
+      "Edit(agent-workspace/learning-data/events/**)",
+      "Edit(agent-workspace/learning-data/archive/**)"
+    ]
+  },
+  "env": {
+    "PYTHON_ENV": "development",
+    "STOCKFORGE_HOOK_PROFILE": "standard",
+    "STOCKFORGE_SPAWNED": "false",
+    "STOCKFORGE_WIND_DOWN_TOKENS": "180000",
+    "STOCKFORGE_CLIFF_TOKENS": "220000",
+    "STOCKFORGE_LOC_STRICT": "0",
+    "STOCKFORGE_CITATION_STRICT": "0",
+    "STOCKFORGE_DRIFT_STRICT": "0",
+    "STOCKFORGE_SAME_COMMIT_STRICT": "0"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory\" && echo \"[$(date -Iseconds)] SessionStart session=$CLAUDE_SESSION_ID cwd=$PWD profile=${STOCKFORGE_HOOK_PROFILE:-standard} spawned=${STOCKFORGE_SPAWNED:-false}\" >> \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory/.session-hooks.log\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/session-start-bootstrap.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/qa-pending-stale-mover.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/qa-answered-detector.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/sync-grilling-trigger.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/learning-queue-sweeper.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/ghost-work-audit.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/proposal-bundle-advisor.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/component-telemetry.sh\""
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory\" && echo \"[$(date -Iseconds)] SessionEnd session=$CLAUDE_SESSION_ID\" >> \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory/.session-hooks.log\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/session-export-raw.sh\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/userprompt-invariants-injector.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/stale-prompt-detector.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/correction-rate-tracker.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory\" && echo \"[$(date -Iseconds)] Stop session=$CLAUDE_SESSION_ID\" >> \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory/.session-hooks.log\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/pre-clear-handoff-guard.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/budget-watchdog.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/autonomous-stop-watchdog.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/taskcompleted-audit.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/charter-coherence-spot.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/drift-signals-D1-D9.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/correction-rate-aggregator.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/learning-index-rebuild.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/bash-hook-lint.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/learning-loop-metric-check.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/research-scanner-output-validator.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/self-awareness-aggregate.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/lesson-synthesis-watchdog.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/memory-routing-audit.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/promotion-cycle-trigger.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/harness-recovery-dod-watchdog.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/drift-rollup-daily.sh\""
+          },
+          {
+            "type": "command",
+            "command": "[ \"${STOCKFORGE_HOOK_PROFILE:-standard}\" = \"strict\" ] && bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/tool-call-first-lint.sh\" || :"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/dispatch-jsonl-recorder.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/write-vs-edit-guard.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/budget-watchdog.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/dispatch-jsonl-recorder.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/component-telemetry.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/post-tool-citation-grep.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/loc-ceiling-check.sh\""
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/subagent-stop-logger.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/component-telemetry.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/dispatch-jsonl-recorder.sh\""
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/precompact-thesis-state-dump.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}

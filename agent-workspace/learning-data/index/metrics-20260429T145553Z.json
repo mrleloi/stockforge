@@ -1,0 +1,1 @@
+{"as_of":"2026-04-29T21:55:53+07:00","metric":"failure_mode_populated_rate","mode":"cumulative","formula":"count(events.failure_mode != null) / count(events)","baseline":{"s11":"0/60=0.0%","measured_at":"2026-04-29"},"target":{"s12_plus_1":">= 0.083"},"measurement":{"total":473,"with_fm":2,"rate":0.004228329809725159,"dist":{"B":1,"H":1}}}

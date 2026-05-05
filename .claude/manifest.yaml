@@ -1,0 +1,435 @@
+# Layer Manifest — Track 5.5a (Phase 0 Harness Bootstrap)
+#
+# Source decision: agent-workspace/memory/decisions/003-up06-track-5.5-sync-layer-selfcap.md § 5.5a
+# Per UP-06 §2: clear layer separation enables /attach skill (port harness to new project),
+# multi-project peers via git fork, and drift detection of scope alignment.
+#
+# Multi-tenant SKIPPED per UP-06 Q6=D — single-human assumption.
+#
+# Categorization rule:
+# - harness     = portable pattern; project-agnostic; copy via /attach
+# - stockforge  = biz-specific; stays with this fork; not copied by /attach
+# - personal    = per-user customization; gitignored; opt-in via /attach --include-personal
+# - hybrid      = split-internally (harness baseline + project override)
+# - needs-refactor = currently entangled with stockforge; pattern is portable; refactor target
+
+version: 1
+revision: REV-2
+created_at: 2026-04-29
+updated_at: 2026-04-29
+schema_url: ./manifest.schema.json    # NEW (S6 will author validator)
+
+description: |
+  Declares scope of every artifact in .claude/ + scripts/hooks/ + select root files.
+  Read by /attach skill at copy time + drift-signals at audit time.
+  Single source of truth for "what is portable harness vs what is stockforge biz".
+
+  REV-2 (2026-04-29, S5-continuation): layer separation is LOGICAL via manifest tags, NOT PHYSICAL.
+  Stockforge biz skills stay co-located with harness skills under `.claude/skills/`; tagging in
+  this manifest determines layer membership. Preserves Claude Code Skill tool auto-discovery.
+  See `agent-workspace/memory/decisions/003-up06-track-5.5-sync-layer-selfcap.md § REV-2` for
+  rationale (Q&A audit: human-workspace/q-and-a/pending/2026-04-29-005-track-5.5a-layer-realization.md).
+
+# ============================================================================
+# Layer 1: HARNESS — portable across projects
+# ============================================================================
+# These patterns work for any Claude Code project (not VN-stock-specific).
+# /attach copies these to target project by default.
+
+harness:
+  description: "Portable patterns; copy-via-/attach by default"
+
+  skills:
+    - path: .claude/skills/grill-maximization/
+      role: "Q&A bundling doctrine — target 15-20 questions per turn"
+    - path: .claude/skills/qa-escalation/
+      role: "File-based Q&A protocol with lifecycle states"
+    - path: .claude/skills/user-prompt-intake/
+      role: "Hybrid intent classifier (lite-detect main + intent-classifier subagent)"
+    - path: .claude/skills/write-a-skill/
+      role: "Meta-skill for creating new SKILL.md with progressive disclosure"
+    - path: .claude/skills/spec-dual-layer/
+      role: "Author dual-layer specs (Part A business + Part B agent contract)"
+    - path: .claude/skills/spec-to-wiki/
+      role: "Convert raw spec to Obsidian wiki format"
+    - path: .claude/skills/test-pyramid-balance/
+      role: "Balance unit/integration/E2E pyramid in pytest"
+      tags: [needs-refactor]   # mentions stockforge categories; pattern is general
+    - path: .claude/skills/ubiquitous-language/
+      role: "DDD glossary extraction"
+      tags: [needs-refactor]   # references stockforge glossary path
+    - path: .claude/skills/ddd-tactical-patterns/
+      role: "DDD tactical patterns (aggregate, entity, VO, repo, event, ACL)"
+      tags: [needs-refactor]   # mentions 9 BCs (stockforge-specific)
+    - path: .claude/skills/obsidian-vault/
+      role: "Search/create/manage notes in Obsidian vault"
+      tags: [needs-refactor]   # references stockforge vault path
+    - path: .claude/skills/attach/
+      role: "Port harness layer to a new project (Track 5.5a deliverable; reads this manifest)"
+
+  agents:
+    - path: .claude/agents/sandwich-architect.md
+      role: "Architect persona in sandwich pattern; PLAN sessions"
+    - path: .claude/agents/sandwich-dev.md
+      role: "Developer persona in sandwich pattern; FOCUSED_IMPL/MULTI_TASK_IMPL"
+    - path: .claude/agents/sandwich-verifier.md
+      role: "Adversarial verifier persona; VERIFY sessions"
+    - path: .claude/agents/master-planner.md
+      role: "Senior tech lead; decomposes goals into phased session sequences"
+    - path: .claude/agents/spec-author.md
+      role: "BA + DDD designer producing dual-layer specs"
+    - path: .claude/agents/devils-advocate.md
+      role: "Adversarial reviewer of plans/specs/decisions"
+    - path: .claude/agents/drift-detector.md
+      role: "Runs drift signals DR1-DR12 with adversarial eye"
+    - path: .claude/agents/intent-vs-impl-diff.md
+      role: "Semantic drift auditor between human intent (UP-NN + Q&A picks) and current artifacts (Track 5.5b.1)"
+    - path: .claude/agents/intent-classifier.md
+      role: "Classifies user prompt intent (per Track 3)"
+    - path: .claude/agents/ul-auditor.md
+      role: "Ubiquitous language auditor"
+    - path: .claude/agents/bdd-planner.md
+      role: "Test pyramid balance strategist"
+    - path: .claude/agents/action-guide-planner.md
+      role: "Bridges /session-start output and execution plan"
+
+  commands:
+    - path: .claude/commands/budget-check.md
+      role: "Current session token budget status"
+    - path: .claude/commands/devils-advocate.md
+      role: "Adversarial critique"
+    - path: .claude/commands/drift-check.md
+      role: "Run drift signals DR1-DR12"
+    - path: .claude/commands/drill-me.md
+      role: "Interactive ubiquitous language extraction"
+    - path: .claude/commands/grill-me.md
+      role: "Relentless plan/design interview"
+    - path: .claude/commands/handoff-read.md
+      role: "Lightweight last session load"
+    - path: .claude/commands/master-plan.md
+      role: "High-level work decomposition"
+    - path: .claude/commands/session-end.md
+      role: "Close work session"
+    - path: .claude/commands/session-start.md
+      role: "Begin work session"
+    - path: .claude/commands/session-verify.md
+      role: "Mid-session alignment check"
+    - path: .claude/commands/spec-author.md
+      role: "Create dual-layer specification"
+    - path: .claude/commands/spec-to-wiki.md
+      role: "Convert raw spec to Obsidian wiki"
+    - path: .claude/commands/ul-audit.md
+      role: "Audit ubiquitous language consistency"
+    - path: .claude/commands/vbw-check.md
+      role: "Apply Verify-Before-Write protocol"
+
+  hooks:
+    - path: scripts/hooks/budget-watchdog.sh
+      role: "Token cliff/wind-down auto-reboot"
+    - path: scripts/hooks/autonomous-stop-watchdog.sh
+      role: "Mode A/B/C detection + auto-recovery"
+    - path: scripts/hooks/dispatch-jsonl-recorder.sh
+      role: "Subagent tool_use_id ↔ agent_id mapping"
+    - path: scripts/hooks/session-start-bootstrap.sh
+      role: "Session start context injection + queued-grill scan"
+    - path: scripts/hooks/subagent-stop-logger.sh
+      role: "Subagent stop telemetry"
+    - path: scripts/hooks/component-telemetry.sh
+      role: "Daemon-dumb JSONL telemetry"
+    - path: scripts/hooks/tool-call-first-lint.sh
+      role: "Mode-A narrate-without-tool detection"
+    - path: scripts/hooks/diagnostic-pretooluse-stash.sh
+      role: "Hook payload debugging"
+    - path: scripts/hooks/diagnostic-subagentstop-stash.sh
+      role: "Hook payload debugging"
+    - path: scripts/hooks/redact-secrets.sh
+      role: "Secrets redaction utility"
+    - path: scripts/hooks/qa-pending-stale-mover.sh
+      role: "Q&A lifecycle: pending → stale on deadline"
+    - path: scripts/hooks/qa-answered-detector.sh
+      role: "Q&A lifecycle: detect newly answered bundles"
+    - path: scripts/hooks/loc-ceiling-check.sh
+      role: "LOC ceiling enforcement on .claude/ artifacts"
+    - path: scripts/hooks/same-commit-rule.sh
+      role: "Spec ↔ code coupling pre-commit"
+    - path: scripts/hooks/session-export-raw.sh
+      role: "Transcript export with redact + cleanText"
+    - path: scripts/session-self-reboot.sh
+      role: "/new keystroke injection (Linux/macOS)"
+    - path: scripts/session-self-reboot.ps1
+      role: "/new keystroke injection (Windows)"
+    - path: scripts/hooks/continue-injector.ps1
+      role: "Fresh-session continue SendKeys"
+
+  docs:
+    - path: SPEC_TEMPLATE.md
+      role: "Spec template (dual-layer)"
+      tags: [needs-refactor]   # contains stockforge section examples
+
+# ============================================================================
+# Layer 2: STOCKFORGE — biz-specific; stays with this fork
+# ============================================================================
+# /attach EXCLUDES these by default. Specific to VN stock advisory mission.
+
+stockforge:
+  description: |
+    Biz-specific; tagged in-place at `.claude/skills/` (no physical move per REV-2 IMPL refinement).
+    /attach excludes these by reading this manifest and skipping each listed path explicitly
+    rather than excluding a `.claude/stockforge/` directory wildcard.
+
+  skills:
+    - path: .claude/skills/crawler-reliability/
+      reason: "VN news/KOL scrapers (CafeF, NDH, VietnamBiz, YouTube, Facebook fanpages)"
+    - path: .claude/skills/evidence-extraction/
+      reason: "I-S1 NO LLM math invariant + claim types (ExtractedClaim, KolRecommendation)"
+    - path: .claude/skills/postgres-pgvector/
+      reason: "VN stock market schemas + Vietnamese pg_trgm fuzzy search"
+    - path: .claude/skills/fastapi-module/
+      reason: "References stockforge conventions + Phase 2+ gating"
+    - path: .claude/skills/prompt-engineering/
+      reason: "References stockforge pipeline stages (claim extraction, KOL recs, sentiment, thesis)"
+
+  agents: []   # All current agents are harness-portable
+
+  commands: []   # All current commands are harness-portable
+
+  hooks:
+    - path: scripts/hooks/userprompt-invariants-injector.sh
+      role: "Injects I-S1/I-S2/I-S3/I-S10/I-S35 reminders per prompt"
+    - path: scripts/hooks/post-tool-citation-grep.sh
+      role: "Audits specs/thesis-log/calibration for numeric without source/as_of"
+    - path: scripts/hooks/precompact-thesis-state-dump.sh
+      role: "Snapshot stockforge thesis state on PreCompact"
+    - path: scripts/hooks/taskcompleted-audit.sh
+      role: "I-S1/I-S2/I-S10 grep on recent files"
+    - path: scripts/hooks/charter-coherence-spot.sh
+      role: "Detect 'buy/sell/recommend' without 'thesis exploration' framing"
+
+  docs:
+    - path: PROJECT_CHARTER.md
+      role: "Stockforge identity + invariants I-S1..I-S35"
+    - path: AGENT_OPERATING_MANUAL.md
+      role: "Stockforge agent operating manual"
+    - path: CLAUDE.md
+      role: "Project-level rules (overrides harness CLAUDE.md baseline)"
+    - path: specs/
+      role: "Stockforge specs (tier1-strategic + tier2-feature)"
+    - path: eval-sets/
+      role: "Stockforge eval (historical theses, labeled KOLs)"
+    - path: obsidian-vault/
+      role: "Stockforge knowledge base"
+    - path: agent-workspace/
+      role: "Stockforge agent memory + decisions + sessions + plans"
+    - path: human-workspace/
+      role: "This human's prompts + decisions + Q&A + notifications"
+    - path: apps/
+      role: "Stockforge application code"
+    - path: packages/
+      role: "Stockforge domain + infra packages"
+    - path: bdd/
+      role: "Stockforge BDD specs"
+
+# ============================================================================
+# Layer 3: HYBRID — split-internally
+# ============================================================================
+# Harness baseline + stockforge-specific overrides within same artifact.
+
+hybrid:
+  description: "Mixed harness pattern + stockforge override; manual handling per /attach"
+
+  hooks:
+    - path: scripts/hooks/drift-signals-D1-D9.sh
+      harness_part: "D1 LOC ceiling drift; D2 self-attestation; D3 charter-mixed bundle; D4 spec-dangling-ref; D9 learning-data path leak"
+      stockforge_part: "D5 missing-citation; D6 LLM-math; D7 no-bear-case; D8 confidence-no-calib"
+      attach_handling: "Copy with stockforge_part stubs; user re-enables per project"
+
+# ============================================================================
+# Layer 4: PERSONAL — per-user customization
+# ============================================================================
+# Gitignored; opt-in via /attach --include-personal.
+# Currently empty — directory + contract will be populated as user accumulates personal hooks/skills.
+
+personal:
+  description: "Per-user customization; gitignored; opt-in via /attach"
+  paths:
+    - .claude/personal/   # NEW directory (S5 mkdir + add to .gitignore)
+    - .env                # Local secrets
+
+# ============================================================================
+# /attach POLICY
+# ============================================================================
+# Used by .claude/skills/attach/ skill at copy time (S5 ships this skill).
+
+attach:
+  default_excludes:
+    # Per-layer (tag-driven; /attach reads stockforge.skills + stockforge.hooks lists)
+    # NOTE: `.claude/stockforge/` directory doesn't exist (REV-2: tag-only); excluded by
+    # individual path enumeration below.
+    - .claude/skills/crawler-reliability/
+    - .claude/skills/evidence-extraction/
+    - .claude/skills/postgres-pgvector/
+    - .claude/skills/fastapi-module/
+    - .claude/skills/prompt-engineering/
+    - .claude/personal/
+    # Stockforge-specific docs/data
+    - PROJECT_CHARTER.md
+    - AGENT_OPERATING_MANUAL.md
+    - CLAUDE.md   # project-level; replaced with skeleton at target
+    - obsidian-vault/
+    - specs/
+    - eval-sets/
+    - apps/
+    - packages/
+    - bdd/
+    # Workspaces (project-specific)
+    - agent-workspace/memory/decisions/
+    - agent-workspace/memory/sessions/
+    - agent-workspace/memory/checkpoints/
+    - agent-workspace/memory/thesis-log/
+    - agent-workspace/memory/calibration/
+    - agent-workspace/raw-sessions/
+    - human-workspace/user_prompt/
+    - human-workspace/decisions/
+    - human-workspace/q-and-a/
+    - human-workspace/notifications/
+    # Stockforge-specific hooks
+    - scripts/hooks/userprompt-invariants-injector.sh
+    - scripts/hooks/post-tool-citation-grep.sh
+    - scripts/hooks/precompact-thesis-state-dump.sh
+    - scripts/hooks/taskcompleted-audit.sh
+    - scripts/hooks/charter-coherence-spot.sh
+    # System
+    - .git/
+    - .pytest_cache/
+    - __pycache__/
+    - node_modules/
+
+  default_includes:
+    # Harness skills (11 — including attach itself so target can re-attach)
+    - .claude/skills/grill-maximization/
+    - .claude/skills/qa-escalation/
+    - .claude/skills/user-prompt-intake/
+    - .claude/skills/write-a-skill/
+    - .claude/skills/spec-dual-layer/
+    - .claude/skills/spec-to-wiki/
+    - .claude/skills/test-pyramid-balance/
+    - .claude/skills/ubiquitous-language/
+    - .claude/skills/ddd-tactical-patterns/
+    - .claude/skills/obsidian-vault/
+    - .claude/skills/attach/
+    # Harness agents/commands (all current = harness)
+    - .claude/agents/
+    - .claude/commands/
+    - .claude/settings.json   # but with sed-replace stockforge_* env vars
+    # Harness hooks (only)
+    - scripts/hooks/budget-watchdog.sh
+    - scripts/hooks/autonomous-stop-watchdog.sh
+    - scripts/hooks/dispatch-jsonl-recorder.sh
+    - scripts/hooks/session-start-bootstrap.sh
+    - scripts/hooks/subagent-stop-logger.sh
+    - scripts/hooks/component-telemetry.sh
+    - scripts/hooks/tool-call-first-lint.sh
+    - scripts/hooks/diagnostic-pretooluse-stash.sh
+    - scripts/hooks/diagnostic-subagentstop-stash.sh
+    - scripts/hooks/redact-secrets.sh
+    - scripts/hooks/qa-pending-stale-mover.sh
+    - scripts/hooks/qa-answered-detector.sh
+    - scripts/hooks/loc-ceiling-check.sh
+    - scripts/hooks/same-commit-rule.sh
+    - scripts/hooks/session-export-raw.sh
+    - scripts/session-self-reboot.sh
+    - scripts/session-self-reboot.ps1
+    - scripts/hooks/continue-injector.ps1
+    - scripts/hooks/drift-signals-D1-D9.sh   # hybrid; stockforge_part stubbed at target
+    # Harness docs (skeletal)
+    - SPEC_TEMPLATE.md
+    - .gitignore   # template; user customizes
+    # Harness workspace structure (empty skeletons)
+    - agent-workspace/CLAUDE.md
+    - agent-workspace/constitution/   # immutable harness-baseline pieces
+    - human-workspace/CLAUDE.md
+    # Manifest itself
+    - .claude/manifest.yaml
+
+  flags:
+    --include-personal:
+      description: "Also copy .claude/personal/ + .env (default false)"
+    --include-stockforge:
+      description: "Also copy stockforge-tagged skills + stockforge-specific docs (for dev mirror; default false)"
+    --dry-run:
+      description: "Print plan without copying (default false)"
+    --force:
+      description: "Overwrite existing files at target without prompt (default false)"
+
+  target_skeleton:
+    description: "What /attach generates at target project root after copy"
+    files_created:
+      - CLAUDE.md (skeleton — points to harness baseline + project-specific stub)
+      - .claude/manifest.yaml (this file copied + reset categorization)
+      - agent-workspace/memory/current-execution.md (skeleton routing source)
+
+# ============================================================================
+# Validation rules (drift-signals consume these)
+# ============================================================================
+
+validation:
+  rules:
+    - id: V1
+      check: "Every .claude/skills/*/SKILL.md path appears in exactly one layer (harness | stockforge | hybrid)"
+      severity: error
+    - id: V2
+      check: "Every .claude/agents/*.md path appears in exactly one layer"
+      severity: error
+    - id: V3
+      check: "Every .claude/commands/*.md path appears in exactly one layer"
+      severity: error
+    - id: V4
+      check: "Every scripts/hooks/*.sh + scripts/hooks/*.ps1 path appears in exactly one layer"
+      severity: error
+    - id: V5
+      check: "Every path in attach.default_includes exists OR is a directory pattern"
+      severity: warning
+    - id: V6
+      check: "No path appears in BOTH attach.default_excludes AND attach.default_includes"
+      severity: error
+    - id: V7
+      check: "manifest.yaml updated_at matches latest mtime of any listed artifact"
+      severity: info   # soft-warn; reminds to bump after restructure
+
+# ============================================================================
+# Provenance
+# ============================================================================
+
+provenance:
+  source_decisions:
+    - D-003 (UP-06 Track 5.5)
+    - "D-003 REV-2 (tag-only IMPL refinement; 2026-04-29 S5-continuation)"
+  source_prompts:
+    - human-workspace/user_prompt/20260429_06.txt
+  amendment_session: "session-4-replan (manifest authoring) + session-5 (REV-2 tag-only)"
+  q_and_a_audit:
+    - human-workspace/q-and-a/pending/2026-04-29-004-up06-track-5.5-amendment.md
+    - human-workspace/q-and-a/pending/2026-04-29-005-track-5.5a-layer-realization.md
+  next_actions:
+    # Physical-move tasks REMOVED per REV-2; skills stay tagged in-place
+    - "S5: author .claude/skills/attach/SKILL.md + references/ (reads manifest.stockforge.skills + .stockforge.hooks for exclusion)"
+    - "S5: update .gitignore for .claude/personal/"
+    - "S5: smoke-test /attach --dry-run on scratch dir"
+    - "S5: confirm D1 drift-signal still passes (no LOC change from this restructure)"
+    - "S6: author manifest.schema.json (validation schema)"
+
+# ============================================================================
+# Open items
+# ============================================================================
+
+open_items:
+  - id: M1
+    note: "needs-refactor tagged skills (test-pyramid-balance, ubiquitous-language, ddd-tactical-patterns, obsidian-vault, SPEC_TEMPLATE.md): refactor to fully portable in Track 6 REWRITE (S10) when refactoring to progressive-disclosure"
+  - id: M2
+    note: "drift-signals-D1-D9.sh hybrid split: when /attach copies, stockforge D5-D8 lines need stubbing. Implement in S5 attach skill."
+  - id: M3
+    note: "Personal layer (.claude/personal/) currently empty; populate as user accumulates per-user hooks/skills. Schema reserved."
+  - id: M4
+    note: "settings.json contains STOCKFORGE_* env vars; /attach must sed-replace to project-prefix at target (e.g., MYPROJECT_*)"
+  - id: M5
+    note: "REV-2 tag-only mechanism: manifest is authoritative for layer membership; directory tree does not visually show separation. Drift signal V1 still enforces exactly-one-layer per skill path. Future stockforge skills: tag in this manifest, place at .claude/skills/<name>/."

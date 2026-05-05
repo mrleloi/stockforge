@@ -1,0 +1,3 @@
+[URGENT] Q&A bundle moved to stale: 2026-04-29-003-up05-askuser-permissions-rawsessions.md
+Deadline was: 2026-04-30T14:55:00Z
+Action: review /c/htdocs/stockforge/human-workspace/q-and-a/stale/2026-04-29-003-up05-askuser-permissions-rawsessions.md and re-fire questions via AskUserQuestion if still relevant.

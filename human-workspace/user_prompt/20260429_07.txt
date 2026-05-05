@@ -1,0 +1,5 @@
+1. kiểm tra lại độ hiệu quả của "reboot session ở 250k context session", thực ra con số này là lấy từ learning lession của "phase2" trong "mdp refactor project", lúc đó sử dụng claude cách đây khá lâu.
+- vấn đề loss-in-middle chắn chắn vẫn còn, nhưng hiện tại main session claude code chạy opus 4.7, có thể là /effort medium hoặc /effort high, nên tôi cho rằng context size "phù hợp" có thể đã nhiều hơn.
+- vấn đề  tổng chi phí handoff, chi phí context load mỗi khi mở session mới qua "/clear", đặc biệt khi project trải qua nhiều phase và session, có thể sẽ trở thành một problem thực sự, nên nếu context length size "phù hợp" lớn hơn, sẽ cho phép việc điều phối công việc trong một phiên và nhiều phiên hiệu quả hơn
+=> quan trọng vẫn là data tracking được từ các phiên, budget, số lỗi, các tiêu chí đánh giá tương ứng với context length size. bạn cũng có thể research các con số phù hợp từ community dev với harness/model hiện tại để đề xuất best approach.
+điều này có thể làm thay đổi đáng kể chất lượng dự án và budget khi chạy ở chế độ full autonomous với nhiều session automation liên tục, đây là một quyết định quan trọng.

@@ -1,0 +1,43 @@
+# Confidence Score System — tunable weights, thresholds, tier display
+# Source: D-006 (Track 8a) + D-002 § Track 8 + Q&A A4/A5/A6
+# Format: flat key:value YAML — shallow only; no nested structures.
+# Parser: awk-grep based; nested YAML unsupported.
+# Source-of-truth schema is D-006 § Decision; this file is the runtime config knob.
+
+# === Categories (5; from D-002 § Track 8) ===
+# Initial score = 50 (mid-range; agent has neither earned high confidence nor accumulated correction debt).
+category_LANGUAGE: 50
+category_DOMAIN_UBIQUITOUS: 50
+category_DESIGN_THINKING: 50
+category_SCOPE: 50
+category_DECISION_ROUTING: 50
+
+# === Weights (asymmetric; per Q&A A5) ===
+# Positive deltas: agent earned confidence; negative: agent earned correction debt.
+weight_decision_correctness: 0.5
+weight_charter_match: 0.2
+weight_q_and_a_resolution: 0.1
+weight_drift_signal: -0.3
+weight_decision_correction: -2.0
+weight_decision_revocation: -3.0
+weight_thesis_revocation: -1.0
+
+# === Thresholds per decision class (Q&A A4 = D) ===
+# Scores expressed as 0-100; threshold check = current_score >= threshold.
+threshold_CHARTER: 99
+threshold_SCOPE: 90
+threshold_ARCH: 80
+threshold_IMPL: 50
+
+# === Tier display boundaries (REFINED post-D-002 REV-2: empirical hit rate, not LOW/MED/HIGH) ===
+# Each line: tier_<NAME>: <min_score>
+# Display string is in sync-tracker-render.sh; this file only maps score->tier name.
+tier_HIGH: 90
+tier_MED_HIGH: 70
+tier_MED: 50
+tier_MED_LOW: 30
+tier_MUST_GRILL: 0
+
+# === Reversal protocol parameters (Q&A A6) ===
+# N = number of forced-grill cycles after revocation; lifts when no further corrections.
+reversal_must_grill_cycles: 5

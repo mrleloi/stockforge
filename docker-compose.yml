@@ -1,0 +1,50 @@
+services:
+  postgres:
+    # TimescaleDB-HA includes TimescaleDB + pgvector + PostgreSQL 16
+    image: timescale/timescaledb-ha:pg16
+    container_name: stockforge-postgres
+    environment:
+      POSTGRES_DB: stockforge
+      POSTGRES_USER: stockforge
+      POSTGRES_PASSWORD: stockforge_dev_only
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/home/postgres/pgdata/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stockforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: stockforge-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # DuckDB for ad-hoc analytics runs in-process inside Python apps (no service needed)
+  # Whisper runs in-process inside Python workers (local mode) — GPU optional
+
+  # Optional: Adminer for DB inspection (dev only)
+  adminer:
+    image: adminer:latest
+    container_name: stockforge-adminer
+    ports:
+      - "8080:8080"
+    profiles: ["dev-tools"]
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  redis_data:

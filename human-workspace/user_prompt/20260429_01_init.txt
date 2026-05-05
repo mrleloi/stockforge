@@ -1,0 +1,15 @@
+1. đây là prompt đầu tiên của dự án này. tôi đã tạo scaffold dự án này từ claude chat dựa trên một ý tưởng của tôi về stock forge.
+- tôi dự định sẽ code dự án này full autonomous bằng ai agent, cụ thể là claude (plan max x20), claude code, chạy 24/7 trên một máy tính pc home.
+- tôi sẽ tham gia vào các công đoạn định hình scope, định hình objective goals tôi mong muốn, còn ai agent sẽ làm hết mọi khâu còn lại, bao gồm brain storming, research, simulation, planning, guidelines, execution, verify, testing, deploying (local), etc... cho đến khi mọi thứ hoàn thành.
+- trong quá trình theo dõi ai agent phát triển, thỉnh thoảng tôi sẽ phát sinh ý tưởng, hoặc muốn thay đổi gì đó, tôi sẽ prompt can thiệp trong folder "/human-workspace/user_prompt" này để định hình lại scope/objective goals.
+thì:
+1.1. vì mục đích đạt được full autonomous coding, tôi đã tạo một side project trong "C:\htdocs\orch-starter", với mong muốn sử dụng nó như một tool hỗ trợ tôi 24/7 quản lý việc implementation.
+nhưng trong quá trình hoàn thành dự án "orch" đó (cũng bằng full autonomous), tôi nhận ra một số điểm:
+- claude/claude code hiện tại đã hỗ trợ gần như mọi thứ tôi cần ban đầu khi tôi muốn tạo ra "orch", bao gồm:
+hệ thống agent, subagent, delegate, batch delegate mạnh mẽ: hầu như từ main session của claude code, nó tự động phân chia công việc cho đúng một hoặc batch nhiều agent, chạy một hoặc nhiều task hiệu quả.
+tôi đang hình dung rằng miễn tôi "re-boot" được session thành công, lưu trữ được trạng thái công việc trước đó, để handoff sang session mới với chi phí và độ hiệu quả tốt nhất có thể, thì hoàn toàn đã có thể dùng claude code để nó tự chạy autonomous fulltime 24/7 mà rất ít phải quản lý.
+tính năng remote control mới của claude code, cũng cho phép tôi tương tác với session trực tiếp từ mobile, với full history message và realtime integration, thay thế hoàn toàn cho ý tưởng dùng telegram ban đầu.
+việc quản lý budget thực sự là để dùng cho chính agent, để nó tự tracking và self-upgrade chính nó để trở nên hiệu quả hơn, thì bản thân local project tracking cũng đã đạt được.
+=> tôi đang băn khoăn mình có nên tiếp tục phát triển dự án orch tiếp nữa không để dùng nó coding cho dự án "stockforge" này, khi mà hệ thống của claude code dường như đã làm quá tốt nếu tôi thiết lập đúng.
+nếu có giá trị xa hơn nữa cho "orch" thì đó là để team cùng sử dụng, community-base và saas-base, giúp cho những người developer khác ít phải quan tâm về cấu hình hơn mà vẫn đạt được trạng thái full autonomous coding hiệu quả, còn nếu chỉ để sử dụng làm side project cho coding project này, thì dường như đang chưa cần thiết.
+=> bạn đánh giá, phân tích lại kĩ dự án "orch", các agent config/settings của nó, rồi quá trình nó được phát triển, những learning lession, knowledge nó đã học được, để xem chúng ta sẽ quyết định như nào, và nếu không dùng thì những gì chúng ta có thể học được thông qua dự án "orch" để bổ sung cho dự án "stockforge" hiện tại, nhằm đạt được full autonomous coding, vì dự án "orch" đã thực sự autonomous được, được phát triển thông qua nhiều "user_prompt", nhiều lần "research" và tự upgrade chính nó.

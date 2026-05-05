@@ -1,0 +1,3 @@
+[URGENT] Q&A bundle moved to stale: 2026-04-29-006-up08-self-learning-pipeline.md
+Deadline was: 2026-04-29T22:00:00Z
+Action: review /c/htdocs/stockforge/human-workspace/q-and-a/stale/2026-04-29-006-up08-self-learning-pipeline.md and re-fire questions via AskUserQuestion if still relevant.

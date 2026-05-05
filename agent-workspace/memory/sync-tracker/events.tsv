@@ -1,0 +1,16 @@
+ts	category	event_type	delta	decision_id	source_evidence	reason
+2026-04-29T16:12:29Z	SCOPE	decision_correctness	0.5	D-006	D-006 § Decision	smoke 1: SCOPE earned correctness on D-006
+2026-04-29T16:12:38Z	DOMAIN_UBIQUITOUS	charter_match	0.2	D-006	Charter Principle 8	smoke 2: DOMAIN earned charter-match
+2026-04-29T16:12:38Z	DESIGN_THINKING	q_and_a_resolution	0.1	Q-E2	Q-E2 closed	smoke 3: DESIGN earned QA resolution
+2026-04-29T16:12:39Z	LANGUAGE	drift_signal	-0.3	DR-test	DR1 mock	smoke 4: LANGUAGE earned drift
+2026-04-29T16:12:39Z	DECISION_ROUTING	decision_correction	-2.0	D-test-fail	user correction mock	smoke 5: DECISION_ROUTING corrected
+2026-04-29T16:12:50Z	SCOPE	decision_revocation	-3.0	D-test-revoked	post-mortem mock	smoke 6: SCOPE revoked → must-grill=5
+2026-04-29T16:37:05Z	DESIGN_THINKING	q_and_a_resolution	0.1		2026-04-29-001-phase0-clusters.md	qa bundle answered
+2026-04-29T22:18:13Z	SCOPE	q_and_a_resolution	0.1	sync-013	S23 sync-bundle Q1=A	Stockforge identity confirmed-aligned at Phase 1 entry
+2026-04-29T22:18:14Z	DOMAIN_UBIQUITOUS	q_and_a_resolution	0.1	sync-015	S23 sync-bundle Q2=A	9 BCs confirmed-aligned for Phase 1 monorepo skeleton
+2026-04-29T22:18:14Z	DECISION_ROUTING	q_and_a_resolution	0.1	sync-016	S23 sync-bundle Q3=A	Calibration over Confidence Track 8a substrate confirmed-aligned
+2026-04-29T22:18:15Z	DESIGN_THINKING	q_and_a_resolution	0.1	sync-017	S23 sync-bundle Q4=A	Sandwich pattern confirmed-aligned post-S21-verifier
+2026-04-29T22:43:23Z	SCOPE	q_and_a_resolution	0.1	S24-sub-track	S24 entry AskUserQuestion Q1=E	S24 sub-track master-plan Phase 1 thin slice picked
+2026-04-29T22:43:25Z	DESIGN_THINKING	q_and_a_resolution	0.1	Q-D1	S24 entry AskUserQuestion Q2=C	sessions folder flat-tree confirmed scale via grep+naming
+2026-04-29T22:43:26Z	DESIGN_THINKING	q_and_a_resolution	0.1	Q-D2	S24 entry AskUserQuestion Q3=A	Obsidian Karpathy raw/wiki pattern confirmed proven scale
+2026-04-29T23:04:28Z	SCOPE	q_and_a_resolution	0.1	Q-S25-1	S25 entry AskUserQuestion Q1=VHM	VHM exemplar confirmed for Phase 1 thin-slice S25-S30

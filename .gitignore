@@ -1,0 +1,98 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.env
+.env.local
+.env.*.local
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+dist/
+build/
+*.egg-info/
+
+# uv / hatch / pdm
+.uv/
+.pdm.toml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Secrets / credentials
+*.pem
+*.key
+credentials.json
+
+# Data (raw pulls — never commit)
+/data/
+/cache/
+*.parquet
+*.feather
+
+# Obsidian
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# Claude Code local overrides
+.claude/settings.local.json
+
+# Personal layer (per-user customization; opt-in via /attach --include-personal)
+# Track 5.5a layer foundation: .claude/personal/ holds per-user hooks/skills not committed.
+.claude/personal/
+
+# Logs
+*.log
+logs/
+
+# OS
+Thumbs.db
+
+# Harness runtime markers (Track 5 hooks; ported from orch v2.2.0)
+# These are local-session ephemeral state; never commit.
+.transcript-tokens
+.session-hooks.log
+.wind-down
+.wind-down-fired
+.auto-reboot-FAILED
+.autonomous-stop-watchdog.log
+.continue-fired-*
+.session-ready
+.dogfood-stop
+agent-workspace/memory/.transcript-tokens
+agent-workspace/memory/.session-hooks.log
+agent-workspace/memory/.wind-down
+agent-workspace/memory/.wind-down-fired
+agent-workspace/memory/.auto-reboot-FAILED
+agent-workspace/memory/.autonomous-stop-watchdog.log
+agent-workspace/memory/.continue-fired-*
+agent-workspace/memory/.session-ready
+agent-workspace/memory/.dogfood-stop
+
+# SQLite databases (sync-tracker, self-awareness — Tracks 8a, 9)
+agent-workspace/memory/sync-tracker/*.db
+agent-workspace/memory/sync-tracker/*.db-journal
+agent-workspace/memory/self-awareness/*.db
+agent-workspace/memory/self-awareness/*.db-journal
+
+# Learning-data write-heavy store (Track 5.5d.1, D-005)
+# events/ + archive/ are write-heavy NDJSON streams; gitignored due to volume + ephemerality.
+# index/ + dogfood/ + loop/ are tracked (small reference artifacts).
+agent-workspace/learning-data/events/
+agent-workspace/learning-data/archive/

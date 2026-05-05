@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# Pre-commit hook — runs deterministic quality gates
+#
+# Installation:
+#   cp .claude/hooks/pre-commit.example .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+#
+# Or install via a git hooks manager like pre-commit.
+
+set -e
+
+echo "Running pre-commit quality gates..."
+
+# Tier 1: Deterministic gates
+
+# 1. Check no commits to forbidden files
+FORBIDDEN_CHANGES=$(git diff --cached --name-only | grep -E "^(PROJECT_CHARTER\.md|agent-workspace/constitution/|obsidian-vault/raw/)" || true)
+if [ -n "$FORBIDDEN_CHANGES" ]; then
+  echo "ERROR: Attempted to commit changes to immutable files:"
+  echo "$FORBIDDEN_CHANGES"
+  echo ""
+  echo "These files require explicit human revision with version bump."
+  echo "See agent-workspace/constitution/boundaries.md for B-1, B-2, B-3."
+  exit 1
+fi
+
+# 2. mypy type check (if Python files staged)
+if git diff --cached --name-only | grep -q "\.py$"; then
+  echo "Running mypy --strict..."
+  if command -v mypy >/dev/null 2>&1; then
+    mypy --strict packages/ apps/ || {
+      echo "ERROR: mypy --strict failed"
+      exit 1
+    }
+  else
+    echo "WARNING: mypy not found, skipping type check"
+  fi
+fi
+
+# 3. Ruff linter
+if git diff --cached --name-only | grep -q "\.py$"; then
+  echo "Running ruff check..."
+  if command -v ruff >/dev/null 2>&1; then
+    ruff check packages/ apps/ || {
+      echo "ERROR: ruff check failed"
+      exit 1
+    }
+    ruff format --check packages/ apps/ || {
+      echo "ERROR: ruff format check failed (run: ruff format packages/ apps/)"
+      exit 1
+    }
+  else
+    echo "WARNING: ruff not found, skipping lint"
+  fi
+fi
+
+# 4. Unit tests
+if git diff --cached --name-only | grep -q "\.py$"; then
+  echo "Running unit tests..."
+  if command -v pytest >/dev/null 2>&1; then
+    pytest packages/domain/ -x -q || {
+      echo "ERROR: Unit tests failed"
+      exit 1
+    }
+  else
+    echo "WARNING: pytest not found, skipping tests"
+  fi
+fi
+
+# 5. Drift check HIGH severity
+if [ -x "./scripts/drift-check/run-all.sh" ]; then
+  echo "Running drift check (HIGH severity only)..."
+  ./scripts/drift-check/run-all.sh high || {
+    echo "ERROR: Drift check found HIGH severity violations"
+    echo "See agent-workspace/quality-reports/drift-reports/ for details"
+    exit 1
+  }
+fi
+
+echo "All pre-commit gates passed"
+exit 0
