@@ -15,6 +15,18 @@
 set -euo pipefail
 trap 'exit 0' ERR
 
+# === L-S48d-1 lint flag — S57 ratify per KI-S54-1 (alt-guard recognition) ===
+# bash-hook-lint Check 7 flags this file. Categorization (each grep usage):
+#   `recorded_session=$(grep ... | head -1 | cut -d= -f2 || true)` — guarded ✓
+#   `if [ -f "$EXEC_FILE" ] && grep -qE ...; then` — `&&`-chain in `if`;
+#     exit code consumed by `if` → ERR-trap exempt per bash spec ✓
+#   `if printf ... | grep -qE ...; then` — pipeline in `if`; same ✓
+#   `if [ X = "1" ] && grep -q ...; then` — `&&`-chain in `if`; same ✓
+#   `HIGH_COUNT="$(grep -c ... || echo 0)"` — alt-guard `|| echo 0` ✓
+# All grep usages SAFE; conservative `|| true` not applied (semantics
+# already correct). Lint refinement to recognize `if X && grep` and
+# `|| echo NN` deferred per KI-S54-1.
+
 WIND_DOWN="${STOCKFORGE_WIND_DOWN_TOKENS:-${ORCH_WIND_DOWN_TOKENS:-180000}}"
 CLIFF="${STOCKFORGE_CLIFF_TOKENS:-${ORCH_CLIFF_TOKENS:-220000}}"
 
@@ -63,7 +75,17 @@ WIND_DOWN_MARK="$PROJECT_DIR/agent-workspace/memory/.wind-down"
 WIND_DOWN_FIRED="$PROJECT_DIR/agent-workspace/memory/.wind-down-fired"
 CLIFF_MARK="$PROJECT_DIR/agent-workspace/memory/.cliff-fired"
 FAILED_MARKER="$PROJECT_DIR/agent-workspace/memory/.auto-reboot-FAILED"
+PRE_BLOCK_MARKER="$PROJECT_DIR/agent-workspace/memory/.auto-reboot-PRE-BLOCKED-stale-checkpoint"
 mkdir -p "$PROJECT_DIR/agent-workspace/memory/handoff-logs"
+
+# HH-H.4 (S48m): if auto-reboot-handoff-verify.sh wrote a pre-block marker
+# (stale checkpoint near threshold), skip the entire spawn path. Marker is
+# cleared by the verifier hook once checkpoint freshness restores.
+if [ -f "$PRE_BLOCK_MARKER" ]; then
+  printf '[%s] watchdog: PRE-BLOCKED by auto-reboot-handoff-verify (stale checkpoint); skipping reboot spawn\n' \
+    "$(date -Iseconds)" >> "$HOOK_LOG"
+  exit 0
+fi
 
 # Auto-recovery on prior failed reboot: clear once-only markers so retry can fire.
 # Without this, .cliff-fired / .wind-down-fired persist after a UIPI/SendKeys failure
@@ -104,27 +126,34 @@ clear_stale_marker "$WIND_DOWN_FIRED"
 clear_stale_marker "$WIND_DOWN_MARK"
 
 if [ "$TOTAL" -ge "$WIND_DOWN" ] && [ "$TOTAL" -lt "$CLIFF" ]; then
-  if [ ! -f "$WIND_DOWN_MARK" ]; then
-    printf 'wind_down_crossed_at=%s session_id=%s\ntokens=%s\n' "$(date -Iseconds)" "${SESSION_ID:-unknown}" "$TOTAL" > "$WIND_DOWN_MARK"
+  # HH-H.5b atomic marker claim (set -o noclobber) — only ONE concurrent
+  # invocation wins the race; race-loser sees `>` fail and skips.
+  if ( set -o noclobber; printf 'wind_down_crossed_at=%s session_id=%s\ntokens=%s\n' "$(date -Iseconds)" "${SESSION_ID:-unknown}" "$TOTAL" > "$WIND_DOWN_MARK" ) 2>/dev/null; then
     printf '[%s] WIND_DOWN crossed tokens=%s — auto-reboot will fire at next Stop hook\n' "$(date -Iseconds)" "$TOTAL" >> "$HOOK_LOG"
   fi
 
   # Sync invocation (NOT background-detached): UIPI requires interactive desktop access
   # inherited from TUI ancestor. `timeout 8s` bounds Stop-hook latency.
-  if [ "$HOOK_EVENT" = "Stop" ] && [ ! -f "$WIND_DOWN_FIRED" ]; then
-    printf 'wind_down_fired_at=%s session_id=%s\ntokens=%s\n' "$(date -Iseconds)" "${SESSION_ID:-unknown}" "$TOTAL" > "$WIND_DOWN_FIRED"
-    printf '[%s] WIND_DOWN auto-reboot firing on Stop tokens=%s\n' "$(date -Iseconds)" "$TOTAL" >> "$HOOK_LOG"
-    timeout 8 bash "$PROJECT_DIR/scripts/session-self-reboot.sh" "continue from checkpoint" \
-        >> "$PROJECT_DIR/agent-workspace/memory/handoff-logs/auto-wind-down-$(date +%s).log" 2>&1 || true
+  # HH-H.5b: write WIND_DOWN_FIRED marker via noclobber atomic claim BEFORE spawning reboot
+  # so a concurrent watchdog hook (Stop + PostToolUse race window) cannot also spawn.
+  if [ "$HOOK_EVENT" = "Stop" ]; then
+    if ( set -o noclobber; printf 'wind_down_fired_at=%s session_id=%s\ntokens=%s\n' "$(date -Iseconds)" "${SESSION_ID:-unknown}" "$TOTAL" > "$WIND_DOWN_FIRED" ) 2>/dev/null; then
+      printf '[%s] WIND_DOWN auto-reboot firing on Stop tokens=%s\n' "$(date -Iseconds)" "$TOTAL" >> "$HOOK_LOG"
+      timeout 8 bash "$PROJECT_DIR/scripts/session-self-reboot.sh" "continue from checkpoint" \
+          >> "$PROJECT_DIR/agent-workspace/memory/handoff-logs/auto-wind-down-$(date +%s).log" 2>&1 || true
+    fi
   fi
 fi
 
 # Cliff: HARD auto-reboot — fires on PostToolUse or Stop. Backstop for missed wind-down.
-if [ "$TOTAL" -ge "$CLIFF" ] && [ ! -f "$CLIFF_MARK" ]; then
-  printf 'cliff_fired_at=%s session_id=%s\ntokens=%s\n' "$(date -Iseconds)" "${SESSION_ID:-unknown}" "$TOTAL" > "$CLIFF_MARK"
-  printf '[%s] CLIFF tokens=%s — firing session-self-reboot.sh\n' "$(date -Iseconds)" "$TOTAL" >> "$HOOK_LOG"
-  timeout 8 bash "$PROJECT_DIR/scripts/session-self-reboot.sh" "continue from checkpoint" \
-      >> "$PROJECT_DIR/agent-workspace/memory/handoff-logs/auto-cliff-$(date +%s).log" 2>&1 || true
+# HH-H.5b atomic marker claim (set -o noclobber) — TOCTOU-safe vs `[ ! -f $CLIFF_MARK ]`
+# pattern (M-S48e-1 //nneeww root cause: Stop+PostToolUse hooks both passed test+spawned).
+if [ "$TOTAL" -ge "$CLIFF" ]; then
+  if ( set -o noclobber; printf 'cliff_fired_at=%s session_id=%s\ntokens=%s\n' "$(date -Iseconds)" "${SESSION_ID:-unknown}" "$TOTAL" > "$CLIFF_MARK" ) 2>/dev/null; then
+    printf '[%s] CLIFF tokens=%s — firing session-self-reboot.sh\n' "$(date -Iseconds)" "$TOTAL" >> "$HOOK_LOG"
+    timeout 8 bash "$PROJECT_DIR/scripts/session-self-reboot.sh" "continue from checkpoint" \
+        >> "$PROJECT_DIR/agent-workspace/memory/handoff-logs/auto-cliff-$(date +%s).log" 2>&1 || true
+  fi
 fi
 
 # === Mode-C premature wind-down guard (Stop-only) ===

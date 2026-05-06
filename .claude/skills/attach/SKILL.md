@@ -82,6 +82,63 @@ What target does NOT get: stockforge biz skills, charter, specs, eval-sets, obsi
 5. Diff target/.claude/skills/ vs source — should differ only in stockforge biz skills (5 absent)
 6. Cleanup: `rm -rf <scratch>` (manual; skill never destroys)
 
+### Layer-separation assertion smoke (S48l HH-G.3 codified)
+
+Standalone Python harness that DOES NOT create files; validates manifest-level layer separation. Use for portability validation when actual copy not desired (autonomous loops avoid Skill tool prompts per UP-05).
+
+```bash
+PYTHONIOENCODING=utf-8 python -c "
+import yaml
+m = yaml.safe_load(open('.claude/manifest.yaml'))
+include, exclude, hybrid = [], [], []
+for cat in ['skills','agents','commands','hooks','docs']:
+    include += [e['path'] for e in (m.get('harness',{}).get(cat) or [])]
+    exclude += [e['path'] for e in (m.get('stockforge',{}).get(cat) or [])]
+hybrid += [e['path'] for e in (m.get('hybrid',{}).get('hooks') or [])]
+default_includes = next((v.get('default_includes') for v in m.values() if isinstance(v,dict) and 'default_includes' in v), [])
+
+assertions = [
+    ('A1', 'agent-workspace/constitution/invariants-stockforge.md' in exclude),
+    ('A2', 'agent-workspace/constitution/invariants.md' in default_includes),
+    ('A3', 'agent-workspace/constitution/invariants-stockforge.md' not in default_includes),
+    ('A4', sum(1 for _ in (m.get('harness',{}).get('skills') or [])) >= 17),
+    ('A5', sum(1 for _ in (m.get('stockforge',{}).get('skills') or [])) == 5),
+    ('A6', any('drift-signals' in p for p in hybrid)),
+    ('A7', 'PROJECT_CHARTER.md' in exclude),
+]
+errors = [c for c, ok in assertions if not ok]
+print('GREEN' if not errors else 'RED ' + ','.join(errors))
+"
+```
+
+Expected output: `GREEN`. If `RED <ids>`, manifest layer-tagging regressed — investigate before allowing /attach to consumers.
+
+## Constitution Layer Boundary (post-S48l HH-G.2)
+
+Constitution files split into harness vs stockforge per portability validation:
+
+| File | Layer | Notes |
+|---|---|---|
+| `architecture.md` | harness | DDD + clean architecture patterns; project-agnostic |
+| `autonomous-protocol.md` | harness | Mode-A/B/C/D/E discipline + Rule 10 |
+| `boundaries.md` | harness | What agent cannot do without human approval |
+| `coding-principles.md` | harness | Karpathy + DDD applied; some I-S* refs but pattern-portable |
+| `decision-discipline.md` | harness | Tier classification + grill discipline |
+| `drift-signals.md` | harness | DR1-DR12 signals + Tiered Coverage Map |
+| `financial-data-protocol.md` | harness (flagged `[needs-refactor]`) | Stock-domain content; portability split target post-HH-G |
+| `invariants.md` | harness | General invariants I-1..I-52 only (post-S48l split) |
+| `invariants-stockforge.md` | **stockforge** | Stock-domain I-S* invariants — NOT copied by /attach |
+| `karpathy-principles.md` | harness | P1-P4 four-principles doctrine |
+| `memory-routing-tree.md` | harness | 12-field routing schema |
+| `memory-tiers.md` | harness | Tier 1/2/3 always-loaded vs JIT vs explicit-pull |
+| `session-budgets.md` | harness | Type selection + budget bands |
+| `vbw-protocol.md` | harness | Verify-Before-Write checkpoints |
+
+When porting to non-stock projects:
+- Target gets 13 harness constitution files (general patterns)
+- `invariants-stockforge.md` is excluded — target authors own invariants per their domain
+- `financial-data-protocol.md` is currently included but flagged for further split if portability validation fails on a non-finance target
+
 ## See Also
 
 - `.claude/manifest.yaml` — single source of truth for layer membership

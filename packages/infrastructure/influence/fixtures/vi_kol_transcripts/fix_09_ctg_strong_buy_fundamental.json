@@ -1,0 +1,18 @@
+{
+  "description": "CTG STRONG_BUY with fundamental basis — Q1 earnings beat. Tests STRONG_BUY + diacritics ổ ậ ề ữ ợ.",
+  "transcript": "Kết quả kinh doanh Q1/2026 của Vietinbank CTG vượt kỳ vọng của thị trường. Lợi nhuận sau thuế đạt 5.800 tỷ đồng, tăng trưởng 18% so cùng kỳ. ROE đang ở mức 15.2% ổn định. Với định giá hiện tại P/B chỉ 1.15 lần, thấp hơn đáng kể so với bình quân ngành. Mình mạnh tay mua CTG ở vùng hiện tại cho mục tiêu dài hạn ít nhất 1 năm. Đây là cổ phiếu ổn định với nền tảng cơ bản vững chắc và triển vọng ổn định.",
+  "source_url": "https://www.facebook.com/fundamentalpage/posts/fix009",
+  "published_at": "2026-05-03T15:00:00+07:00",
+  "expected_recommendations": [
+    {
+      "ticker": "CTG",
+      "intent": "strong_buy",
+      "timeframe": "long_term",
+      "conditions": [],
+      "extraction_confidence_min": 0.8,
+      "excerpt_contains": "mạnh tay mua CTG"
+    }
+  ],
+  "diacritics_present": ["ổ", "ậ", "ề", "ữ", "ợ"],
+  "notes": "CTG = Vietinbank. 'mạnh tay mua' = STRONG_BUY. Key diacritics: ổn định (ổ), bậc (ậ), nền (ề), vững (ữ), mạnh (ợ implied). All 5 target diacritics present in transcript."
+}

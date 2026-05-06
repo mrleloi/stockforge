@@ -1,0 +1,21 @@
+{
+  "ticker": "VND",
+  "period_start": "2021-06-01T00:00:00+00:00",
+  "period_end": "2021-09-30T00:00:00+00:00",
+  "phases": ["pre_pump", "pump", "distribution"],
+  "features_at_detection": {
+    "price_change_30d": "0.08",
+    "price_5d_change": "0.25",
+    "volume_30d_avg_rising": "true",
+    "volume_5d_avg_declining": "false",
+    "volume_5d_avg": "5000000",
+    "volume_30d_avg": "1500000",
+    "t2_news_silent": "false",
+    "t3_kol_mentions_rising": "true",
+    "t3_kol_mentions_peak": "true",
+    "t4_novice_post_share": "0.65",
+    "t4_coordination_score": "0.25"
+  },
+  "subsequent_outcome": "Price fell back to pre-pump levels within 45 days of distribution phase",
+  "labeled_by": "user"
+}

@@ -32,10 +32,10 @@ PROMPT_LOWER="$(printf '%s' "$USER_PROMPT" | tr '[:upper:]' '[:lower:]')"
 MATCHED_VI=""
 MATCHED_EN=""
 if printf '%s' "$PROMPT_LOWER" | grep -qE "$VI_PATTERNS" 2>/dev/null; then
-  MATCHED_VI=$(printf '%s' "$PROMPT_LOWER" | grep -oE "$VI_PATTERNS" 2>/dev/null | head -3 | tr '\n' '|' | sed 's/|$//')
+  MATCHED_VI=$(printf '%s' "$PROMPT_LOWER" | grep -oE "$VI_PATTERNS" 2>/dev/null | head -3 | tr '\n' '|' | sed 's/|$//' || true)
 fi
 if printf '%s' "$PROMPT_LOWER" | grep -qE "$EN_PATTERNS" 2>/dev/null; then
-  MATCHED_EN=$(printf '%s' "$PROMPT_LOWER" | grep -oE "$EN_PATTERNS" 2>/dev/null | head -3 | tr '\n' '|' | sed 's/|$//')
+  MATCHED_EN=$(printf '%s' "$PROMPT_LOWER" | grep -oE "$EN_PATTERNS" 2>/dev/null | head -3 | tr '\n' '|' | sed 's/|$//' || true)
 fi
 
 [ -z "$MATCHED_VI" ] && [ -z "$MATCHED_EN" ] && exit 0

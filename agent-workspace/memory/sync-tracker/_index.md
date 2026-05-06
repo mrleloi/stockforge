@@ -1,7 +1,7 @@
 # Confidence Score Index — sync-tracker
 
 > **Auto-generated** by `scripts/hooks/sync-tracker-render.sh`. Do NOT edit by hand.
-> **Last rendered**: 2026-04-29T23:04:28Z
+> **Last rendered**: 2026-05-05T06:35:57Z
 > **Source**: D-006 (Track 8a) + Charter Principle 8 (Calibration over confidence)
 > **Storage**: bash+TSV flat-file MVP per IMPL-S17-1; SQLite migration deferred Phase 1+
 
@@ -9,11 +9,11 @@
 
 | Category | Score | Tier | Sample Count | Last Updated | Must-Grill Remaining |
 |---|---|---|---|---|---|
-| LANGUAGE | 49.7 | 🟠 MED-LOW          (0.30-0.49) | 1 | 2026-04-29T16:12:39Z | 0 |
-| DOMAIN_UBIQUITOUS | 50.3 | 🟡 MED              (0.50-0.69) | 2 | 2026-04-29T22:18:14Z | 0 |
-| DESIGN_THINKING | 50.5 | 🟡 MED              (0.50-0.69) | 5 | 2026-04-29T22:43:26Z | 0 |
-| SCOPE | 47.8 | 🟠 MED-LOW          (0.30-0.49) | 5 | 2026-04-29T23:04:28Z | 2 |
-| DECISION_ROUTING | 48.1 | 🟠 MED-LOW          (0.30-0.49) | 2 | 2026-04-29T22:18:14Z | 0 |
+| LANGUAGE | 51.4 | 🟡 MED              (0.50-0.69) | 31 | 2026-05-05T15:00:00Z | 0 |
+| DOMAIN_UBIQUITOUS | 56.7 | 🟡 MED              (0.50-0.69) | 32 | 2026-05-05T10:00:00Z | 0 |
+| DESIGN_THINKING | 54.8 | 🟡 MED              (0.50-0.69) | 30 | 2026-05-05T13:30:00Z | 0 |
+| SCOPE | 50.7 | 🟡 MED              (0.50-0.69) | 30 | 2026-05-05T12:00:00Z | 2 |
+| DECISION_ROUTING | 49.5 | 🟠 MED-LOW          (0.30-0.49) | 30 | 2026-05-05T14:00:00Z | 0 |
 
 ## Decision-Class Thresholds
 
@@ -30,16 +30,16 @@
 
 | ts | category | event_type | delta | decision_id | reason |
 |---|---|---|---|---|---|
-| 2026-04-29T16:12:50Z | SCOPE | decision_revocation | -3.0 | D-test-revoked | smoke 6: SCOPE revoked → must-grill=5 |
-| 2026-04-29T16:37:05Z | DESIGN_THINKING | q_and_a_resolution | 0.1 |  | qa bundle answered |
-| 2026-04-29T22:18:13Z | SCOPE | q_and_a_resolution | 0.1 | sync-013 | Stockforge identity confirmed-aligned at Phase 1 entry |
-| 2026-04-29T22:18:14Z | DOMAIN_UBIQUITOUS | q_and_a_resolution | 0.1 | sync-015 | 9 BCs confirmed-aligned for Phase 1 monorepo skeleton |
-| 2026-04-29T22:18:14Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | sync-016 | Calibration over Confidence Track 8a substrate confirmed-aligned |
-| 2026-04-29T22:18:15Z | DESIGN_THINKING | q_and_a_resolution | 0.1 | sync-017 | Sandwich pattern confirmed-aligned post-S21-verifier |
-| 2026-04-29T22:43:23Z | SCOPE | q_and_a_resolution | 0.1 | S24-sub-track | S24 sub-track master-plan Phase 1 thin slice picked |
-| 2026-04-29T22:43:25Z | DESIGN_THINKING | q_and_a_resolution | 0.1 | Q-D1 | sessions folder flat-tree confirmed scale via grep+naming |
-| 2026-04-29T22:43:26Z | DESIGN_THINKING | q_and_a_resolution | 0.1 | Q-D2 | Obsidian Karpathy raw/wiki pattern confirmed proven scale |
-| 2026-04-29T23:04:28Z | SCOPE | q_and_a_resolution | 0.1 | Q-S25-1 | VHM exemplar confirmed for Phase 1 thin-slice S25-S30 |
+| 2026-05-05T13:30:00Z | DECISION_ROUTING | charter_match | 0.2 | sync-tracker-auto | sync-tracker auto-update Stop hook ship (HH-B.5) |
+| 2026-05-05T12:30:00Z | DECISION_ROUTING | charter_match | 0.2 | session-end-linter | session-end checklist linter Stop hook (HH-C.1) |
+| 2026-05-05T12:35:00Z | DECISION_ROUTING | charter_match | 0.2 | project-md-staleness | project.md staleness check Stop hook (HH-C.2) |
+| 2026-04-29T15:00:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | Q-A2-routing | drift leading indicator A=LOC ceiling routing rule |
+| 2026-04-29T19:00:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | Q-E1 | self-detect-drift D=defense-in-depth A+B+C combined |
+| 2026-04-29T19:30:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | Q-E2 | agent-notes promotion frequency A=phase-boundary only |
+| 2026-04-29T20:00:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | Q-E3 | promotion target priority D=Hook FIRST → Skill → Charter |
+| 2026-04-29T20:30:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | Q-E4 | drift recovery flow C=open Q&A bundle async |
+| 2026-05-04T17:30:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | L-S43f-1 | bundled deny-lift cycle for sibling charter proposals |
+| 2026-05-05T10:30:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | L-S46-2 | post-/clear TaskList loss completion-check before re-dispatch |
 
 ## How to use
 

@@ -63,11 +63,11 @@ SIGNAL_BREAKDOWN="$(printf '%s\n' "$TODAY_ENTRIES" \
 DISTINCT_FILES="$(printf '%s\n' "$TODAY_ENTRIES" \
   | grep -oE 'file=[^ ]+' \
   | sort -u \
-  | sed 's/^file=/  - /')"
+  | sed 's/^file=/  - /' || true)"
 DISTINCT_FILE_COUNT="$(printf '%s\n' "$DISTINCT_FILES" | grep -c '^  - ' || true)"
 
 # Last 10 HIGH entries verbatim for triage
-LAST_HIGH="$(printf '%s\n' "$TODAY_ENTRIES" | grep 'severity=HIGH' | tail -10 | sed 's/^/    /')"
+LAST_HIGH="$(printf '%s\n' "$TODAY_ENTRIES" | grep 'severity=HIGH' | tail -10 | sed 's/^/    /' || true)"
 
 # Write rollup
 {

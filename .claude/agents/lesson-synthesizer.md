@@ -1,7 +1,7 @@
 ---
 name: lesson-synthesizer
 description: Stage 2 of self-upgrade loop — fresh-context analysis of session diff + recent agent-notes/KI/BP entries. Extracts patterns from session work and proposes ≥1 new known-issue / best-practice / agent-notes entry. Invoked when lesson-synthesis-watchdog ALERTs OR when user explicitly requests pattern extraction. Companion to deterministic HR-1 watchdog.
-model: sonnet
+model: opus
 tools: [Read, Glob, Grep, Bash, Write, Edit]
 ---
 

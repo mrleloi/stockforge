@@ -1,0 +1,200 @@
+[2026-05-06T08:00:06+07:00] watchdog tokens=124527 wind_down=180000 cliff=220000
+[2026-05-06T08:00:10+07:00] watchdog tokens=130012 wind_down=180000 cliff=220000
+[2026-05-06T08:00:10+07:00] watchdog tokens=130012 wind_down=180000 cliff=220000
+[2026-05-06T08:00:10+07:00] watchdog tokens=130012 wind_down=180000 cliff=220000
+[2026-05-06T08:00:13+07:00] watchdog tokens=130012 wind_down=180000 cliff=220000
+[2026-05-06T08:00:13+07:00] watchdog tokens=130012 wind_down=180000 cliff=220000
+[2026-05-06T08:00:16+07:00] watchdog tokens=130012 wind_down=180000 cliff=220000
+[2026-05-06T08:00:17+07:00] watchdog tokens=130012 wind_down=180000 cliff=220000
+[2026-05-06T08:00:20+07:00] watchdog tokens=130012 wind_down=180000 cliff=220000
+[2026-05-06T08:00:20+07:00] watchdog tokens=130012 wind_down=180000 cliff=220000
+[2026-05-06T08:00:24+07:00] watchdog tokens=130012 wind_down=180000 cliff=220000
+[2026-05-06T08:00:24+07:00] watchdog tokens=130012 wind_down=180000 cliff=220000
+[2026-05-06T08:00:31+07:00] Stop session=
+[2026-05-06T08:00:32+07:00] correction-rate-aggregator: this=41 buckets=[0:1 50000:5 100000:16 150000:14 200000:3 250000:2] all_sessions=1 progress=1/10
+[2026-05-06T08:00:32+07:00] taskcompleted-audit: 2 violation(s) found across recent files
+[2026-05-06T08:00:32+07:00] watchdog tokens=131156 wind_down=180000 cliff=220000
+[2026-05-06T08:00:32+07:00] research-scanner-output-validator OK (0 violations)
+[2026-05-06T08:00:32+07:00] learning-loop-metric-check OK (0 violations)
+[2026-05-06T08:00:33+07:00] watchdog tokens=131156 wind_down=180000 cliff=220000
+[2026-05-06T08:00:32+07:00] learning-index-rebuild SKIP delta=66 total=7344 threshold=100
+[2026-05-06T08:00:33+07:00] watchdog tokens=131156 wind_down=180000 cliff=220000
+[2026-05-06T08:00:32+07:00] drift-rollup-daily: wrote /c/htdocs/stockforge/agent-workspace/memory/drift-logs/2026-05-06-rollup.md (total=109 high=6 medium=103 low=0 files=18)
+[2026-05-06T08:00:37+07:00] SubagentStop agentId=a7950a3b3c50975da status=unknown session=95b9527e-ddad-4b3f-8f63-a262ec92fde0
+[2026-05-06T08:00:32+07:00] drift-signals-D1-D9: 19 violation(s) — see /c/htdocs/stockforge/agent-workspace/memory/.drift-signals.log
+[2026-05-06T08:00:49+07:00] watchdog tokens=131156 wind_down=180000 cliff=220000
+[2026-05-06T08:00:55+07:00] watchdog tokens=131156 wind_down=180000 cliff=220000
+[2026-05-06T08:00:32+07:00] bash-hook-lint WARN 12 violation(s):
+  - L-S11-1-PORTABILITY: autonomous-stop-watchdog.sh — non-Phase-0-portable invocation (python/jq/yq/pip/npm) — Phase 0 doctrine = bash + POSIX only
+  - L-S11-1-PORTABILITY: qa-pending-stale-mover.sh — non-Phase-0-portable invocation (python/jq/yq/pip/npm) — Phase 0 doctrine = bash + POSIX only
+  - L-S11-1-PORTABILITY: redact-secrets.sh — non-Phase-0-portable invocation (python/jq/yq/pip/npm) — Phase 0 doctrine = bash + POSIX only
+  - L-S11-1-PORTABILITY: session-export-raw.sh — non-Phase-0-portable invocation (python/jq/yq/pip/npm) — Phase 0 doctrine = bash + POSIX only
+  - L-S11-1-PORTABILITY: subagent-stop-logger.sh — non-Phase-0-portable invocation (python/jq/yq/pip/npm) — Phase 0 doctrine = bash + POSIX only
+  - L-S11-1-PORTABILITY: vendor-api-probe.sh — non-Phase-0-portable invocation (python/jq/yq/pip/npm) — Phase 0 doctrine = bash + POSIX only
+  - D-IDENTITY-AUTONOMOUS-REGRESSION: agent-workspace/constitution/autonomous-protocol.md — live-config line matches forbidden pattern: 30:`autonomous_mode = true` is the steady state. There is **no SUPERVISED bifurcation, no human-in-t
+  - L-S48d-1-PIPEFAIL-BARE-GREP: pre-dispatch-adr-number-check.sh — pipefail + ERR trap + grep without guard — silent fail risk (L-S48d-1; refined S58 to recognize compound-if + alt-guard echo/exit/return + pipefail-bracket + multi-line continuation)
+  - L-S53-2-UNANCHORED-POSITIONAL-GREP: autonomous-stop-watchdog.sh — grep with routing-marker pattern (S<N>/Track/Session/## S<N>) lacks '^' anchor — mid-line false-positive risk (L-S53-2)
+  - L-S53-2-UNANCHORED-POSITIONAL-GREP: promotion-cycle-trigger.sh — grep with routing-marker pattern (S<N>/Track/Session/## S<N>) lacks '^' anchor — mid-line false-positive risk (L-S53-2)
+  - L-S53-2-UNANCHORED-POSITIONAL-GREP: session-start-bootstrap.sh — grep with routing-marker pattern (S<N>/Track/Session/## S<N>) lacks '^' anchor — mid-line false-positive risk (L-S53-2)
+  - L-S53-2-UNANCHORED-POSITIONAL-GREP: stale-prompt-detector.sh — grep with routing-marker pattern (S<N>/Track/Session/## S<N>) lacks '^' anchor — mid-line false-positive risk (L-S53-2)
+[2026-05-06T08:00:59+07:00] UserPromptSubmit-injector: SKIP (trivial prompt detected)
+[2026-05-06T08:01:06+07:00] watchdog tokens=131156 wind_down=180000 cliff=220000
+[2026-05-06T08:01:14+07:00] watchdog tokens=131156 wind_down=180000 cliff=220000
+[2026-05-06T08:01:23+07:00] watchdog tokens=131156 wind_down=180000 cliff=220000
+[2026-05-06T08:01:31+07:00] watchdog tokens=131156 wind_down=180000 cliff=220000
+[2026-05-06T08:01:33+07:00] watchdog tokens=132333 wind_down=180000 cliff=220000
+[2026-05-06T08:01:33+07:00] watchdog tokens=132333 wind_down=180000 cliff=220000
+[2026-05-06T08:01:37+07:00] watchdog tokens=132333 wind_down=180000 cliff=220000
+[2026-05-06T08:01:39+07:00] watchdog tokens=134564 wind_down=180000 cliff=220000
+[2026-05-06T08:01:39+07:00] watchdog tokens=134564 wind_down=180000 cliff=220000
+[2026-05-06T08:01:39+07:00] watchdog tokens=134564 wind_down=180000 cliff=220000
+[2026-05-06T08:01:43+07:00] watchdog tokens=134564 wind_down=180000 cliff=220000
+[2026-05-06T08:01:45+07:00] watchdog tokens=134958 wind_down=180000 cliff=220000
+[2026-05-06T08:01:45+07:00] watchdog tokens=134958 wind_down=180000 cliff=220000
+[2026-05-06T08:01:46+07:00] watchdog tokens=134958 wind_down=180000 cliff=220000
+[2026-05-06T08:01:50+07:00] watchdog tokens=134958 wind_down=180000 cliff=220000
+[2026-05-06T08:01:58+07:00] watchdog tokens=136600 wind_down=180000 cliff=220000
+[2026-05-06T08:02:12+07:00] watchdog tokens=137529 wind_down=180000 cliff=220000
+[2026-05-06T08:02:19+07:00] watchdog tokens=137529 wind_down=180000 cliff=220000
+[2026-05-06T08:02:29+07:00] watchdog tokens=137529 wind_down=180000 cliff=220000
+[2026-05-06T08:02:40+07:00] watchdog tokens=138857 wind_down=180000 cliff=220000
+[2026-05-06T08:02:41+07:00] watchdog tokens=138857 wind_down=180000 cliff=220000
+[2026-05-06T08:02:47+07:00] watchdog tokens=138857 wind_down=180000 cliff=220000
+[2026-05-06T08:02:53+07:00] watchdog tokens=138857 wind_down=180000 cliff=220000
+[2026-05-06T08:02:54+07:00] watchdog tokens=139980 wind_down=180000 cliff=220000
+[2026-05-06T08:03:05+07:00] watchdog tokens=139980 wind_down=180000 cliff=220000
+[2026-05-06T08:03:06+07:00] watchdog tokens=141126 wind_down=180000 cliff=220000
+[2026-05-06T08:03:27+07:00] watchdog tokens=141126 wind_down=180000 cliff=220000
+[2026-05-06T08:03:30+07:00] watchdog tokens=141126 wind_down=180000 cliff=220000
+[2026-05-06T08:03:32+07:00] watchdog tokens=141126 wind_down=180000 cliff=220000
+[2026-05-06T08:03:33+07:00] watchdog tokens=142570 wind_down=180000 cliff=220000
+[2026-05-06T08:03:33+07:00] watchdog tokens=142570 wind_down=180000 cliff=220000
+[2026-05-06T08:03:36+07:00] watchdog tokens=142570 wind_down=180000 cliff=220000
+[2026-05-06T08:03:52+07:00] watchdog tokens=144813 wind_down=180000 cliff=220000
+[2026-05-06T08:03:53+07:00] watchdog tokens=144813 wind_down=180000 cliff=220000
+[2026-05-06T08:03:57+07:00] watchdog tokens=144813 wind_down=180000 cliff=220000
+[2026-05-06T08:04:11+07:00] watchdog tokens=144813 wind_down=180000 cliff=220000
+[2026-05-06T08:04:12+07:00] Stop session=
+[2026-05-06T08:04:13+07:00] correction-rate-aggregator: this=41 buckets=[0:1 50000:5 100000:16 150000:14 200000:3 250000:2] all_sessions=1 progress=1/10
+[2026-05-06T08:04:13+07:00] taskcompleted-audit: 2 violation(s) found across recent files
+[2026-05-06T08:04:13+07:00] research-scanner-output-validator OK (0 violations)
+[2026-05-06T08:04:13+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:04:13+07:00] learning-loop-metric-check OK (0 violations)
+[2026-05-06T08:04:13+07:00] drift-rollup-daily: wrote /c/htdocs/stockforge/agent-workspace/memory/drift-logs/2026-05-06-rollup.md (total=128 high=7 medium=121 low=0 files=18)
+[2026-05-06T08:04:12+07:00] learning-index-rebuild OK delta=107 total=7385 sample_lines=100
+[2026-05-06T08:04:15+07:00] SubagentStop agentId=afc32bebce8193e97 status=unknown session=95b9527e-ddad-4b3f-8f63-a262ec92fde0
+[2026-05-06T08:04:12+07:00] drift-signals-D1-D9: 19 violation(s) — see /c/htdocs/stockforge/agent-workspace/memory/.drift-signals.log
+[2026-05-06T08:04:25+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:04:34+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:04:13+07:00] bash-hook-lint WARN 12 violation(s):
+  - L-S11-1-PORTABILITY: autonomous-stop-watchdog.sh — non-Phase-0-portable invocation (python/jq/yq/pip/npm) — Phase 0 doctrine = bash + POSIX only
+  - L-S11-1-PORTABILITY: qa-pending-stale-mover.sh — non-Phase-0-portable invocation (python/jq/yq/pip/npm) — Phase 0 doctrine = bash + POSIX only
+  - L-S11-1-PORTABILITY: redact-secrets.sh — non-Phase-0-portable invocation (python/jq/yq/pip/npm) — Phase 0 doctrine = bash + POSIX only
+  - L-S11-1-PORTABILITY: session-export-raw.sh — non-Phase-0-portable invocation (python/jq/yq/pip/npm) — Phase 0 doctrine = bash + POSIX only
+  - L-S11-1-PORTABILITY: subagent-stop-logger.sh — non-Phase-0-portable invocation (python/jq/yq/pip/npm) — Phase 0 doctrine = bash + POSIX only
+  - L-S11-1-PORTABILITY: vendor-api-probe.sh — non-Phase-0-portable invocation (python/jq/yq/pip/npm) — Phase 0 doctrine = bash + POSIX only
+  - D-IDENTITY-AUTONOMOUS-REGRESSION: agent-workspace/constitution/autonomous-protocol.md — live-config line matches forbidden pattern: 30:`autonomous_mode = true` is the steady state. There is **no SUPERVISED bifurcation, no human-in-t
+  - L-S48d-1-PIPEFAIL-BARE-GREP: pre-dispatch-adr-number-check.sh — pipefail + ERR trap + grep without guard — silent fail risk (L-S48d-1; refined S58 to recognize compound-if + alt-guard echo/exit/return + pipefail-bracket + multi-line continuation)
+  - L-S53-2-UNANCHORED-POSITIONAL-GREP: autonomous-stop-watchdog.sh — grep with routing-marker pattern (S<N>/Track/Session/## S<N>) lacks '^' anchor — mid-line false-positive risk (L-S53-2)
+  - L-S53-2-UNANCHORED-POSITIONAL-GREP: promotion-cycle-trigger.sh — grep with routing-marker pattern (S<N>/Track/Session/## S<N>) lacks '^' anchor — mid-line false-positive risk (L-S53-2)
+  - L-S53-2-UNANCHORED-POSITIONAL-GREP: session-start-bootstrap.sh — grep with routing-marker pattern (S<N>/Track/Session/## S<N>) lacks '^' anchor — mid-line false-positive risk (L-S53-2)
+  - L-S53-2-UNANCHORED-POSITIONAL-GREP: stale-prompt-detector.sh — grep with routing-marker pattern (S<N>/Track/Session/## S<N>) lacks '^' anchor — mid-line false-positive risk (L-S53-2)
+[2026-05-06T08:04:40+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:05:21+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:05:24+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:05:40+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:05:43+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:06:23+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:07:05+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:07:42+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:08:32+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:08:49+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:09:36+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:10:02+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:10:05+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:10:08+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:10:22+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:10:28+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:10:39+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:11:00+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:11:35+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:12:03+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:12:42+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:13:07+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:13:12+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:13:41+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:13:48+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:13:55+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:14:01+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:14:08+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:14:15+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:14:33+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:14:40+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:14:54+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:15:05+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:15:08+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:15:14+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:15:21+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:15:28+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:15:33+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:15:38+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:15:45+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:15:52+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:15:58+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:16:06+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:16:18+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:16:23+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:16:31+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:16:43+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:16:49+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:16:56+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:17:03+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:17:07+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:17:11+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:17:16+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:17:20+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:17:27+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:17:31+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:17:36+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:17:39+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:17:47+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:17:53+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:17:57+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:18:03+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:18:07+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:18:14+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:18:18+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:18:26+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:18:31+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:18:34+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:18:37+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:18:42+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:18:46+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:18:50+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:18:56+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:00+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:05+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:09+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:15+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:20+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:26+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:31+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:35+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:39+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:43+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:47+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:53+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:19:56+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:20:01+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:20:07+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:20:10+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:20:13+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:20:18+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:20:22+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:20:29+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:20:41+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:20:46+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:20:54+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:21:09+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:21:12+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000
+[2026-05-06T08:22:24+07:00] watchdog tokens=150353 wind_down=180000 cliff=220000

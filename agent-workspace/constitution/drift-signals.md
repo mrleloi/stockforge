@@ -20,6 +20,46 @@ Results written to `agent-workspace/quality-reports/drift-reports/YYYY-MM-DD-N.m
 
 ---
 
+## Tiered Coverage Map
+
+> Added 2026-05-05 via D-029 (S48c HH-B.4 audit + S48d ratification). Reconciles
+> the doctrine numbering (DR1-DR12) with the Stop-hook implementation
+> (`drift-signals-D1-D9.sh`). Reader reference: which signals fire automatically
+> vs require manual command vs require DB connection.
+
+Drift signals are detected at three tiers:
+
+**Tier-A — Automated detector** (Stop-hook `drift-signals-D1-D9.sh`; runs every session-end):
+- DR-A1 — LOC ceiling overrun (PRIMARY per Q-A2; severity HIGH at >20% overrun) ← formerly D1
+- DR-A2 — Self-attestation contradicting actual file content ← formerly D2
+- DR-A3 — Charter/SCOPE bundled with sub-charter items ← formerly D3
+- DR-A4 — Confidence claim without calibration metadata ← formerly D8
+- DR-A5 — Runtime-path-leak into write-only learning-data tree (D-005) ← formerly D9
+- DR1 — Domain layer imports framework (NEW S48c HH-B.4; grep `packages/domain/**`)
+- DR3 — LLM call without retry/budget wrapper (NEW S48c HH-B.4; grep `packages/infrastructure/**`)
+- DR6 — `Any` type in domain package (NEW S48c HH-B.4; grep + filter test files)
+- DR8 — Cross-BC direct import (NEW S48c HH-B.4; grep per-BC subdir)
+- DR-S1 — LLM emitted number without tool call (covered by D6 LLM-math grep)
+- DR-S2 — Thesis output without bear case (covered by D7 thesis-bear grep)
+- DR2 — Evidence without citation (PARTIAL via D5 numeric+citation grep; full DB check Tier-C)
+- DR5 — Claim stored without metadata (PARTIAL via D5)
+- DR10 — Spec dangling reference (PARTIAL via D4 reference scan)
+
+**Tier-B — Manual `/drift-check` command** (semantic checks; requires LLM judgment):
+- DR4 — Hardcoded prompt outside `prompts/`
+- DR7 — UL term drift (also via `/ul-audit`)
+- DR12 — Anti-pattern from `agent-notes.md`
+
+**Tier-C — DB-query check** (requires Postgres connection; not run on every session):
+- DR9 — Synthesis output without verifier step
+- DR11 — Stale session-handoff (also git-log diff-able via Tier-A heuristic)
+
+**Note on numbering**: hook script filename `drift-signals-D1-D9.sh` retains its path for
+stability; internal labels emit Tier-A signals as `DR-A<N>` per this map. Future detector
+additions follow `DR-A<next>` numbering. Stock-specific signals stay under `DR-S<N>` namespace.
+
+---
+
 ## HIGH Severity (blocks commit/merge)
 
 ### DR1: Domain layer imports framework

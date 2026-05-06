@@ -1,0 +1,26 @@
+{
+  "description": "Multi-ticker — FPT BUY vs VHM AVOID comparison. Tests multiple recommendations in one transcript.",
+  "transcript": "Hôm nay mình so sánh hai cổ phiếu FPT và VHM. FPT đang có câu chuyện tăng trưởng tốt từ mảng phần mềm xuất khẩu và AI services. Doanh thu Q1 tăng 20%. Mình đang mua FPT cho danh mục trung dài hạn. Còn VHM của Vinhomes thì khác, bất động sản nhà ở chưa hồi phục rõ ràng, tồn kho cao. Mình không khuyến nghị VHM trong 6 tháng tới, anh em cẩn thận với VHM nhé. Nếu anh em chỉ chọn một thì chọn FPT thay vì VHM.",
+  "source_url": "https://www.youtube.com/watch?v=fix010_compare",
+  "published_at": "2026-05-04T21:00:00+07:00",
+  "expected_recommendations": [
+    {
+      "ticker": "FPT",
+      "intent": "buy",
+      "timeframe": "long_term",
+      "conditions": [],
+      "extraction_confidence_min": 0.7,
+      "excerpt_contains": "mua FPT"
+    },
+    {
+      "ticker": "VHM",
+      "intent": "avoid",
+      "timeframe": "months",
+      "conditions": [],
+      "extraction_confidence_min": 0.65,
+      "excerpt_contains": "cẩn thận với VHM"
+    }
+  ],
+  "diacritics_present": ["ổ", "ề", "ợ"],
+  "notes": "FPT = FPT Corp (tech). VHM = Vinhomes (real estate). Two simultaneous recommendations. 'cẩn thận' = AVOID per spec § B.5."
+}

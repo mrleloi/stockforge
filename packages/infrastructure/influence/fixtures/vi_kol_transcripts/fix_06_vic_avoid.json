@@ -1,0 +1,18 @@
+{
+  "description": "VIC avoid recommendation — KOL warns about Vingroup due to high debt. Tests AVOID intent + diacritics.",
+  "transcript": "Anh em cần cẩn thận với VIC của Vingroup. Nợ vay quá lớn, tỷ lệ nợ trên vốn chủ sở hữu ở mức báo động. Dòng tiền tự do âm liên tục 3 quý. Với điều kiện lãi suất hiện tại, áp lực tài chính rất nặng nề. Mình khuyên anh em tránh xa VIC trong thời điểm này, ít nhất là trong 3-6 tháng tới. Đây là phân tích cơ bản dựa trên báo cáo tài chính Q1/2026.",
+  "source_url": "https://www.facebook.com/fundamentalgroup/posts/fix006",
+  "published_at": "2026-05-02T09:00:00+07:00",
+  "expected_recommendations": [
+    {
+      "ticker": "VIC",
+      "intent": "avoid",
+      "timeframe": "months",
+      "conditions": [],
+      "extraction_confidence_min": 0.7,
+      "excerpt_contains": "cẩn thận với VIC"
+    }
+  ],
+  "diacritics_present": ["ổ", "ề", "ợ"],
+  "notes": "VIC = Vingroup. 'cẩn thận' = AVOID per spec § B.5. Clear AVOID recommendation with timeframe 3-6 months."
+}

@@ -1,0 +1,17 @@
+{
+  "ticker": "FLC",
+  "signals": [
+    {"signal_name": "volume_price_spike", "phase": "pump", "weight": 0.4},
+    {"signal_name": "fomo_active", "phase": "pump", "weight": 0.3},
+    {"signal_name": "novice_fomo_dominant", "phase": "distribution", "weight": 0.3}
+  ],
+  "historical_matches": [
+    {
+      "ticker": "FLC",
+      "period_start": "2022-01-10",
+      "period_end": "2022-03-15",
+      "outcome_description": "Classic coordination pattern detected; rapid reversal followed"
+    }
+  ],
+  "expected_evidence_shape": "pattern_detected_high_risk"
+}

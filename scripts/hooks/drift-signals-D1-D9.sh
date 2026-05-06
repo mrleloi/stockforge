@@ -8,6 +8,20 @@
 set -uo pipefail
 trap 'exit 0' ERR
 
+# === L-S48d-1 lint flag — S57 retrofit (1 real fix + KI-S54-1 ratify) ===
+# bash-hook-lint Check 7 flags this file. Categorization:
+#   FIXED S57: D4-loop bare-grep `REFS="$(grep -oE ... | sort -u | head -5)"`
+#     was unguarded — no-match returned 1 → pipefail propagated → ERR-trap
+#     `exit 0` silently aborted spec scanning. Added `|| true` end-of-pipeline.
+#     REAL bug, not alt-guard form (only one in this file).
+#   Many `if grep -qE ...; then` and `if ! grep -qiE ...; then` forms — exit
+#     consumed by `if` → ERR-trap exempt per bash spec ✓
+#   Many `VAR="$(grep ... | wc -l | tr -d '...' || echo 0)"` — alt-guard
+#     `|| echo 0` end-of-pipeline ✓ (KI-S54-1 recognition)
+#   `if [ X = "1" ] && grep -q ...; then` (line ~202) — `&&`-chain in `if` ✓
+# Per-file Check 7 design keeps flag (alt-guards not normalized to `|| true`).
+# Lint refinement deferred per KI-S54-1.
+
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 mkdir -p "$PROJECT_DIR/agent-workspace/memory"
 LOG="$PROJECT_DIR/agent-workspace/memory/.drift-signals.log"
@@ -81,7 +95,7 @@ done
 SPECS="$(find "$PROJECT_DIR/specs" -name '*.md' -mmin -1440 2>/dev/null || true)"
 for s in $SPECS; do
   [ ! -f "$s" ] && continue
-  REFS="$(grep -oE 'packages/[a-z_/-]+\.py|apps/[a-z_/-]+\.py' "$s" 2>/dev/null | sort -u | head -5)"
+  REFS="$(grep -oE 'packages/[a-z_/-]+\.py|apps/[a-z_/-]+\.py' "$s" 2>/dev/null | sort -u | head -5 || true)"
   for ref in $REFS; do
     if [ ! -f "$PROJECT_DIR/$ref" ]; then
       emit "D4-SPEC-DANGLING-REF" "LOW" "spec=$s missing_ref=$ref"
@@ -147,6 +161,52 @@ for f in "$PROJECT_DIR"/scripts/hooks/*.sh; do
     emit "D9-LEARNING-PATH-LEAK" "HIGH" "file=$f category=non-whitelist-hook refs-write-only-tree"
   fi
 done
+
+# === DR1 (HH-B.4 extension): Domain layer imports framework (HIGH) ===
+# Doctrine-codified per agent-workspace/constitution/drift-signals.md DR1.
+if [ -d "$PROJECT_DIR/packages/domain" ]; then
+  DR1_HITS="$(grep -rn "from fastapi\|from pydantic\|from sqlalchemy\|import psycopg\|from redis" \
+    "$PROJECT_DIR/packages/domain/" --include="*.py" 2>/dev/null | wc -l | tr -d '[:space:]' || echo 0)"
+  [[ "$DR1_HITS" =~ ^[0-9]+$ ]] || DR1_HITS=0
+  if [ "$DR1_HITS" -gt 0 ]; then
+    emit "DR1-DOMAIN-FRAMEWORK" "HIGH" "count=$DR1_HITS scope=packages/domain/**"
+  fi
+fi
+
+# === DR3 (HH-B.4 extension): LLM call without retry/budget wrapper (MEDIUM) ===
+if [ -d "$PROJECT_DIR/packages/infrastructure" ]; then
+  DR3_HITS="$(grep -rn "anthropic\.Anthropic\|client\.messages\.create" \
+    "$PROJECT_DIR/packages/infrastructure/" --include="*.py" 2>/dev/null \
+    | grep -v "with_budget\|with_retry\|budget_aware" | wc -l | tr -d '[:space:]' || echo 0)"
+  [[ "$DR3_HITS" =~ ^[0-9]+$ ]] || DR3_HITS=0
+  if [ "$DR3_HITS" -gt 0 ]; then
+    emit "DR3-LLM-NO-RETRY" "MEDIUM" "count=$DR3_HITS scope=packages/infrastructure/**"
+  fi
+fi
+
+# === DR6 (HH-B.4 extension): Any type in domain package (HIGH) ===
+if [ -d "$PROJECT_DIR/packages/domain" ]; then
+  DR6_HITS="$(grep -rn ": Any\|cast(Any\|-> Any" "$PROJECT_DIR/packages/domain/" --include="*.py" 2>/dev/null \
+    | grep -v "test_\|_test\.py" | wc -l | tr -d '[:space:]' || echo 0)"
+  [[ "$DR6_HITS" =~ ^[0-9]+$ ]] || DR6_HITS=0
+  if [ "$DR6_HITS" -gt 0 ]; then
+    emit "DR6-DOMAIN-ANY-TYPE" "HIGH" "count=$DR6_HITS scope=packages/domain/**"
+  fi
+fi
+
+# === DR8 (HH-B.4 extension): Cross-BC direct import (HIGH) ===
+if [ -d "$PROJECT_DIR/packages/domain" ]; then
+  DR8_TOTAL=0
+  for BC in market_data fundamental company_intelligence macro news influence crowd analysis portfolio; do
+    [ -d "$PROJECT_DIR/packages/domain/$BC" ] || continue
+    bc_hits="$(grep -rn "from packages\.domain\." "$PROJECT_DIR/packages/domain/$BC/" --include="*.py" 2>/dev/null \
+      | grep -v "packages/domain/$BC/" | wc -l | tr -d '[:space:]' || echo 0)"
+    [[ "$bc_hits" =~ ^[0-9]+$ ]] && DR8_TOTAL=$(( DR8_TOTAL + bc_hits ))
+  done
+  if [ "$DR8_TOTAL" -gt 0 ]; then
+    emit "DR8-CROSS-BC-IMPORT" "HIGH" "count=$DR8_TOTAL scope=packages/domain/<BC>/**"
+  fi
+fi
 
 if [ "$VIOLATIONS" -gt 0 ]; then
   echo "[$TS] drift-signals-D1-D9: $VIOLATIONS violation(s) — see $LOG" >> "$HOOK_LOG"

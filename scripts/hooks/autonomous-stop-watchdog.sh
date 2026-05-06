@@ -61,7 +61,18 @@ if [[ -n "$TRANSCRIPT_PATH" && -f "$TRANSCRIPT_PATH" ]]; then
   # (which is "I will do X" without doing X); self-pause is "I'll stop here, fresh
   # context picks up next session" without dispatching anything. Mode-D continue-injector
   # types "continue" but LLM self-pauses again → infinite no-progress loop.
-  if printf '%s' "$LAST_TAIL" | grep -qiE '(Holding here|holding at this point|next session.{0,30}(job|task|work|pick.up|trigger|start)|fresh (context|session) picks up|fresh session.{0,30}(trigger|entry|start)|session boundary|Stop hook.{0,30}(handles|takes over|fires)|wait for.{0,30}(fresh|next) session|S[0-9]+ entry is.{0,30}next)' ; then
+  #
+  # NOTE on L-S53-2 lint advice (S55 PoC categorization, KI-S55-1):
+  #   bash-hook-lint Check 8 flags `S[0-9]+ entry is.{0,30}next` as unanchored
+  #   positional-marker → suggests `^` anchor. That advice is WRONG for THIS grep:
+  #   target is transcript-tail narration content embedded mid-JSON-line, not
+  #   structured markdown headers. Each JSONL line begins `{"role":"assistant",...`,
+  #   so `^S` would never match. P6 firing-test case ("S52 entry is the next
+  #   session start.") empirically demonstrates anchoring would regress detector.
+  #   Lint flag here = false-positive on fix advice; semantic concern (over-match
+  #   on archive-style prose) is mitigated by the `entry is.{0,30}next` structure
+  #   plus archive-prose control cases (TC-archive-1/2) in the firing-test.
+  if printf '%s' "$LAST_TAIL" | grep -qiE '(Holding here|holding at this point|next session.{0,30}(job|task|work|pick.up|trigger|start)|fresh (context|session) picks up|fresh session.{0,30}(trigger|entry|start)|session boundary|Stop hook.{0,30}(handles|takes over|fires)|wait for.{0,30}(fresh|next|your) (session|call|decision|approval|sign[- ]?off|go[- ]?ahead)|wait for your|wait for the user|S[0-9]+ entry is.{0,30}next|will wait for|defer(ring)? to (you|user)|pause(d)? (here|for you)|standing by|[Nn]ext .{0,5}continue.{0,30}(enters|triggers|fires|advances|starts|begins)|[Nn]ext (sandwich|session|step|dispatch).{0,15}(enters|triggers|begins|fires|advances)|on next (continue|dispatch|session|user)|await(s|ing)? .{0,30}(continue|next|user (input|response)))' ; then
     if ! printf '%s' "$LAST_TAIL" | grep -qE '"type":"tool_use"' ; then
       SELF_PAUSE_HIT="suspected"
     fi
@@ -185,7 +196,9 @@ if [[ "$PREMATURE_WINDOWN_HIT" == "suspected" ]]; then
     } > "$MODE_C_MARKER"
 
     if [[ "$MODE_C_RECOVERY_MODE" == "injector" && "$DRY_RUN" != "1" ]]; then
-      rm -f "$LOG_DIR"/.continue-fired-* 2>/dev/null || true
+      # NOTE: do NOT rm -f .continue-fired-* here — defeats injector idempotency
+      # by session-ready tick; relies on session-start-bootstrap re-touching
+      # .session-ready when a genuinely new session begins.
       MODE_C_HANDOFF_LOG="$PROJECT_DIR/agent-workspace/memory/handoff-logs/mode-c-recovery-$(date +%s)-$MODE_C_KEY.log"
       mkdir -p "$(dirname "$MODE_C_HANDOFF_LOG")"
       timeout 8 "${MODE_C_CMD[@]}" >> "$MODE_C_HANDOFF_LOG" 2>&1 || true
@@ -250,7 +263,7 @@ if [[ "$MODE_D_FIRE" -eq 1 ]]; then
     } > "$MODE_D_MARKER"
 
     if [[ "$MODE_D_RECOVERY_MODE" != "skip-non-windows" ]] && [[ "$DRY_RUN" != "1" ]]; then
-      rm -f "$LOG_DIR"/.continue-fired-* 2>/dev/null || true
+      # NOTE: do NOT rm -f .continue-fired-* here — same rationale as Mode-C.
       MODE_D_HANDOFF_LOG="$PROJECT_DIR/agent-workspace/memory/handoff-logs/mode-d-handoff-$(date +%s)-$MODE_D_KEY.log"
       mkdir -p "$(dirname "$MODE_D_HANDOFF_LOG")"
       timeout 8 "${MODE_D_CMD[@]}" >> "$MODE_D_HANDOFF_LOG" 2>&1 || true

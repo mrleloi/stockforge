@@ -1,0 +1,18 @@
+{
+  "description": "FPT buy short-term — Tests BUY intent + WEEKS timeframe + diacritics ổ ậ ề ữ ợ round-trip.",
+  "transcript": "Hôm nay mình phân tích cổ phiếu FPT. Kết quả kinh doanh quý 1 rất tốt, doanh thu tăng mạnh. Với mức giá 125.000, mình thấy FPT là cơ hội mua trong ngắn hạn 2-3 tuần. Mục tiêu giá 135.000. Rủi ro: nếu VN-Index điều chỉnh mạnh dưới 1.200 điểm thì FPT cũng sẽ bị ảnh hưởng. Những bạn đang ở vùng đỉnh thì nên chốt lời trước. Tóm lại là mua FPT ở giá hiện tại là hợp lý.",
+  "source_url": "https://www.facebook.com/stockkol/posts/fixture_03",
+  "published_at": "2026-05-03T09:00:00+07:00",
+  "expected_recommendations": [
+    {
+      "ticker": "FPT",
+      "intent": "buy",
+      "timeframe": "weeks",
+      "conditions": [],
+      "extraction_confidence_min": 0.7,
+      "excerpt_contains": "mua FPT"
+    }
+  ],
+  "diacritics_present": ["ổ", "ậ", "ề", "ữ", "ợ"],
+  "notes": "FPT = FPT Corp (tech). 'mua FPT' = BUY. Platform: Facebook text post (no transcription needed)."
+}

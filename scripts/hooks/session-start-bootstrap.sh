@@ -63,8 +63,26 @@ QUEUED_GRILL_FILE="$PROJECT_DIR/agent-workspace/memory/observations/queued-grill
 EXEC_FILE="$PROJECT_DIR/agent-workspace/memory/current-execution.md"
 if [ -f "$QUEUED_GRILL_FILE" ] && [ -f "$EXEC_FILE" ]; then
   ACTIVE_PHASE=$(awk -F': ' '/^\*\*Phase\*\*/ {print $2; exit}' "$EXEC_FILE" 2>/dev/null || true)
-  ACTIVE_SESSION=$(awk -F': ' '/^\*\*Session N\*\*/ {print $2; exit}' "$EXEC_FILE" 2>/dev/null || true)
-  ACTIVE_TRACK=$(grep -oE 'Track [0-9]+' "$EXEC_FILE" 2>/dev/null | head -1 || true)
+  # ACTIVE_SESSION: extract LARGEST `## S<N>` header — real file format (per L-S51-1 / M-S52-1 fix at S53).
+  # Prior bug (M-S52-1): awked for `^**Session N**` literal which never appears in real file
+  # → ACTIVE_SESSION silently empty → queued-grill awk matcher (line ~75 below) `sess != ""`
+  # branch never executed → session-token fire_when entries (e.g. "S20+", "S52", "S5 Track 7")
+  # silently never fired in production. Track-based matching kept working (ACTIVE_TRACK line below).
+  ACTIVE_SESSION_NUM=$(grep -oE '^## S[0-9]+' "$EXEC_FILE" 2>/dev/null | grep -oE '[0-9]+' | sort -n | tail -1 || true)
+  ACTIVE_SESSION="${ACTIVE_SESSION_NUM:+S$ACTIVE_SESSION_NUM}"
+  # KI-S56-1 STRUCTURAL FIX SHIPPED S57 (was deferred at S56). Prior bug:
+  # `grep -oE 'Track [0-9]+' | head -1` on whole file returned archive-prose
+  # Track ref (e.g. "Track 5" from S53 narrative) instead of currently-active
+  # Track. Per L-S56-1 3-class typology: target is Class B free-form-prose-in-
+  # markdown, so `^` anchor advice from Check 8 was INVALID (Track refs don't
+  # line-anchor in this file format). Real fix is structural — parse the
+  # "## Active Focus Track" section bounded by next `---` separator FIRST via
+  # awk range pattern, then grep section-content only. Archive prose lives
+  # OUTSIDE the section so head -1 picks active Track ref, or empty if Phase
+  # 3.5 uses T<N> shorthand exclusively (also correct: ACTIVE_TRACK="" → no
+  # spurious match in queued-grill awk per `track != ""` guard line ~98).
+  # `|| true` end-of-pipeline preserved (L-S48d-1 pipefail+ERR-trap discipline).
+  ACTIVE_TRACK=$(awk '/^## Active Focus Track/,/^---/' "$EXEC_FILE" 2>/dev/null | grep -oE 'Track [0-9]+' | head -1 || true)
   GRILL_QUEUE_LOG="$PROJECT_DIR/agent-workspace/memory/.queued-grill-fired.log"
   # Match entries whose fire_when contains active session "S<N>" or track "Track <N>" tokens.
   awk -v phase="$ACTIVE_PHASE" -v sess="$ACTIVE_SESSION" -v track="$ACTIVE_TRACK" '
@@ -124,8 +142,20 @@ SHOULD_FIRE_INJECTOR="false"
 FIRE_REASON=""
 case "$SOURCE" in
   clear)
-    SHOULD_FIRE_INJECTOR="true"
-    FIRE_REASON="source=clear (explicit user action)"
+    # HH-H.3 (S48m): gate clear-branch by autonomous_mode + STOCKFORGE_FORCE_CONTINUE_ON_CLEAR
+    # override. Pre-S48m unconditionally fired — but a user-driven /clear with
+    # autonomous_mode=false (post-Phase-2.5 ratification gate) would race against
+    # the human typing their own first prompt. Override env var keeps the explicit-
+    # user-flow path fast.
+    if [ "${STOCKFORGE_FORCE_CONTINUE_ON_CLEAR:-0}" = "1" ]; then
+      SHOULD_FIRE_INJECTOR="true"
+      FIRE_REASON="source=clear + STOCKFORGE_FORCE_CONTINUE_ON_CLEAR=1 (override)"
+    elif [ "$AUTONOMOUS_MODE" = "true" ]; then
+      SHOULD_FIRE_INJECTOR="true"
+      FIRE_REASON="source=clear + autonomous_mode=true"
+    else
+      FIRE_REASON="source=clear + autonomous_mode=false (HH-H.3 gate; user-driven /clear → race risk)"
+    fi
     ;;
   resume)
     SHOULD_FIRE_INJECTOR="true"

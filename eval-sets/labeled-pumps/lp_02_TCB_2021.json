@@ -1,0 +1,21 @@
+{
+  "ticker": "TCB",
+  "period_start": "2021-09-01T00:00:00+00:00",
+  "period_end": "2021-12-31T00:00:00+00:00",
+  "phases": ["pre_pump", "pump", "distribution", "dump"],
+  "features_at_detection": {
+    "price_change_30d": "0.07",
+    "price_5d_change": "0.22",
+    "volume_30d_avg_rising": "true",
+    "volume_5d_avg_declining": "false",
+    "volume_5d_avg": "8000000",
+    "volume_30d_avg": "2000000",
+    "t2_news_silent": "true",
+    "t3_kol_mentions_rising": "true",
+    "t3_kol_mentions_peak": "false",
+    "t4_novice_post_share": "0.55",
+    "t4_coordination_score": "0.35"
+  },
+  "subsequent_outcome": "Sharp correction in December 2021 following market-wide derisking",
+  "labeled_by": "user"
+}

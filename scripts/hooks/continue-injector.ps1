@@ -54,20 +54,30 @@ function Try-FocusClaudeTerminal {
                     Start-Sleep -Milliseconds 400
                     return $true
                 }
+
+                $cur = $parent
+                $hops = 0
+                while ($cur -and $hops -lt 6) {
+                    $hops++
+                    try {
+                        $curParentId = (Get-CimInstance Win32_Process -Filter "ProcessId = $($cur.Id)" -ErrorAction Stop).ParentProcessId
+                    } catch { break }
+                    if (-not $curParentId) { break }
+                    $curParent = Get-Process -Id $curParentId -ErrorAction SilentlyContinue
+                    if (-not $curParent) { break }
+                    Log ("claude-ancestor hop {0} pid={1} name={2} mainWnd=0x{3:X}" -f $hops, $curParent.Id, $curParent.ProcessName, [int64]$curParent.MainWindowHandle)
+                    if ($curParent.MainWindowHandle -ne [IntPtr]::Zero) {
+                        [Win32]::ShowWindow($curParent.MainWindowHandle, 9) | Out-Null
+                        [Win32]::SetForegroundWindow($curParent.MainWindowHandle) | Out-Null
+                        Start-Sleep -Milliseconds 400
+                        return $true
+                    }
+                    $cur = $curParent
+                }
             } catch { Log "parent-walk error: $_" }
         }
 
-        $terminals = @("WindowsTerminal","mintty","ConsoleWindowHost","wt","pwsh","powershell","cmd","bash")
-        foreach ($name in $terminals) {
-            $p = Get-Process $name -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero } | Select-Object -First 1
-            if ($p) {
-                Log ("fallback focus {0} pid={1}" -f $name, $p.Id)
-                [Win32]::ShowWindow($p.MainWindowHandle, 9) | Out-Null
-                [Win32]::SetForegroundWindow($p.MainWindowHandle) | Out-Null
-                Start-Sleep -Milliseconds 400
-                return $true
-            }
-        }
+        Log "no claude.exe ancestor has valid window; refusing fallback to random terminal (L-S48-1 bug: prior code grabbed first WindowsTerminal/cmd/bash with valid hwnd, typed continue into unrelated user windows under multi-claude conditions)"
     } catch { Log "focus error: $_" }
     return $false
 }
@@ -81,19 +91,57 @@ function Send-Continue {
     } catch { Log "SendKeys error: $_"; return $false }
 }
 
-# Idempotency: skip if another injector already fired for this session-ready tick.
 $ProjectDir = (Get-Item $PSScriptRoot).Parent.Parent.FullName
-$SessionTag = (Get-Item (Join-Path $ProjectDir "agent-workspace\memory\.session-ready") -ErrorAction SilentlyContinue).LastWriteTime.Ticks
-$FiredMarker = Join-Path $ProjectDir ("agent-workspace\memory\.continue-fired-{0}" -f $SessionTag)
-if (Test-Path $FiredMarker) {
-    Log "already fired for this session-ready tick ($SessionTag); exiting"
-    exit 0
-}
-Set-Content -Path $FiredMarker -Value (Get-Date -Format "o") -ErrorAction SilentlyContinue
 
+# Hard global rate-limit (covers ALL entry points: bootstrap startup/clear/resume + Mode-A/B/C/D
+# recovery). Prevents bootstrap touching .session-ready on every SessionStart from generating a
+# fresh idempotency tick that lets another injector fire seconds after the previous. Empirical
+# trigger 2026-05-05: 180 injector spawns + 160 SessionStarts in single morning, sustained
+# wrong-window "continue" typing into user TUI. See agent-workspace/memory/agent-notes.md L-S48-1.
+$RateLimitMarker = Join-Path $ProjectDir "agent-workspace\memory\.continue-injector-last-fire"
+if (Test-Path $RateLimitMarker) {
+    $LastFire = (Get-Item $RateLimitMarker -ErrorAction SilentlyContinue).LastWriteTime
+    if ($LastFire) {
+        $AgeSeconds = ((Get-Date) - $LastFire).TotalSeconds
+        if ($AgeSeconds -lt 60) {
+            Log ("rate-limit: another injector fired {0:N1}s ago (<60s); exiting" -f $AgeSeconds)
+            exit 0
+        }
+    }
+}
+Set-Content -Path $RateLimitMarker -Value (Get-Date -Format "o") -ErrorAction SilentlyContinue
+
+# Per-tick idempotency was REMOVED at S53 (M-S53-3 fix). Rationale:
+# Original design (L-S48-1) gated on `.session-ready` mtime → SessionTag advanced only on
+# SessionStart events (`/clear`, fresh launch, `claude --resume`). Within a single session,
+# SessionTag NEVER changes → first injector fire writes `.continue-fired-{Tag}` → ALL
+# subsequent autonomous Stop→Mode-D→continue-injector handoffs hit "already fired" silent
+# exit → autonomous-full loop dead within session boundaries. Smoking gun S53 19:59→20:16:
+# Mode-D fired correctly but injector silent-exited because per-tick marker was carried
+# over from prior bootstrap fire 16min earlier.
+#
+# Replacement contract (post-S53):
+#   - 60s rate-limit (above) handles burst-spam within single SessionStart event
+#   - Each caller has its OWN per-event idempotency marker:
+#     - bootstrap (SessionStart): one fire per SessionStart event (no marker; bootstrap
+#       itself only fires once per SessionStart)
+#     - Mode-A (API truncation): `.api-truncation-recovery-fired-$RECOVERY_KEY`
+#     - Mode-C (premature wind-down): `.mode-c-recovery-fired-$MODE_C_KEY`
+#     - Mode-D (clean handoff): `.mode-d-recovery-fired-$MODE_D_KEY`
+#   - Cross-caller: 60s rate-limit ensures no two callers fire injector within 60s window
+# The L-S48-1 incident scenario (180 spawns + 160 SessionStarts in one morning) is fully
+# covered by the 60s rate-limit since spawns averaged ~30-40 min apart well above 60s.
+$SessionTag = "post-S53-no-per-tick"
+
+$Sent = $false
 for ($i = 1; $i -le $RetryCount; $i++) {
     Log "attempt $i/$RetryCount"
-    Try-FocusClaudeTerminal | Out-Null
+    $focused = Try-FocusClaudeTerminal
+    if (-not $focused) {
+        Log ("skip attempt {0}: no verified claude TUI window; will not type into foreground (L-S48-1 prevention)" -f $i)
+        if ($i -lt $RetryCount) { Start-Sleep -Milliseconds $RetryDelayMs }
+        continue
+    }
     $fg = [Win32]::GetForegroundWindow()
     [int]$pid_fg = 0
     [Win32]::GetWindowThreadProcessId($fg, [ref]$pid_fg) | Out-Null
@@ -101,10 +149,12 @@ for ($i = 1; $i -le $RetryCount; $i++) {
     Log ("foreground pid={0} name={1}" -f $pid_fg, ($fgProc.ProcessName))
     if (Send-Continue) {
         Log "continue+Enter sent (attempt $i)"
+        $Sent = $true
+        break
     } else {
         Log "send failed (attempt $i)"
     }
     if ($i -lt $RetryCount) { Start-Sleep -Milliseconds $RetryDelayMs }
 }
 
-Log "injector done"
+Log ("injector done sent={0}" -f $Sent)

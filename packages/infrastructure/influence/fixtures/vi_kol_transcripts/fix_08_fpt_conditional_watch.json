@@ -1,0 +1,18 @@
+{
+  "description": "FPT conditional watch — buy if price breaks key resistance. Tests WATCH intent + conditions (BR-7).",
+  "transcript": "FPT hôm nay đang giao dịch tích cực quanh vùng 128.000. Đây là ngưỡng kháng cự quan trọng. Mình đang theo dõi FPT rất kỹ. Nếu FPT bứt phá thành công ngưỡng 130.000 với khối lượng giao dịch tăng mạnh thì đó là tín hiệu kỹ thuật tốt để mua vào. Hiện tại chưa có tín hiệu rõ ràng nên mình chưa đặt lệnh. Anh em cứ theo dõi thêm.",
+  "source_url": "https://t.me/technicalanalysis_vn/fix008",
+  "published_at": "2026-05-04T11:00:00+07:00",
+  "expected_recommendations": [
+    {
+      "ticker": "FPT",
+      "intent": "watch",
+      "timeframe": "days",
+      "conditions": ["nếu FPT bứt phá ngưỡng 130.000"],
+      "extraction_confidence_min": 0.65,
+      "excerpt_contains": "theo dõi FPT"
+    }
+  ],
+  "diacritics_present": ["ổ", "ợ"],
+  "notes": "FPT = FPT Corporation (tech). 'theo dõi' = WATCH per spec § B.5. Conditional: 'nếu bứt phá 130k' (BR-7). Low confidence expected as intent is implicit."
+}

@@ -31,15 +31,28 @@ fi
 # (line 12 chain "S1 → S2 → ... → S<latest>" → first match always S1) → 10/12 raw
 # transcripts overwrote session-1.md / session-5.md, losing provenance.
 #
-# Method 1: explicit "S<N> NEXT" marker — current active session per routing convention.
-# Method 2: scoped to "**Session N**:" chain line → last S<N> in chain (LARGEST).
-# Method 3: fall back to 0 (timestamp filename via caller).
+# Method 1 (primary, post-S53): LARGEST `## S<N>` header — real file format. Topmost row
+#   in current-execution.md by convention = latest session.
+# Method 2 (fallback): explicit "S<N> NEXT" marker, anchored to line start to prevent
+#   false-positive on archive prose. Vestigial routing convention; rarely used.
+# Method 3 (final fallback): 0 (timestamp filename via caller).
+#
+# Triple-bug fix at S53 (in dependency order):
+#   - M-S52-1: prior Method 2 grepped imagined `^\*\*Session N\*\*:` literal that never
+#     matched real `## S<N> — title` header format → SESSION_N silently empty.
+#   - M-S53-1: prior pipeline lacked `|| true` → set -o pipefail + trap ERR fired silent
+#     exit on unmatched grep BEFORE Method 2 ever ran → masked M-S52-1 fix entirely.
+#     Discovered via S53 firing-test; family of L-S48d-1.
+#   - M-S53-2: prior Method 1 (NEXT marker) was unanchored → matched archive prose mid-line
+#     (e.g. "S38/S42 NEXT branching gate") returning false-positive 42 every export.
+#     Discovered via S53 production smoke against real current-execution.md.
+# Resolution: swap order so header-scan is primary; anchor NEXT-marker to ^; add `|| true`.
 EXEC_FILE="$PROJECT_DIR/agent-workspace/memory/current-execution.md"
 SESSION_N=""
 if [ -f "$EXEC_FILE" ]; then
-  SESSION_N="$(grep -oE 'S[0-9]+[[:space:]]+NEXT' "$EXEC_FILE" 2>/dev/null | head -1 | grep -oE '[0-9]+' | head -1)"
+  SESSION_N="$(grep -oE '^## S[0-9]+' "$EXEC_FILE" 2>/dev/null | grep -oE '[0-9]+' | sort -n | tail -1 || true)"
   if [ -z "$SESSION_N" ]; then
-    SESSION_N="$(grep -E '^\*\*Session N\*\*:' "$EXEC_FILE" 2>/dev/null | grep -oE 'S[0-9]+' | sed 's/^S//' | sort -n | tail -1)"
+    SESSION_N="$(grep -oE '^S[0-9]+[[:space:]]+NEXT' "$EXEC_FILE" 2>/dev/null | head -1 | grep -oE '[0-9]+' | head -1 || true)"
   fi
 fi
 [ -z "$SESSION_N" ] && SESSION_N="0"

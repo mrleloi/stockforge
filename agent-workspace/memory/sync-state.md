@@ -1,8 +1,8 @@
 ---
 schema_version: 1
 created_at: 2026-04-29
-updated_at: 2026-05-01
-last_check: 2026-05-01
+updated_at: 2026-05-05
+last_check: 2026-05-05
 description: |
   Single-source-of-truth audit of human-LLM mutual understanding ("sync state").
   Each item records ONE statement of intent + its current alignment state.
@@ -283,10 +283,19 @@ items:
 
   - id: sync-027
     statement: "Constitution session-budgets.md update queued for Track 7 (S11) per agent-workspace/CLAUDE.md immutability contract; D-004 documents intent to amend"
-    state: open-question
+    state: confirmed-aligned
+    confirmed_at: 2026-05-05
+    confirmation_via: "AskUserQuestion S48d 4-Q bundle Q3=A — confirmed closure via D-020 (S43c bundle Q3 — Mode A/B/C/D + Verifier Budget by Scope)"
     queued_at: 2026-04-29
     queue_ref: D-004 § Constitution changes
     fire_when: "S11 (Track 7) constitution port — proposals/ flow"
+    transition_history:
+      - state: open-question
+        at: 2026-04-29
+        basis: "D-004 amend-intent; queued for Track 7"
+      - state: confirmed-aligned
+        at: 2026-05-05
+        basis: "D-020 (S43c) shipped Mode A/B/C/D + Verifier Budget; S48d AskUserQuestion confirmed closure"
 ```
 
 ### Drift-Detected (S6 first audit baseline)
@@ -380,11 +389,20 @@ items:
 
   - id: sync-036
     statement: "decompose-work skill + capability-map.md + promote-rule skill = S8 deliverables (5.5c.1+2+6); try-n-approaches + OTEL stack + JSONL extension = S9 deliverables (5.5c.3+4+5). Construction in progress; not all artifacts exist yet."
-    state: assumed-aligned
+    state: confirmed-aligned
+    confirmed_at: 2026-05-05
+    confirmation_via: "AskUserQuestion S48d 4-Q bundle Q4=A — all 6 artifacts shipped per S9-S22 history (now visible in .claude/skills/ + agent-workspace/memory/)"
     last_check: 2026-04-29
     assumption_basis: "D-003 § 5.5c sub-track schedule + 002-track-5.5-sync-layer-selfcap.md § Sub-track Detail"
     re_verify_when: "S9 close (when 5.5c.3+4+5 ship)"
     related_decisions: [D-003]
+    transition_history:
+      - state: assumed-aligned
+        at: 2026-04-29
+        basis: "D-003 § 5.5c provisional"
+      - state: confirmed-aligned
+        at: 2026-05-05
+        basis: "S48d AskUserQuestion confirmed all 6 artifacts shipped per S9-S22 ship history"
 
   - id: sync-037
     statement: "DH-3 closure: S2-drift bottleneck attributed to harness deterministic layer not-yet-wired (pre-S3 fortification gap). User UP-04 §1 verbatim diagnostic + bundle-002 § A1=B explicit pick = aligned attribution. Tracks 3-5 closed the gap via deterministic hooks port (drift-signals D1-D8, qa-pending-stale-mover, charter-coherence-spot, etc.)."
@@ -429,6 +447,7 @@ items:
 - Counts (post-S23 Phase 1 entry sync-bundle): 26 confirmed (sync-013/015/016/017 transitioned) + 2 assumed (sync-014, 036) + 9 open-question + 1 drift-detected = 38 total entries.
 - Counts (post-S24 entry Q-D1+Q-D2 closures): 28 confirmed (sync-039+040 added) + 2 assumed (sync-014, 036) + 9 open-question + 1 drift-detected = 40 total entries.
 - Counts (post-S25 entry Q-S25-1 VHM closure): 29 confirmed (sync-041 added) + 2 assumed (sync-014, 036) + 9 open-question + 1 drift-detected = 41 total entries.
+- Counts (post-S48d 4-Q bundle Q3+Q4 closures 2026-05-05): 31 confirmed (sync-027 + sync-036 transitioned) + 1 assumed (sync-014 only) + 8 open-question + 1 drift-detected = 41 total entries.
 
 ---
 

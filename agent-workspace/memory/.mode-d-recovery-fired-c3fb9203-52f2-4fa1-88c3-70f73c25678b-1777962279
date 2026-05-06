@@ -1,0 +1,7 @@
+fired_at=2026-05-05T13:24:50+07:00
+session=c3fb9203-52f2-4fa1-88c3-70f73c25678b
+checkpoint_mtime=1777962279
+age_sec=12
+real_tokens=212666
+cliff_thr=220000
+mode=injector-handoff

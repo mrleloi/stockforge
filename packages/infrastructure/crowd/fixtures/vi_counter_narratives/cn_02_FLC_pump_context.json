@@ -1,0 +1,21 @@
+{
+  "ticker": "FLC",
+  "bullish_consensus": [
+    "FLC đang trong giai đoạn tăng trưởng mạnh theo truyền thông",
+    "Nhiều nhà đầu tư F0 đổ vào FLC vì kỳ vọng tăng"
+  ],
+  "failing_analogs": [
+    {
+      "ticker": "FLC",
+      "period_start": "2022-01-10",
+      "period_end": "2022-03-15",
+      "outcome_description": "Sharp reversal following coordinated posting pattern and insider activity news"
+    }
+  ],
+  "structural_risks": [],
+  "expected_bear_point_themes": [
+    "coordination_pattern_risk",
+    "novice_investor_concentration",
+    "historical_self_reference"
+  ]
+}

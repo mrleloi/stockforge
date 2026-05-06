@@ -4,10 +4,11 @@ effort: max
 thinking: enabled
 task_class:
   - FOCUSED_IMPL
-samples_count: 5
-sample_sessions: [S26, S28, S30, S32, S35]
-last_updated: 2026-05-01T00:00:00Z
-source: manual session log review
+samples_count: 23
+sample_sessions: [S26, S28, S30, S32, S35, S47, S48b, S48c, S48d, S48f, S48g, S48h, S48l, S49, S55, S56, S57, S58, S59, S60, S61, S62, S63]
+last_updated: 2026-05-05T23:42:28+07:00
+status: BIASED-PRE-REBUILD-S65 (user 2026-05-06 flagged tracking gap; rebuild after cost-ledger.tsv accumulates ≥10 sessions)
+source: manual session log review (S48i HH-F.1 ETL backfill — auto-populate hook gap S48e..S48h investigation deferred S48j)
 ---
 
 # Profile — Opus 4.7 × max × FOCUSED_IMPL
@@ -18,6 +19,9 @@ source: manual session log review
 - Cosmetic cleanup + refactor + deferred-residue resolution single-pass.
 - Live-smoke + reconciliation discipline (S28 248 VHM bars; S32 248 vnstock + 248 SSI = 496 rows reconciled; S30 VHM exemplar thesis with 15 deterministic SQL queries).
 - IMPL-tier decision file authoring per L-S15-1 inline doctrine when needed (D-006, D-007, D-008, D-012).
+- **NEW S48 governance cluster (Phase 2.5 harness hardening)**: Hook authoring + smoke testing in single sessions (S48b HH-A 6/6; S48c HH-B 5/5 telemetry repair; S48d HH-C 4/4 watchdog hooks + D-028+D-029 ratify; S48f HH-D.2 + D-030 charter promote autonomous-protocol Rule 10; S48g HH-E.1 stale URGENT escalator + HH-E.2 proposal author; S48h HH-E.2 ratify + D-031 + qa-pending-auto-mover.sh ship + smoke 4/4 GREEN). Direct-edit pattern when target NOT in `agent-workspace/constitution/**` deny list (S48h CLAUDE.md edit; distinct from D-018..D-030 deny-lift cycle).
+- **Bundled deny-lift cycle** competence (S48d D-029 drift-signals reconciliation + S48f D-030 autonomous-protocol Rule 10 — both via `Edit(agent-workspace/constitution/**)` deny temporary lift + restore same-turn + D9 zero-residue verify).
+- **Companion ADR provenance authoring** (12-field schema): D-028..D-031 all under L-S15-1 inline doctrine. ~150-190 LOC each; provenance chain + trade-offs + drift-watch + companion handoff sections consistently shipped.
 
 ## 2. Known limitations
 
@@ -37,7 +41,11 @@ source: manual session log review
 - M-S28-1 vendor-API drift
 - M-S29-1 verifier residue R1-R4 (S30 fixed R1)
 - M-S31-1 master-plan LOC over advisory cap
-- M-S35-1..5 cognitive failures (this session = recovery)
+- M-S35-1..5 cognitive failures (S35 META_LOOP_RECOVERY)
+- **M-S45-1 substrate data-loss** (sandwich-architect Write vs Edit on agent-notes.md; ~140 lines unrecoverable; L-S45-2 mechanical guard `write-vs-edit-guard.sh` shipped same-turn)
+- **M-S45-2 + M-S47-1 Mode-E recurrence** (3rd L-S44-1 family; D-030 charter Rule 10 promotion S48f)
+- **M-S48d-1 pipefail-bracket trap** (set -uo pipefail + grep-no-match silently tips ERR trap; mitigation: `set +o pipefail` brackets around optional greps OR `{ grep ...; } || true` subshell wrapper). Applied in S48g/S48h hook authoring.
+- **M-S48e-1 garbled keystroke-injection** (`//nneeww` SendKeys double-keystroke; root cause TOCTOU between Stop + PostToolUse budget-watchdog firing session-self-reboot; HH-H.5 fix sub-deliverable scoped S48k)
 
 ## 5. Calibration
 

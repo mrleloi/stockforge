@@ -1,7 +1,0 @@
-fired_at=2026-05-01T07:19:44+07:00
-session=3a907529-6b19-4768-aacc-a17c880d31bb
-checkpoint_mtime=1777594760
-age_sec=24
-real_tokens=312297
-cliff_thr=220000
-mode=reboot-handoff

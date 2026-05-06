@@ -1,0 +1,9 @@
+{
+  "ticker": "HPG",
+  "signals": [
+    {"signal_name": "quiet_accumulation", "phase": "pre_pump", "weight": 0.3},
+    {"signal_name": "kol_whispers_no_news", "phase": "pre_pump", "weight": 0.3}
+  ],
+  "historical_matches": [],
+  "expected_evidence_shape": "novel_pattern_low_confidence"
+}

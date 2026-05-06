@@ -137,6 +137,138 @@ for t in "${LIVE_TARGETS[@]}"; do
   fi
 done
 
+# === Check 5: M-S51-1 grep-on-imagined-format anti-pattern (Pattern A) ===
+# Origin: S51 T3.1 — promotion-cycle-trigger.sh greped literal `^\*\*Session N\*\*:` against
+# real `## SXX —` header format → 0 matches → silent broken hook for ~12hr.
+# Detection: literal "Session N" (capital-N placeholder; never a real header) appearing
+# inside any grep/sed/awk argument. Also catches the variant with escaped asterisks.
+if [ -d "$HOOKS_DIR" ]; then
+  for f in "$HOOKS_DIR"/*.sh; do
+    [ ! -f "$f" ] && continue
+    bn="$(basename "$f")"
+    [ "$bn" = "bash-hook-lint.sh" ] && continue
+    BAD_A="$(grep -nE "(grep|sed|awk)[[:space:]].*Session N([^a-zA-Z0-9]|$)" "$f" 2>/dev/null | grep -vE "^[[:space:]]*[0-9]+:[[:space:]]*#" || true)"
+    if [ -n "$BAD_A" ]; then
+      emit "M-S51-1-IMAGINED-FORMAT" "$bn" "literal 'Session N' placeholder in grep/sed/awk pattern — verify against real current-execution.md format (L-S51-1)"
+    fi
+  done
+fi
+
+# === Check 6: L-S48m-1 CLAUDE_SESSION_ID empty-on-Windows anti-pattern (Pattern B) ===
+# Origin: S48m profile-template-auto-populate.sh — marker filename used $CLAUDE_SESSION_ID
+# without :- fallback; on Windows the env var is empty → marker collides on every fire →
+# silent skip after first fire. L-S48m-1 fix: use session-log basename instead.
+if [ -d "$HOOKS_DIR" ]; then
+  for f in "$HOOKS_DIR"/*.sh; do
+    [ ! -f "$f" ] && continue
+    bn="$(basename "$f")"
+    [ "$bn" = "bash-hook-lint.sh" ] && continue
+    BAD_B="$(grep -nE "[\"]?\\.[a-zA-Z0-9_-]+(-fired|-marker|-ran|-flag)-\\\$\\{?CLAUDE_SESSION_ID" "$f" 2>/dev/null | grep -vE "^[[:space:]]*[0-9]+:[[:space:]]*#" || true)"
+    if [ -n "$BAD_B" ]; then
+      emit "L-S48m-1-CLAUDE-SESSION-ID-MARKER" "$bn" "marker filename uses \$CLAUDE_SESSION_ID (empty on Windows; silent skip — L-S48m-1)"
+    fi
+  done
+fi
+
+# === Check 7: L-S48d-1 pipefail+ERR-trap+bare-grep anti-pattern (Pattern C) — REFINED S58 ===
+# Origin: S48d profile-template-auto-populate.sh — set -uo pipefail + trap 'exit 0' ERR
+# + bare `grep -m1 ...` returning nonzero on no-match → ERR trap fires silently → script
+# exits 0 with NO log line → invisible failure. Fix: wrap each grep with `|| true` or
+# convert to `if grep ...; then ... fi` form.
+#
+# S54 refinement: caught command-sub + pipeline forms (was bare-line only).
+#
+# S58 refinement (closes KI-S54-1): replaces the 3-pass grep filter with an awk script
+# that tracks pipefail-bracket state + multi-line `\`-continuation joining + 4 NEW
+# false-positive recognitions surfaced by S57 ratify-via-comment categorization sample:
+#
+#   NEW skip rules:
+#     (1) Compound conditional `if X && grep`/`if X | grep`/`elif X && grep`/etc — line
+#         starts with `if|while|until|elif` AND contains `grep` (cond exit consumed by `if`)
+#     (2) Alt-guard `|| echo NN`/`|| echo ""`/`|| echo` end-of-pipeline (substitute
+#         non-zero with echo output → command-sub/pipeline returns 0 → ERR trap exempt)
+#     (3) Alt-guard `|| exit N`/`|| return N` (explicit exit handling)
+#     (4) Pipefail-bracket `set +o pipefail; grep; set -o pipefail` (pipefail temporarily
+#         disabled so grep no-match is safe; double-defense pattern)
+#
+# Plus existing skip rules (preserved):
+#   - Comment lines (`^NN:#`)
+#   - Direct conditional `if grep`/`while grep`/`until grep`/`elif grep`
+#   - Already-guarded `|| true`/`|| :`
+#
+# Multi-line `\`-continuation: physical lines ending with `\` are joined with the next
+# physical line before pattern testing (catches drift-signals-D1-D9.sh:178-180 form
+# where alt-guard `|| echo 0` is on the LAST continuation line of a 3-line pipeline).
+#
+# Initial pipefail state: OFF (matches bash default; flips ON when first
+# `set -[a-zA-Z]*o pipefail` seen; flips OFF when `set +o pipefail` seen).
+if [ -d "$HOOKS_DIR" ]; then
+  for f in "$HOOKS_DIR"/*.sh; do
+    [ ! -f "$f" ] && continue
+    bn="$(basename "$f")"
+    [ "$bn" = "bash-hook-lint.sh" ] && continue
+    HAS_PIPEFAIL="$(grep -cE 'set [^#]*pipefail' "$f" 2>/dev/null || echo 0)"
+    HAS_ERR_TRAP="$(grep -cE 'trap[[:space:]]+[^#]*ERR' "$f" 2>/dev/null || echo 0)"
+    if [ "$HAS_PIPEFAIL" -gt 0 ] 2>/dev/null && [ "$HAS_ERR_TRAP" -gt 0 ] 2>/dev/null; then
+      VIOLATION_LINE="$(awk '
+BEGIN { pipefail_off = 1; carry = "" }
+{
+  line = $0
+  if (line ~ /\\$/) {
+    sub(/\\$/, "", line)
+    carry = (carry == "" ? line : carry " " line)
+    next
+  }
+  full = (carry == "" ? line : carry " " line)
+  carry = ""
+
+  if (full ~ /^[[:space:]]*set[[:space:]]+\+o[[:space:]]+pipefail/) {
+    pipefail_off = 1
+    next
+  }
+  if (full ~ /^[[:space:]]*set[[:space:]]+-[a-zA-Z]*o[[:space:]]+pipefail/) {
+    pipefail_off = 0
+    next
+  }
+  if (pipefail_off) next
+  if (full ~ /^[[:space:]]*#/) next
+  if (full ~ /grep[[:space:]]/) {
+    if (full ~ /^[[:space:]]*(if|while|until|elif)[[:space:]]/) next
+    if (full ~ /grep[[:space:]].*[[:space:]](&&|\|\|)[[:space:]]/) next
+    print NR ":" full
+    exit
+  }
+}
+' "$f" 2>/dev/null || true)"
+      if [ -n "$VIOLATION_LINE" ]; then
+        emit "L-S48d-1-PIPEFAIL-BARE-GREP" "$bn" "pipefail + ERR trap + grep without guard — silent fail risk (L-S48d-1; refined S58 to recognize compound-if + alt-guard echo/exit/return + pipefail-bracket + multi-line continuation)"
+      fi
+    fi
+  done
+fi
+
+# === Check 8: L-S53-2 unanchored positional-marker grep (NEW Pattern D) — S54 ===
+# Origin: S53 M-S53-2 — `session-export-raw.sh` Method 1 grep `'S[0-9]+[[:space:]]+NEXT'`
+# without ^ anchor matched archive prose mid-line "S38/S42 NEXT branching gate" →
+# returned false-positive 42 every export, silently corrupted ALL raw-session filenames.
+# Detection: 2-pass — (a) find grep lines whose pattern contains routing-marker regex
+# tokens (S[0-9]+, Track [0-9]+, Session N, Session [0-9]+, ## S[0-9]+); (b) exclude
+# lines where the pattern body starts with `^` anchor (whitelist).
+if [ -d "$HOOKS_DIR" ]; then
+  for f in "$HOOKS_DIR"/*.sh; do
+    [ ! -f "$f" ] && continue
+    bn="$(basename "$f")"
+    [ "$bn" = "bash-hook-lint.sh" ] && continue
+    BAD_D="$(grep -nE "grep[[:space:]]+(-[a-zA-Z][a-zA-Z0-9]*[[:space:]]+)*['\"][^'\"]*(S\[0-9\]\+|Track[[:space:]]+\[0-9|Session[[:space:]]+(N|\[0-9)|## S\[0-9)" "$f" 2>/dev/null \
+      | grep -vE "grep[[:space:]]+(-[a-zA-Z][a-zA-Z0-9]*[[:space:]]+)*['\"]\^" \
+      | grep -vE '^[[:space:]]*[0-9]+:[[:space:]]*#' \
+      || true)"
+    if [ -n "$BAD_D" ]; then
+      emit "L-S53-2-UNANCHORED-POSITIONAL-GREP" "$bn" "grep with routing-marker pattern (S<N>/Track/Session/## S<N>) lacks '^' anchor — mid-line false-positive risk (L-S53-2)"
+    fi
+  done
+fi
+
 # === Emit results ===
 if [ "$VIOLATIONS" -gt 0 ]; then
   printf '[%s] bash-hook-lint WARN %d violation(s):\n%s' "$TS" "$VIOLATIONS" "$VIOLATION_LIST" >> "$LOG"
@@ -152,6 +284,10 @@ if [ "$VIOLATIONS" -gt 0 ]; then
       printf '- L-S13-1: ensure declared LOG/FILE/OUTPUT vars get used as `>> "$VAR"` or read source\n'
       printf '- D-IDENTITY: live config must NOT reference SUPERVISED mode / autonomous_mode=false / until-Track-7 framing\n'
       printf -- '- L-S43b-9: replace `printf "-..."` or `printf "\047-..."\047` with `printf -- "-..."` to disambiguate format from option flag\n'
+      printf '- M-S51-1 (Pattern A): replace literal `Session N` placeholder in grep/sed/awk with real `## S[0-9]+` header pattern (verify against current-execution.md format)\n'
+      printf '- L-S48m-1 (Pattern B): use session-log basename (NOT $CLAUDE_SESSION_ID empty-on-Windows) for marker filenames\n'
+      printf '- L-S48d-1 (Pattern C): wrap grep usages with `|| true` (or `|| :`); use `if grep ...; then` form for conditionals; applies to bare-line + pipeline + command-substitution `$(grep ...)` forms (S54 refined)\n'
+      printf '- L-S53-2 (Pattern D, NEW S54): anchor positional-marker grep patterns with `^` (e.g. `grep -E "^S[0-9]+ NEXT"` not `grep -E "S[0-9]+ NEXT"`) to prevent mid-line archive-prose false-positives\n'
     } > "$NOTIF_FILE" 2>/dev/null || true
   fi
 else

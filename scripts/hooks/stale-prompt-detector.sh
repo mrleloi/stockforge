@@ -40,7 +40,7 @@ $1"
 
 # === UP-NN reference check ===
 if [ -f "$INTAKE_LOG" ]; then
-  for ref in $(printf '%s' "$USER_PROMPT" | grep -oE 'UP-[0-9]+' | sort -u); do
+  for ref in $(printf '%s' "$USER_PROMPT" | grep -oE 'UP-[0-9]+' | sort -u || true); do
     STATUS=$(awk -v ref="$ref" '
       $0 ~ "up_id: " ref "$" { in_entry=1; next }
       in_entry && /^- up_id:/ { in_entry=0 }
@@ -54,7 +54,7 @@ fi
 
 # === D-NNN reference check ===
 if [ -d "$DECISIONS_DIR" ]; then
-  for ref in $(printf '%s' "$USER_PROMPT" | grep -oE 'D-[0-9]+' | sort -u); do
+  for ref in $(printf '%s' "$USER_PROMPT" | grep -oE 'D-[0-9]+' | sort -u || true); do
     NUM=$(printf '%s' "$ref" | sed 's/D-0*//; s/^$/0/')
     NUM_PADDED=$(printf '%03d' "$NUM" 2>/dev/null || echo "$NUM")
     DEC_FILE=$(ls "$DECISIONS_DIR"/${NUM_PADDED}-*.md 2>/dev/null | head -1 || true)
@@ -68,20 +68,44 @@ if [ -d "$DECISIONS_DIR" ]; then
 fi
 
 # === Track N(.Nx) reference check ===
+# NOTE on L-S53-2 lint advice (S56 categorization, KI-S55-1 family):
+#   bash-hook-lint Check 8 flags `grep -oE 'Track [0-9]+...'` here as unanchored
+#   positional-marker → suggests `^` anchor. WRONG advice: target is `$USER_PROMPT`
+#   piped variable holding free-form user input where "Track 5" can appear anywhere.
+#   Anchoring `^Track [0-9]+` would only match prompts STARTING with "Track <N>"
+#   (e.g. user types "remind me about Track 5" → mid-prompt → anchored grep
+#   misses). Categorization: content-search of user-input text (NOT header-parse).
+#   Per L-S55-1: ratify false-positive via this comment.
+#
+# NOTE on for-loop word-splitting (S56 firing-test catch; L-S52-3 SUCCESS path):
+#   Track refs like "Track 7" contain an internal space — `for ref in $(...)`
+#   under default IFS would split into "Track" + "7" (separate iterations,
+#   broken warning text). Use while-read with IFS= to preserve the full match.
+#   Sibling UP-NN + D-NNN + S<N> loops below are safe because matched tokens
+#   have no internal whitespace (hyphenated or single word).
 if [ -f "$EXEC_FILE" ]; then
-  for ref in $(printf '%s' "$USER_PROMPT" | grep -oE 'Track [0-9]+(\.[0-9]+[a-z]*(\.[0-9]+)?)?' | sort -u); do
+  while IFS= read -r ref; do
+    [ -z "$ref" ] && continue
     TRACK_NUM=$(printf '%s' "$ref" | sed 's/^Track //')
     DONE_LINE=$(grep -E "Track ${TRACK_NUM}.*(✅|DONE|done)" "$EXEC_FILE" 2>/dev/null | head -1 || true)
     if [ -n "$DONE_LINE" ]; then
       add_warning "- $ref is marked DONE in current-execution.md. If user wants amendments, surface what shipped before re-implementing."
     fi
-  done
+  done < <(printf '%s' "$USER_PROMPT" | grep -oE 'Track [0-9]+(\.[0-9]+[a-z]*(\.[0-9]+)?)?' | sort -u || true)
 fi
 
 # === S<N> session reference check (only flag if session log exists; means session closed) ===
+# NOTE on L-S53-2 lint advice (S56 categorization, KI-S55-1 family):
+#   bash-hook-lint Check 8 flags `grep -oE '\bS[0-9]+\b'` here as unanchored
+#   positional-marker → suggests `^` anchor. WRONG advice: target is `$USER_PROMPT`
+#   user-input where "S52" can appear mid-prompt. The `\b` word boundary IS the
+#   correct content-search anchor mechanism for token detection inside free-form
+#   text (analogous role to `^` for line-anchored structured docs). Categorization:
+#   content-search of user-input text (NOT header-parse). Per L-S55-1: ratify
+#   false-positive via this comment; existing `\b` boundary is the right mechanism.
 SESSIONS_DIR="$PROJECT_DIR/agent-workspace/memory/sessions"
 if [ -d "$SESSIONS_DIR" ]; then
-  for ref in $(printf '%s' "$USER_PROMPT" | grep -oE '\bS[0-9]+\b' | sort -u); do
+  for ref in $(printf '%s' "$USER_PROMPT" | grep -oE '\bS[0-9]+\b' | sort -u || true); do
     SNUM=$(printf '%s' "$ref" | sed 's/^S//')
     LOG_EXISTS=$(ls "$SESSIONS_DIR"/*-session-${SNUM}*.md 2>/dev/null | head -1 || true)
     if [ -n "$LOG_EXISTS" ]; then

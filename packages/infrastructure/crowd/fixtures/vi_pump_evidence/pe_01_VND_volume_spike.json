@@ -1,0 +1,16 @@
+{
+  "ticker": "VND",
+  "signals": [
+    {"signal_name": "volume_price_spike", "phase": "pump", "weight": 0.4},
+    {"signal_name": "fomo_active", "phase": "pump", "weight": 0.3}
+  ],
+  "historical_matches": [
+    {
+      "ticker": "VND",
+      "period_start": "2021-06-01",
+      "period_end": "2021-09-30",
+      "outcome_description": "Volume spike followed by distribution and correction"
+    }
+  ],
+  "expected_evidence_shape": "pattern_detected_caution"
+}

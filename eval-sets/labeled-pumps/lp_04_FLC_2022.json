@@ -1,0 +1,21 @@
+{
+  "ticker": "FLC",
+  "period_start": "2022-01-10T00:00:00+00:00",
+  "period_end": "2022-03-15T00:00:00+00:00",
+  "phases": ["pump", "distribution", "dump"],
+  "features_at_detection": {
+    "price_change_30d": "0.35",
+    "price_5d_change": "0.40",
+    "volume_30d_avg_rising": "true",
+    "volume_5d_avg_declining": "false",
+    "volume_5d_avg": "50000000",
+    "volume_30d_avg": "10000000",
+    "t2_news_silent": "false",
+    "t3_kol_mentions_rising": "true",
+    "t3_kol_mentions_peak": "true",
+    "t4_novice_post_share": "0.80",
+    "t4_coordination_score": "0.82"
+  },
+  "subsequent_outcome": "Classic pump-and-dump; coordinated posting detected; rapid price collapse post-announcement",
+  "labeled_by": "user"
+}

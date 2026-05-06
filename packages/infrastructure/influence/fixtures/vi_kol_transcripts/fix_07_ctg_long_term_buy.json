@@ -1,0 +1,18 @@
+{
+  "description": "CTG (Vietinbank) long-term buy — fundamental analysis basis. Tests BUY + LONG_TERM timeframe.",
+  "transcript": "Ngân hàng Vietinbank mã CTG đang ở vùng giá hấp dẫn. P/B 1.2 lần thấp hơn trung bình ngành ngân hàng. Lợi nhuận sau thuế Q1/2026 tăng 15% so cùng kỳ năm ngoái. NIM ổn định ở mức 3.2%. Mình đang tích lũy dần CTG cho danh mục dài hạn, mục tiêu 12 tháng. Đây là cổ phiếu phù hợp cho nhà đầu tư có tầm nhìn dài hạn và chấp nhận rủi ro trung bình.",
+  "source_url": "https://www.youtube.com/watch?v=fix007_ctg",
+  "published_at": "2026-05-03T20:00:00+07:00",
+  "expected_recommendations": [
+    {
+      "ticker": "CTG",
+      "intent": "buy",
+      "timeframe": "long_term",
+      "conditions": [],
+      "extraction_confidence_min": 0.7,
+      "excerpt_contains": "tích lũy dần CTG"
+    }
+  ],
+  "diacritics_present": ["ổ", "ề", "ợ"],
+  "notes": "CTG = Vietinbank. 'tích lũy' = BUY with accumulation framing. LONG_TERM (12 months) stated explicitly."
+}

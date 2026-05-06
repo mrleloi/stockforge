@@ -39,6 +39,7 @@ dependencies = [
     "playwright>=1.47.0",               # JS-heavy sites
     "feedparser>=6.0.0",                # RSS
     "yt-dlp>=2024.10.0",                # YouTube
+    "tenacity>=9.0.0",                  # retry/backoff for KOL adapters (BC-6 S46)
 
     # --- Transcription ---
     "openai-whisper>=20240930",         # local Whisper
@@ -75,6 +76,7 @@ dev = [
     "hypothesis>=6.115.0",
     "faker>=30.0.0",
     "freezegun>=1.5.0",
+    "respx>=0.21.0",                    # httpx mocking for KOL adapter tests (BC-6 S46)
     "import-linter>=2.1.0",             # enforce architecture boundaries
     "pre-commit>=4.0.0",
 ]

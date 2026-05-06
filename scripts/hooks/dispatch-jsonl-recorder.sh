@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# dispatch-jsonl-recorder.sh — append-only dispatch event log (Decision 023 v2 schema, 10 fields).
+# dispatch-jsonl-recorder.sh — append-only dispatch event log (Decision 023 v2 schema + HH-B.1/B.2 telemetry).
 # PreToolUse(Agent) → DISPATCHED row + sidecar entry keyed by tool_use_id.
-# PostToolUse(Agent) → sidecar entry keyed by hex agent_id (extracted from result text "agentId: <hex>").
-# SubagentStop → COMPLETED row; sidecar lookup by hex agent_id retrieves tool_use_id.
+# PostToolUse(Agent) → no-op (legacy hex-extract removed; never matched in stockforge agents).
+# SubagentStop → COMPLETED row with FIFO-matched tool_use_id + transcript-derived tokens/duration/failure_mode.
+# HH-B.1: replaced broken "agentId: <hex>" regex correlation with FIFO match against dispatch.jsonl
+#         (filter parent_session_id, find oldest DISPATCHED without matching COMPLETED).
+# HH-B.2: SubagentStop reads transcript_path to populate tokens_real + duration_ms + failure_mode.
 # Ported from orch v2.2.0; adapted subagent_type→model map for stockforge agents.
 
 set -uo pipefail
@@ -27,9 +30,7 @@ process.stdin.on('end',()=>{
     console.log('AGENT_ID='+q(p.agent_id));
     console.log('STATUS='+q(p.status));
     console.log('SUBAGENT_TYPE='+q((p.tool_input&&p.tool_input.subagent_type)||''));
-    const resultText=(p.tool_response&&p.tool_response.content&&p.tool_response.content[0]&&p.tool_response.content[0].text)||'';
-    const m=resultText.match(/agentId:\\s*([a-f0-9]{10,20})/i);
-    console.log('RESULT_AGENT_ID='+q(m?m[1]:''));
+    console.log('TRANSCRIPT_PATH='+q(p.transcript_path));
   } catch { console.log('HOOK_EVENT=\"\"'); }
 });" 2>/dev/null || echo 'HOOK_EVENT=""')"
 
@@ -38,9 +39,12 @@ process.stdin.on('end',()=>{
 [ "$HOOK_EVENT" != "PreToolUse" ] && [ "$HOOK_EVENT" != "PostToolUse" ] && [ "$HOOK_EVENT" != "SubagentStop" ] && exit 0
 
 # Stockforge subagent → model map (per .claude/agents/ frontmatter).
+# Re-grounded against actual frontmatter at S48c (HH-B.1) — added intent-vs-impl-diff,
+# research-scanner, lesson-synthesizer; corrected spec-author opus (was sonnet).
 case "${SUBAGENT_TYPE:-}" in
-  master-planner|sandwich-architect|sandwich-verifier|devils-advocate) MODEL="opus" ;;
-  sandwich-dev|action-guide-planner|bdd-planner|drift-detector|spec-author|ul-auditor|intent-classifier) MODEL="sonnet" ;;
+  master-planner|sandwich-architect|sandwich-verifier|devils-advocate|intent-vs-impl-diff|spec-author|lesson-synthesizer|drift-detector) MODEL="opus" ;;
+  sandwich-dev|action-guide-planner|bdd-planner|ul-auditor|research-scanner) MODEL="sonnet" ;;
+  intent-classifier) MODEL="haiku" ;;
   *) MODEL="unknown" ;;
 esac
 
@@ -55,53 +59,92 @@ if [ "$HOOK_EVENT" = "PreToolUse" ]; then
   [ -z "$DID" ] && DID="$(node -e 'const c=require("crypto");console.log(c.randomUUID())' 2>/dev/null || echo "gen-$(date +%s)")"
   ATYPE="${SUBAGENT_TYPE:-unknown-agent}"
   [ -z "$ATYPE" ] && ATYPE="unknown-agent"
-  printf '%s\n' "{\"dispatch_id\":\"${DID}\",\"tool_use_id\":\"${DID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\"}" >> "$SIDECAR"
+  printf '%s\n' "{\"dispatch_id\":\"${DID}\",\"tool_use_id\":\"${DID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\",\"parent_session_id\":\"${PARENT_SID}\",\"ts_ms\":${TS_MS},\"state\":\"pending\"}" >> "$SIDECAR"
   printf '%s\n' "{\"event\":\"DISPATCHED\",\"dispatch_id\":\"${DID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\",\"parent_session_id\":\"${PARENT_SID}\",\"bg\":true,\"ts_ms\":${TS_MS},\"outcome\":null,\"tokens_used\":null,\"tool_use_id\":\"${DID}\"}" >> "$DISPATCH_JSONL"
 elif [ "$HOOK_EVENT" = "PostToolUse" ]; then
-  HEX_ID="${RESULT_AGENT_ID:-}"
-  if [ -z "$HEX_ID" ]; then
-    printf '[WARN] dispatch-jsonl-recorder: PostToolUse-Agent: RESULT_AGENT_ID empty — agentId pattern not found in result text. SubagentStop correlation will degrade to unknown-agent.\n' >&2
-  fi
-  ORIG_TID="${TOOL_USE_ID:-}"
-  if [ -n "$HEX_ID" ] && [ -n "$ORIG_TID" ] && [ -f "$SIDECAR" ]; then
-    MATCH="$(grep "\"tool_use_id\":\"${ORIG_TID}\"" "$SIDECAR" | tail -1 || true)"
-    if [ -n "$MATCH" ]; then
-      eval "$(printf '%s' "$MATCH" | node -e "
-let s=''; process.stdin.on('data',c=>s+=c);
-process.stdin.on('end',()=>{ try{const p=JSON.parse(s);
-  console.log('ATYPE='+JSON.stringify(p.agent_type||'unknown-agent'));
-  console.log('MODEL='+JSON.stringify(p.model||'unknown'));
-}catch{console.log('ATYPE=\"unknown-agent\"\nMODEL=\"unknown\"');} });" 2>/dev/null || echo 'ATYPE="unknown-agent"')"
-      printf '%s\n' "{\"dispatch_id\":\"${HEX_ID}\",\"tool_use_id\":\"${ORIG_TID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\"}" >> "$SIDECAR"
-    fi
-  fi
+  # HH-B.1: PostToolUse hex-extraction removed — orch-specific "agentId: <hex>" pattern never matched
+  # in stockforge subagent return text. SubagentStop now does FIFO matching directly against
+  # dispatch.jsonl, no PostToolUse correlation step needed.
+  :
 else
-  # SubagentStop
-  LID="${AGENT_ID:-}"; ATYPE="unknown-agent"; MODEL="unknown"; TOOL_USE_ID_FOUND=""
-  if [ -n "$LID" ] && [ -f "$SIDECAR" ]; then
-    MATCH="$(grep "\"dispatch_id\":\"${LID}\"" "$SIDECAR" | tail -1 || true)"
-    if [ -n "$MATCH" ]; then
-      eval "$(printf '%s' "$MATCH" | node -e "
-let s=''; process.stdin.on('data',c=>s+=c);
-process.stdin.on('end',()=>{ try{const p=JSON.parse(s);
-  console.log('ATYPE='+JSON.stringify(p.agent_type||'unknown-agent'));
-  console.log('MODEL='+JSON.stringify(p.model||'unknown'));
-  console.log('TOOL_USE_ID_FOUND='+JSON.stringify(p.tool_use_id||''));
-}catch{console.log('ATYPE=\"unknown-agent\"\nMODEL=\"unknown\"\nTOOL_USE_ID_FOUND=\"\"');} });" 2>/dev/null || echo 'ATYPE="unknown-agent"')"
-    fi
-  fi
+  # SubagentStop — HH-B.1 FIFO matching against dispatch.jsonl + HH-B.2 transcript enrichment.
   case "${STATUS:-}" in
     DONE|done|ok) OUTCOME='"DONE"' ;; FAIL|fail|error) OUTCOME='"FAIL"' ;;
     BLOCKED|blocked) OUTCOME='"BLOCKED"' ;; *) OUTCOME='"DONE"' ;;
   esac
-  if [ -n "$TOOL_USE_ID_FOUND" ]; then
-    DID="$TOOL_USE_ID_FOUND"
-    TOOL_USE_ID_JSON="\"$TOOL_USE_ID_FOUND\""
-  else
-    DID="${LID:-unknown}"
-    TOOL_USE_ID_JSON="null"
+
+  # FIFO match: find oldest DISPATCHED for this parent_session_id without a matching COMPLETED.
+  # Falls back to legacy AGENT_ID hex if FIFO returns nothing (e.g. dispatch.jsonl truncated).
+  eval "$(node -e "
+const fs=require('fs'),path=require('path');
+const dispatchPath=process.argv[1], sid=process.argv[2], legacyAgentId=process.argv[3]||'';
+let tid='', atype='unknown-agent', model='unknown';
+try {
+  const lines=fs.readFileSync(dispatchPath,'utf8').split('\n').filter(Boolean);
+  const events=lines.map(l=>{ try{return JSON.parse(l);}catch{return null;} }).filter(Boolean);
+  const sessionEvents=events.filter(e=>e.parent_session_id===sid);
+  const dispatched=sessionEvents.filter(e=>e.event==='DISPATCHED');
+  const completedTids=new Set(sessionEvents.filter(e=>e.event==='COMPLETED'&&e.tool_use_id).map(e=>e.tool_use_id));
+  const unmatched=dispatched.filter(d=>d.tool_use_id&&!completedTids.has(d.tool_use_id));
+  if (unmatched.length>0) {
+    const pick=unmatched[0]; // FIFO oldest
+    tid=pick.tool_use_id||''; atype=pick.agent_type||'unknown-agent'; model=pick.model||'unknown';
+  }
+} catch {}
+const q=v=>JSON.stringify(String(v||''));
+console.log('TID='+q(tid));
+console.log('ATYPE='+q(atype));
+console.log('MODEL='+q(model));
+" "$DISPATCH_JSONL" "$PARENT_SID" "${AGENT_ID:-}" 2>/dev/null || echo 'TID=""
+ATYPE="unknown-agent"
+MODEL="unknown"')"
+
+  # HH-B.2: extract tokens_real + duration_ms + failure_mode from subagent transcript JSONL.
+  TOKENS_REAL_JSON="null"; DURATION_MS_JSON="null"; FAILURE_MODE_JSON="null"
+  if [ -n "${TRANSCRIPT_PATH:-}" ] && [ -f "$TRANSCRIPT_PATH" ]; then
+    eval "$(node -e "
+const fs=require('fs');
+const tp=process.argv[1];
+let tokens=0, firstTs=0, lastTs=0, fmode='', errCount=0, lineCount=0;
+try {
+  const lines=fs.readFileSync(tp,'utf8').split('\n').filter(Boolean);
+  for (const line of lines) {
+    try {
+      const e=JSON.parse(line);
+      lineCount++;
+      const u=e.message&&e.message.usage;
+      if (u) {
+        tokens+=(u.input_tokens||0)+(u.output_tokens||0)+(u.cache_creation_input_tokens||0)+(u.cache_read_input_tokens||0);
+      }
+      const ts=e.timestamp?new Date(e.timestamp).getTime():0;
+      if (ts>0) { if (firstTs===0||ts<firstTs) firstTs=ts; if (ts>lastTs) lastTs=ts; }
+      const txt=JSON.stringify(e.message||e).toLowerCase();
+      if (e.isError||txt.includes('\"is_error\":true')) errCount++;
+      if (txt.includes('rate limit')||txt.includes('rate_limit_error')) { if (!fmode) fmode='R'; }
+      else if (txt.includes('timeout')||txt.includes('timed out')) { if (!fmode) fmode='T'; }
+      else if (txt.includes('permission denied')||txt.includes('not allowed')) { if (!fmode) fmode='H'; }
+    } catch {}
+  }
+  if (errCount>0&&!fmode) fmode='B';
+} catch {}
+const dur=(firstTs>0&&lastTs>firstTs)?(lastTs-firstTs):0;
+console.log('TOKENS='+tokens);
+console.log('DURATION_MS='+dur);
+console.log('FMODE='+JSON.stringify(fmode));
+" "$TRANSCRIPT_PATH" 2>/dev/null || echo 'TOKENS=0
+DURATION_MS=0
+FMODE=""')"
+    [[ "${TOKENS:-0}" =~ ^[0-9]+$ ]] && [ "${TOKENS:-0}" -gt 0 ] && TOKENS_REAL_JSON="$TOKENS"
+    [[ "${DURATION_MS:-0}" =~ ^[0-9]+$ ]] && [ "${DURATION_MS:-0}" -gt 0 ] && DURATION_MS_JSON="$DURATION_MS"
+    [ -n "${FMODE:-}" ] && FAILURE_MODE_JSON="\"${FMODE}\""
   fi
-  printf '%s\n' "{\"event\":\"COMPLETED\",\"dispatch_id\":\"${DID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\",\"parent_session_id\":\"${PARENT_SID}\",\"bg\":true,\"ts_ms\":${TS_MS},\"outcome\":${OUTCOME},\"tokens_used\":null,\"tool_use_id\":${TOOL_USE_ID_JSON}}" >> "$DISPATCH_JSONL"
+
+  if [ -n "${TID:-}" ]; then
+    DID="$TID"; TOOL_USE_ID_JSON="\"${TID}\""
+  else
+    DID="${AGENT_ID:-unknown}"; TOOL_USE_ID_JSON="null"
+  fi
+  printf '%s\n' "{\"event\":\"COMPLETED\",\"dispatch_id\":\"${DID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\",\"parent_session_id\":\"${PARENT_SID}\",\"bg\":true,\"ts_ms\":${TS_MS},\"outcome\":${OUTCOME},\"tokens_used\":${TOKENS_REAL_JSON},\"duration_ms\":${DURATION_MS_JSON},\"failure_mode\":${FAILURE_MODE_JSON},\"tool_use_id\":${TOOL_USE_ID_JSON}}" >> "$DISPATCH_JSONL"
 fi
 ) </dev/null >/dev/null 2>&1 &
 disown 2>/dev/null || true

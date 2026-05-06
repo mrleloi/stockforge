@@ -1,0 +1,20 @@
+{
+  "description": "MSN avoid — low extraction confidence (< 0.7) → manual review route. Tests BR-6 threshold.",
+  "transcript": "Về cổ phiếu MSN thì mình không chắc lắm, có vẻ như không nên đầu tư vào lúc này. Giá đang cao, tuy nhiên tùy theo quan điểm mỗi người. Bản thân mình thì thấy nên cẩn thận với MSN, nhưng cũng không nói chắc được. Thị trường chứng khoán vẫn đang biến động.",
+  "source_url": "https://www.youtube.com/watch?v=fixture_04",
+  "published_at": "2026-05-03T16:00:00+07:00",
+  "expected_recommendations": [
+    {
+      "ticker": "MSN",
+      "intent": "avoid",
+      "timeframe": "weeks",
+      "conditions": [],
+      "extraction_confidence_min": 0.5,
+      "extraction_confidence_max": 0.7,
+      "requires_manual_review": true,
+      "excerpt_contains": "cẩn thận với MSN"
+    }
+  ],
+  "diacritics_present": ["ổ", "ề"],
+  "notes": "MSN = Masan Group. Low-confidence avoid — vague language. BR-6: if confidence < 0.7, requires_manual_review=True."
+}

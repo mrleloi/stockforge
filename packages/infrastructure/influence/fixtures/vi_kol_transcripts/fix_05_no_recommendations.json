@@ -1,0 +1,9 @@
+{
+  "description": "HPG market commentary — no extractable recommendations. Tests empty-array path.",
+  "transcript": "Hôm nay thị trường chứng khoán Việt Nam tăng mạnh. VN-Index đạt 1.280 điểm, tăng 12 điểm so với phiên trước. Tổng khối lượng giao dịch toàn thị trường đạt 850 triệu cổ phiếu. Cổ phiếu HPG và VIC đều tăng trong phiên hôm nay. Đây là thông tin tổng hợp từ HoSE, không phải khuyến nghị đầu tư. Nhà đầu tư cần xem xét kỹ trước khi quyết định. Thị trường vẫn tiềm ẩn rủi ro biến động ngắn hạn.",
+  "source_url": "https://www.youtube.com/watch?v=fixture_05",
+  "published_at": "2026-05-04T15:30:00+07:00",
+  "expected_recommendations": [],
+  "diacritics_present": ["ổ", "ề", "ợ"],
+  "notes": "Pure market commentary. Spec § B.5: 'Do NOT extract general market commentary'. Expected empty array."
+}

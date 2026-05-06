@@ -55,6 +55,33 @@ AGENT_ID="$(printf '%s' "$PAYLOAD" | node -e "
 let s=''; process.stdin.on('data',c=>s+=c);
 process.stdin.on('end',()=>{ try { console.log(JSON.parse(s).agent_id||''); } catch { console.log(''); } });" 2>/dev/null || true)"
 
+# HH-B.3: extract tool_response text patterns for fine-grained failure_mode classification.
+# Pattern → code map:  permission denied → H, timeout → T, rate limit → R, file not found → F,
+# invalid input → I, error: prefix → B (generic error), connection refused → N (network).
+RESPONSE_FAILURE_MODE="$(printf '%s' "$PAYLOAD" | node -e "
+let s=''; process.stdin.on('data',c=>s+=c);
+process.stdin.on('end',()=>{ try {
+  const p=JSON.parse(s);
+  const r=p.tool_response;
+  if (!r) { console.log(''); return; }
+  let txt='';
+  if (typeof r==='string') txt=r;
+  else if (r.content&&Array.isArray(r.content)) txt=r.content.map(c=>c.text||'').join(' ');
+  else txt=JSON.stringify(r);
+  txt=txt.toLowerCase();
+  if (r.is_error===true) {
+    if (txt.includes('rate limit')||txt.includes('rate_limit_error')) { console.log('R'); return; }
+    if (txt.includes('permission denied')||txt.includes('not allowed')||txt.includes('access denied')) { console.log('H'); return; }
+    if (txt.includes('timeout')||txt.includes('timed out')) { console.log('T'); return; }
+    if (txt.includes('file not found')||txt.includes('no such file')||txt.includes('does not exist')) { console.log('F'); return; }
+    if (txt.includes('connection refused')||txt.includes('econnrefused')||txt.includes('network error')) { console.log('N'); return; }
+    if (txt.includes('invalid')||txt.includes('inputvalidationerror')) { console.log('I'); return; }
+    console.log('B');
+    return;
+  }
+  console.log('');
+} catch { console.log(''); } });" 2>/dev/null || true)"
+
 [ -z "$HOOK_EVENT_NAME" ] && [ -z "$SESSION_ID" ] && [ -z "$TOOL_NAME" ] && exit 0
 
 classify_component() {
@@ -253,7 +280,11 @@ skip_if_duplicate "$TS" "$COMP_NAME" && exit 0
 compute_tokens_real
 compute_duration_ms "${SESSION_ID:-default}"
 correlate_failure_mode
-# S13 wire-in: outcome-based fallback (only set if correlate didn't already populate).
+# HH-B.3: response-text pattern classification (more specific than outcome heuristic).
+if [ "$FAILURE_MODE" = "null" ] && [ -n "${RESPONSE_FAILURE_MODE:-}" ]; then
+  FAILURE_MODE="\"${RESPONSE_FAILURE_MODE}\""
+fi
+# S13 wire-in: outcome-based fallback (only set if correlate + response-text didn't populate).
 if [ "$FAILURE_MODE" = "null" ] && [ "$OUTCOME" = "error" ]; then FAILURE_MODE='"B"'; fi
 if [ "$FAILURE_MODE" = "null" ] && [ "$OUTCOME" = "timeout" ]; then FAILURE_MODE='"T"'; fi
 if [ "$PAYLOAD_DECISION" = "deny" ]; then FAILURE_MODE='"H"'; fi

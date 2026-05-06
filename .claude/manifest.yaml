@@ -14,9 +14,13 @@
 # - needs-refactor = currently entangled with stockforge; pattern is portable; refactor target
 
 version: 1
-revision: REV-2
+revision: REV-3
 created_at: 2026-04-29
-updated_at: 2026-04-29
+updated_at: 2026-05-05
+revision_history:
+  - REV-1 (2026-04-29): initial layer separation
+  - REV-2 (2026-04-29 S5-cont): tag-only IMPL refinement (no physical move)
+  - REV-3 (2026-05-05 S48b HH-A.5): regen — tag 35 artifacts that accumulated since REV-2 (7 skills + 2 agents + 1 command + 25 hooks); restore V1/V2/V3/V4 invariant exactly-one-layer membership
 schema_url: ./manifest.schema.json    # NEW (S6 will author validator)
 
 description: |
@@ -66,6 +70,22 @@ harness:
       tags: [needs-refactor]   # references stockforge vault path
     - path: .claude/skills/attach/
       role: "Port harness layer to a new project (Track 5.5a deliverable; reads this manifest)"
+    # REV-3 additions (2026-05-05 S48b HH-A.5):
+    - path: .claude/skills/promote-rule/
+      role: "Cluster agent-notes entries; propose hook/skill/charter promotion targets"
+    - path: .claude/skills/try-n-approaches/
+      role: "Karpathy autoresearch outer-loop — generate ≥3 approaches per task"
+    - path: .claude/skills/sync-pull/
+      role: "Confidence-score lookup before SCOPE+/ARCH/IMPL decisions (D-006)"
+    - path: .claude/skills/session-memory-l0-l1/
+      role: "Extract structured memories from session JSONL (regex L0 + LLM L1; D-007)"
+    - path: .claude/skills/hook-diagnostics/
+      role: "Inspect hook event lifecycle + transcript cache + aggregator output (D-008)"
+    - path: .claude/skills/decompose-work/
+      role: "Split task into deterministic-vs-LLM portions before execution"
+    - path: .claude/skills/empirical-probe-first/
+      role: "Probe ALL viable strategies before committing (L-S32-1; promoted S43e)"
+      tags: [needs-refactor]   # stockforge S32 origin narrative; doctrine is general
 
   agents:
     - path: .claude/agents/sandwich-architect.md
@@ -92,6 +112,12 @@ harness:
       role: "Test pyramid balance strategist"
     - path: .claude/agents/action-guide-planner.md
       role: "Bridges /session-start output and execution plan"
+    # REV-3 additions (2026-05-05 S48b HH-A.5):
+    - path: .claude/agents/research-scanner.md
+      role: "Opensource repo surveyor with provenance (D-005 § 5.5d.3)"
+      tags: [needs-refactor]   # stockforge dogfood example; pattern is general
+    - path: .claude/agents/lesson-synthesizer.md
+      role: "Stage 2 self-upgrade loop — fresh-context lesson synthesis from session diff (HR-6; D-026 Rule 4b)"
 
   commands:
     - path: .claude/commands/budget-check.md
@@ -122,6 +148,10 @@ harness:
       role: "Audit ubiquitous language consistency"
     - path: .claude/commands/vbw-check.md
       role: "Apply Verify-Before-Write protocol"
+    # REV-3 additions (2026-05-05 S48b HH-A.5):
+    - path: .claude/commands/autonomous.md
+      role: "Toggle autonomous_mode + WATCHDOG_DISABLE env var atomically (NEW S48)"
+      tags: [needs-refactor]   # STOCKFORGE_WATCHDOG_DISABLE env name; rename at /attach time
 
   hooks:
     - path: scripts/hooks/budget-watchdog.sh
@@ -159,7 +189,61 @@ harness:
     - path: scripts/session-self-reboot.ps1
       role: "/new keystroke injection (Windows)"
     - path: scripts/hooks/continue-injector.ps1
-      role: "Fresh-session continue SendKeys"
+      role: "Fresh-session continue SendKeys (L-S48-1 fixed: ≤1 fire/60s + claude.exe ancestor walk)"
+    # REV-3 additions (2026-05-05 S48b HH-A.5) — 25 hooks accumulated since REV-2:
+    - path: scripts/hooks/stale-prompt-detector.sh
+      role: "Detect stale user_prompt files past freshness window"
+    - path: scripts/hooks/correction-rate-tracker.sh
+      role: "Track correction-rate signals for sync-tracker"
+    - path: scripts/hooks/correction-rate-aggregator.sh
+      role: "Aggregate correction-rate signals on Stop"
+    - path: scripts/hooks/sync-grilling-trigger.sh
+      role: "Auto-inject sync-grilling reminder when ≥3 sessions elapsed"
+    - path: scripts/hooks/learning-queue-sweeper.sh
+      role: "Sweep learning-data/queue/ on SessionStart"
+    - path: scripts/hooks/research-scanner-output-validator.sh
+      role: "Validate research-scanner subagent output schema (L-S12-2)"
+    - path: scripts/hooks/learning-loop-metric-check.sh
+      role: "Validate try-n-approaches Karpathy loop metric pre-conditions (L-S12-1)"
+    - path: scripts/hooks/metric-failure-mode-rate.sh
+      role: "Track metric failure rate for capability-map calibration"
+    - path: scripts/hooks/sync-tracker-render.sh
+      role: "Render sync-tracker _index.md from events.tsv (D-006 substrate)"
+    - path: scripts/hooks/sync-tracker-update.sh
+      role: "Update sync-tracker state.tsv on Stop (D-006 substrate)"
+    - path: scripts/hooks/self-awareness-aggregate.sh
+      role: "Stop-hook aggregator emitting sessions-rollup.tsv row (D-008 + L-S19-1)"
+    - path: scripts/hooks/subagent-budget-classifier.sh
+      role: "Classify subagent dispatch budget bucket"
+    - path: scripts/hooks/vendor-api-probe.sh
+      role: "SessionStart vendor-API drift probe (D-013 + L-S28-1)"
+      tags: [needs-refactor]   # vendor list seeds w/ stockforge libs; generalize at /attach
+    - path: scripts/hooks/tier1-bloat-check.sh
+      role: "Stop-hook Tier 1 bootstrap ceiling guard ≤8K tokens (D-017 memory-tiers)"
+    - path: scripts/hooks/drift-rollup-daily.sh
+      role: "Stop-hook daily drift summary rollup (HR-3 + KI-S43b-*)"
+    - path: scripts/hooks/harness-recovery-dod-watchdog.sh
+      role: "Stop-hook DoD audit on HR-* recovery markers (HR-8 + KI-S43b-7)"
+    - path: scripts/hooks/memory-routing-audit.sh
+      role: "Stop-hook memory-routing-tree compliance audit (D-024 / HR-4)"
+    - path: scripts/hooks/promotion-cycle-trigger.sh
+      role: "Stop-hook phase-boundary promotion cycle trigger (Q-E2)"
+    - path: scripts/hooks/bash-hook-lint.sh
+      role: "Bash hook portability lint (L-S11-1; printf -- + POSIX-only)"
+    - path: scripts/hooks/learning-index-rebuild.sh
+      role: "Rebuild learning-data/index/ manifest on Stop"
+    - path: scripts/hooks/ghost-work-audit.sh
+      role: "Detect untracked source files at SessionStart (C4 promote-rule output)"
+    - path: scripts/hooks/pre-clear-handoff-guard.sh
+      role: "Pre-/clear handoff invariant guard (HR-2 + HR-7 + D-026 advisory→strict)"
+      tags: [needs-refactor]   # STOCKFORGE_ env vars; rename at /attach time
+    - path: scripts/hooks/lesson-synthesis-watchdog.sh
+      role: "Stop-hook Rule 4b enforcer (D-026 advisory→strict via S43f)"
+    - path: scripts/hooks/proposal-bundle-advisor.sh
+      role: "Advise on bundling sibling charter proposals (L-S43f-1 hook-tier candidate)"
+    - path: scripts/hooks/write-vs-edit-guard.sh
+      role: "PreToolUse Write→Edit guard for protected memory paths (L-S45-2 incident response)"
+      tags: [needs-refactor]   # stockforge-specific protected paths; generalize at /attach
 
   docs:
     - path: SPEC_TEMPLATE.md
@@ -208,6 +292,8 @@ stockforge:
   docs:
     - path: PROJECT_CHARTER.md
       role: "Stockforge identity + invariants I-S1..I-S35"
+    - path: agent-workspace/constitution/invariants-stockforge.md
+      role: "Stock-domain I-S* invariants (split from invariants.md S48l HH-G.2 — D-022 cluster + I-S1..I-S65)"
     - path: AGENT_OPERATING_MANUAL.md
       role: "Stockforge agent operating manual"
     - path: CLAUDE.md
@@ -305,7 +391,7 @@ attach:
     - node_modules/
 
   default_includes:
-    # Harness skills (11 — including attach itself so target can re-attach)
+    # Harness skills (18 — including attach itself so target can re-attach)
     - .claude/skills/grill-maximization/
     - .claude/skills/qa-escalation/
     - .claude/skills/user-prompt-intake/
@@ -317,7 +403,15 @@ attach:
     - .claude/skills/ddd-tactical-patterns/
     - .claude/skills/obsidian-vault/
     - .claude/skills/attach/
-    # Harness agents/commands (all current = harness)
+    # REV-3 harness skills (7 NEW):
+    - .claude/skills/promote-rule/
+    - .claude/skills/try-n-approaches/
+    - .claude/skills/sync-pull/
+    - .claude/skills/session-memory-l0-l1/
+    - .claude/skills/hook-diagnostics/
+    - .claude/skills/decompose-work/
+    - .claude/skills/empirical-probe-first/
+    # Harness agents/commands (all current = harness; directory wildcard covers REV-3 additions)
     - .claude/agents/
     - .claude/commands/
     - .claude/settings.json   # but with sed-replace stockforge_* env vars
@@ -341,12 +435,51 @@ attach:
     - scripts/session-self-reboot.ps1
     - scripts/hooks/continue-injector.ps1
     - scripts/hooks/drift-signals-D1-D9.sh   # hybrid; stockforge_part stubbed at target
+    # REV-3 harness hooks (25 NEW):
+    - scripts/hooks/stale-prompt-detector.sh
+    - scripts/hooks/correction-rate-tracker.sh
+    - scripts/hooks/correction-rate-aggregator.sh
+    - scripts/hooks/sync-grilling-trigger.sh
+    - scripts/hooks/learning-queue-sweeper.sh
+    - scripts/hooks/research-scanner-output-validator.sh
+    - scripts/hooks/learning-loop-metric-check.sh
+    - scripts/hooks/metric-failure-mode-rate.sh
+    - scripts/hooks/sync-tracker-render.sh
+    - scripts/hooks/sync-tracker-update.sh
+    - scripts/hooks/self-awareness-aggregate.sh
+    - scripts/hooks/subagent-budget-classifier.sh
+    - scripts/hooks/vendor-api-probe.sh
+    - scripts/hooks/tier1-bloat-check.sh
+    - scripts/hooks/drift-rollup-daily.sh
+    - scripts/hooks/harness-recovery-dod-watchdog.sh
+    - scripts/hooks/memory-routing-audit.sh
+    - scripts/hooks/promotion-cycle-trigger.sh
+    - scripts/hooks/bash-hook-lint.sh
+    - scripts/hooks/learning-index-rebuild.sh
+    - scripts/hooks/ghost-work-audit.sh
+    - scripts/hooks/pre-clear-handoff-guard.sh
+    - scripts/hooks/lesson-synthesis-watchdog.sh
+    - scripts/hooks/proposal-bundle-advisor.sh
+    - scripts/hooks/write-vs-edit-guard.sh
     # Harness docs (skeletal)
     - SPEC_TEMPLATE.md
     - .gitignore   # template; user customizes
     # Harness workspace structure (empty skeletons)
     - agent-workspace/CLAUDE.md
-    - agent-workspace/constitution/   # immutable harness-baseline pieces
+    # constitution/ harness baseline (12 general files — invariants-stockforge.md excluded as stockforge biz; financial-data-protocol.md stays in this list as it predates split, refactor target HH-G+ if portability concern)
+    - agent-workspace/constitution/architecture.md
+    - agent-workspace/constitution/autonomous-protocol.md
+    - agent-workspace/constitution/boundaries.md
+    - agent-workspace/constitution/coding-principles.md
+    - agent-workspace/constitution/decision-discipline.md
+    - agent-workspace/constitution/drift-signals.md
+    - agent-workspace/constitution/financial-data-protocol.md   # tags: [needs-refactor] — stockforge-specific content; portability split target post-HH-G
+    - agent-workspace/constitution/invariants.md   # general invariants only post-S48l HH-G.2 split
+    - agent-workspace/constitution/karpathy-principles.md
+    - agent-workspace/constitution/memory-routing-tree.md
+    - agent-workspace/constitution/memory-tiers.md
+    - agent-workspace/constitution/session-budgets.md
+    - agent-workspace/constitution/vbw-protocol.md
     - human-workspace/CLAUDE.md
     # Manifest itself
     - .claude/manifest.yaml

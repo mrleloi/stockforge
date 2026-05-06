@@ -1,0 +1,26 @@
+{
+  "description": "VIC conditional watch — BR-7 conditional separation fixture. Tests conditions list + WATCH intent.",
+  "transcript": "Bây giờ mình sẽ nói về Vingroup VIC. VIC đang ở ngưỡng 42.000. Mình theo dõi VIC nếu giá phá vỡ ngưỡng 45.000 thì có thể cân nhắc mua thêm. Còn hiện tại thì cứ theo dõi thôi. Với MSN thì mình thấy không nên vội vàng, hãy cẩn thận ở vùng giá này vì rủi ro còn cao. Đây là ý kiến cá nhân, không phải lời khuyên đầu tư.",
+  "source_url": "https://www.youtube.com/watch?v=fixture_02",
+  "published_at": "2026-05-02T10:30:00+07:00",
+  "expected_recommendations": [
+    {
+      "ticker": "VIC",
+      "intent": "watch",
+      "timeframe": "weeks",
+      "conditions": ["nếu giá phá vỡ ngưỡng 45.000"],
+      "extraction_confidence_min": 0.6,
+      "excerpt_contains": "theo dõi VIC"
+    },
+    {
+      "ticker": "MSN",
+      "intent": "avoid",
+      "timeframe": "weeks",
+      "conditions": [],
+      "extraction_confidence_min": 0.6,
+      "excerpt_contains": "cẩn thận"
+    }
+  ],
+  "diacritics_present": ["ổ", "ề", "ữ"],
+  "notes": "VIC = Vingroup. 'theo dõi' = WATCH; 'cẩn thận' = AVOID per spec § B.5. BR-7: VIC has condition."
+}

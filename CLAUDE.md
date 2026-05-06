@@ -53,6 +53,10 @@ Full detail: `agent-workspace/constitution/karpathy-principles.md`.
 3. Update `agent-workspace/memory/current-execution.md` (status, next session)
 4. If learned rule emerged → append to `agent-workspace/memory/agent-notes.md`
 5. If thesis logged this session → ensure entry in `agent-workspace/memory/thesis-log/`
+6. Update `agent-workspace/memory/mistake-log.md` with new M-S<N>-<M> entries OR explicitly state "no mistakes this session" in the session log (enforced by `session-end-checklist-linter.sh`)
+7. If a NEW ADR landed this session → verify `project.md` Phase Goals Tracker still matches `current-execution.md` Active Focus Track Phase status (enforced by `project-md-staleness-check.sh`)
+8. (auto) Stop-hook `profile-template-auto-populate.sh` appends a sample row to the matching `agent-workspace/memory/self-awareness/profiles/<model>-<effort>-<task_class>.md` card
+9. (auto) Stop-hook `promotion-cycle-trigger.sh` HARD-BLOCKs at next SessionStart if ≥8 new lessons accumulated since last `promote-rule` dispatch — schedule a promote-rule subagent dispatch in the next session if blocked
 
 ---
 

@@ -4,10 +4,11 @@ effort: max
 thinking: enabled
 task_class:
   - MULTI_TASK_IMPL
-samples_count: 4
-sample_sessions: [S27, S33, S34, S20]
-last_updated: 2026-05-01T00:00:00Z
-source: agent-workspace/memory/sessions-rollup.tsv (S18 row only) + manual session log review S20-S34
+samples_count: 6
+status: BIASED-PRE-REBUILD-S65 (user 2026-05-06 flagged tracking gap; rebuild after cost-ledger.tsv accumulates ≥10 sessions)
+sample_sessions: [S27, S33, S34, S20, S48m, S66]
+last_updated: 2026-05-06T09:16:51+07:00
+source: agent-workspace/memory/sessions-rollup.tsv (S18 row only) + manual session log review S20-S34 (S48 sequence had ZERO MULTI_TASK_IMPL — all S48b..h ran as FOCUSED_IMPL; observed S48 governance pattern fits FOCUSED_IMPL band)
 ---
 
 # Profile — Opus 4.7 × max × MULTI_TASK_IMPL
@@ -40,6 +41,7 @@ source: agent-workspace/memory/sessions-rollup.tsv (S18 row only) + manual sessi
 - M-S33-1 / M-S34-1 (cross-BC import miss; refactor)
 - M-S35-3 (self-track > hard_cap)
 - M-S35-4 (4 dead meta-loops)
+- **M-S48d-1 pipefail-bracket trap** (relevant to MULTI_TASK_IMPL hook authoring; if ≥3 hooks shipped per session, ERR-trap silent failures multiply; mitigation: `set +o pipefail` brackets around optional greps applied in S48d HH-C.3 + S48g HH-E.1 + S48h HH-E.2 hook authors).
 
 ## 5. Calibration
 

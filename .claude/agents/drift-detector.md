@@ -1,7 +1,7 @@
 ---
 name: drift-detector
 description: Runs drift signals DR1-DR12 with adversarial eye. Deeper than /drift-check command — includes semantic inspection for DR7, DR12. Invoked when suspected drift or periodic audit.
-model: sonnet
+model: opus
 tools: [Read, Glob, Grep, Bash]
 ---
 

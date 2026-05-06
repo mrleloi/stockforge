@@ -4,10 +4,11 @@ effort: max
 thinking: enabled
 task_class:
   - VERIFY
-samples_count: 2
-sample_sessions: [S21, S29]
-last_updated: 2026-05-01T00:00:00Z
-source: manual session log review + sandwich-verifier observations
+samples_count: 3
+status: BIASED-PRE-REBUILD-S65 (user 2026-05-06 flagged tracking gap; rebuild after cost-ledger.tsv accumulates ≥10 sessions)
+sample_sessions: [S21, S29, S64]
+last_updated: 2026-05-06T00:17:45+07:00
+source: manual session log review + sandwich-verifier observations (S48 sequence had ZERO VERIFY sessions — Phase 2.5 governance work consolidated under FOCUSED_IMPL with smoke-test self-verification per ship; phase-boundary VERIFY sandwich-verifier dispatch deferred to Phase 2.5 close)
 ---
 
 # Profile — Opus 4.7 × max × VERIFY

@@ -96,7 +96,14 @@ Per `agent-workspace/constitution/autonomous-protocol.md` (Track 7) and stockfor
 This directory is the agent's domain. Human's domain is `human-workspace/`. The two communicate through:
 - Human → Agent: `human-workspace/user_prompt/`, `human-workspace/decisions/`
 - Agent → Human: `human-workspace/notifications/`, `human-workspace/q-and-a/pending/`
-- Bidirectional: `human-workspace/q-and-a/answered/` (agent writes pending; human moves answered)
+- Bidirectional: `human-workspace/q-and-a/answered/` — agent writes pending; either human or agent (per Auto-mv rule below) moves resolved bundles to answered/
 - Audit trail: this directory's `memory/decisions/` references `human-workspace/` source files via path pointers
 
-Agent never writes to `human-workspace/` outside the designated `q-and-a/pending/` channel.
+**Auto-mv rule (HH-E.2 — D-031 ratification, 2026-05-05)**: Agent MAY mv a bundle from `q-and-a/pending/` to `q-and-a/answered/` IFF ALL of the following hold:
+
+1. **Frontmatter signal**: bundle frontmatter `status:` field value starts with one of: `answered-`, `closed-`, `resolved-`. Examples already in repo: `answered-via-chat`, `answered-via-AskUserQuestion`, `answered-2026-05-04-via-chat`. Detection is deterministic (head -20 of file + grep `^status:`).
+2. **No human-veto signal**: bundle frontmatter has NO `wait_until:` ISO-8601 timestamp greater than current epoch — if present, agent MUST defer mv until that timestamp passes. Allows human to override auto-mv per-bundle without contract amendment.
+3. **No global pause**: file `human-workspace/q-and-a/.auto-mv-paused` does NOT exist — global kill switch for the auto-mv mechanism (single empty file presence pauses all auto-mv).
+4. **Hook validation**: the mv is performed by `scripts/hooks/qa-pending-auto-mover.sh` (Stop hook). Direct manual `mv` invocation by agent (e.g. via Bash tool) is STILL forbidden — only the validated hook path is authorized.
+
+Agent never writes to `human-workspace/` outside the designated `q-and-a/pending/` write channel + the auto-mv rule above + `notifications/` write channel (existing).

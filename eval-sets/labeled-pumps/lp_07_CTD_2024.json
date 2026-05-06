@@ -1,0 +1,21 @@
+{
+  "ticker": "CTD",
+  "period_start": "2024-01-15T00:00:00+00:00",
+  "period_end": "2024-04-15T00:00:00+00:00",
+  "phases": ["pump", "distribution", "dump"],
+  "features_at_detection": {
+    "price_change_30d": "0.28",
+    "price_5d_change": "0.32",
+    "volume_30d_avg_rising": "true",
+    "volume_5d_avg_declining": "false",
+    "volume_5d_avg": "4500000",
+    "volume_30d_avg": "1200000",
+    "t2_news_silent": "false",
+    "t3_kol_mentions_rising": "false",
+    "t3_kol_mentions_peak": "true",
+    "t4_novice_post_share": "0.75",
+    "t4_coordination_score": "0.55"
+  },
+  "subsequent_outcome": "Construction sector; brief pump on government contract news; rapid distribution after news cycle ended",
+  "labeled_by": "user"
+}

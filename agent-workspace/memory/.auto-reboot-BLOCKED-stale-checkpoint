@@ -1,0 +1,4 @@
+AUTO-REBOOT BLOCKED at 2026-05-06T09:02:50+07:00
+Reason: checkpoints/latest.md mtime is 3760s old (>300s threshold; HH-H.1 guard).
+Action: write a fresh checkpoint via /handoff-prep before reboot fires.
+Override: set STOCKFORGE_FORCE_REBOOT=1 to bypass.

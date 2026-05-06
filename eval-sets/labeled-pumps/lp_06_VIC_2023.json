@@ -1,0 +1,21 @@
+{
+  "ticker": "VIC",
+  "period_start": "2023-07-01T00:00:00+00:00",
+  "period_end": "2023-10-31T00:00:00+00:00",
+  "phases": ["pre_pump"],
+  "features_at_detection": {
+    "price_change_30d": "0.06",
+    "price_5d_change": "0.08",
+    "volume_30d_avg_rising": "true",
+    "volume_5d_avg_declining": "false",
+    "volume_5d_avg": "2000000",
+    "volume_30d_avg": "1800000",
+    "t2_news_silent": "true",
+    "t3_kol_mentions_rising": "true",
+    "t3_kol_mentions_peak": "false",
+    "t4_novice_post_share": "0.35",
+    "t4_coordination_score": "0.15"
+  },
+  "subsequent_outcome": "Pre-pump signals only; no full pump materialized; quiet accumulation by institutional investors",
+  "labeled_by": "user"
+}

@@ -1,0 +1,15 @@
+{
+  "ticker": "HPG",
+  "bullish_consensus": [
+    "HPG hưởng lợi từ chu kỳ đầu tư hạ tầng của Chính phủ",
+    "Giá thép phục hồi hỗ trợ biên lợi nhuận",
+    "KOL nhận xét tích cực về triển vọng dài hạn"
+  ],
+  "failing_analogs": [],
+  "structural_risks": [],
+  "expected_bear_point_themes": [
+    "cyclical_risk",
+    "commodity_price_dependency",
+    "execution_risk"
+  ]
+}

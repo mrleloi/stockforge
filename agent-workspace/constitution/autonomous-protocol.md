@@ -139,6 +139,40 @@ Any deferred-on-cost LLM path (S43a Stage B; R6 CafeF live; Q-S41-1 Opus dogfood
 
 **Companion**: Q9 spec amendment patterns shift "$X estimated" cost-profile lines toward "$0 marginal via subagent substrate" once a feature ships its production substrate.
 
+## Rule 10 — Autonomous-Mode Defection Forbidden (D-030, ratified 2026-05-05; S48e/S48f charter promotion of L-S44/M-S47-1 cluster)
+
+In `autonomous_mode = true` (the only mode per Rule 1), agent SHALL NOT emit any phrase that:
+
+- (a) **Defers to human selection between options** — enumerated as "(a)/(b)/(c)/(d) — which?" or
+  semantic equivalents ("Would you prefer X, Y, or Z?", "Pick one of: ...", "What's your preference?").
+- (b) **Enumerates next-trigger conditions** — "Next continue does X", "Holding here until you...",
+  "Will resume when you...", "Awaiting your signal", "On your go".
+- (c) **Self-pauses at session/PLAN boundaries** — "Ready for next session?", "Should I proceed to...",
+  "Type continue when ready", "Let me know when to start".
+
+**Allowed exceptions** (NOT defections):
+- AskUserQuestion calls for genuinely-new SCOPE/CHARTER decisions (per Rule 8).
+- Reporting completion ("Phase X done; Y next per checkpoint") — descriptive, not deferring.
+- Asking clarification on ambiguous user prompt (legitimate Q surfaced by user-prompt-intake skill).
+
+**Why charter-tier (not just hook)**: hook detects post-emission. Charter prevents emission at
+prompt-binding layer. The Mode-E recurrence pattern (4× across S40/S43/S44/S47/S48 after 2 hook
+extensions) demonstrates that hook-only enforcement is insufficient for habit-pattern violations.
+
+**Anti-pattern (S44 origin)**: 5 successive Stop-hook fires logged Mode-D firing continue-injector
+→ user had to type "continue" themselves AND issue verbal correction because the self-pause loop
+produced no progress. User correctly diagnosed this as harness/deterministic gap (detector missing),
+NOT LLM willpower failure. Charter rule shifts the binding from "willpower" to "context-loaded
+identity rule".
+
+**Enforcement layers** (defense-in-depth per Rule 6):
+- Layer 1 (prompt): this Rule 10 (always-loaded via Tier 1 constitution).
+- Layer 2 (hook): autonomous-stop-watchdog.sh § 3 SELF_PAUSE_HIT regex (already shipped pre-S48d).
+- Layer 3 (hook escalation): if Mode-E hit count exceeds 1 per N sessions, emit URGENT to
+  notifications/ for human review (post-S48f wiring).
+- Layer 4 (subagent): optional `autonomous-defection-detector` skill — semantic check via fresh-
+  context subagent post-Stop if Layer 2 regex misses prose-rephrased violations (HH-D.3 deferred).
+
 ---
 
 ## Acceptance Process (HISTORICAL — superseded by S38 ratification)

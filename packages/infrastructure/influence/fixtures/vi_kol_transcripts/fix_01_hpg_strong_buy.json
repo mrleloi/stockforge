@@ -1,0 +1,18 @@
+{
+  "description": "HPG strong buy recommendation — Vietnamese fixture 1. Tests STRONG_BUY intent + diacritics ổ ậ ề ữ ợ.",
+  "transcript": "Chào mọi người, hôm nay mình sẽ chia sẻ về cổ phiếu HPG. Hiện tại HPG đang ở vùng giá 26.000 VND, đây là vùng hỗ trợ rất mạnh. Mình thấy đây là cơ hội tốt để mạnh tay mua HPG cho mục tiêu 30.000 VND trong vòng 2-3 tháng. Đây không phải là tư vấn tài chính, chỉ là quan điểm cá nhân. Đặc biệt là các anh chị ở thành phố Hồ Chí Minh nên theo dõi kỹ hơn. Những bạn đã ở vùng giá 28.000 thì cẩn thận.",
+  "source_url": "https://www.youtube.com/watch?v=fixture_01",
+  "published_at": "2026-05-01T14:00:00+07:00",
+  "expected_recommendations": [
+    {
+      "ticker": "HPG",
+      "intent": "strong_buy",
+      "timeframe": "months",
+      "conditions": [],
+      "extraction_confidence_min": 0.7,
+      "excerpt_contains": "mạnh tay mua HPG"
+    }
+  ],
+  "diacritics_present": ["ổ", "ậ", "ề", "ữ", "ợ"],
+  "notes": "HPG = Hoa Phat Group (steel). 'mạnh tay mua' = STRONG_BUY per spec § B.5."
+}

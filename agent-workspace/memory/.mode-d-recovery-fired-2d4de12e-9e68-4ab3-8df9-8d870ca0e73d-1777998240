@@ -1,0 +1,7 @@
+fired_at=2026-05-05T23:24:35+07:00
+session=2d4de12e-9e68-4ab3-8df9-8d870ca0e73d
+checkpoint_mtime=1777998240
+age_sec=36
+real_tokens=191338
+cliff_thr=220000
+mode=injector-handoff

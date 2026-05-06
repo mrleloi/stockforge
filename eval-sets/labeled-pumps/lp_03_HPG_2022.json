@@ -1,0 +1,21 @@
+{
+  "ticker": "HPG",
+  "period_start": "2022-01-01T00:00:00+00:00",
+  "period_end": "2022-04-30T00:00:00+00:00",
+  "phases": ["pre_pump", "pump"],
+  "features_at_detection": {
+    "price_change_30d": "0.12",
+    "price_5d_change": "0.18",
+    "volume_30d_avg_rising": "true",
+    "volume_5d_avg_declining": "false",
+    "volume_5d_avg": "12000000",
+    "volume_30d_avg": "3500000",
+    "t2_news_silent": "false",
+    "t3_kol_mentions_rising": "true",
+    "t3_kol_mentions_peak": "true",
+    "t4_novice_post_share": "0.70",
+    "t4_coordination_score": "0.45"
+  },
+  "subsequent_outcome": "Partial pump; steel sector fundamentals provided floor support; distribution phase mild",
+  "labeled_by": "agent_with_review"
+}

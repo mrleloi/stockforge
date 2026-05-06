@@ -1,0 +1,22 @@
+{
+  "ticker": "VND",
+  "bullish_consensus": [
+    "Cổ phiếu VND tăng mạnh nhờ kết quả kinh doanh vượt kỳ vọng",
+    "Ban lãnh đạo VND có chiến lược mở rộng rõ ràng",
+    "Lĩnh vực chứng khoán được hưởng lợi từ dòng tiền mới"
+  ],
+  "failing_analogs": [
+    {
+      "ticker": "SSI",
+      "period_start": "2021-11-01",
+      "period_end": "2022-03-31",
+      "outcome_description": "Correction followed peak sentiment period in securities sector"
+    }
+  ],
+  "structural_risks": [],
+  "expected_bear_point_themes": [
+    "sentiment_saturation",
+    "historical_analog_correction",
+    "groupthink_risk"
+  ]
+}

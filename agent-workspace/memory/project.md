@@ -1,29 +1,27 @@
 # Project Memory — StockForge
 
-> Updated: 2026-04-30 (S30 — Phase 1 closure SHIPPED; D-011 ACCEPTED Phase 2 entry SCOPE-tier user-gated Option A; 4 NEW deliverables [thesis-log/_template.md + VHM exemplar + post-mortems/_template.md + D-011]; R1 partial fix shipped 1 of 8 obs mypy errors cleared; 3 IMPL-S30-* deviations documented; 1 NEW lesson candidate L-S30-1).
+> Updated: 2026-05-05 (S48d — Phase 2.5 HH-C ritual codification 4/4 DONE: 3 NEW Stop-hook watchdogs + CLAUDE.md § Session End extension 5→9 steps via D-028 + drift-signals.md Tiered Coverage Map via D-029 + 2 sync-state closures sync-027 + sync-036).
 > Update cadence: After phase boundaries, after significant decisions, weekly at minimum.
 
 ## Current Phase
 
-**Phase 2** — Foundation Tier 1+2 (Tier 1+2 VN30 rollout; entered 2026-04-30 via D-011 SCOPE-tier user-gated Option A; per Charter Month 6 success criteria + spec-T1-001 § B.2). Phase 1 = COMPLETE 2026-04-30 (S25-S30 all DONE).
+**Phase 2.5** — Harness Hardening (NEW; entered 2026-05-05 S48 post-audit; runs S48b-S48i; 8 substantive tracks HH-A..HH-H; ~750K-1.1M envelope). Pre-condition for Phase 3 Track I resume.
 
-Goals (REV-3 after UP-06 + UP-08; sequencing post-Track-7-split):
-- Tracks 0-5 (DONE through S8): pattern-mining + workspace dualism + provenance + intent classifier + Q&A escalation + loop-resilience hooks
-- Track 5.5a (DONE S4): Layer manifest + /attach skill (no multi-tenant; tag-only)
-- Track 5.5b (DONE S5+S6+S7): Sync infrastructure (intent-vs-impl-diff agent + sync-state + grilling hook + correction-rate-tracker)
-- **Track 5.5c (DONE S8+S13)**: Self-cap full set — decompose-work + capability-map + promote-rule (S8) + try-n-approaches + failure_mode wire-in + metric-function + JSONL/OTEL design + L-1 re-dispatch (S13)
-- Track 5.5d (DONE S10+S11+S12): Self-learning ETL pipeline (boundary + sweeper + index + Karpathy + DSPy dogfood SHIPPED)
-- **Track 6 REWRITE primary (DONE S14)**: progressive-disclosure refactor of top-8 D1 violators; 16 D1 carry-over to Track 6 secondary (post-Phase-0 cleanup or absorbed S19)
-- **Track 7 PLAN (DONE S15)**: constitution port plan composition; 9 queued-grill items closed via 3 AskUserQuestion batches
-- **Track 7 IMPL (DONE S16)**: D-003 REV-4 + D-005 REV-1 amendments; bash-hook-lint.sh + 3 hook wire-ins; 6 proposals at agent-workspace/proposals/; 4 skill/memory amendments via references/ companion + direct edits; promotion-routing-S16.md
-- **Track 8a (DONE S17)**: Confidence Score System SHIPPED via D-006 + sync-tracker layer (events.tsv / state.tsv / weights.yaml / _index.md / README.md) + sync-tracker-update.sh + sync-tracker-render.sh + sync-pull skill; bash+TSV substrate per IMPL-S17-1 (L-S11-1 portability binding); SQLite migration deferred Phase 1+
-- Track 8b (S18 NEXT): Memory L0/L1 extraction (cleanText + TranscriptCache; ports claude-sessions to packages/observability/)
-- Track 9 (S19 or S20): Self-Awareness + OTEL (REDUCED ~50K — Phase 0 design-only artifact lives at `self-awareness/otel-design.md`)
-- Track 6 secondary (S19 or post-Phase-0): 16 D1 violators closure
-- Final verifier S20
+**Phase 3 — Tier 3+4 KOL + pump + outer-loop**: PAUSED at S47 (Track G+H DONE; Track I S49 awaits Phase 2.5 close per pre-condition checklist).
 
-20 sessions estimated (REV-3 + Track 7 PLAN+IMPL split). Expected total: ~2.44M tokens (user-accepted via D-005 Q5=A 2026-04-29).
-Plan file: `agent-workspace/session-plans/pending/001-port-from-orch.md` (filename retained; content = 14-track REV-3 plan).
+Goals (Phase 2.5 — derived from 2026-05-05 audit + root cause 3-axes):
+- HH-A Foundation repair (S48b NEXT): wire 2 charter-prescribed orphan hooks (vendor-api-probe ✓ DONE this turn + tier1-bloat-check ✓ DONE this turn); refresh project.md (this Edit); manifest regen V1 invariant; HH-A.7 NEW = current-execution.md Tier 1 bloat (34K tok→≤8K target)
+- HH-B Telemetry repair (S48c): fix dispatch.jsonl JOIN; populate failure_mode + tokens_used; audit DR1-DR12 (8/12 dead); reactivate sync-tracker
+- HH-C Continuous-loop ritual (S48d): 4 NEW Stop-hook watchdogs codifying continuous obligations
+- HH-D Self-pause Mode-E charter promotion (S48e): tier-3 escalation after 4 hook-tier recurrences
+- HH-E Q&A escalation upgrade (S48f): URGENT-tier surface + lifecycle contract revision
+- HH-F Self-knowledge bootstrap (S48g): ETL D-001..D-027 + 17 M-* → ≥30 profile cards / category
+- HH-G Portability validation (S48h): general-harness CLAUDE.md template + /attach smoke test
+- HH-H Auto-/clear-handoff safety (S48i): fix incident root — checkpoint write MUST precede any /clear+continue
+
+Re-enable autonomous_mode CHỈ sau 8-item pre-condition checklist passes (per 009 § "Re-enable autonomous_mode gate") + user explicit ratification.
+
+Plan file: `agent-workspace/session-plans/pending/009-S48-harness-hardening-middle-phase.md`. Companion: `observations/2026-05-05-harness-alignment-audit.md` + `observations/2026-05-05-root-cause-3-axes.md`.
 
 ---
 
@@ -31,18 +29,60 @@ Plan file: `agent-workspace/session-plans/pending/001-port-from-orch.md` (filena
 
 | Phase | Target | Status | Started | Completed |
 |---|---|---|---|---|
-| 0 — Harness Bootstrap (NEW) | Workspace dualism, provenance, Confidence Score, Self-Awareness, port from orch | DONE | 2026-04-29 | 2026-04-30 (S22) |
-| 1 — Foundation (was Project Setup) | Day 1 checklist + customize constitution + UL glossary 42 VN terms + monorepo 9 BCs + first entities BC-1+BC-9 + Tier 1 ingestion adapter (vnstock+TCBS+SQLite) + 248 VHM bars + thesis-template + VHM exemplar + post-mortems-template | DONE | 2026-04-30 (S23) | 2026-04-30 (S30) |
-| 2 — Foundation Tier 1+2 (was Phase 1) | Tier 1+2 VN30 rollout (~30 tickers); BC-2 Fundamental + BC-5 News (CafeF + NDH + VietnamBiz); R2 TCBS-endpoint or DNSE/KBS pivot; thesis pipeline expansion 3-perspective; 9 proposals user-approve batch parallel | IN PROGRESS | 2026-04-30 (S31 PLAN next) | - |
-| 3 — Edge Sources Tier 3+4 (was Phase 2) | KOL tracking + crowd sentiment | NOT STARTED | - | - |
-| 4 — Multi-perspective (was Phase 3) | Adversarial agents, thesis system | NOT STARTED | - | - |
-| 5 — Compounding (was Phase 4) | Karpathy outer loop, calibration drives weights | NOT STARTED | - | - |
+| 0 — Harness Bootstrap | Workspace dualism, provenance, Confidence Score, Self-Awareness, port from orch | DONE | 2026-04-29 | 2026-04-30 (S22) |
+| 1 — Foundation VHM Thin-Slice | Day 1 + UL glossary 42 VN terms + monorepo 9 BCs + first entities BC-1+BC-9 + Tier 1 ingestion + 248 VHM bars + thesis template + VHM exemplar | DONE | 2026-04-30 (S23) | 2026-04-30 (S30) |
+| 2 — Foundation Tier 1+2 | VN30 rollout ~30 tickers; BC-2 Fundamental + BC-5 News; R2 closure via SSI direct httpx; Track F thesis pipeline 3-perspective; 9 charter promote bundles | DONE | 2026-04-30 (S31) | 2026-05-04 (S43e/S43f) |
+| 2.5 — Harness Hardening (NEW) | 8 tracks HH-A..HH-H: foundation / telemetry / ritual / Mode-E charter / Q&A escalation / self-knowledge bootstrap / portability / auto-reboot safety | IN PROGRESS | 2026-05-05 (S48) | - |
+| 3 — Tier 3+4 KOL + pump + outer-loop | BC-6 Influence Network (S45+S46+S47 DONE; S49 Track I PAUSED) + BC-7 sentiment/pump + BC-9 outer-loop | PAUSED | 2026-05-05 (S44) | - |
+| 4 — Multi-perspective | Adversarial agents, thesis system maturation | NOT STARTED | - | - |
+| 5 — Compounding | Karpathy outer loop, calibration drives weights | NOT STARTED | - | - |
 
 ---
 
 ## Recent Architectural Decisions (last 5)
 
 > Newest first. Keep only last 5. Full ADRs in `agent-workspace/memory/decisions/`.
+
+### 2026-05-05 — D-029 — S48d charter-promote drift-signals reconciliation (Tiered Coverage Map; DR1-DR12 ↔ D1-D9)
+**Source**: S48c HH-B.4 audit observation + Q-S48c-1 carry-forward + S48d 4-Q AskUserQuestion bundle Q2=ACCEPT.
+**Picks**: Part A doctrine reorganization via deny-lift cycle; Part B hook ext (DR1/3/6/8 detectors) already shipped S48c.
+**Impact**: drift-signals.md +40 LOC "Tiered Coverage Map" subsection (Tier-A/B/C); D9 zero-residue verified (only drift-signals.md md5 changed). Internal label rename D1→DR-A1 etc deferred to next routine hook patch.
+**Status**: ACCEPTED via CHARTER-tier deny-lift.
+
+### 2026-05-05 — D-028 — S48d HH-C.4 CLAUDE.md § Session End ritual extension (5 → 9 steps)
+**Source**: Phase 2.5 HH-C ritual codification + DRC-1 audit + S48d 4-Q AskUserQuestion bundle Q1=ACCEPT.
+**Picks**: 4 NEW steps (#6 mistake-log update / #7 staleness verify / #8 auto profile-template / #9 auto promote-rule). Companion hooks HH-C.1/2/3 shipped same session (3 NEW Stop hooks ~355 LOC total; smoke 6/6 GREEN).
+**Impact**: CLAUDE.md +50 tok in always-loaded Tier 1 (~0.6% ceiling delta). Codifies decision-discipline.md Rule 4b (D-026) lesson-synthesis discipline at the agent-side ritual layer. Hooks enforce mechanically.
+**Status**: ACCEPTED via CHARTER-tier (CLAUDE.md USER-GATE convention).
+
+### 2026-05-05 — D-027 — BC-6 Influence Network architecture (Tracks G+H+I; SQLite extension; KOLChannelAdapter Protocol; Recommendation domain aggregate)
+**Source**: spec 002 KOL + spec 003 pump + Phase 3 master-plan 007 § R-P3-1 + S45 sandwich-architect dispatch.
+**Picks**: SQLite extension over fresh DB; Protocol over inheritance for KOLChannelAdapter; domain Recommendation aggregate over ValueObject.
+**Impact**: 152 LOC. S46 Track G + S47 Track H IMPL DONE; S49 Track I PAUSED awaiting Phase 2.5 close.
+**Status**: ACCEPTED via ARCH-tier (sandwich-architect S45).
+
+### 2026-05-05 — D-026 — S43e Charter promote bundle C1+C2 (architecture LLM Substrate Boundary + decision-discipline Rule 4b)
+**Source**: S43e harness-recovery + S43f 4-Q AskUserQuestion bundle; deny-lift mechanism (S38 precedent).
+**Picks**: C1 ACCEPT + C2 ACCEPT — bundled deny-lift cycle ratified both charter amendments.
+**Impact**: architecture.md +25 LOC LLM Substrate Boundary subsection (BP-S43b-1/2/3 cited verbatim) + decision-discipline.md +33 LOC Rule 4b mandatory lesson-synthesis at session-end. Watchdog flipped advisory → strict.
+**Status**: ACCEPTED via CHARTER-tier deny-lift.
+
+### 2026-05-04 — D-025 — Phase 2 envelope amendment +50-65% (~860K-1.25M → ~1.60M-1.85M main + ~700K subagent)
+**Source**: S43d master-plan calibration vs Phase 2 actual; Q&A 003 Q10=A.
+**Impact**: 4 structural drivers attributed (META_LOOP S35 + sandwich-architect S41 + harness-recovery S43b + rule-application S43c+S43d). Phase 3 master-plan bakes 4 standing-overhead reserves.
+**Status**: ACCEPTED via IMPL-tier amendment.
+
+### 2026-05-04 — D-024 — HR-4 memory-routing-tree CHARTER promotion
+**Source**: S43c bundle 2 + L-S43b-5 (12+ user-memory entries should-be agent-notes).
+**Impact**: memory-routing-tree.md moved to constitution/; companion `memory-routing-audit.sh` Stop hook wired; 12-field routing schema codified.
+**Status**: ACCEPTED via CHARTER-tier deny-lift.
+
+### 2026-05-04 — D-018..D-023 — S43c Bundle 2 charter promote (7 amendments batch) — moved to archive
+(See `agent-workspace/memory/decisions/018-S43c-...md` through `023-S43c-...md` for full ADR text. Stub kept for context cross-ref.)
+
+### Pre-S48 history (archived, last 5 stale)
+
+D-011/010/009/006/S16 — see `agent-workspace/memory/decisions/` for full ADR text.
 
 ### 2026-04-30 — D-011 — Phase 2 entry: Tier 1+2 VN30 rollout (SCOPE-tier user-gated)
 **Source**: master-plan 004 § S30 + S30 AskUserQuestion 1Q + Charter § Month 6 success criteria + spec-T1-001 § B.2 + S29 verifier verdict PASS-WITH-RESIDUE.
