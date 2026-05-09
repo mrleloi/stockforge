@@ -142,6 +142,28 @@ compute_tokens_real() {
   if [ "$TOKENS_REAL" -lt 0 ]; then TOKENS_REAL=0; fi
 }
 
+# D3 (Plan 011): capture cache token fields from env vars (Claude Code 4.x).
+# Sets CACHE_READ_TOKENS and CACHE_CREATION_TOKENS globals.
+# Falls back to 0 if env vars unavailable (not fatal; additive fields only).
+# L-S58-1 ERR-trap-aware: uses if/then/fi, not [ x ] && Y.
+compute_cache_tokens() {
+  CACHE_READ_TOKENS=0
+  CACHE_CREATION_TOKENS=0
+  local env_read env_create
+  env_read="${CLAUDE_TOKENS_CACHE_READ:-}"
+  env_create="${CLAUDE_TOKENS_CACHE_CREATION:-}"
+  if [ -n "$env_read" ]; then
+    if [[ "$env_read" =~ ^[0-9]+$ ]]; then
+      CACHE_READ_TOKENS="$env_read"
+    fi
+  fi
+  if [ -n "$env_create" ]; then
+    if [[ "$env_create" =~ ^[0-9]+$ ]]; then
+      CACHE_CREATION_TOKENS="$env_create"
+    fi
+  fi
+}
+
 compute_duration_ms() {
   local session="$1"
   local ts_file="$MEMORY_DIR/.last-event-ts-${session}"
@@ -237,8 +259,13 @@ compose_event_jsonl() {
   comp_name="$(printf '%s' "$comp_name" | tr -d '\n\r' | sed 's/"/\\"/g')"
   local session_id_json="null"
   [ -n "$session_id" ] && session_id_json="\"$(printf '%s' "$session_id" | sed 's/"/\\"/g')\""
-  printf '{"ts":"%s","component_type":"%s","component_name":"%s","trigger":"%s","outcome":"%s","tokens_real":%s,"duration_ms":%s,"session_id":%s,"task_id":null,"failure_mode":%s}' \
-    "$ts_val" "$comp_type" "$comp_name" "$trigger" "$outcome" "$tokens_real" "$duration_ms" "$session_id_json" "$failure_mode"
+  # D3 additive fields: cache_read_tokens + cache_creation_tokens (global vars set by compute_cache_tokens)
+  local crt="${CACHE_READ_TOKENS:-0}"
+  local cct="${CACHE_CREATION_TOKENS:-0}"
+  [[ "$crt" =~ ^[0-9]+$ ]] || crt=0
+  [[ "$cct" =~ ^[0-9]+$ ]] || cct=0
+  printf '{"ts":"%s","component_type":"%s","component_name":"%s","trigger":"%s","outcome":"%s","tokens_real":%s,"duration_ms":%s,"session_id":%s,"task_id":null,"failure_mode":%s,"cache_read_tokens":%s,"cache_creation_tokens":%s}' \
+    "$ts_val" "$comp_type" "$comp_name" "$trigger" "$outcome" "$tokens_real" "$duration_ms" "$session_id_json" "$failure_mode" "$crt" "$cct"
 }
 
 # Track 5.5d.1 D-2: emit learning event to write-heavy NDJSON store.
@@ -278,6 +305,7 @@ fi
 skip_if_duplicate "$TS" "$COMP_NAME" && exit 0
 
 compute_tokens_real
+compute_cache_tokens
 compute_duration_ms "${SESSION_ID:-default}"
 correlate_failure_mode
 # HH-B.3: response-text pattern classification (more specific than outcome heuristic).

@@ -36,9 +36,20 @@ if [ "$PROD_TOUCHED" -lt 1 ]; then
 fi
 
 # Were any of the lesson-target files updated in last 24h?
-KI_RECENT=$(find "$SA_DIR/known-issues.md" -mtime -1 2>/dev/null | wc -l | tr -d '[:space:]')
-BP_RECENT=$(find "$SA_DIR/best-practices.md" -mtime -1 2>/dev/null | wc -l | tr -d '[:space:]')
-NOTES_RECENT=$(find "$MEM_DIR/agent-notes.md" -mtime -1 2>/dev/null | wc -l | tr -d '[:space:]')
+# L-S68 fix: guard find with [ -f ] check; bare find on non-existent path errors under pipefail
+# (find non-zero + pipe to wc → pipefail propagates → ERR trap → silent exit 0). Caught in D6 dogfood.
+KI_RECENT=0
+if [ -f "$SA_DIR/known-issues.md" ]; then
+  KI_RECENT=$(find "$SA_DIR/known-issues.md" -mtime -1 2>/dev/null | wc -l | tr -d '[:space:]')
+fi
+BP_RECENT=0
+if [ -f "$SA_DIR/best-practices.md" ]; then
+  BP_RECENT=$(find "$SA_DIR/best-practices.md" -mtime -1 2>/dev/null | wc -l | tr -d '[:space:]')
+fi
+NOTES_RECENT=0
+if [ -f "$MEM_DIR/agent-notes.md" ]; then
+  NOTES_RECENT=$(find "$MEM_DIR/agent-notes.md" -mtime -1 2>/dev/null | wc -l | tr -d '[:space:]')
+fi
 
 LESSON_TOTAL=$(( KI_RECENT + BP_RECENT + NOTES_RECENT ))
 
@@ -50,6 +61,25 @@ if [ "$LESSON_TOTAL" -eq 0 ]; then
   printf '[%s] %s\n' "$TS" "$ALERT" >> "$LOG"
   printf '[%s] lesson-synthesis-watchdog: STRICT-ALERT prod_touched=%s lessons=0\n' "$TS" "$PROD_TOUCHED" >> "$HOOK_LOG"
   echo "$ALERT" >&2
+
+  # Plan 011 D6: enqueue async lesson-synthesizer dispatch job (priority 2 — high; runs before profile-render).
+  # Kill switch: MEMORY_ETL_DISABLE=1. Failure here is non-fatal (still exit 2 below).
+  ETL_QUEUE_DIR="$MEM_DIR/etl-queue"
+  if [ "${MEMORY_ETL_DISABLE:-0}" != "1" ]; then
+    if mkdir -p "$ETL_QUEUE_DIR" 2>/dev/null; then
+      ETL_TS="$(date -u +%Y%m%d-%H%M%S 2>/dev/null || echo unknown)"
+      ETL_JOB="$ETL_QUEUE_DIR/2-${ETL_TS}-lesson-synthesize.job"
+      {
+        printf -- '---\n'
+        printf 'task: lesson-synthesize\n'
+        printf 'payload: {"prod_touched":%s,"trigger":"dormancy"}\n' "$PROD_TOUCHED"
+        printf 'created_at: %s\n' "$TS"
+        printf 'producer: lesson-synthesis-watchdog.sh\n'
+        printf -- '---\n'
+      } > "$ETL_JOB" 2>/dev/null || true
+    fi
+  fi
+
   exit 2
 fi
 

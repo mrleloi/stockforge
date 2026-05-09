@@ -12,13 +12,25 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 FAIL_MARKER="$PROJECT_DIR/agent-workspace/memory/.auto-reboot-FAILED"
 
-# === HH-H.1 stale-checkpoint guard (S48m) ===
-# Refuse to fire UNLESS checkpoints/latest.md mtime within last 5 minutes.
+# === HH-H.1 stale-checkpoint guard (S48m; relaxed 300s→1800s S189 D-045) ===
+# Refuse to fire UNLESS checkpoints/latest.md mtime within last 30 minutes.
 # Forces a fresh checkpoint write before reboot — prevents auto-reboot from
 # losing pending work when the agent hasn't yet handed off state.
 # Override via STOCKFORGE_FORCE_REBOOT=1 (e.g. for manual smoke tests).
+# Tunable via STOCKFORGE_HH_H1_THRESHOLD_S env (default 1800).
+#
+# S189 D-045 root-cause fix: original 300s (5min) threshold blocked all IMPL
+# turns >5min between checkpoint-write and Stop-fire. Empirical: S188 close
+# wrote latest.md at 12:14 then continued IMPL work; Stop fired 12:25 with
+# checkpoint mtime ~11min old (660s) > 300s → BLOCKED → autonomous loop
+# silently died for 26+ hours until user manually re-prompted at S189 entry.
+# Typical FOCUSED_IMPL turn duration 10-25min; MULTI_TASK_IMPL 25-60min.
+# 1800s (30min) accommodates FOCUSED_IMPL turns; defense-in-depth via HH-H.4
+# outer-fence (auto-reboot-handoff-verify.sh; 7200s=2h threshold) catches
+# longer truly-stale states.
 CHECKPOINT="$PROJECT_DIR/agent-workspace/memory/checkpoints/latest.md"
 STALE_BLOCK_MARKER="$PROJECT_DIR/agent-workspace/memory/.auto-reboot-BLOCKED-stale-checkpoint"
+HH_H1_THRESHOLD_S="${STOCKFORGE_HH_H1_THRESHOLD_S:-1800}"
 if [ "${STOCKFORGE_FORCE_REBOOT:-0}" != "1" ]; then
   if [ ! -f "$CHECKPOINT" ]; then
     mkdir -p "$(dirname "$STALE_BLOCK_MARKER")"
@@ -29,14 +41,18 @@ if [ "${STOCKFORGE_FORCE_REBOOT:-0}" != "1" ]; then
   fi
   CHECKPOINT_MTIME=$(stat -c %Y "$CHECKPOINT" 2>/dev/null || stat -f %m "$CHECKPOINT" 2>/dev/null || echo 0)
   CHECKPOINT_AGE=$(( $(date +%s) - CHECKPOINT_MTIME ))
-  if [ "$CHECKPOINT_AGE" -gt 300 ]; then
+  if [ "$CHECKPOINT_AGE" -gt "$HH_H1_THRESHOLD_S" ]; then
     mkdir -p "$(dirname "$STALE_BLOCK_MARKER")"
-    printf 'AUTO-REBOOT BLOCKED at %s\nReason: checkpoints/latest.md mtime is %ss old (>300s threshold; HH-H.1 guard).\nAction: write a fresh checkpoint via /handoff-prep before reboot fires.\nOverride: set STOCKFORGE_FORCE_REBOOT=1 to bypass.\n' \
-      "$(date -Iseconds)" "$CHECKPOINT_AGE" > "$STALE_BLOCK_MARKER"
-    echo "[ERROR] session-self-reboot ABORT: checkpoint stale (${CHECKPOINT_AGE}s > 300s) — refusing to fire (HH-H.1)" >&2
+    printf 'AUTO-REBOOT BLOCKED at %s\nReason: checkpoints/latest.md mtime is %ss old (>%ss threshold; HH-H.1 guard).\nAction: write a fresh checkpoint via /handoff-prep before reboot fires.\nOverride: set STOCKFORGE_FORCE_REBOOT=1 to bypass; tune via STOCKFORGE_HH_H1_THRESHOLD_S env (default 1800).\n' \
+      "$(date -Iseconds)" "$CHECKPOINT_AGE" "$HH_H1_THRESHOLD_S" > "$STALE_BLOCK_MARKER"
+    echo "[ERROR] session-self-reboot ABORT: checkpoint stale (${CHECKPOINT_AGE}s > ${HH_H1_THRESHOLD_S}s) — refusing to fire (HH-H.1)" >&2
     exit 2
   fi
 fi
+# Both guards passed (or override active) → underlying stale-checkpoint condition resolved.
+# Clear any prior block marker so it doesn't surface as ghost diagnostic state.
+# Mirrors auto-reboot-handoff-verify.sh:64 (HH-H.4 sibling fence) clear-on-fresh pattern.
+rm -f "$STALE_BLOCK_MARKER"
 
 # === HH-H.5a 60s rate-limit idempotency (S48m) ===
 # Mirrors continue-injector.ps1 L-S48-1 pattern: prevents double-spawn when

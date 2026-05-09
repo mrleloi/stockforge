@@ -85,6 +85,32 @@ agent-workspace/memory/.continue-fired-*
 agent-workspace/memory/.session-ready
 agent-workspace/memory/.dogfood-stop
 
+# Harness runtime markers — extension (S112 backlog from S111)
+# Hook idempotency + per-session sidecar + diagnostic markers under agent-workspace/memory/.
+# Never commit; complements the existing patterns above.
+agent-workspace/memory/.*-fired-*
+agent-workspace/memory/.cliff-fired*
+agent-workspace/memory/.last-event-ts-*
+agent-workspace/memory/.dispatch-pending-*.jsonl
+agent-workspace/memory/.*-last-rotate-week
+agent-workspace/memory/.attestation-checked-*
+agent-workspace/memory/.auto-reboot-BLOCKED-*
+agent-workspace/memory/.continue-injector-last-fire
+agent-workspace/memory/.drift-detector-due
+agent-workspace/memory/.precompact-snapshots/
+agent-workspace/memory/.qa-last-scan-ts
+agent-workspace/memory/.session-self-reboot-last-fire
+agent-workspace/memory/.transcript-tokens-prev
+agent-workspace/memory/.unattested-observations.tsv
+
+# Runtime work-queue + rotated archive logs (S114 backlog from S112)
+# `.job` files are ephemeral ETL job-queue items consumed by memory-etl-processor.sh.
+# README.md in etl-queue/ is documentation and stays tracked.
+# drift-signals-archive/ holds rotated `.log.gz` files (drift-signals-log-rotate.sh weekly hook).
+agent-workspace/memory/etl-queue/*.job
+agent-workspace/memory/etl-queue/processed/
+agent-workspace/memory/drift-signals-archive/
+
 # SQLite databases (sync-tracker, self-awareness — Tracks 8a, 9)
 agent-workspace/memory/sync-tracker/*.db
 agent-workspace/memory/sync-tracker/*.db-journal

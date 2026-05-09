@@ -62,8 +62,15 @@ case "${FILE_PATH:-}" in
   *) exit 0 ;;
 esac
 
-SID="${SESSION_ID:-${CLAUDE_SESSION_ID:-unknown}}"
-[ -z "$SID" ] && SID="unknown"
+# L-S108-1 fix (S109): drop constant fallback "unknown". Per-turn marker semantics
+# (intra-session blocking) means hour-bucket would WRONGLY block unrelated sessions
+# in same hour. PostToolUse JSON payload reliably populates session_id; if missing,
+# fail-safe no-op (don't write marker → watchdog won't block).
+SID="${SESSION_ID:-${CLAUDE_SESSION_ID:-}}"
+if [ -z "$SID" ]; then
+  echo "[$(date -Iseconds)] checkpoint-write-marker: SKIP — session_id empty (L-S108-1 fail-safe)" >> "$LOG"
+  exit 0
+fi
 
 MARKER="$MEM_DIR/.checkpoint-written-${SID}"
 TS="$(date -Iseconds)"

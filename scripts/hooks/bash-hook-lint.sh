@@ -123,12 +123,13 @@ for t in "${LIVE_TARGETS[@]}"; do
   rel="${t#$PROJECT_DIR/}"
   # Scan; deny pattern matches but allow file to legitimately quote/document the rule itself.
   if grep -qE "$REGRESSION_PATTERN" "$t" 2>/dev/null; then
-    # Allow if the line ALSO contains "fabricated|deprecated|anti-pattern|never user-authorized"
-    # (i.e. file is documenting the prohibition, not violating it).
+    # Allow if the line ALSO contains a denial marker OR a negation-form of the regression
+    # pattern (i.e. file is documenting the prohibition, not violating it). L-S69-1: artifact-
+    # verifier hooks must whitelist legitimate canonical phrasings of the rule they enforce.
     HITS="$(grep -nE "$REGRESSION_PATTERN" "$t" 2>/dev/null || true)"
     while IFS= read -r line; do
       [ -z "$line" ] && continue
-      if printf '%s' "$line" | grep -qiE 'fabricated|deprecated|anti-pattern|never user-authorized|do NOT|MUST NOT|forbidden|not user-authorized'; then
+      if printf '%s' "$line" | grep -qiE 'fabricated|deprecated|anti-pattern|never user-authorized|do NOT|MUST NOT|forbidden|not user-authorized|no[[:space:]]+["]?(SUPERVISED|until[[:space:]]+Track|human-in-the-loop|autonomous_mode)|D-IDENTITY|bash-hook-lint'; then
         continue
       fi
       emit "D-IDENTITY-AUTONOMOUS-REGRESSION" "$rel" "live-config line matches forbidden pattern: $(printf '%s' "$line" | cut -c1-100)"
@@ -170,6 +171,32 @@ if [ -d "$HOOKS_DIR" ]; then
   done
 fi
 
+# === Check 6b: L-S108-1 CLAUDE_SESSION_ID fallback-to-constant anti-pattern (Pattern B') ===
+# Origin: S108 qa-pending-auto-mover.sh — SID="${CLAUDE_SESSION_ID:-main}" then
+# MARKER="...-${SID}". CLAUDE_SESSION_ID empty on Windows → fallback "main" shared across
+# ALL sessions → marker filename collides → permanent idempotency lockout (M-S108-1: bundle
+# stuck in pending/ for 24+h). Check 6 only catches DIRECT $CLAUDE_SESSION_ID in marker;
+# misses INDIRECT-via-VAR form. Fix: use date hour-bucket or session-log basename.
+#
+# Detection: file has BOTH (a) fallback-to-constant assignment AND (b) any marker filename
+# pattern using $VAR. The combination indicates likely indirect-via-VAR lockout.
+if [ -d "$HOOKS_DIR" ]; then
+  for f in "$HOOKS_DIR"/*.sh; do
+    [ ! -f "$f" ] && continue
+    bn="$(basename "$f")"
+    [ "$bn" = "bash-hook-lint.sh" ] && continue
+    # (a) Suspicious assignment: ${CLAUDE_SESSION_ID:-WORD} where WORD is alphabetic
+    HAS_FALLBACK="$(grep -nE '\$\{CLAUDE_SESSION_ID:-[a-zA-Z][a-zA-Z0-9_-]*\}' "$f" 2>/dev/null | grep -vE "^[[:space:]]*[0-9]+:[[:space:]]*#" || true)"
+    if [ -n "$HAS_FALLBACK" ]; then
+      # (b) Marker filename pattern using ANY $VAR (dot-prefixed -fired/-marker/-ran/-flag/-written/-pending suffix)
+      HAS_MARKER="$(grep -nE '\.[a-zA-Z0-9_-]+-(fired|marker|ran|flag|written|pending)-\$\{?[A-Z_]' "$f" 2>/dev/null | grep -vE "^[[:space:]]*[0-9]+:[[:space:]]*#" || true)"
+      if [ -n "$HAS_MARKER" ]; then
+        emit "L-S108-1-CLAUDE-SESSION-ID-FALLBACK-CONSTANT" "$bn" "fallback-to-constant \${CLAUDE_SESSION_ID:-WORD} + marker filename present (likely per-session lockout on Windows; use date hour-bucket or session-log basename — L-S108-1)"
+      fi
+    fi
+  done
+fi
+
 # === Check 7: L-S48d-1 pipefail+ERR-trap+bare-grep anti-pattern (Pattern C) — REFINED S58 ===
 # Origin: S48d profile-template-auto-populate.sh — set -uo pipefail + trap 'exit 0' ERR
 # + bare `grep -m1 ...` returning nonzero on no-match → ERR trap fires silently → script
@@ -207,13 +234,17 @@ if [ -d "$HOOKS_DIR" ]; then
     [ ! -f "$f" ] && continue
     bn="$(basename "$f")"
     [ "$bn" = "bash-hook-lint.sh" ] && continue
-    HAS_PIPEFAIL="$(grep -cE 'set [^#]*pipefail' "$f" 2>/dev/null || echo 0)"
-    HAS_ERR_TRAP="$(grep -cE 'trap[[:space:]]+[^#]*ERR' "$f" 2>/dev/null || echo 0)"
-    if [ "$HAS_PIPEFAIL" -gt 0 ] 2>/dev/null && [ "$HAS_ERR_TRAP" -gt 0 ] 2>/dev/null; then
+    # Clean 0/1 (per L-S80-2: avoids "0\n0" multi-line from `grep -c ... || echo 0` race that breaks awk -v / [ test downstream)
+    if grep -qE 'set [^#]*pipefail' "$f" 2>/dev/null; then HAS_PIPEFAIL=1; else HAS_PIPEFAIL=0; fi
+    if grep -qE 'trap[[:space:]]+[^#]*ERR' "$f" 2>/dev/null; then HAS_ERR_TRAP=1; else HAS_ERR_TRAP=0; fi
+    if [ "$HAS_PIPEFAIL" = 1 ] && [ "$HAS_ERR_TRAP" = 1 ]; then
       VIOLATION_LINE="$(awk '
 BEGIN { pipefail_off = 1; carry = "" }
 {
   line = $0
+  # Match physical line ending with literal `\` (backslash continuation).
+  # /\\$/ in awk source = regex `\\` (literal backslash) + `$` (EOL anchor).
+  # Confirmed empirically: `awk '/\\$/'` matches lines ending with literal `\`.
   if (line ~ /\\$/) {
     sub(/\\$/, "", line)
     carry = (carry == "" ? line : carry " " line)
@@ -269,6 +300,139 @@ if [ -d "$HOOKS_DIR" ]; then
   done
 fi
 
+# === Check 9: L-S68-2 family — find/ls on possibly-missing path under pipefail+ERR-trap (NEW S80) ===
+# Origin: 4 instances across S68/S75/S76/S78. Family precondition: file has BOTH `set -*o pipefail`
+# AND `trap ... ERR`. In that mode, `find $missing -mtime`/`ls $dir/*.glob` returns rc=1 silently
+# if path missing or glob has no match → ERR trap fires → script silent-exits 0 BEFORE work runs.
+#
+# Variants (combined detector):
+#   (a) Single-path `find $path -...` (literal var; no glob) — S68+S75
+#   (b) `ls $dir/*.glob` (no-match returns rc=1 under pipefail) — S76
+#   (c) Multi-path `find $a $b $c -...` (rc=1 if ANY arg missing) — S78
+#
+# Skip rules (all three variants):
+#   - Comment lines (^NN: # )
+#   - Line starts with `if|while|until|elif`
+#   - Alt-guarded with `|| true|:|return|exit|echo`
+#   - Errors silenced with `2>/dev/null`
+#   - Pipefail bracket disabled (`set +o pipefail` in effect)
+#   - File-test guard `[ -d ... ]` or `[ -f ... ]` on SAME line (catches `[ -d $X ] && find $X`)
+#   - Variant (b) only: `shopt -s nullglob` set anywhere above (glob no-match → empty list, no rc=1)
+#
+# Multi-line `\`-continuation: physical lines joined with carry before pattern-matching, so multi-arg
+# find spread across multiple lines is tested as one logical line (catches `2>/dev/null` on tail).
+if [ -d "$HOOKS_DIR" ]; then
+  for f in "$HOOKS_DIR"/*.sh; do
+    [ ! -f "$f" ] && continue
+    bn="$(basename "$f")"
+    [ "$bn" = "bash-hook-lint.sh" ] && continue
+    # Clean 0/1 (per L-S80-2: avoids "0\n0" multi-line from `grep -c ... || echo 0` race that breaks awk -v / [ test downstream)
+    if grep -qE 'set [^#]*pipefail' "$f" 2>/dev/null; then HAS_PIPEFAIL=1; else HAS_PIPEFAIL=0; fi
+    if grep -qE 'trap[[:space:]]+[^#]*ERR' "$f" 2>/dev/null; then HAS_ERR_TRAP=1; else HAS_ERR_TRAP=0; fi
+    if [ "$HAS_PIPEFAIL" = 1 ] && [ "$HAS_ERR_TRAP" = 1 ]; then
+      # Clean 0/1 (avoids "0\n0" from `grep -c` exit-1 + `|| echo 0` race that breaks awk's numeric coercion)
+      if grep -qE '^[[:space:]]*shopt[[:space:]]+-s[[:space:]]+nullglob' "$f" 2>/dev/null; then HAS_NULLGLOB=1; else HAS_NULLGLOB=0; fi
+      VIOLATION_LINE_E="$(awk -v has_nullglob="$HAS_NULLGLOB" '
+BEGIN { pipefail_off = 1; carry = "" }
+{
+  line = $0
+  # Match physical line ending with literal `\` (backslash continuation).
+  # /\\$/ in awk source = regex `\\` (literal backslash) + `$` (EOL anchor).
+  # Confirmed empirically: `awk '/\\$/'` matches lines ending with literal `\`.
+  if (line ~ /\\$/) {
+    sub(/\\$/, "", line)
+    carry = (carry == "" ? line : carry " " line)
+    next
+  }
+  full = (carry == "" ? line : carry " " line)
+  carry = ""
+
+  if (full ~ /^[[:space:]]*set[[:space:]]+\+o[[:space:]]+pipefail/) { pipefail_off = 1; next }
+  if (full ~ /^[[:space:]]*set[[:space:]]+-[a-zA-Z]*o[[:space:]]+pipefail/) { pipefail_off = 0; next }
+  if (pipefail_off) next
+  if (full ~ /^[[:space:]]*#/) next
+
+  body = full
+  sub(/^[[:space:]]+/, "", body)
+
+  # Skip lines starting with conditional keywords
+  if (body ~ /^(if|while|until|elif)[[:space:]]/) next
+
+  # Skip alt-guarded with || true|:|return|exit|echo
+  if (full ~ /\|\|[[:space:]]+(true|:|return|exit|echo)/) next
+
+  # Skip if errors silenced
+  if (full ~ /2>\/dev\/null/) next
+
+  # Skip if same-line file-test guard (catches `[ -d $X ] && find $X`)
+  if (full ~ /\[[[:space:]]+-[df][[:space:]]+/) next
+
+  # === Variant (a) + (c): find <var/literal>... ===
+  # Match `find` token followed by quoted/unquoted $var arg.
+  if (body ~ /(^|[[:space:]`(|&;])find[[:space:]]+["]?\$/) {
+    print NR ":(find-variant) " full
+    exit
+  }
+
+  # === Variant (b): ls $dir/*.glob ===
+  # Match `ls` token followed by arg(s) containing a `$var` AND a glob `*` somewhere after.
+  # Permissive on intermediate chars (handles `ls "$DIR"/*.md`, `ls ${X}/*.tsv`, etc.).
+  # Skip if shopt -s nullglob set in file (glob no-match → empty list, no rc=1).
+  if (has_nullglob == 0 && body ~ /(^|[[:space:]`(|&;])ls[[:space:]]+[^|&;]*\$[^|&;]*\*/) {
+    print NR ":(ls-glob-variant) " full
+    exit
+  }
+}
+' "$f" 2>/dev/null || true)"
+      if [ -n "$VIOLATION_LINE_E" ]; then
+        emit "L-S68-2-FIND-LS-MISSING-PATH" "$bn" "find/ls on possibly-missing path under pipefail+ERR-trap — silent exit risk if path missing (L-S68-2 family; 4 instances S68/S75/S76/S78). Use [ -d \$X ]/[ -f \$X ] guard, OR add 2>/dev/null + || true, OR conditional form."
+      fi
+    fi
+  done
+fi
+
+# === Check 10: L-S80-2 grep-c-OR-echo capture trap (Pattern F, NEW S81) ===
+# Origin: S80 T2 debug — bash-hook-lint.sh HAS_NULLGLOB extracted via
+#   `HAS_NULLGLOB="$(grep -c ... 2>/dev/null || echo 0)"` produces multi-line "0\n0" when grep
+# finds 0 + exits 1 (because grep -c always prints "0" THEN || fires → echo prints another "0"
+# → captured stdout is "0\n0"). Passing to awk `-v var=...` then `var == 0` evaluates as
+# string "0\n0" != numeric 0 → false-negative; nullglob detection skipped → ls-glob detector
+# fires false-positive. Recovered S80 via if/then/fi clean-integer fix.
+#
+# Detection: VAR=$(... grep -c ... || echo <N> ...) with || INSIDE the $() (capture trap).
+# The form is intrinsic to grep -c semantics + || short-circuit, regardless of pipefail/ERR-trap
+# state — so no precondition check (unlike Check 7/9 family).
+#
+# Skip rules:
+#   - Comment lines (^NN:#)
+# NOTE: intermediate flattener pipes (`| head`, `| tr -d`, `| awk`) do NOT reliably mitigate
+# under `set -o pipefail` — pipeline still propagates grep's non-zero exit → || still fires →
+# echo appends its own newline → multi-line capture survives. Always-flag; only fix is if/then/fi.
+if [ -d "$HOOKS_DIR" ]; then
+  for f in "$HOOKS_DIR"/*.sh; do
+    [ ! -f "$f" ] && continue
+    bn="$(basename "$f")"
+    [ "$bn" = "bash-hook-lint.sh" ] && continue
+    VIOLATION_LINE_F="$(awk '
+/^[[:space:]]*#/ { next }
+{
+  # Pattern F: =$( ... grep ... -c ... || echo <N> ... )  with || INSIDE the $()
+  # `[^)]*` between `$(` and `)` rejects nested `)` (rare in practice; acceptable FN).
+  # No flattener-pipe skip rule: under `set -o pipefail` the pipeline returns non-zero
+  # when grep returns 1, so `|| echo N` fires regardless of intermediate `head`/`tr -d`/`awk`,
+  # and echo appends its own newline → multi-line capture survives the flattener.
+  # Only safe mitigation = if/then/fi clean-integer form.
+  if ($0 !~ /=[[:space:]]*"?\$\([^)]*grep[^)]*[[:space:]]-c[A-Za-z]*[[:space:]][^)]*\|\|[[:space:]]*echo[[:space:]]+[0-9]/) next
+  print NR ":" $0
+  exit
+}
+' "$f" 2>/dev/null || true)"
+    if [ -n "$VIOLATION_LINE_F" ]; then
+      emit "L-S80-2-GREP-C-OR-ECHO-CAPTURE-TRAP" "$bn" "VAR=\$(grep -c ... || echo N) produces multi-line \"0\\nN\" capture when grep finds 0 + exits 1 → breaks awk -v numeric coercion downstream (L-S80-2). Fix: if grep -qE ...; then VAR=1; else VAR=0; fi (clean integer)."
+    fi
+  done
+fi
+
 # === Emit results ===
 if [ "$VIOLATIONS" -gt 0 ]; then
   printf '[%s] bash-hook-lint WARN %d violation(s):\n%s' "$TS" "$VIOLATIONS" "$VIOLATION_LIST" >> "$LOG"
@@ -288,6 +452,8 @@ if [ "$VIOLATIONS" -gt 0 ]; then
       printf '- L-S48m-1 (Pattern B): use session-log basename (NOT $CLAUDE_SESSION_ID empty-on-Windows) for marker filenames\n'
       printf '- L-S48d-1 (Pattern C): wrap grep usages with `|| true` (or `|| :`); use `if grep ...; then` form for conditionals; applies to bare-line + pipeline + command-substitution `$(grep ...)` forms (S54 refined)\n'
       printf '- L-S53-2 (Pattern D, NEW S54): anchor positional-marker grep patterns with `^` (e.g. `grep -E "^S[0-9]+ NEXT"` not `grep -E "S[0-9]+ NEXT"`) to prevent mid-line archive-prose false-positives\n'
+      printf '- L-S68-2 (Pattern E, NEW S80): wrap `find $var ...` / `ls $dir/*.glob` with `2>/dev/null` + `|| true`, OR add `[ -d "$X" ] && find ...` same-line guard, OR `if find ...; then` conditional form. Three variants caught: (a) single-path find (S68+S75); (b) ls glob no-match (S76); (c) multi-path find (S78). Family precondition: file has both `set -*o pipefail` AND `trap ... ERR`.\n'
+      printf '- L-S80-2 (Pattern F, NEW S81): replace `VAR=$(grep -c ... || echo N)` with `if grep -qE ...; then VAR=1; else VAR=0; fi` (clean integer). The antipattern produces multi-line "0\\nN" when grep finds 0 + exits 1 (grep -c always prints count THEN || fires → echo appends N) → breaks awk -v numeric coercion (`var == 0` evaluates as string mismatch) and `[ "$VAR" = 0 ]`/`-eq 0` becomes fragile. Under `set -o pipefail`, intermediate `| head`/`| tr -d`/`| awk` does NOT fully mitigate (pipeline still returns non-zero → || still fires → echo appends newline) — only if/then/fi clean-integer form is safe.\n'
     } > "$NOTIF_FILE" 2>/dev/null || true
   fi
 else

@@ -17,12 +17,27 @@ QA_DIR="$PROJECT_DIR/human-workspace/q-and-a/pending"
 URGENT="$PROJECT_DIR/human-workspace/notifications/urgent.md"
 MEM_DIR="$PROJECT_DIR/agent-workspace/memory"
 LOG="$MEM_DIR/.qa-urgent-escalator.log"
-SID="${CLAUDE_SESSION_ID:-main}"
-MARKER="$MEM_DIR/.qa-urgent-fired-${SID}"
+# L-S108-1 fix (S109): per-session marker MUST use hour-bucket, NEVER fallback constant.
+# CLAUDE_SESSION_ID empty for Stop hooks on Windows → fallback "main" shared across
+# ALL sessions → marker collision (M-S108-1 RCA: stale .qa-urgent-fired-main from
+# S48g blocked hook S99-S108). SID still captured for log diagnostics.
+SID="${CLAUDE_SESSION_ID:-}"
+BUCKET="$(date +%Y%m%d-%H 2>/dev/null)"
+[ -z "$BUCKET" ] && BUCKET="unbucketed-$$"
+MARKER="$MEM_DIR/.qa-urgent-fired-${BUCKET}"
 TS="$(date -Iseconds)"
 NOW_EPOCH="$(date +%s 2>/dev/null || echo 0)"
 
-# Idempotency: skip if already fired this session
+# Cleanup stale markers from prior buckets (L-S108-1 prevention).
+for old_marker in "$MEM_DIR"/.qa-urgent-fired-*; do
+  [ -f "$old_marker" ] || continue
+  case "$old_marker" in
+    *".qa-urgent-fired-${BUCKET}") ;;
+    *) rm -f "$old_marker" 2>/dev/null ;;
+  esac
+done
+
+# Idempotency: skip if already fired this hour-bucket
 [ -f "$MARKER" ] && exit 0
 
 mkdir -p "$(dirname "$LOG")" "$(dirname "$URGENT")"
@@ -36,7 +51,7 @@ STALE_FILES=$(find "$QA_DIR" -maxdepth 1 -type f -name "*.md" -mtime +2 2>/dev/n
 set -o pipefail
 
 STALE_COUNT=0
-[ -n "$STALE_FILES" ] && STALE_COUNT=$(printf '%s\n' "$STALE_FILES" | grep -c . 2>/dev/null || echo 0)
+[ -n "$STALE_FILES" ] && STALE_COUNT=$(printf '%s\n' "$STALE_FILES" | grep -c . 2>/dev/null || true)
 # Coerce to int (find can output empty string with -mtime)
 [[ "$STALE_COUNT" =~ ^[0-9]+$ ]] || STALE_COUNT=0
 

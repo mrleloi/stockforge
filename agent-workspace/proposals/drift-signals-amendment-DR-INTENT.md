@@ -1,7 +1,10 @@
 ---
 proposal_id: drift-signals-amendment-DR-INTENT
 type: charter-amendment-draft
-status: PROPOSED
+status: DEFERRED
+status_updated_at: 2026-05-07 (S124 zombie-cleanup; hook proposal-bundle-advisor was firing false-positive on stale PROPOSED status)
+defer_basis: D-013 § Deferred (S35 ratification 2026-05-01) + S39 batch answered bundle 2026-05-01-003 ("All 4 OTHER deferred proposals (drift-signals-amendment-DR-INTENT + provenance-protocol) remain deferred per D-013")
+re_trigger_condition: Phase 3 first thesis ships (per D-013 deferred-list policy paired with provenance-protocol)
 created_at: 2026-05-01
 session: S35 (META_LOOP_RECOVERY)
 target_file: agent-workspace/constitution/drift-signals.md

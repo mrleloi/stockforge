@@ -72,7 +72,13 @@ if [ "$USER_MEM_RECENT_FILES" -gt 0 ]; then
 fi
 
 # Step 3: agent-notes.md fresh?
-NOTES_RECENT=$(find "$MEM_DIR/agent-notes.md" -mtime -1 2>/dev/null | wc -l | tr -d '[:space:]')
+# L-S68-2 fix (S75): guard find with [ -f ] check; bare find on missing path
+# errors under pipefail+ERR-trap → silent exit 0. Match lesson-synthesis-watchdog
+# pattern (lines 41-52).
+NOTES_RECENT=0
+if [ -f "$MEM_DIR/agent-notes.md" ]; then
+  NOTES_RECENT=$(find "$MEM_DIR/agent-notes.md" -mtime -1 2>/dev/null | wc -l | tr -d '[:space:]')
+fi
 [[ "$NOTES_RECENT" =~ ^[0-9]+$ ]] || NOTES_RECENT=0
 
 printf '[%s] memory-routing-audit: prod_touched=%s user_mem_fresh=%s user_mem_files=%s notes_recent=%s\n' \

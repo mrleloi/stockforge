@@ -1,22 +1,26 @@
 #!/usr/bin/env bash
 # Firing-test for qa-pending-auto-mover.sh (Phase 3.5 T7 retrofit; S61).
+# Extended at S108 with TC7 — L-S108-1 stale-marker regression test.
 #
 # Hook purpose (HH-E.2 / D-031 Stop): scan human-workspace/q-and-a/pending/
 # for bundles whose frontmatter `status:` starts with answered-|closed-|
 # resolved-, AND whose `wait_until:` ISO is past (or absent), AND no global
 # `.auto-mv-paused` kill switch. Mv qualifying bundles to answered/.
-# Idempotent per session via marker file.
+# Idempotent per HOUR-BUCKET via marker file (L-S108-1; was per-session
+# but $CLAUDE_SESSION_ID empty on Windows → fallback-to-constant lockout).
 #
 # Test strategy: stage temp PROJECT_DIR with various pending bundle fixtures;
 # invoke hook; assert mv outcome (file moved or not) + log entries.
 #
-# 6 test cases:
-#   TC1 — pending dir missing → silent + marker touched
+# 7 test cases:
+#   TC1 — pending dir missing → silent + current-bucket marker created
 #   TC2 — kill switch (.auto-mv-paused) present → skip all + log
 #   TC3 — bundle status=answered-via-chat, no wait_until → MV to answered/
 #   TC4 — bundle status=open → SKIP (wrong status)
 #   TC5 — bundle status=answered + wait_until in future → DEFER
-#   TC6 — idempotent (marker prevents 2nd-call re-fire)
+#   TC6 — idempotent (marker prevents 2nd-call re-fire same hour)
+#   TC7 — L-S108-1 REGRESSION: stale cross-bucket markers + legacy "main"
+#         fallback marker present → cleanup deletes both, MV happens
 #
 # Exit 0 = all assertions pass. Exit 1 = any assertion fail.
 set -euo pipefail
@@ -44,18 +48,20 @@ clean_state() {
   mkdir -p "$TEMPDIR/agent-workspace/memory" "$TEMPDIR/human-workspace/q-and-a"
 }
 
-marker_path() {
-  echo "$TEMPDIR/agent-workspace/memory/.qa-auto-mv-fired-$1"
+current_marker() {
+  # Hour-bucket marker per L-S108-1 (matches hook's date +%Y%m%d-%H)
+  echo "$TEMPDIR/agent-workspace/memory/.qa-auto-mv-fired-$(date +%Y%m%d-%H)"
 }
 
-# --- TC1: pending dir missing → silent + marker touched ---
+# --- TC1: pending dir missing → silent + current-bucket marker touched ---
 clean_state
 run_hook "tc1"
-if [ ! -f "$(marker_path tc1)" ]; then
-  echo "FAIL TC1: marker should be touched even when pending/ missing"
+if [ ! -f "$(current_marker)" ]; then
+  echo "FAIL TC1: current-bucket marker should be touched even when pending/ missing"
+  ls -la "$TEMPDIR/agent-workspace/memory/" 2>&1
   exit 1
 fi
-echo "PASS TC1: pending/ missing → silent + marker touched"
+echo "PASS TC1: pending/ missing → silent + current-bucket marker touched"
 
 # --- TC2: kill switch present → skip all + log ---
 clean_state
@@ -184,7 +190,49 @@ if [ ! -f "$PEND/bundle-tc6-second.md" ]; then
 fi
 echo "PASS TC6: idempotent — marker prevents second-call re-fire"
 
+# --- TC7: L-S108-1 REGRESSION — stale cross-bucket marker + legacy fallback ---
+# Reproduces M-S108-1 bug: agent stuck for 24+h because .qa-auto-mv-fired-main
+# (legacy CLAUDE_SESSION_ID:-main fallback marker) blocked all subsequent
+# sessions. Fix asserts cleanup loop deletes BOTH stale-bucket and legacy markers.
+clean_state
+mkdir -p "$PEND"
+cat > "$PEND/bundle-tc7.md" <<'EOF'
+---
+status: answered-via-test
+---
+Stuck-bundle regression scenario.
+EOF
+# Plant stale Jan-2026 hour-bucket marker (different bucket from current)
+touch "$TEMPDIR/agent-workspace/memory/.qa-auto-mv-fired-20260105-13"
+# Plant LEGACY fallback marker (the EXACT M-S108-1 bug filename)
+touch "$TEMPDIR/agent-workspace/memory/.qa-auto-mv-fired-main"
+run_hook "tc7"
+if [ -f "$PEND/bundle-tc7.md" ]; then
+  echo "FAIL TC7 (REGRESSION): bundle stuck in pending/ — stale-marker lockout NOT prevented"
+  ls -la "$TEMPDIR/agent-workspace/memory/" 2>&1
+  cat "$LOG" 2>&1
+  exit 1
+fi
+if [ ! -f "$ANS/bundle-tc7.md" ]; then
+  echo "FAIL TC7 (REGRESSION): bundle should be in answered/ after stale-marker cleanup"
+  exit 1
+fi
+if [ -f "$TEMPDIR/agent-workspace/memory/.qa-auto-mv-fired-20260105-13" ]; then
+  echo "FAIL TC7: stale Jan-2026 marker should have been cleaned up"
+  exit 1
+fi
+if [ -f "$TEMPDIR/agent-workspace/memory/.qa-auto-mv-fired-main" ]; then
+  echo "FAIL TC7: legacy 'main' fallback marker should have been cleaned up"
+  exit 1
+fi
+if [ ! -f "$(current_marker)" ]; then
+  echo "FAIL TC7: current-bucket marker should be created post-MV"
+  exit 1
+fi
+echo "PASS TC7: L-S108-1 REGRESSION — stale markers cleaned + bundle MV'd"
+
 echo ""
-echo "=== ALL FIRING-TESTS PASSED (6/6) ==="
+echo "=== ALL FIRING-TESTS PASSED (7/7) ==="
 echo "qa-pending-auto-mover.sh externally-observable behavior verified."
+echo "L-S108-1 stale-marker regression COVERED (TC7)."
 exit 0

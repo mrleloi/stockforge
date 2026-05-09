@@ -41,7 +41,7 @@ process.stdin.on('end',()=>{
 PROPOSED_NNN=""
 PROPOSED_PATH="$(printf '%s' "$PROMPT" | grep -oE 'agent-workspace/memory/decisions/[0-9]{3}-[A-Za-z0-9_-]+\.md' | head -1 || true)"
 if [ -n "$PROPOSED_PATH" ]; then
-  PROPOSED_NNN="$(printf '%s' "$PROPOSED_PATH" | grep -oE '[0-9]{3}' | head -1)"
+  PROPOSED_NNN="$(printf '%s' "$PROPOSED_PATH" | grep -oE '[0-9]{3}' | head -1 || true)"
 fi
 
 # Pattern B: D-NNN + ADR-authoring intent

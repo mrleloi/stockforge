@@ -1,0 +1,4 @@
+ts	dispatch_id	observation_passed	empirical_passed	divergence	verdict
+2026-05-06T02:54:30.903Z	sandwich-dev-S67-BC-7-track-K	0	172	172	BLOCK
+2026-05-06T03:44:49.184Z	sandwich-dev-S67-plan-011-P0	172	322	150	BLOCK
+2026-05-06T04:14:19.753Z	sandwich-dev-S66-BC-7-track-J	92	92	0	LEGACY-RESOLVED-S66

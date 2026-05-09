@@ -65,7 +65,13 @@ done
 
 # === D2: Self-attestation contradicting actual (text claims X LOC but file is Y) ===
 # Heuristic grep: session logs claiming "within target" or "<150 LOC" without wc -l command nearby.
-SESSION_LOGS="$(find "$PROJECT_DIR/agent-workspace/memory/sessions" -name '*.md' -mmin -1440 2>/dev/null || true)"
+# S118 narrowed scan window 1440 → 60 min: session logs are write-once historical
+# records; re-flagging the same archived log on every SessionStart added 396/day MEDIUM
+# emissions with 0 actionable catch-rate (see drift-rollup 2026-05-06). Active-work window
+# captures fresh-write at session-end ritual; archived logs fall out cleanly. CLAUDE.md S99
+# ritual demotion (catch-rate=0 ⇒ demote-to-passive) + L-S69-1 family (artifact-verifier
+# hooks must scope to active target, not historical archive).
+SESSION_LOGS="$(find "$PROJECT_DIR/agent-workspace/memory/sessions" -name '*.md' -mmin -60 2>/dev/null || true)"
 for s in $SESSION_LOGS; do
   [ ! -f "$s" ] && continue
   if grep -qE '(LOC|line count|bodies are.*LOC|within target)' "$s" 2>/dev/null; then
@@ -143,8 +149,9 @@ for f in $DATA_FILES; do
 done
 
 # === D9: Runtime-path-leak into write-only learning-data/(events|archive)/ tree ===
-# Track 5.5d.1 boundary discipline (D-005). Whitelist: hooks that legitimately write/admin events.
-LEARNING_WRITE_HOOKS="component-telemetry|learning-queue-sweeper|learning-index-rebuild|drift-signals-D1-D9"
+# Track 5.5d.1 boundary discipline (D-005). Whitelist: hooks that legitimately write/admin events
+# OR legitimately read events for metric-computation per Phase 0 Karpathy-loop framing (L-S12).
+LEARNING_WRITE_HOOKS="component-telemetry|learning-queue-sweeper|learning-index-rebuild|drift-signals-D1-D9|metric-failure-mode-rate"
 for f in "$PROJECT_DIR"/.claude/skills/*/SKILL.md \
          "$PROJECT_DIR"/.claude/agents/*.md \
          "$PROJECT_DIR"/.claude/commands/*.md; do
@@ -214,7 +221,7 @@ fi
 
 # Exit code: always 0 unless STOCKFORGE_DRIFT_STRICT=1 + any HIGH violation.
 if [ "${STOCKFORGE_DRIFT_STRICT:-0}" = "1" ] && grep -q 'severity=HIGH' "$LOG" 2>/dev/null; then
-  HIGH_COUNT="$(grep -c "severity=HIGH" "$LOG" 2>/dev/null || echo 0)"
+  HIGH_COUNT="$(grep -c "severity=HIGH" "$LOG" 2>/dev/null || true)"
   if [ "$HIGH_COUNT" -gt 0 ]; then
     printf '[drift-signals] BLOCKING: %d HIGH-severity drift(s) detected with STOCKFORGE_DRIFT_STRICT=1\n' "$HIGH_COUNT" >&2
     exit 2

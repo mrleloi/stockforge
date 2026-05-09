@@ -101,8 +101,8 @@ if [ -f "$RAW_FILE" ]; then
 fi
 
 # Count redacted secrets + stripped chatter for metadata.
-REDACTED_COUNT="$(printf '%s' "$TRANSCRIPT_REDACTED" | grep -c '\[REDACTED:' 2>/dev/null || echo 0)"
-STRIPPED_COUNT="$(printf '%s' "$TRANSCRIPT_CLEAN" | grep -c '\[stripped\]' 2>/dev/null || echo 0)"
+REDACTED_COUNT="$(printf '%s' "$TRANSCRIPT_REDACTED" | grep -c '\[REDACTED:' 2>/dev/null || true)"
+STRIPPED_COUNT="$(printf '%s' "$TRANSCRIPT_CLEAN" | grep -c '\[stripped\]' 2>/dev/null || true)"
 
 TOKEN_COUNT="$(cat "$PROJECT_DIR/agent-workspace/memory/.transcript-tokens" 2>/dev/null | tr -d '[:space:]' || echo 0)"
 

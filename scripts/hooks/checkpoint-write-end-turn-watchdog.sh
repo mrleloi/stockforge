@@ -58,8 +58,16 @@ process.stdin.on('end',()=>{
 # Only act on PreToolUse
 [ "${HOOK_EVENT:-}" != "PreToolUse" ] && exit 0
 
-SID="${SESSION_ID:-${CLAUDE_SESSION_ID:-unknown}}"
-[ -z "$SID" ] && SID="unknown"
+# L-S108-1 fix (S109): drop constant fallback "unknown". Per-turn marker semantics
+# (intra-session blocking) means hour-bucket would WRONGLY block unrelated sessions
+# in same hour. PreToolUse JSON payload reliably populates session_id; if missing,
+# fail-safe ALLOW (don't deny tool call — better to allow than deny based on
+# stale/colliding marker from another session).
+SID="${SESSION_ID:-${CLAUDE_SESSION_ID:-}}"
+if [ -z "$SID" ]; then
+  echo "[$(date -Iseconds)] checkpoint-write-end-turn: ALLOW — session_id empty (L-S108-1 fail-safe)" >> "$LOG"
+  exit 0
+fi
 
 MARKER="$MEM_DIR/.checkpoint-written-${SID}"
 

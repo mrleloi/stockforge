@@ -48,9 +48,66 @@ case "${SUBAGENT_TYPE:-}" in
   *) MODEL="unknown" ;;
 esac
 
+# D2 (Plan 011): model resolution fallback — read .claude/agents/<type>.md frontmatter.
+# Cache in .dispatch-model-cache.tsv to avoid repeated file reads.
+# Only runs when SUBAGENT_TYPE is non-empty and MODEL is still unknown.
+MODEL_CACHE="$MEMORY_DIR/.dispatch-model-cache.tsv"
+resolve_model_from_agents() {
+  local stype="$1"
+  local cached_model=""
+  # Check cache first (bash-only; no grep exit-1 risk with while read)
+  if [ -f "$MODEL_CACHE" ]; then
+    while IFS="	" read -r ct cm; do
+      if [ "$ct" = "$stype" ]; then
+        cached_model="$cm"
+        break
+      fi
+    done < "$MODEL_CACHE" 2>/dev/null || true
+  fi
+  if [ -n "$cached_model" ]; then
+    printf '%s' "$cached_model"
+    return
+  fi
+  # Read .claude/agents/<stype>.md frontmatter model: field (awk; ERR-trap-safe)
+  local agent_file="$PROJECT_DIR/.claude/agents/${stype}.md"
+  local resolved="unknown"
+  if [ -f "$agent_file" ]; then
+    local m
+    m="$(awk '/^---/{c++;next}c==1&&/^model:/{sub(/^model:[[:space:]]*/,"");print;exit}c>1{exit}' "$agent_file" 2>/dev/null || true)"
+    if [ -n "$m" ]; then
+      # Normalize: claude-opus → opus, claude-sonnet → sonnet, claude-haiku → haiku
+      case "$m" in
+        *opus*) resolved="opus" ;;
+        *sonnet*) resolved="sonnet" ;;
+        *haiku*) resolved="haiku" ;;
+        opus|sonnet|haiku) resolved="$m" ;;
+        *) resolved="$m" ;;
+      esac
+    fi
+  fi
+  # Cache the result (create header if needed)
+  if [ ! -f "$MODEL_CACHE" ]; then
+    printf 'subagent_type\tmodel\n' > "$MODEL_CACHE" 2>/dev/null || true
+  fi
+  printf '%s\t%s\n' "$stype" "$resolved" >> "$MODEL_CACHE" 2>/dev/null || true
+  printf '%s' "$resolved"
+}
+
+if [ "$MODEL" = "unknown" ] && [ -n "${SUBAGENT_TYPE:-}" ]; then
+  RESOLVED="$(resolve_model_from_agents "$SUBAGENT_TYPE")"
+  if [ -n "$RESOLVED" ] && [ "$RESOLVED" != "unknown" ]; then
+    MODEL="$RESOLVED"
+  fi
+fi
+
 TS_MS="$(node -e 'console.log(Date.now())' 2>/dev/null || echo 0)"
-PARENT_SID="${SESSION_ID:-${CLAUDE_SESSION_ID:-main}}"
-[ -z "$PARENT_SID" ] && PARENT_SID="main"
+# L-S108-1 fix (S109): drop constant fallback "main". Per-session sidecar
+# (.dispatch-pending-<sid>.jsonl) requires unique-per-session value for FIFO
+# matching to work correctly; constant fallback caused cross-session contamination
+# risk. JSON payload reliably populates session_id for Agent / SubagentStop hooks;
+# if missing, fail-safe no-op (skip recording rather than contaminate "main" sidecar).
+PARENT_SID="${SESSION_ID:-${CLAUDE_SESSION_ID:-}}"
+[ -z "$PARENT_SID" ] && exit 0
 SIDECAR="$MEMORY_DIR/.dispatch-pending-${PARENT_SID}.jsonl"
 DISPATCH_JSONL="$MEMORY_DIR/dispatch.jsonl"
 

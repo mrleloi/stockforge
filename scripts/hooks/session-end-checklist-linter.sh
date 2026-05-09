@@ -18,12 +18,27 @@ trap 'exit 0' ERR
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 MEMORY_DIR="$PROJECT_DIR/agent-workspace/memory"
 SESSIONS_DIR="$MEMORY_DIR/sessions"
-SESSION_ID="${CLAUDE_SESSION_ID:-default}"
-MARKER="$MEMORY_DIR/.session-end-checklist-fired-${SESSION_ID}"
+# L-S108-1 fix (S109): per-session marker MUST use hour-bucket, NEVER fallback constant.
+# CLAUDE_SESSION_ID empty for Stop hooks on Windows → fallback "default" shared across
+# ALL sessions (M-S108-1 RCA: stale .session-end-checklist-fired-default from S48g
+# blocked hook S99-S108). SESSION_ID still captured for log diagnostics.
+SESSION_ID="${CLAUDE_SESSION_ID:-}"
+BUCKET="$(date +%Y%m%d-%H 2>/dev/null)"
+[ -z "$BUCKET" ] && BUCKET="unbucketed-$$"
+MARKER="$MEMORY_DIR/.session-end-checklist-fired-${BUCKET}"
 LOG="$MEMORY_DIR/.session-hooks.log"
 TS="$(date -Iseconds 2>/dev/null || date '+%Y-%m-%dT%H:%M:%S')"
 
-# Idempotent: bail if already fired this session.
+# Cleanup stale markers from prior buckets (L-S108-1 prevention).
+for old_marker in "$MEMORY_DIR"/.session-end-checklist-fired-*; do
+  [ -f "$old_marker" ] || continue
+  case "$old_marker" in
+    *".session-end-checklist-fired-${BUCKET}") ;;
+    *) rm -f "$old_marker" 2>/dev/null ;;
+  esac
+done
+
+# Idempotent: bail if already fired this hour-bucket.
 [ -f "$MARKER" ] && exit 0
 
 # Bail if sessions dir missing.

@@ -51,6 +51,14 @@ esac
 # Resolve delta: override CLI arg wins; else look up weight_<event_type> from weights.yaml.
 get_weight() { awk -F': *' -v key="$1" '$1==key {print $2; exit}' "$WEIGHTS"; }
 if [[ -n "$OVERRIDE_DELTA" ]]; then
+  # Per M-S98-1 + M-S101-1 (sync-tracker arg-position recurrence S98+S101 same-day):
+  # validate $3 is numeric (decimal, optional sign) OR empty. Catches misordered calls
+  # where decision_id (e.g. "sync-grilling-S101") lands in $3 OVERRIDE_DELTA slot,
+  # which historically appeared to "succeed" but corrupted state.tsv silently.
+  if ! printf '%s' "$OVERRIDE_DELTA" | grep -qE '^-?[0-9]+(\.[0-9]+)?$'; then
+    echo "[sync-tracker-update] invalid override_delta='$OVERRIDE_DELTA' — must be numeric (e.g. 0.2 or -0.5) or empty. See M-S98-1 + M-S101-1 for arg-position pattern. Usage: $0 <category> <event_type> [<override_delta>] [<decision_id> [<source_evidence> [<reason>]]]" >&2
+    exit 2
+  fi
   DELTA="$OVERRIDE_DELTA"
 else
   DELTA="$(get_weight "weight_$EVT")"

@@ -103,6 +103,87 @@ else
   PASS=$((PASS+1))
 fi
 
+# === TC4: S188 D-044 H-c contract — hook emits minimal stdout JSON on chain tail
+# (UserPromptSubmit chain truncation hypothesis: stdout JSON re-emission required
+# at segment boundary at hook #5/#6 on Claude Code Windows).
+# Reuses TC3 sandbox (all-fired path, silent_count=0); captures STDOUT separately
+# via file-based fixture per L-S176-1 (avoids inline shell-quote pitfalls).
+STDOUT_TC4_FILE="$TEMPDIR/tc4-stdout.json"
+CLAUDE_PROJECT_DIR="$TEMPDIR" bash "$HOOK" > "$STDOUT_TC4_FILE" 2>/dev/null || true
+
+# Validate JSON structure: hookSpecificOutput.hookEventName=='UserPromptSubmit'
+# AND hookSpecificOutput.additionalContext==''
+TC4_RESULT=$(node -e "
+const fs=require('fs');
+try {
+  const s=fs.readFileSync(process.argv[1],'utf8');
+  const j=JSON.parse(s);
+  if (!j.hookSpecificOutput) { console.log('FAIL:no-hookSpecificOutput'); process.exit(0); }
+  const o=j.hookSpecificOutput;
+  if (o.hookEventName !== 'UserPromptSubmit') { console.log('FAIL:wrong-event:'+o.hookEventName); process.exit(0); }
+  if (o.additionalContext !== '') { console.log('FAIL:non-empty-context:'+JSON.stringify(o.additionalContext)); process.exit(0); }
+  const keys=Object.keys(o).sort().join(',');
+  if (keys !== 'additionalContext,hookEventName') { console.log('FAIL:extra-keys:'+keys); process.exit(0); }
+  console.log('OK');
+} catch(e) { console.log('FAIL:parse-error:'+e.message); }
+" "$STDOUT_TC4_FILE" 2>/dev/null)
+
+if [ "$TC4_RESULT" = "OK" ]; then
+  echo "PASS [TC4] hook emits stdout JSON {hookEventName:'UserPromptSubmit',additionalContext:''} on all-fired path"
+  PASS=$((PASS+1))
+else
+  printf 'FAIL [TC4] stdout JSON contract broken: %s; raw: %s\n' "$TC4_RESULT" "$(cat "$STDOUT_TC4_FILE")"
+  FAIL=$((FAIL+1))
+fi
+
+# === TC5: S188 D-044 H-c contract — same stdout JSON contract on silent>0 path
+# (TC1 reproduces silent_count=2 setup; verifies stdout JSON emits AFTER stderr alert).
+cat > "$TEMPDIR/.claude/settings.json" <<'EOF'
+{
+  "hooks": {
+    "Stop": [
+      {"hooks": [
+        {"type": "command", "command": "bash scripts/hooks/active-hook.sh"},
+        {"type": "command", "command": "bash scripts/hooks/silent-hook.sh"}
+      ]}
+    ],
+    "UserPromptSubmit": [
+      {"hooks": [
+        {"type": "command", "command": "bash scripts/hooks/another-silent.sh"}
+      ]}
+    ]
+  }
+}
+EOF
+TS_NOW3="$(date -Iseconds 2>/dev/null || date)"
+printf '[%s] active-hook fired session=test\n' "$TS_NOW3" > "$TEMPDIR/agent-workspace/memory/.session-hooks.log"
+printf 'recent log\n' > "$TEMPDIR/agent-workspace/memory/.active-hook.log"
+rm -f "$TEMPDIR/agent-workspace/memory/.hook-firing-counter.log"
+
+STDOUT_TC5_FILE="$TEMPDIR/tc5-stdout.json"
+CLAUDE_PROJECT_DIR="$TEMPDIR" bash "$HOOK" > "$STDOUT_TC5_FILE" 2>/dev/null || true
+
+TC5_RESULT=$(node -e "
+const fs=require('fs');
+try {
+  const s=fs.readFileSync(process.argv[1],'utf8');
+  const j=JSON.parse(s);
+  if (!j.hookSpecificOutput) { console.log('FAIL:no-hookSpecificOutput'); process.exit(0); }
+  const o=j.hookSpecificOutput;
+  if (o.hookEventName !== 'UserPromptSubmit') { console.log('FAIL:wrong-event'); process.exit(0); }
+  if (o.additionalContext !== '') { console.log('FAIL:non-empty-context'); process.exit(0); }
+  console.log('OK');
+} catch(e) { console.log('FAIL:parse-error:'+e.message); }
+" "$STDOUT_TC5_FILE" 2>/dev/null)
+
+if [ "$TC5_RESULT" = "OK" ]; then
+  echo "PASS [TC5] hook emits stdout JSON on silent>0 path (alongside stderr alert)"
+  PASS=$((PASS+1))
+else
+  printf 'FAIL [TC5] stdout JSON contract broken on silent>0 path: %s; raw: %s\n' "$TC5_RESULT" "$(cat "$STDOUT_TC5_FILE")"
+  FAIL=$((FAIL+1))
+fi
+
 echo ""
-printf '=== TOTAL: PASS=%d FAIL=%d (target: 3/3) ===\n' "$PASS" "$FAIL"
+printf '=== TOTAL: PASS=%d FAIL=%d (target: 5/5) ===\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ] && exit 0 || exit 1

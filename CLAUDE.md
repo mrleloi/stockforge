@@ -54,7 +54,7 @@ Full detail: `agent-workspace/constitution/karpathy-principles.md`.
 4. If learned rule emerged → append to `agent-workspace/memory/agent-notes.md`
 5. If thesis logged this session → ensure entry in `agent-workspace/memory/thesis-log/`
 6. Update `agent-workspace/memory/mistake-log.md` with new M-S<N>-<M> entries OR explicitly state "no mistakes this session" in the session log (enforced by `session-end-checklist-linter.sh`)
-7. If a NEW ADR landed this session → verify `project.md` Phase Goals Tracker still matches `current-execution.md` Active Focus Track Phase status (enforced by `project-md-staleness-check.sh`)
+7. If a NEW ADR landed this session → verify `project.md` Phase Goals Tracker still matches `current-execution.md` Active Focus Track Phase status (enforced by `phase-status-coherence.sh` UserPromptSubmit cadence + `project-md-adr-staleness.sh` Stop cadence; D-038 retired Check A from latter)
 8. (auto) Stop-hook `profile-template-auto-populate.sh` appends a sample row to the matching `agent-workspace/memory/self-awareness/profiles/<model>-<effort>-<task_class>.md` card
 9. (auto) Stop-hook `promotion-cycle-trigger.sh` HARD-BLOCKs at next SessionStart if ≥8 new lessons accumulated since last `promote-rule` dispatch — schedule a promote-rule subagent dispatch in the next session if blocked
 
@@ -88,6 +88,8 @@ Read these when relevant to current task.
 - **User prompt overrides ALL defaults.** If user says "skip X", that trumps any skill/workflow.
 - **Context-threshold band (per D-004 — Opus 4.7 recalibrated)**: 180K wind-down (auto-prep handoff) / 220K cliff (auto-reboot via session-self-reboot.sh) / 250K hard_cap (mandatory split). Operational defaults in `scripts/hooks/budget-watchdog.sh`. Re-evaluate empirically after 10 sessions or on Anthropic model/policy change.
 - **Deterministic gates (mypy, pytest, ruff) must pass before commit.** Max 3 retry before escalate.
+- **Tracking retention (per S99 RCA Layer 1; Q-RCA-1 = A)**: `current-execution.md` ≤ 5 sessions inline / ≤ 200 LOC; `agent-notes.md` digest only / ≤ 700 LOC; `mistake-log.md` digest only / ≤ 200 LOC; `component-telemetry.jsonl` ≤ 10 MB (weekly rotate via `telemetry-rotate.sh`, retain 4 weeks). Cap breaches: WARN-only via `tracking-retention.sh` Stop hook; manual archive to dated file. Working-memory budget per `agent-workspace/proposals/memory-tiers.md` § Tier 1 = ≤ 20 KB combined for routine load.
+- **Ritual demotion (per S99 RCA Layer 5; Q-RCA-5 + Q-RCA-7 = A)**: per-session rituals (audit / re-scan / refresh) MUST track catch-rate. Catch-rate = 0 over 3+ consecutive sessions ⇒ promote-to-hook OR demote-to-passive OR retire. Refinement-of-rule (lesson-about-lesson) is AP-23 RED FLAG: 2nd instance mandates promote-or-retire (not inline accumulation).
 
 ---
 

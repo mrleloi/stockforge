@@ -16,8 +16,17 @@ mkdir -p "$(dirname "$LOG")"
 [ ! -f "$EXEC_FILE" ] && exit 0
 
 # Active session-plan path resolution.
-ACTIVE_PLAN=$(grep -oE 'session-plans/pending/[0-9-]+[^ )"`]+\.md' "$EXEC_FILE" | head -1 || true)
-[ -z "$ACTIVE_PLAN" ] && exit 0
+# Match optional `agent-workspace/` prefix because grep -oE returns ONLY the matched
+# substring (without it, production paths like `agent-workspace/session-plans/...`
+# get stripped to bare `session-plans/...` and the existence check fails — silent
+# no-op against production layout). S74 fix per L-S74-1 — was latent S73 finding.
+RAW_PATH=$(grep -oE '(agent-workspace/)?session-plans/pending/[0-9-]+[^ )"`]+\.md' "$EXEC_FILE" | head -1 || true)
+[ -z "$RAW_PATH" ] && exit 0
+# Normalize: ensure agent-workspace/ prefix (production layout).
+case "$RAW_PATH" in
+  agent-workspace/*) ACTIVE_PLAN="$RAW_PATH" ;;
+  *) ACTIVE_PLAN="agent-workspace/$RAW_PATH" ;;
+esac
 [ ! -f "$PROJECT_DIR/$ACTIVE_PLAN" ] && exit 0
 
 # Whitelist of vendor libraries we care about (extend as project grows).
@@ -46,7 +55,8 @@ except Exception as e:
 done
 
 # Multi-strategy ladder detection (L-S32-1).
-LADDER=$(grep -cE 'Strategy A[1-4]|alternative [A-D]:|ladder' "$PROJECT_DIR/$ACTIVE_PLAN" || echo 0)
+LADDER=$(grep -cE 'Strategy A[1-4]|alternative [A-D]:|ladder' "$PROJECT_DIR/$ACTIVE_PLAN" 2>/dev/null || true)
+[[ "$LADDER" =~ ^[0-9]+$ ]] || LADDER=0
 if [ "$LADDER" -ge 3 ]; then
   printf '[%s] multi-strategy ladder detected (count=%s) in %s — probe-first doctrine recommended\n' \
     "$(date -Iseconds)" "$LADDER" "$ACTIVE_PLAN" >> "$LOG"

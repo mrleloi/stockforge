@@ -147,10 +147,10 @@ echo "PASS TC5: component-telemetry 2×A + 1×B → failure_codes='$FAILURE_CODE
 # --- TC6: idempotent — header only on first run; appends on subsequent ---
 clean_state
 run_hook
-HEADER_COUNT_AFTER_1=$(grep -c "^session_n" "$ROLLUP" 2>/dev/null || echo 0)
+HEADER_COUNT_AFTER_1=$(grep -c "^session_n" "$ROLLUP" 2>/dev/null || true)
 ROW_COUNT_AFTER_1=$(wc -l < "$ROLLUP" | tr -d '[:space:]')
 run_hook
-HEADER_COUNT_AFTER_2=$(grep -c "^session_n" "$ROLLUP" 2>/dev/null || echo 0)
+HEADER_COUNT_AFTER_2=$(grep -c "^session_n" "$ROLLUP" 2>/dev/null || true)
 ROW_COUNT_AFTER_2=$(wc -l < "$ROLLUP" | tr -d '[:space:]')
 
 if [ "$HEADER_COUNT_AFTER_1" != "1" ] || [ "$HEADER_COUNT_AFTER_2" != "1" ]; then

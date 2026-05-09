@@ -145,6 +145,14 @@
           },
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/essential-routing-fields-verifier.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/working-memory-budget-audit.sh\""
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/session-start-bootstrap.sh\""
           },
           {
@@ -182,6 +190,26 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/in-flight-subagent-watcher.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/session-start-scan-unattested-observations.sh\""
+          },
+          {
+            "type": "command",
+            "command": "CLAUDE_HOOK_EVENT=SessionStart bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/idle-escape-detector.sh\""
+          },
+          {
+            "type": "command",
+            "command": "CLAUDE_HOOK_EVENT=SessionStart bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/phase-status-coherence.sh\""
+          },
+          {
+            "type": "command",
+            "command": "CLAUDE_HOOK_EVENT=SessionStart bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/harness-health-self-scan.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/continue-injector-spawn.sh\""
           }
         ]
       },
@@ -235,6 +263,18 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/effort-escalation-detector.sh\""
+          },
+          {
+            "type": "command",
+            "command": "CLAUDE_HOOK_EVENT=UserPromptSubmit bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/idle-escape-detector.sh\""
+          },
+          {
+            "type": "command",
+            "command": "CLAUDE_HOOK_EVENT=UserPromptSubmit bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/phase-status-coherence.sh\""
+          },
+          {
+            "type": "command",
+            "command": "CLAUDE_HOOK_EVENT=UserPromptSubmit bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/harness-health-self-scan.sh\""
           }
         ]
       }
@@ -252,6 +292,14 @@
           },
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/tracking-retention.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/telemetry-rotate.sh\""
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/auto-reboot-handoff-verify.sh\""
           },
           {
@@ -261,6 +309,10 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/autonomous-stop-watchdog.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/pre-checkpoint-close-verifier.sh\""
           },
           {
             "type": "command",
@@ -292,6 +344,10 @@
           },
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/file-pattern-hook-pre-flight-lint.sh\""
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/learning-loop-metric-check.sh\""
           },
           {
@@ -312,6 +368,10 @@
           },
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/index-registry-renderer.sh\""
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/qa-stale-urgent-escalator.sh\""
           },
           {
@@ -328,7 +388,7 @@
           },
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/project-md-staleness-check.sh\""
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/project-md-adr-staleness.sh\""
           },
           {
             "type": "command",
@@ -345,6 +405,10 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/drift-rollup-daily.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/drift-signals-log-rotate.sh\""
           },
           {
             "type": "command",
@@ -443,6 +507,10 @@
       {
         "matcher": ".*",
         "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/post-dev-dispatch-attestation-check.sh\""
+          },
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/component-telemetry.sh\""

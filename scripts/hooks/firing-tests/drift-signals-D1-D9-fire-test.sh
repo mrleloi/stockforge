@@ -12,13 +12,18 @@
 # Test strategy: stage temp PROJECT_DIR with various fixture trees;
 # invoke hook; assert .drift-signals.log entries + exit code.
 #
-# 6 test cases:
+# 10 test cases:
 #   TC1 — clean state (no agents/skills/commands/data) → no violations
 #   TC2 — agent file 250 LOC > 200 ceiling, overrun ≥ 20% → D1-LOC-CEILING HIGH
 #   TC3 — agent file 220 LOC > 200, overrun < 20% → D1-LOC-CEILING MEDIUM
 #   TC4 — data file with "18% confidence" but no source/as_of + no calib → D5/D8 HIGH
 #   TC5 — D9 path leak: skill referencing learning-data/events → D9-LEARNING-PATH-LEAK
 #   TC6 — STOCKFORGE_DRIFT_STRICT=1 + HIGH violation → exit 2 (block)
+#   TC7 — fresh session log w/ "LOC within target" + no "wc -l" → D2-SELF-ATTEST MEDIUM (S118)
+#   TC8 — fresh session log w/ "LOC within target" AND "wc -l" → NOT flagged (S118)
+#   TC9 — fresh session log w/ no LOC claim text → NOT flagged (S118)
+#   TC10 — historical session log (mtime > 60 min) w/ unverified LOC claim → NOT flagged
+#          (S118 narrowed scan window 1440 → 60 min; out-of-window file falls out cleanly)
 #
 # Exit 0 = all assertions pass. Exit 1 = any assertion fail.
 set -euo pipefail
@@ -154,7 +159,79 @@ if [ "$EXIT" != "2" ]; then
 fi
 echo "PASS TC6: STRICT=1 + HIGH violation → exit 2 (block)"
 
+# --- TC7: fresh session log w/ "LOC within target" + no "wc -l" → D2 MEDIUM ---
+# S118 backfill (L-S49b-4 charter-coverage discipline). D2 had ZERO test coverage prior.
+clean_state
+mkdir -p "$TEMPDIR/agent-workspace/memory/sessions"
+cat > "$TEMPDIR/agent-workspace/memory/sessions/2026-05-06-session-200.md" <<'EOF'
+# Session 200 — sample
+agent-notes.md is 563 LOC within target (≤700 cap).
+mistake-log.md within target as well.
+EOF
+EXIT=$(run_hook 0)
+if ! grep -q "D2-SELF-ATTEST" "$LOG" 2>/dev/null; then
+  echo "FAIL TC7: expected D2-SELF-ATTEST entry"
+  cat "$LOG" 2>/dev/null
+  exit 1
+fi
+if ! grep -q "without-wc-l-verification" "$LOG" 2>/dev/null; then
+  echo "FAIL TC7: expected detail=without-wc-l-verification"
+  cat "$LOG"
+  exit 1
+fi
+echo "PASS TC7: fresh session log w/ unverified LOC claim → D2-SELF-ATTEST MEDIUM"
+
+# --- TC8: fresh session log w/ "LOC within target" AND "wc -l" → NOT flagged ---
+clean_state
+mkdir -p "$TEMPDIR/agent-workspace/memory/sessions"
+cat > "$TEMPDIR/agent-workspace/memory/sessions/2026-05-06-session-201.md" <<'EOF'
+# Session 201 — sample
+Verified via `wc -l agent-notes.md` → 563 LOC within target.
+EOF
+EXIT=$(run_hook 0)
+if grep -q "D2-SELF-ATTEST" "$LOG" 2>/dev/null; then
+  echo "FAIL TC8: D2-SELF-ATTEST should NOT fire when wc -l verification present"
+  cat "$LOG"
+  exit 1
+fi
+echo "PASS TC8: fresh session log w/ wc -l verification → D2-SELF-ATTEST NOT flagged"
+
+# --- TC9: fresh session log w/ no LOC claim text → NOT flagged ---
+clean_state
+mkdir -p "$TEMPDIR/agent-workspace/memory/sessions"
+cat > "$TEMPDIR/agent-workspace/memory/sessions/2026-05-06-session-202.md" <<'EOF'
+# Session 202 — sample
+Drained backlog item; no architectural change. No commits this session.
+EOF
+EXIT=$(run_hook 0)
+if grep -q "D2-SELF-ATTEST" "$LOG" 2>/dev/null; then
+  echo "FAIL TC9: D2-SELF-ATTEST should NOT fire when no LOC-claim trigger words present"
+  cat "$LOG"
+  exit 1
+fi
+echo "PASS TC9: fresh session log w/ no LOC claim → D2-SELF-ATTEST NOT flagged"
+
+# --- TC10: historical session log (mtime > 60 min) w/ unverified LOC claim → NOT flagged ---
+# S118 narrowed scan window 1440 → 60 min. Verifies out-of-window file is excluded.
+clean_state
+mkdir -p "$TEMPDIR/agent-workspace/memory/sessions"
+cat > "$TEMPDIR/agent-workspace/memory/sessions/2026-05-05-session-099.md" <<'EOF'
+# Session 099 — historical
+agent-notes.md is 563 LOC within target.
+EOF
+# Backdate mtime to 65 min ago (out of -mmin -60 window)
+PAST_EPOCH=$(( $(date +%s) - 3960 ))
+touch -d "@$PAST_EPOCH" "$TEMPDIR/agent-workspace/memory/sessions/2026-05-05-session-099.md"
+EXIT=$(run_hook 0)
+if grep -q "D2-SELF-ATTEST" "$LOG" 2>/dev/null; then
+  echo "FAIL TC10: D2-SELF-ATTEST should NOT fire on historical (>60 min) session log"
+  echo "  (S118 fix narrowed scan window from -mmin -1440 to -mmin -60)"
+  cat "$LOG"
+  exit 1
+fi
+echo "PASS TC10: historical session log (mtime > 60 min) → D2-SELF-ATTEST NOT flagged"
+
 echo ""
-echo "=== ALL FIRING-TESTS PASSED (6/6) ==="
+echo "=== ALL FIRING-TESTS PASSED (10/10) ==="
 echo "drift-signals-D1-D9.sh externally-observable behavior verified."
 exit 0

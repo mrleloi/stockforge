@@ -153,7 +153,7 @@ EOF
   done
 } > "$SYNC_DIR/events.tsv"
 run_hook
-EVENT_COUNT=$(grep -c "^| 2026-05-05T10:" "$INDEX" || echo 0)
+EVENT_COUNT=$(grep -c "^| 2026-05-05T10:" "$INDEX" || true)
 if [ "$EVENT_COUNT" != "10" ]; then
   echo "FAIL TC4: expected 10 event rows (top-10); got $EVENT_COUNT"
   grep "^| 2026-05-05T10:" "$INDEX" || true

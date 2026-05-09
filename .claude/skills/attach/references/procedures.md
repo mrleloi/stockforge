@@ -178,3 +178,52 @@ test -d "$SCRATCH/.claude/skills/attach" && echo "PASS: /attach copies itself (s
 # Cleanup
 echo "Cleanup: rm -rf $SCRATCH (manual; skill never destroys)"
 ```
+
+## HH-G.4 Portability Validation Checklist (post-S174 close)
+
+Use this checklist to pre-flight any /attach invocation OR consume as smoke-test
+source-of-truth when investigating drift in the harness vs stockforge layer split.
+Closed S174 per Q4=A user-pick (Phase 2.5 HH-G residue → Phase 3.5 alignment).
+
+### Pre-flight (before /attach)
+
+- [ ] **VBW**: Read `.claude/manifest.yaml` end-to-end; confirm REV-3 timestamp + V1-V7 schema
+- [ ] **VBW**: Read `templates/general-harness/CLAUDE.md` (HH-G.1 deliverable); confirm <2.5K tokens portable
+- [ ] **VBW**: Read `.claude/skills/attach/SKILL.md` § "Layer-separation assertion smoke" (A1-A7)
+- [ ] **HEALTH**: Run `scripts/hooks/attach-portability-smoke.sh` against real project; confirm `state=GREEN`
+- [ ] **HEALTH**: Run `scripts/hooks/firing-tests/attach-portability-smoke-fire-test.sh`; confirm 7/7 PASS
+
+### During /attach
+
+- [ ] Exclusion list honored: 5 stockforge skills (`crawler-reliability`, `evidence-extraction`, `postgres-pgvector`, `fastapi-module`, `prompt-engineering`) NOT copied
+- [ ] Exclusion list honored: 5 stockforge hooks (`userprompt-invariants-injector.sh`, `post-tool-citation-grep.sh`, `precompact-thesis-state-dump.sh`, `taskcompleted-audit.sh`, `charter-coherence-spot.sh`) NOT copied
+- [ ] Exclusion list honored: stockforge docs (`PROJECT_CHARTER.md`, `AGENT_OPERATING_MANUAL.md`, project-`CLAUDE.md`, `obsidian-vault/`, `specs/`, `eval-sets/`, `apps/`, `packages/`, `bdd/`, `agent-workspace/constitution/invariants-stockforge.md`) NOT copied
+- [ ] Inclusion list honored: 18 harness skills + 14 agents + 14 commands + ≥30 harness hooks + 13 harness constitution files copied
+- [ ] HH-G.1 template lands at `<target>/templates/general-harness/CLAUDE.md` and is consumed as the basis for the target's project-CLAUDE.md skeleton (per `references/skeleton-templates.md` § CLAUDE.md)
+- [ ] settings.json env-var rewrite: all `STOCKFORGE_` → `<TARGET_PREFIX>_` (default `MYPROJECT`)
+- [ ] Hybrid hook (`drift-signals-D1-D9.sh`): stockforge_part stubbed via `STOCKFORGE_PART_START` / `STOCKFORGE_PART_END` markers
+
+### Post-/attach validation (target side)
+
+- [ ] `<target>/CLAUDE.md` exists (skeleton from HH-G.1 template via `skeleton-templates.md` extraction)
+- [ ] `<target>/.claude/manifest.yaml` exists with `stockforge.skills/.hooks/.docs` cleared (target re-categorizes own biz)
+- [ ] `<target>/agent-workspace/memory/{sessions,decisions,checkpoints,observations}/` empty skeleton dirs
+- [ ] `<target>/human-workspace/{user_prompt,decisions,q-and-a/{pending,answered,stale},notifications}/` empty skeleton dirs
+- [ ] `cd <target> && claude` + `/session-start` returns clean routing scaffold (no stockforge biz leak in autoload)
+- [ ] `<target>/scripts/hooks/attach-portability-smoke.sh` runs `state=GREEN` on the post-/attach state (target re-targets own manifest)
+
+### Known-issues to suppress
+
+- **HH-G hybrid hook stubs**: `drift-signals-D1-D9.sh` D5/D6/D7/D8 lines need `STOCKFORGE_PART_START`/`END` markers added in source before /attach can stub them. Manifest open_item M2.
+- **Personal layer empty**: `.claude/personal/` reserved but not populated; `--include-personal` flag is no-op until a user actually drops content there. Manifest open_item M3.
+- **needs-refactor skills** (4 listed in manifest.harness.skills): `test-pyramid-balance`, `ubiquitous-language`, `ddd-tactical-patterns`, `obsidian-vault` mention stockforge categories/paths but pattern is portable. Refactor target post-HH-G.
+
+### Re-validation triggers
+
+Re-run `attach-portability-smoke.sh` whenever:
+- A new file lands in `.claude/skills/`, `.claude/agents/`, `.claude/commands/`, `scripts/hooks/`, or `agent-workspace/constitution/` (new artifact may need explicit layer tag)
+- `manifest.yaml` is edited (REV-N bump)
+- `templates/general-harness/CLAUDE.md` is edited (HH-G.1 content drift)
+- A hybrid hook is added or modified (`hybrid.hooks` membership changes)
+
+If smoke flips to RED, /attach is blocked until investigation closes the regression.

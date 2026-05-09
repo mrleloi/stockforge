@@ -123,6 +123,30 @@ if [ -f "$PROFILE_CARD" ]; then
       { print }
     ' "$PROFILE_CARD" > "$TMP" && mv "$TMP" "$PROFILE_CARD"
     echo "[$TS] profile-template-auto-populate: appended $SESSION_N to ${MODEL_SHORT}-${TASK_CLASS}.md" >> "$LOG" 2>/dev/null || true
+
+    # Plan 011 D6: enqueue profile-render job when samples_count crosses rebuild threshold (default 10).
+    # Configurable via STOCKFORGE_PROFILE_REBUILD_THRESHOLD env var. Kill switch: MEMORY_ETL_DISABLE=1.
+    PROFILE_THRESHOLD="${STOCKFORGE_PROFILE_REBUILD_THRESHOLD:-10}"
+    NEW_COUNT="$(awk '/^samples_count:[[:space:]]*[0-9]+/ {match($0,/[0-9]+/);print substr($0,RSTART,RLENGTH);exit}' "$PROFILE_CARD" 2>/dev/null || echo 0)"
+    if [ "${NEW_COUNT:-0}" -ge "$PROFILE_THRESHOLD" ] 2>/dev/null && [ "${MEMORY_ETL_DISABLE:-0}" != "1" ]; then
+      ETL_QUEUE_DIR="$MEMORY_DIR/etl-queue"
+      if mkdir -p "$ETL_QUEUE_DIR" 2>/dev/null; then
+        ETL_TS_FN="$(date -u +%Y%m%d-%H%M%S 2>/dev/null || echo unknown)"
+        ETL_JOB="$ETL_QUEUE_DIR/3-${ETL_TS_FN}-profile-render-${MODEL_SHORT}-${TASK_CLASS}.job"
+        # Dedup: skip if same-cell job already pending in queue
+        if ! ls "$ETL_QUEUE_DIR"/*"profile-render-${MODEL_SHORT}-${TASK_CLASS}.job" >/dev/null 2>&1; then
+          {
+            printf -- '---\n'
+            printf 'task: profile-render\n'
+            printf 'payload: {"model":"%s","task_class":"%s","samples_count":%s,"profile_card":"%s"}\n' \
+              "$MODEL_SHORT" "$TASK_CLASS" "$NEW_COUNT" "$PROFILE_CARD"
+            printf 'created_at: %s\n' "$TS"
+            printf 'producer: profile-template-auto-populate.sh\n'
+            printf -- '---\n'
+          } > "$ETL_JOB" 2>/dev/null || true
+        fi
+      fi
+    fi
   fi
   touch "$MARKER" 2>/dev/null || true
   exit 0

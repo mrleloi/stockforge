@@ -2,9 +2,14 @@
 # session-start-bootstrap.sh — SessionStart hook injecting stockforge resume context.
 # Wired as SessionStart in .claude/settings.json (matcher: startup|resume|clear).
 # Reads payload, emits hookSpecificOutput.additionalContext pointing model at latest checkpoint.
-# Also: spawns continue-injector.ps1 (Windows) so fresh session gets first prompt.
 # Ported from orch v2.2.0; adapted paths (phase-1-core.md → docs/DAY_1_CHECKLIST.md) +
 # removed orch worktree sweep + added queued-grill-master fire_when scan.
+#
+# S184 D-042: continue-injector spawn block extracted into continue-injector-spawn.sh,
+# wired LAST in SessionStart chain. Reason — empirically the nested powershell.exe
+# Start-Process spawn truncates the SessionStart hook chain on Windows after the
+# spawning hook completes (S183 root-cause finding); placing the spawn LAST means
+# the truncation no longer suppresses any downstream chain hook.
 set -euo pipefail
 trap 'exit 0' ERR
 
@@ -124,80 +129,8 @@ echo "[$(date -Iseconds)] SessionStart-bootstrap injected additionalContext" >> 
 printf 'ready_at=%s\nsession_id=%s\nsource=%s\n' "$(date -Iseconds)" "${CLAUDE_SESSION_ID:-unknown}" "$SOURCE" \
   > "$PROJECT_DIR/agent-workspace/memory/.session-ready"
 
-# Spawn DETACHED continue-injector that SendKeys "continue" to fresh TUI.
-# GATING (S8 revision per user "no continue, why? fix" complaint, supersedes S7 unconditional gate):
-#   source=clear  → fire UNCONDITIONALLY (explicit user /clear → expects checkpoint resume; race risk low)
-#   source=resume → fire UNCONDITIONALLY (user invoked claude --resume → expects continuation)
-#   source=startup → gated by autonomous_mode=true (fresh launch; user likely typing own prompt → race risk high)
-# stale-prompt-detector.sh line 26 short-circuits literal "continue" prompt → no false stale-warning firing.
-EXEC_FILE="$PROJECT_DIR/agent-workspace/memory/current-execution.md"
-AUTONOMOUS_MODE="false"
-if [ -f "$EXEC_FILE" ]; then
-  AUTONOMOUS_MODE=$(awk -F': ' '/^\*\*autonomous_mode\*\*/ {print $2; exit}' "$EXEC_FILE" 2>/dev/null \
-    | awk '{print $1}' | tr -d '*' || echo "false")
-  AUTONOMOUS_MODE="${AUTONOMOUS_MODE:-false}"
-fi
-
-SHOULD_FIRE_INJECTOR="false"
-FIRE_REASON=""
-case "$SOURCE" in
-  clear)
-    # HH-H.3 (S48m): gate clear-branch by autonomous_mode + STOCKFORGE_FORCE_CONTINUE_ON_CLEAR
-    # override. Pre-S48m unconditionally fired — but a user-driven /clear with
-    # autonomous_mode=false (post-Phase-2.5 ratification gate) would race against
-    # the human typing their own first prompt. Override env var keeps the explicit-
-    # user-flow path fast.
-    if [ "${STOCKFORGE_FORCE_CONTINUE_ON_CLEAR:-0}" = "1" ]; then
-      SHOULD_FIRE_INJECTOR="true"
-      FIRE_REASON="source=clear + STOCKFORGE_FORCE_CONTINUE_ON_CLEAR=1 (override)"
-    elif [ "$AUTONOMOUS_MODE" = "true" ]; then
-      SHOULD_FIRE_INJECTOR="true"
-      FIRE_REASON="source=clear + autonomous_mode=true"
-    else
-      FIRE_REASON="source=clear + autonomous_mode=false (HH-H.3 gate; user-driven /clear → race risk)"
-    fi
-    ;;
-  resume)
-    SHOULD_FIRE_INJECTOR="true"
-    FIRE_REASON="source=resume (user invoked claude --resume)"
-    ;;
-  startup)
-    if [ "$AUTONOMOUS_MODE" = "true" ]; then
-      SHOULD_FIRE_INJECTOR="true"
-      FIRE_REASON="source=startup + autonomous_mode=true"
-    else
-      FIRE_REASON="source=startup + autonomous_mode=false (race risk with user typing)"
-    fi
-    ;;
-esac
-
-if [ "$SHOULD_FIRE_INJECTOR" = "true" ]; then
-  case "$(uname -s)" in
-    MINGW*|MSYS*|CYGWIN*)
-      PS_SCRIPT="$(cygpath -w "$PROJECT_DIR/scripts/hooks/continue-injector.ps1")"
-      powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass \
-        -Command "Start-Process -WindowStyle Hidden -FilePath powershell.exe -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','$PS_SCRIPT'" \
-        >/dev/null 2>&1 &
-      disown 2>/dev/null || true
-      ;;
-    Darwin)
-      nohup osascript -e 'delay 2.5' \
-        -e 'tell application "System Events" to keystroke "continue"' \
-        -e 'tell application "System Events" to key code 36' \
-        >/dev/null 2>&1 &
-      disown 2>/dev/null || true
-      ;;
-    Linux)
-      if command -v xdotool >/dev/null 2>&1; then
-        ( sleep 2.5; xdotool type --delay 30 "continue"; xdotool key Return ) \
-          >/dev/null 2>&1 &
-        disown 2>/dev/null || true
-      fi
-      ;;
-  esac
-  echo "[$(date -Iseconds)] SessionStart-bootstrap spawned continue-injector ($FIRE_REASON)" >> "$HOOK_LOG"
-else
-  echo "[$(date -Iseconds)] SessionStart-bootstrap SKIPPED continue-injector ($FIRE_REASON)" >> "$HOOK_LOG"
-fi
+# NOTE: continue-injector spawn moved to scripts/hooks/continue-injector-spawn.sh (S184 D-042)
+# wired LAST in SessionStart chain so its Windows-specific child-spawn truncation can no longer
+# suppress downstream chain hooks (vendor-api-probe through harness-health-self-scan).
 
 exit 0

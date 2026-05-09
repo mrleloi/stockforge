@@ -5,7 +5,10 @@
 # or session-self-reboot (Mode-B over wind-down, Mode-D over cliff).
 # Ported from orch v2.2.0 (verbatim with STOCKFORGE_* env rename + ORCH_* fallback).
 # Mode-D = clean-handoff (S14 mid-session add per user "why not autonomous continue?").
-# Detects: no A/B/C suspected + checkpoints/latest.md mtime within last 60s + autonomous_mode=true.
+# Detects: no A/B/C suspected + checkpoints/latest.md mtime within last STOCKFORGE_MODE_D_MAX_AGE seconds (default 300) + autonomous_mode=true.
+# S67-fix (M-S67-2): widened from 60s → 300s default after observed loop-break — post-checkpoint cleanup
+# tool calls (firing-test re-runs, final pytest, summary text) routinely consume 60-180s, pushing Stop
+# event past the legacy 60s gate. Override via env STOCKFORGE_MODE_D_MAX_AGE (e.g. 900 for 15min).
 # Pairs the existing failure-mode recovery with end-of-session continuation (clean session boundary).
 
 set -uo pipefail
@@ -211,12 +214,15 @@ if [[ "$PREMATURE_WINDOWN_HIT" == "suspected" ]]; then
   fi
 fi
 
-# === Mode-D auto-recovery (clean handoff — checkpoint just written within last 60s) ===
+# === Mode-D auto-recovery (clean handoff — checkpoint just written within last MAX_AGE seconds) ===
 # Triggers when session ends cleanly (no A/B/C suspected) AND latest checkpoint mtime is recent.
 # Recovery: tokens >= cliff (220K default) → session-self-reboot.sh (full reboot for fresh envelope);
 #           tokens < cliff → continue-injector.ps1 (just nudge "continue" to TUI).
 # L-S10-1 patterns: if/then/fi only; defensive integer validation.
+# S67-fix (M-S67-2): age threshold 60s → 300s default. Override via env STOCKFORGE_MODE_D_MAX_AGE.
 CLIFF_THR="${STOCKFORGE_CLIFF_TOKENS:-${ORCH_CLIFF_TOKENS:-220000}}"
+MODE_D_MAX_AGE="${STOCKFORGE_MODE_D_MAX_AGE:-${ORCH_MODE_D_MAX_AGE:-300}}"
+if ! [[ "$MODE_D_MAX_AGE" =~ ^[0-9]+$ ]]; then MODE_D_MAX_AGE=300; fi
 CHECKPOINT_FILE="$PROJECT_DIR/agent-workspace/memory/checkpoints/latest.md"
 
 MODE_D_FIRE=0
@@ -228,7 +234,7 @@ if [[ -z "${API_ERROR_HIT:-}" ]] && [[ -z "${PREMATURE_WINDOWN_HIT:-}" ]]; then
     CKPT_EPOCH="$(stat -c '%Y' "$CHECKPOINT_FILE" 2>/dev/null || echo 0)"
     if [[ "$NOW_EPOCH" =~ ^[0-9]+$ ]] && [[ "$CKPT_EPOCH" =~ ^[0-9]+$ ]]; then
       AGE_SEC=$(( NOW_EPOCH - CKPT_EPOCH ))
-      if [[ "$AGE_SEC" -ge 0 ]] && [[ "$AGE_SEC" -le 60 ]]; then
+      if [[ "$AGE_SEC" -ge 0 ]] && [[ "$AGE_SEC" -le "$MODE_D_MAX_AGE" ]]; then
         MODE_D_FIRE=1
       fi
     fi

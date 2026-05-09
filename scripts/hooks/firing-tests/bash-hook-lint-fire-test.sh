@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Firing-test for bash-hook-lint.sh patterns A/B/C/D extension (Phase 3.5 T3.4 + S54 refinement + S58 KI-S54-1 closure per L-S51-1).
+# Firing-test for bash-hook-lint.sh patterns A/B/C/D/E/F extension (Phase 3.5 T3.4 + S54 refinement + S58 KI-S54-1 closure per L-S51-1 + S80 L-S68-2 family three-variant promotion + S81 L-S80-2 Pattern F promotion + S117 Check 3 D-IDENTITY backfill per L-S69-1 self-reference rule).
 #
 # Stages synthetic hook scripts (dirty + clean) into a tempdir scripts/hooks/ layout,
 # runs bash-hook-lint pointed at the tempdir, and asserts:
@@ -22,6 +22,30 @@
 #     TC-D  : unanchored `grep -E 'S[0-9]+ NEXT'` flagged
 #     TC-D-anchored : anchored `grep -E '^S[0-9]+ NEXT'` NOT flagged
 #     TC-D-content : arbitrary content `grep "foo bar"` NOT flagged
+#   Check 9 — Pattern E (L-S68-2 family find/ls on possibly-missing path under pipefail+ERR-trap, NEW S80):
+#     TC-E-a  : single-path `find $DIR -name foo` flagged (S68+S75 variant)
+#     TC-E-b  : `ls $DIR/*.glob` flagged (S76 variant)
+#     TC-E-c  : multi-path `find $A $B $C -type f` flagged (S78 variant)
+#     TC-E-2null    : `find $DIR ... 2>/dev/null` NOT flagged (errors silenced)
+#     TC-E-altguard : `find $DIR ... || true` NOT flagged (alt-guarded)
+#     TC-E-dgaurd   : `[ -d "$DIR" ] && find "$DIR" ...` NOT flagged (same-line file-test guard)
+#     TC-E-multiline-2null : multi-line find with 2>/dev/null on tail continuation NOT flagged
+#     TC-E-nullglob : ls $dir/*.glob with `shopt -s nullglob` set NOT flagged
+#     TC-E-no-precondition : `find $DIR ...` in script WITHOUT pipefail+ERR-trap NOT flagged
+#     TC-E-conditional : `if find $DIR ...; then` NOT flagged (conditional consumes exit)
+#   Check 10 — Pattern F (L-S80-2 grep -c||echo capture trap, NEW S81):
+#     TC-F-a  : `VAR=$(grep -c X file || echo 0)` flagged (basic form)
+#     TC-F-b  : `VAR="$(grep -cE 'X' file 2>/dev/null || echo 0)"` flagged (quoted + 2>/dev/null + flag-combo)
+#     TC-F-existing : reuse of pipefail-alt-echo-grep.sh (S58 fixture; FIRST line `COUNT=$(grep -c ...)` matches Pattern F)
+#     TC-F-or-true : `VAR=$(grep -c ... || true)` NOT flagged (no echo N)
+#     TC-F-no-or : `VAR=$(grep -c ... )` NOT flagged (no || at all)
+#     TC-F-no-c-flag : `VAR=$(grep -E pat file || echo 0)` NOT flagged (grep without -c → not the trap)
+#     TC-F-comment : commented-line containing the pattern NOT flagged
+#   Check 3 — D-IDENTITY-AUTONOMOUS-REGRESSION (NEW S117 backfill; L-S69-1 self-reference allow-list):
+#     TC-D-IDENTITY-bare      : bare regression line (no denial / no negation) → flagged
+#     TC-D-IDENTITY-denial    : regression + existing denial markers (`forbidden|fabricated|...`) → NOT flagged
+#     TC-D-IDENTITY-negation  : regression in `no <pattern>` negation form (S117 NEW) → NOT flagged
+#     TC-D-IDENTITY-self-ref  : line referencing the lint check itself (`bash-hook-lint`/`D-IDENTITY`; S117 NEW) → NOT flagged
 #   TC-clean — pure clean hook NOT flagged for any check.
 #
 # Exit 0 = all assertions pass. Exit 1 = any assertion fail.
@@ -32,7 +56,7 @@ HOOK="$SCRIPT_DIR/../bash-hook-lint.sh"
 [ ! -f "$HOOK" ] && { echo "FAIL: hook script not found at $HOOK"; exit 1; }
 
 TEMPDIR=$(mktemp -d)
-trap 'rm -rf "$TEMPDIR"' EXIT
+trap '[ -n "${KEEP_TEMP:-}" ] && echo "(KEEP_TEMP set; tempdir at $TEMPDIR)" || rm -rf "$TEMPDIR"' EXIT
 
 mkdir -p "$TEMPDIR/scripts/hooks"
 mkdir -p "$TEMPDIR/agent-workspace/memory"
@@ -215,6 +239,169 @@ COUNT=$(grep -c "warning" "$LOG" || true)
 echo "$RESULT $COUNT"
 EOF
 
+# === Pattern E (Check 9) — TC-E-a: single-path `find $DIR -name foo` flagged (S68+S75 variant) ===
+cat > "$TEMPDIR/scripts/hooks/pipefail-find-single-path.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+DIR="$PROJECT_DIR/maybe-missing"
+RESULT=$(find "$DIR" -name '*.md' -mtime -1)
+echo "$RESULT"
+EOF
+
+# === Pattern E (Check 9) — TC-E-b: `ls $DIR/*.glob` flagged (S76 variant) ===
+cat > "$TEMPDIR/scripts/hooks/pipefail-ls-glob.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+DIR="$PROJECT_DIR/maybe-missing"
+FILES=$(ls "$DIR"/*.md)
+echo "$FILES"
+EOF
+
+# === Pattern E (Check 9) — TC-E-c: multi-path `find $A $B $C` flagged (S78 variant) ===
+cat > "$TEMPDIR/scripts/hooks/pipefail-find-multi-path.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+A="$PROJECT_DIR/dir1"
+B="$PROJECT_DIR/dir2"
+C="$PROJECT_DIR/dir3"
+RESULT=$(find "$A" "$B" "$C" -type f -name '*.md')
+echo "$RESULT"
+EOF
+
+# === Pattern E negative — TC-E-2null: 2>/dev/null silences errors ===
+cat > "$TEMPDIR/scripts/hooks/pipefail-find-2null.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+DIR="$PROJECT_DIR/maybe-missing"
+RESULT=$(find "$DIR" -name '*.md' 2>/dev/null)
+echo "$RESULT"
+EOF
+
+# === Pattern E negative — TC-E-altguard: `|| true` alt-guarded ===
+cat > "$TEMPDIR/scripts/hooks/pipefail-find-altguard.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+DIR="$PROJECT_DIR/maybe-missing"
+RESULT=$(find "$DIR" -name '*.md' || true)
+echo "$RESULT"
+EOF
+
+# === Pattern E negative — TC-E-dguard: same-line `[ -d "$DIR" ] && find` guard ===
+cat > "$TEMPDIR/scripts/hooks/pipefail-find-dguard.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+DIR="$PROJECT_DIR/maybe-missing"
+[ -d "$DIR" ] && find "$DIR" -name '*.md'
+EOF
+
+# === Pattern E negative — TC-E-multiline-2null: multi-line find with 2>/dev/null on tail ===
+# Mirrors charter-coherence-spot.sh + taskcompleted-audit.sh production form.
+cat > "$TEMPDIR/scripts/hooks/pipefail-find-multiline-2null.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+TARGETS="$(find "$PROJECT_DIR/dir1" \
+                "$PROJECT_DIR/dir2" \
+                "$PROJECT_DIR/dir3" \
+            -type f -name '*.md' 2>/dev/null | head -10)"
+echo "$TARGETS"
+EOF
+
+# === Pattern E negative — TC-E-nullglob: shopt -s nullglob covers ls glob no-match ===
+cat > "$TEMPDIR/scripts/hooks/pipefail-ls-nullglob.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+shopt -s nullglob
+DIR="$PROJECT_DIR/maybe-missing"
+FILES=$(ls "$DIR"/*.md)
+echo "$FILES"
+EOF
+
+# === Pattern E negative — TC-E-no-precondition: no pipefail+ERR-trap ===
+# Without the precondition, ERR trap can't fire silently — risk doesn't apply.
+cat > "$TEMPDIR/scripts/hooks/find-no-precondition.sh" <<'EOF'
+#!/usr/bin/env bash
+set -u
+DIR="$PROJECT_DIR/maybe-missing"
+RESULT=$(find "$DIR" -name '*.md')
+echo "$RESULT"
+EOF
+
+# === Pattern E negative — TC-E-conditional: `if find ...; then` form ===
+cat > "$TEMPDIR/scripts/hooks/pipefail-find-conditional.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+DIR="$PROJECT_DIR/maybe-missing"
+if find "$DIR" -mtime -1 2>/dev/null | grep -q .; then
+  echo "found"
+fi
+EOF
+
+# === Pattern F (Check 10) — TC-F-a: basic `VAR=$(grep -c X file || echo 0)` flagged ===
+cat > "$TEMPDIR/scripts/hooks/grep-c-or-echo-basic.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+LOG="$PROJECT_DIR/log.txt"
+COUNT=$(grep -c 'foo' "$LOG" || echo 0)
+echo "$COUNT"
+EOF
+
+# === Pattern F (Check 10) — TC-F-b: quoted form with 2>/dev/null + flag-combo `-cE` ===
+cat > "$TEMPDIR/scripts/hooks/grep-c-or-echo-quoted-flagcombo.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+LOG="$PROJECT_DIR/log.txt"
+COUNT="$(grep -cE 'foo|bar' "$LOG" 2>/dev/null || echo 0)"
+if [ "$COUNT" -gt 0 ] 2>/dev/null; then echo "found"; fi
+EOF
+
+# === Pattern F negative — TC-F-or-true: `|| true` (no echo N) NOT flagged ===
+cat > "$TEMPDIR/scripts/hooks/grep-c-or-true.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+LOG="$PROJECT_DIR/log.txt"
+COUNT=$(grep -c 'foo' "$LOG" || true)
+echo "$COUNT"
+EOF
+
+# === Pattern F negative — TC-F-no-or: no `||` at all NOT flagged ===
+cat > "$TEMPDIR/scripts/hooks/grep-c-no-or.sh" <<'EOF'
+#!/usr/bin/env bash
+set -u
+LOG="$PROJECT_DIR/log.txt"
+COUNT=$(grep -c 'foo' "$LOG")
+echo "$COUNT"
+EOF
+
+# === Pattern F negative — TC-F-no-c-flag: grep without `-c` flag NOT flagged ===
+# `grep -E pat file || echo 0` is NOT the L-S80-2 trap (no count emission; if grep fails,
+# only echo's "0" lands in capture — single-line "0", not multi-line "0\n0").
+cat > "$TEMPDIR/scripts/hooks/grep-no-c-or-echo.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+LOG="$PROJECT_DIR/log.txt"
+RESULT=$(grep -E '^foo' "$LOG" || echo 0)
+echo "$RESULT"
+EOF
+
+# === Pattern F negative — TC-F-comment: commented-out line NOT flagged ===
+cat > "$TEMPDIR/scripts/hooks/grep-c-comment.sh" <<'EOF'
+#!/usr/bin/env bash
+set -u
+LOG="$PROJECT_DIR/log.txt"
+# COUNT=$(grep -c 'foo' "$LOG" || echo 0)  -- this is a doc comment showing the antipattern
+COUNT=0
+echo "$COUNT"
+EOF
+
 # === TC-clean: clean hook NOT flagged for any check ===
 cat > "$TEMPDIR/scripts/hooks/clean-hook.sh" <<'EOF'
 #!/usr/bin/env bash
@@ -223,6 +410,35 @@ LOG="$PROJECT_DIR/log.txt"
 mkdir -p "$(dirname "$LOG")"
 printf '[%s] hello\n' "$(date)" >> "$LOG"
 exit 0
+EOF
+
+# === Check 3 (D-IDENTITY-AUTONOMOUS-REGRESSION) fixtures (NEW S117) ===
+# Stage live-target markdown files in $TEMPDIR/agent-workspace/constitution/.
+# Check 3 scans these for SUPERVISED|autonomous_mode:false|until Track 7 patterns.
+mkdir -p "$TEMPDIR/agent-workspace/constitution"
+
+# TC-D-IDENTITY-bare: regression line with NO denial / NO negation / NO self-ref → SHOULD flag
+cat > "$TEMPDIR/agent-workspace/constitution/d-identity-tc-bare.md" <<'EOF'
+# Stub Doctrine
+Default mode is SUPERVISED mode until Track 7 completes.
+EOF
+
+# TC-D-IDENTITY-denial: regression line with denial marker (existing allow-list) → NOT flagged
+cat > "$TEMPDIR/agent-workspace/constitution/d-identity-tc-denial.md" <<'EOF'
+# Doctrine: Denial Form
+The fabricated SUPERVISED mode framing is forbidden — never user-authorized.
+EOF
+
+# TC-D-IDENTITY-negation: regression line with `no <pattern>` negation form (S117 NEW allow-list) → NOT flagged
+cat > "$TEMPDIR/agent-workspace/constitution/d-identity-tc-negation.md" <<'EOF'
+# Doctrine: Negation Form
+There is no SUPERVISED bifurcation, no human-in-the-loop default mode, no "until Track 7" gate.
+EOF
+
+# TC-D-IDENTITY-self-ref: line referencing the lint check itself (S117 NEW allow-list) → NOT flagged
+cat > "$TEMPDIR/agent-workspace/constitution/d-identity-tc-self-ref.md" <<'EOF'
+# Doctrine: Self-Reference
+The drift signal `bash-hook-lint.sh § D-IDENTITY` scans LIVE config for `SUPERVISED|autonomous_mode:\s*false|until Track 7` regression and soft-warns.
 EOF
 
 chmod +x "$TEMPDIR/scripts/hooks/"*.sh
@@ -262,6 +478,31 @@ assert_NOT_flagged() {
   fi
 }
 
+assert_flagged_path() {
+  # $1=label, $2=violation_code, $3=relative_path (full; e.g. "agent-workspace/constitution/foo.md")
+  # Used for Check 3 (D-IDENTITY) which emits with full file path, not basename.
+  if grep -qE "${2}: ${3} " "$LOG"; then
+    echo "PASS [${1}] ${2} detected on ${3}"
+    PASS=$((PASS+1))
+  else
+    echo "FAIL [${1}] ${2} NOT detected on ${3}"
+    grep -E "${3}|${2}" "$LOG" || echo "(no matches)"
+    FAIL=$((FAIL+1))
+  fi
+}
+
+assert_NOT_flagged_path() {
+  # $1=label, $2=violation_code, $3=relative_path (full)
+  if grep -qE "${2}: ${3} " "$LOG"; then
+    echo "FAIL [${1}] false-positive: ${2} flagged on ${3}"
+    grep -E "${3}" "$LOG" || true
+    FAIL=$((FAIL+1))
+  else
+    echo "PASS [${1}] no false-positive: ${2} NOT on ${3}"
+    PASS=$((PASS+1))
+  fi
+}
+
 # Check 5 — Pattern A
 assert_flagged "TC-A" "M-S51-1-IMAGINED-FORMAT" "imagined-format-grep"
 
@@ -290,8 +531,39 @@ assert_flagged "TC-D" "L-S53-2-UNANCHORED-POSITIONAL-GREP" "unanchored-positiona
 assert_NOT_flagged "TC-D-anchored" "L-S53-2-UNANCHORED-POSITIONAL-GREP" "anchored-positional-grep"
 assert_NOT_flagged "TC-D-content"  "L-S53-2-UNANCHORED-POSITIONAL-GREP" "content-grep"
 
-# TC-clean — no violations on clean-hook.sh for ANY check
-if grep -qE "(M-S51-1|L-S48m-1|L-S48d-1|L-S53-2).*clean-hook" "$LOG"; then
+# Check 9 — Pattern E (NEW S80; L-S68-2 family three-variant)
+assert_flagged "TC-E-a" "L-S68-2-FIND-LS-MISSING-PATH" "pipefail-find-single-path"
+assert_flagged "TC-E-b" "L-S68-2-FIND-LS-MISSING-PATH" "pipefail-ls-glob"
+assert_flagged "TC-E-c" "L-S68-2-FIND-LS-MISSING-PATH" "pipefail-find-multi-path"
+
+# Check 9 negative
+assert_NOT_flagged "TC-E-2null"            "L-S68-2-FIND-LS-MISSING-PATH" "pipefail-find-2null"
+assert_NOT_flagged "TC-E-altguard"         "L-S68-2-FIND-LS-MISSING-PATH" "pipefail-find-altguard"
+assert_NOT_flagged "TC-E-dguard"           "L-S68-2-FIND-LS-MISSING-PATH" "pipefail-find-dguard"
+assert_NOT_flagged "TC-E-multiline-2null"  "L-S68-2-FIND-LS-MISSING-PATH" "pipefail-find-multiline-2null"
+assert_NOT_flagged "TC-E-nullglob"         "L-S68-2-FIND-LS-MISSING-PATH" "pipefail-ls-nullglob"
+assert_NOT_flagged "TC-E-no-precondition"  "L-S68-2-FIND-LS-MISSING-PATH" "find-no-precondition"
+assert_NOT_flagged "TC-E-conditional"      "L-S68-2-FIND-LS-MISSING-PATH" "pipefail-find-conditional"
+
+# Check 10 — Pattern F (NEW S81; L-S80-2 grep -c||echo capture trap)
+assert_flagged "TC-F-a"        "L-S80-2-GREP-C-OR-ECHO-CAPTURE-TRAP" "grep-c-or-echo-basic"
+assert_flagged "TC-F-b"        "L-S80-2-GREP-C-OR-ECHO-CAPTURE-TRAP" "grep-c-or-echo-quoted-flagcombo"
+assert_flagged "TC-F-existing" "L-S80-2-GREP-C-OR-ECHO-CAPTURE-TRAP" "pipefail-alt-echo-grep"
+
+# Check 10 negative
+assert_NOT_flagged "TC-F-or-true"    "L-S80-2-GREP-C-OR-ECHO-CAPTURE-TRAP" "grep-c-or-true"
+assert_NOT_flagged "TC-F-no-or"      "L-S80-2-GREP-C-OR-ECHO-CAPTURE-TRAP" "grep-c-no-or"
+assert_NOT_flagged "TC-F-no-c-flag"  "L-S80-2-GREP-C-OR-ECHO-CAPTURE-TRAP" "grep-no-c-or-echo"
+assert_NOT_flagged "TC-F-comment"    "L-S80-2-GREP-C-OR-ECHO-CAPTURE-TRAP" "grep-c-comment"
+
+# Check 3 — D-IDENTITY-AUTONOMOUS-REGRESSION (NEW S117 backfill)
+assert_flagged_path     "TC-D-IDENTITY-bare"     "D-IDENTITY-AUTONOMOUS-REGRESSION" "agent-workspace/constitution/d-identity-tc-bare.md"
+assert_NOT_flagged_path "TC-D-IDENTITY-denial"   "D-IDENTITY-AUTONOMOUS-REGRESSION" "agent-workspace/constitution/d-identity-tc-denial.md"
+assert_NOT_flagged_path "TC-D-IDENTITY-negation" "D-IDENTITY-AUTONOMOUS-REGRESSION" "agent-workspace/constitution/d-identity-tc-negation.md"
+assert_NOT_flagged_path "TC-D-IDENTITY-self-ref" "D-IDENTITY-AUTONOMOUS-REGRESSION" "agent-workspace/constitution/d-identity-tc-self-ref.md"
+
+# TC-clean — no violations on clean-hook.sh for ANY check (now includes L-S80-2)
+if grep -qE "(M-S51-1|L-S48m-1|L-S48d-1|L-S53-2|L-S68-2|L-S80-2).*clean-hook" "$LOG"; then
   echo "FAIL [TC-clean] false-positive on clean-hook.sh"
   grep "clean-hook" "$LOG" || true
   FAIL=$((FAIL+1))

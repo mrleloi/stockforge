@@ -27,12 +27,27 @@ trap 'exit 0' ERR
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 MEMORY_DIR="$PROJECT_DIR/agent-workspace/memory"
 SYNC_HOOK="$PROJECT_DIR/scripts/hooks/sync-tracker-update.sh"
-SESSION_ID="${CLAUDE_SESSION_ID:-default}"
-MARKER="$MEMORY_DIR/.sync-tracker-fired-${SESSION_ID}"
+# L-S108-1 fix (S109): per-session marker MUST use hour-bucket, NEVER fallback constant.
+# CLAUDE_SESSION_ID empty for Stop hooks on Windows → fallback "default" shared across
+# ALL sessions (M-S108-1 RCA: stale .sync-tracker-fired-default from S48g blocked
+# hook S99-S108). SESSION_ID still captured for log + sync-tracker invocation labels.
+SESSION_ID="${CLAUDE_SESSION_ID:-}"
+BUCKET="$(date +%Y%m%d-%H 2>/dev/null)"
+[ -z "$BUCKET" ] && BUCKET="unbucketed-$$"
+MARKER="$MEMORY_DIR/.sync-tracker-fired-${BUCKET}"
 LOG="$MEMORY_DIR/.session-hooks.log"
 TS="$(date -Iseconds 2>/dev/null || date '+%Y-%m-%dT%H:%M:%S')"
 
-# Idempotent: bail if already fired this session.
+# Cleanup stale markers from prior buckets (L-S108-1 prevention).
+for old_marker in "$MEMORY_DIR"/.sync-tracker-fired-*; do
+  [ -f "$old_marker" ] || continue
+  case "$old_marker" in
+    *".sync-tracker-fired-${BUCKET}") ;;
+    *) rm -f "$old_marker" 2>/dev/null ;;
+  esac
+done
+
+# Idempotent: bail if already fired this hour-bucket.
 [ -f "$MARKER" ] && exit 0
 
 # Bail if sync-tracker-update.sh missing.
@@ -43,7 +58,12 @@ FIRED=0
 # Event 1: new ADRs authored this session (mtime <6h).
 DECISIONS_DIR="$MEMORY_DIR/decisions"
 if [ -d "$DECISIONS_DIR" ]; then
-  ADR_COUNT="$(find "$DECISIONS_DIR" -maxdepth 1 -name 'D-*.md' -mmin -360 2>/dev/null | wc -l | tr -d '[:space:]' || echo 0)"
+  # D-039 fix: real ADRs use NNN-*.md naming (38 files); 'D-*.md' alone matched 0 since hook inception.
+  # Backward-compat dual-glob mirrors D-038 Option E pattern: primary NNN-*.md + secondary D-*.md.
+  # pattern-lint-skip: dual-glob `\( -name NNN -o -name D \)` — D-*.md is intentional backward-compat
+  # branch; full expression matches via NNN branch (~38 files); per-greedy-regex GLOB extraction
+  # picks last -name and would false-positive on D-*.md alone.
+  ADR_COUNT="$(find "$DECISIONS_DIR" -maxdepth 1 \( -name '[0-9][0-9][0-9]-*.md' -o -name 'D-*.md' \) -mmin -360 2>/dev/null | wc -l | tr -d '[:space:]' || echo 0)"
   [[ "$ADR_COUNT" =~ ^[0-9]+$ ]] || ADR_COUNT=0
   if [ "$ADR_COUNT" -gt 0 ]; then
     # Cap at 3 fires to avoid runaway when bulk ADRs land.
@@ -61,7 +81,7 @@ if [ -f "$DRIFT_LOG" ]; then
   # Use today's date prefix to scope to today (avoid stale-bucket false positive).
   TODAY="$(date -u +%Y-%m-%d 2>/dev/null || true)"
   if [ -n "$TODAY" ]; then
-    HIGH_TODAY="$(grep "^\[${TODAY}" "$DRIFT_LOG" 2>/dev/null | grep -c "severity=HIGH" || echo 0)"
+    HIGH_TODAY="$(grep "^\[${TODAY}" "$DRIFT_LOG" 2>/dev/null | grep -c "severity=HIGH" || true)"
     [[ "$HIGH_TODAY" =~ ^[0-9]+$ ]] || HIGH_TODAY=0
     if [ "$HIGH_TODAY" -gt 0 ]; then
       bash "$SYNC_HOOK" DECISION_ROUTING drift_signal "" "auto-S${SESSION_ID:0:8}-drift" "" "auto-detected $HIGH_TODAY HIGH-drift events today" >/dev/null 2>&1 || true

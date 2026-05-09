@@ -1,7 +1,0 @@
-# Drift-detector scheduled run due
-
-**Triggered at**: 2026-05-06T07:52:49+07:00
-**Reason**: 493896h elapsed since last drift-detector dispatch (interval = 6h)
-**Action**: Main session at next SessionStart should dispatch `drift-detector` subagent (Opus per routing-config; ~30-60K)
-**Output**: agent-workspace/memory/drift-logs/scheduled-2026-05-06-07.md
-**Clear marker**: rm /c/htdocs/stockforge/agent-workspace/memory/.drift-detector-due post-dispatch

@@ -1,8 +1,76 @@
 ---
 schema_version: 1
 created_at: 2026-04-29
-updated_at: 2026-05-05
-last_check: 2026-05-05
+updated_at: 2026-05-07
+last_check: 2026-05-07
+last_check_session: S170
+last_check_outcome: |
+  S83 sync-grilling refresher (auto-tiered; no AskUserQuestion fired):
+  - Rationale: zero new SCOPE-tier divergence signal in S81+S82 work (pure harness routine — Pattern F Check 10 lint promotion at S81 + retroactive backfill of 7 production scripts at S82 per L-S69-2 doctrine; 63/63 PASS regression sustained both sessions). No charter / BC / process changes.
+  - Identity (sync-007/008/013): unchanged from S68/S23 confirmed-aligned (AI-first VN stock advisory + self+3-5 peers + NOT-SaaS)
+  - BC decomposition (9 BCs / sync-015): unchanged from S68/S23 confirmed-aligned
+  - Process rules: sandwich pattern + verify-phase-before-next-phase still binding (S83 entry empirically re-verified S82 work BEFORE consuming DONE claim — 7-file `|| true` swap confirmed via Grep `|| echo 0` returning 0 hits at S82-edited lines + bash-hook-lint exit 0 + state.tsv last_updated_ts=2026-05-06T06:29:02Z = S80 event; verified BEFORE running S83 auto-tier)
+  - D8 orphan triage: RATIFIED-S68 (no pending action this transition)
+  - Phase 3.5 (010-S50) status: T1+T2+T3+T4+T7 ✅ COMPLETE (T7 closed-S73); T5+T6+T8 still pending charter-tier dispatch session (deferred per user-gate)
+  - All 5 sync categories scores still within MED tier: SCOPE 51.7 / DOMAIN 56.7 / DESIGN 54.8 / LANGUAGE 51.4 / DECISION_ROUTING 49.5 (MED-LOW). SCOPE must_grill_remaining=0 (decremented from 1 by S83 charter_match event per sync-tracker-update.sh lines 132-143).
+  - L-S49b-4 charter-coverage backlog: DRAINED at S79 (still drained — S81+S82 added zero promotion candidates; S81 promoted L-S80-2 → bash-hook-lint Check 10 directly without going through L-S49b-4 backlog).
+  - Pattern F Check 10 deterministic linter: PROMOTED-S81 (L-S80-2 grep-c||echo capture trap) + RETROACTIVE-BACKFILL-COMPLETED-S82 (7 production scripts; 0 NEW Pattern F violations sustained; 14 pre-existing carry-over remain — different lessons).
+  - Per "Full autonomous, no SUPERVISED mode" user binding: AskUserQuestion reserved for actual SCOPE/CHARTER divergence; auto-tier appropriate for periodic refresher with no signal
+  - DRIFT NOTE: S80 sync-grilling refresher event was recorded in events.tsv + state.tsv at S80 close but NOT in sync-state.md narrative — soft drift (M-S67-3-style under-recording). Backfilled in this S83 entry below.
+  - Recommend next sync-grilling at S86 (3 sessions out per existing cadence). If S84/S85 surface new SCOPE-tier signal (e.g., user prompt redirects scope OR Phase 3.5 T5+T6+T8 dispatched as charter-tier) → re-grill earlier.
+
+  S80 sync-grilling refresher (auto-tiered; no AskUserQuestion fired) [BACKFILLED at S83 — narrative was missing at S80 close despite events.tsv + state.tsv update]:
+  - Rationale: zero new SCOPE-tier divergence signal in S78+S79 work (pure harness routine — 5 firing-tests authored + L-S49b-4 backlog DRAINED 15→0 at S79; 63/63 PASS regression). No charter / BC / process changes.
+  - Identity (sync-007/008/013): unchanged from S68/S23 confirmed-aligned (AI-first VN stock advisory + self+3-5 peers + NOT-SaaS)
+  - BC decomposition (9 BCs / sync-015): unchanged from S68/S23 confirmed-aligned
+  - Process rules: sandwich pattern + verify-phase-before-next-phase still binding
+  - D8 orphan triage: RATIFIED-S68 (no pending action this transition)
+  - Phase 3.5 (010-S50) status: T1+T2+T3+T4+T7 ✅ COMPLETE; T5+T6+T8 still pending charter-tier dispatch
+  - Sync category scores: SCOPE 51.5 / DOMAIN 56.7 / DESIGN 54.8 / LANGUAGE 51.4 / DECISION_ROUTING 49.5
+  - L-S49b-4 charter-coverage backlog: DRAINED (was 8 → 0 across S78 + S79)
+  - L-S68-2 family three-variant linter: PROMOTED-S80 (Check 9 active in bash-hook-lint.sh)
+  - Per "Full autonomous, no SUPERVISED mode" user binding: AskUserQuestion reserved for actual SCOPE/CHARTER divergence; auto-tier appropriate
+  - Recommend next sync-grilling at S83 (3 sessions out per existing cadence). [HISTORICAL — superseded by S83 entry above]
+
+  S77 sync-grilling refresher (auto-tiered; no AskUserQuestion fired) [HISTORICAL — superseded by S83 entry above]:
+  - Rationale: zero new SCOPE-tier divergence signal in S75+S76 work (pure harness routine — 7 firing-tests authored S75-S76 + 2 hook bug fixes: memory-routing-audit L-S68-2 second instance at S75 + sync-grilling-trigger glob-vs-find variant at S76; 55/55 PASS regression). No charter / BC / process changes.
+  - Identity (sync-007/008/013): unchanged from S68/S23 confirmed-aligned (AI-first VN stock advisory + self+3-5 peers + NOT-SaaS)
+  - BC decomposition (9 BCs / sync-015): unchanged from S68/S23 confirmed-aligned
+  - Process rules: sandwich pattern + verify-phase-before-next-phase still binding (S77 entry empirically re-verified S76 work BEFORE consuming DONE claim — 4 firing-tests existence + 55-total-count + sync-grilling-trigger.sh fix line 45 + current-execution.md S76 header + checkpoint-S76 header all confirmed via Bash + Grep before sync-grilling refresh)
+  - D8 orphan triage: RATIFIED-S68 (no pending action this transition)
+  - Phase 3.5 (010-S50) status: T1+T2+T3+T4+T7 ✅ COMPLETE (T7 closed-S73); T5+T6+T8 still pending charter-tier dispatch session (deferred per user-gate)
+  - All 5 sync categories scores still within MED tier: SCOPE 50.7 / DOMAIN 56.7 / DESIGN 54.8 / LANGUAGE 51.4 / DECISION_ROUTING 49.5 (MED-LOW). SCOPE must_grill_remaining=2 (carry-over from prior smoke-tests) — no new SCOPE event since S71 to deplete (S74+S77 events are sync-grilling auto-tier refreshers, not divergence-resolution).
+  - L-S49b-4 charter-coverage backlog: 15 → 12 → 8 (S75 shipped 3 + S76 shipped 4); 8 hooks remaining (ghost-work-audit / proposal-bundle-advisor / checkpoint-marker-cleanup-resume / taskcompleted-audit / learning-index-rebuild / learning-loop-metric-check / research-scanner-output-validator / precompact-thesis-state-dump). NOT a SCOPE-tier signal — pure harness procedural execution per Phase 3.5 T7-followup mandate.
+  - Per "Full autonomous, no SUPERVISED mode" user binding: AskUserQuestion reserved for actual SCOPE/CHARTER divergence; auto-tier appropriate for periodic refresher with no signal
+  - Recommend next sync-grilling at S80 (3 sessions out per existing cadence). If S78/S79 surface new SCOPE-tier signal (e.g., user prompt redirects scope OR Phase 3.5 T5+T6+T8 dispatched as charter-tier) → re-grill earlier.
+
+  S74 sync-grilling refresher (auto-tiered; no AskUserQuestion fired) [HISTORICAL — superseded by S77 entry above]:
+  - Rationale: zero new SCOPE-tier divergence signal in S72+S73 work (pure harness routine — T7 deeper audit + 4 HH-A..HH-H firing-tests authored; 48/48 PASS regression). No charter / BC / process changes.
+  - Identity (sync-007/008/013): unchanged from S68/S23 confirmed-aligned (AI-first VN stock advisory + self+3-5 peers + NOT-SaaS)
+  - BC decomposition (9 BCs / sync-015): unchanged from S68/S23 confirmed-aligned
+  - Process rules: sandwich pattern + verify-phase-before-next-phase still binding (S73 T7-followup applied verify-phase-before-next-phase user memory verbatim — empirically re-verified S72 4-gap finding before authoring 4 firing-tests)
+  - D8 orphan triage: RATIFIED-S68 (no pending action this transition)
+  - Phase 3.5 (010-S50) status: T1+T2+T3+T4+T7 ✅ COMPLETE (T7 closed-S73); T5+T6+T8 still pending charter-tier dispatch session (deferred per user-gate)
+  - All 5 sync categories scores still within MED tier: SCOPE 50.7 / DOMAIN 56.7 / DESIGN 54.8 / LANGUAGE 51.4 / DECISION_ROUTING 49.5 (MED-LOW). SCOPE must_grill_remaining=2 (carry-over from prior smoke-tests) — no new SCOPE event since S71 to deplete.
+  - Per "Full autonomous, no SUPERVISED mode" user binding: AskUserQuestion reserved for actual SCOPE/CHARTER divergence; auto-tier appropriate for periodic refresher with no signal
+  - Recommend next sync-grilling at S77 (3 sessions out per existing cadence). If S75/S76 surface new SCOPE-tier signal (e.g., user prompt redirects scope OR Phase 3.5 T5+T6+T8 dispatched as charter-tier) → re-grill earlier.
+
+  S71 sync-grilling refresher (auto-tiered; no AskUserQuestion fired):
+  - Rationale: zero new SCOPE-tier divergence signal in S69+S70 work (pure harness inline cleanup — D1+D2 hook deploys + L-S69-2 retroactive triage + Plan 010-S65 archive). No charter / BC / process changes.
+  - Identity (sync-007/008): unchanged from S68 confirmed-aligned (AI-first VN stock advisory + self+3-5 peers + NOT-SaaS)
+  - BC decomposition (9 BCs): unchanged from S68 confirmed-aligned
+  - Process rules: sandwich pattern + verify-phase-before-next-phase still binding (L-S69-2 procedure validated this S70)
+  - D8 orphan triage: RATIFIED-S68 (no pending action this transition)
+  - Phase 3.5 (010-S50) status: AMBIGUOUS — RETAINED in pending/ pending dedicated T1-T8 audit; not a SCOPE-tier divergence per se, just incomplete close ritual
+  - Per "Full autonomous, no SUPERVISED mode" user binding: AskUserQuestion reserved for actual SCOPE/CHARTER divergence; auto-tier appropriate for periodic refresher with no signal
+  - Recommend next sync-grilling at S74 (3 sessions out per existing cadence). If Phase 3.5 audit dispatched at S71/S72 and surfaces new SCOPE-tier signal → re-grill earlier. [HISTORICAL — superseded by S74 entry above]
+  
+  S68 sync-grilling refresher (4 Q AskUserQuestion bundle, all answered "Yes/unchanged"):
+  - Identity (sync-007/008): AI-first VN stock advisory + self+3-5 peers + NOT-SaaS — confirmed-aligned still
+  - BC decomposition (9 BCs): market_data / fundamental / company_intelligence / macro / news / influence / crowd / analysis / portfolio — confirmed-aligned still
+  - Process rules: sandwich pattern + verify-phase-before-next-phase — both binding + working as intended
+  - D8 orphan triage (Plan 011): defer all 3 to phase boundary (per spec default proposal)
+  No charter revisions; no BC restructure; no process changes. Recommend next sync-grilling at S71 (3 sessions out per existing cadence). [HISTORICAL — superseded by S71 entry above]
 description: |
   Single-source-of-truth audit of human-LLM mutual understanding ("sync state").
   Each item records ONE statement of intent + its current alignment state.

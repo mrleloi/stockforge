@@ -1,8 +1,10 @@
-# Provenance Protocol — DRAFT
+# Provenance Protocol — DEFERRED
 
-> **Status**: PROPOSAL — pending user approval in Track 7.
-> **Move-to-constitution**: When user approves, this file moves to `agent-workspace/constitution/provenance-protocol.md` and becomes binding. Until then, agents SHOULD follow it but it is not enforced by deny-list.
-> **Source decisions**: D-002 § Track 2 (REV-2) + Q&A clusters B/C/E (provenance + decision-id format + notification channels).
+> **Status**: DEFERRED (D-013 § Deferred ratified 2026-05-01 at S35; re-affirmed S38 batch answered bundle 2026-05-01-001 — "4 OTHER proposals (financial-data-protocol-amendment-VN, invariants-amendment-VN, architecture-amendment, provenance-protocol) were routed to **defer** with explicit re-trigger conditions per D-013").
+> **Re-trigger condition**: Phase 3 first thesis ships (per D-013 deferred-list policy — "provenance-protocol formal charter — Phase 3 first thesis ships").
+> **Status-field updated**: 2026-05-07 (S124 zombie-cleanup; hook proposal-bundle-advisor was firing false-positive on stale PROPOSAL status).
+> **Move-to-constitution**: When re-trigger condition met AND user approves, this file moves to `agent-workspace/constitution/provenance-protocol.md` and becomes binding. Until then, agents SHOULD follow it but it is not enforced by deny-list.
+> **Source decisions**: D-002 § Track 2 (REV-2) + Q&A clusters B/C/E (provenance + decision-id format + notification channels) + D-013 (defer-routing).
 > **Author**: Claude Opus 4.7, S2 (2026-04-29).
 
 ## Purpose

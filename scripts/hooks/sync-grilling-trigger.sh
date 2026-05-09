@@ -36,10 +36,13 @@ esac
 LAST_CHECK=$(grep -oE 'last_check:[[:space:]]*[0-9]{4}-[0-9]{2}-[0-9]{2}' "$SYNC_STATE" 2>/dev/null \
   | awk '{print $2}' | sort -r | head -1 || true)
 
-# Count sessions since last_check (count session log files dated after LAST_CHECK)
+# Count sessions since last_check (count session log files dated after LAST_CHECK).
+# NB: use `find` instead of `ls path/*.glob` — bash glob with zero matches errors under
+# pipefail+ERR-trap, causing silent exit before subsequent FIRED log write
+# (related anti-pattern family to L-S68-2 — find on possibly-missing path needing guard).
 SESSIONS_SINCE=0
 if [ -d "$SESSIONS_DIR" ] && [ -n "$LAST_CHECK" ]; then
-  SESSIONS_SINCE=$(ls "$SESSIONS_DIR"/*-session-*.md 2>/dev/null \
+  SESSIONS_SINCE=$(find "$SESSIONS_DIR" -maxdepth 1 -type f -name '*-session-*.md' 2>/dev/null \
     | awk -v cutoff="$LAST_CHECK" -F/ '{
         fname = $NF;
         if (match(fname, /^[0-9]{4}-[0-9]{2}-[0-9]{2}/)) {

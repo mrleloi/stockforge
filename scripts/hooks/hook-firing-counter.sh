@@ -76,7 +76,7 @@ for hook_name in $DECLARED; do
 
   # Check 2: hook basename appears in session-hooks.log (any 7-day entry).
   # Heuristic: grep -c "$base" — fixed-string-ish matching via -F to avoid regex pitfalls.
-  hits="$(grep -F -c "$base" "$HOOKS_LOG" 2>/dev/null || echo 0)"
+  hits="$(grep -F -c "$base" "$HOOKS_LOG" 2>/dev/null || true)"
   case "$hits" in
     ''|*[!0-9]*) hits=0 ;;
   esac
@@ -102,5 +102,11 @@ if [ "$SILENT_COUNT" -gt 0 ]; then
 else
   printf '[%s] hook-firing-counter: all %d declared hooks fired within 7d\n' "$TS" "$DECLARED_TOTAL" >> "$COUNTER_LOG"
 fi
+
+# S188 D-044 H-c test — emit minimal hookSpecificOutput JSON so Windows
+# UserPromptSubmit chain advances past this hook (S187 hypothesis: stdout JSON
+# emission is required for chain continuation across segment boundaries on
+# Claude Code Windows; this hook may be such a boundary at #5/#6).
+node -e "process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'UserPromptSubmit',additionalContext:''}}))" 2>/dev/null || true
 
 exit 0

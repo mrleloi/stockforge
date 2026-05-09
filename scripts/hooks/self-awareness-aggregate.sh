@@ -72,7 +72,7 @@ fi
 # subagents — DISPATCHED events in dispatch.jsonl
 subagents=0
 if [[ -r "$DISPATCH" ]]; then
-    subagents=$(grep -c '"event":"DISPATCHED"' "$DISPATCH" 2>/dev/null || echo 0)
+    subagents=$(grep -c '"event":"DISPATCHED"' "$DISPATCH" 2>/dev/null || true)
 fi
 
 # failure_codes — comma-separated A:N,B:M,C:N,... from non-null failure_mode in component-telemetry.jsonl

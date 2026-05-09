@@ -22,6 +22,10 @@ PROMPT_HEAD="$(printf '%s' "$USER_PROMPT" | head -c 80 | tr '[:upper:]' '[:lower
 TRIVIAL_REGEX='^(continue|ok|ok rồi\.? *continue|ok continue|yes|y|n|no|tiếp|skip|next|done)$'
 if [ -n "$PROMPT_HEAD" ] && printf '%s' "$PROMPT_HEAD" | grep -qE "$TRIVIAL_REGEX"; then
   echo "[$(date -Iseconds)] UserPromptSubmit-injector: SKIP (trivial prompt detected)" >> "$HOOK_LOG"
+  # S186 D-043 — emit minimal hookSpecificOutput JSON on SKIP path so Windows
+  # UserPromptSubmit hook chain advances past this hook (S185 hypothesis: stdout
+  # JSON emission is required for chain continuation on Claude Code Windows).
+  node -e "process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'UserPromptSubmit',additionalContext:''}}))" 2>/dev/null || true
   exit 0
 fi
 

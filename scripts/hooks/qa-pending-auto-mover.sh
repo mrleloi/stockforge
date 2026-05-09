@@ -5,7 +5,9 @@
 # `status:` starts with `answered-|closed-|resolved-` AND whose `wait_until:` (if
 # present) ISO-8601 timestamp is in the past, AND no global `.auto-mv-paused` kill
 # switch exists. Mv qualifying bundles to human-workspace/q-and-a/answered/.
-# Idempotent per session via marker file.
+# Idempotent per hour-bucket via marker file (L-S108-1: per-session intent
+# requires per-session signal; CLAUDE_SESSION_ID empty on Windows so we use
+# date hour-bucket instead).
 #
 # Bash + POSIX only per L-S11-1. Pipefail-bracket pattern per L-S48d-1.
 # Stop hook (priority: late chain — AFTER qa-stale-urgent-escalator.sh).
@@ -31,12 +33,28 @@ QA_ANS="$PROJECT_DIR/human-workspace/q-and-a/answered"
 KILL_SWITCH="$PROJECT_DIR/human-workspace/q-and-a/.auto-mv-paused"
 MEM_DIR="$PROJECT_DIR/agent-workspace/memory"
 LOG="$MEM_DIR/.qa-auto-mv.log"
-SID="${CLAUDE_SESSION_ID:-main}"
-MARKER="$MEM_DIR/.qa-auto-mv-fired-${SID}"
+# Marker uses HOUR-BUCKET (NOT $CLAUDE_SESSION_ID-with-fallback per L-S108-1).
+# Reason: $CLAUDE_SESSION_ID empty on Windows → fallback-to-constant ("main")
+# shares marker across all sessions → permanent idempotency lockout (M-S108-1
+# RCA: bundle stuck in pending/ for 24+h before discovery). Hour-bucket
+# self-recovers (next hour creates fresh marker) and works on Windows.
+BUCKET="$(date +%Y%m%d-%H 2>/dev/null)"
+[ -z "$BUCKET" ] && BUCKET="unbucketed-$$"  # PID fallback if date fails
+MARKER="$MEM_DIR/.qa-auto-mv-fired-${BUCKET}"
 TS="$(date -Iseconds)"
 NOW_EPOCH="$(date +%s 2>/dev/null || echo 0)"
 
-# Idempotency: skip if already fired this session
+# Cleanup stale markers from prior buckets (L-S108-1 prevention).
+# Keeps current bucket marker; removes all others matching pattern.
+for old_marker in "$MEM_DIR"/.qa-auto-mv-fired-*; do
+  [ -f "$old_marker" ] || continue  # glob no-match safety
+  case "$old_marker" in
+    *".qa-auto-mv-fired-${BUCKET}") ;;  # current bucket → keep
+    *) rm -f "$old_marker" 2>/dev/null ;;  # stale → delete
+  esac
+done
+
+# Idempotency: skip if already fired this hour-bucket
 [ -f "$MARKER" ] && exit 0
 
 mkdir -p "$(dirname "$LOG")" "$QA_ANS"
@@ -117,8 +135,8 @@ while IFS= read -r f; do
   fi
 done <<< "$PENDING_FILES"
 
-# Summary log + idempotency marker
-printf '[%s] qa-pending-auto-mover: session=%s moved=%d deferred=%d skipped=%d\n' "$TS" "$SID" "$MOVED" "$DEFERRED" "$SKIPPED" >> "$LOG"
+# Summary log + idempotency marker (hour-bucketed per L-S108-1)
+printf '[%s] qa-pending-auto-mover: bucket=%s moved=%d deferred=%d skipped=%d\n' "$TS" "$BUCKET" "$MOVED" "$DEFERRED" "$SKIPPED" >> "$LOG"
 echo "fired" > "$MARKER"
 
 # Soft-warn stderr only when non-zero mv

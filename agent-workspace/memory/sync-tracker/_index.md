@@ -1,7 +1,7 @@
 # Confidence Score Index — sync-tracker
 
 > **Auto-generated** by `scripts/hooks/sync-tracker-render.sh`. Do NOT edit by hand.
-> **Last rendered**: 2026-05-05T06:35:57Z
+> **Last rendered**: 2026-05-08T08:11:25Z
 > **Source**: D-006 (Track 8a) + Charter Principle 8 (Calibration over confidence)
 > **Storage**: bash+TSV flat-file MVP per IMPL-S17-1; SQLite migration deferred Phase 1+
 
@@ -12,8 +12,8 @@
 | LANGUAGE | 51.4 | 🟡 MED              (0.50-0.69) | 31 | 2026-05-05T15:00:00Z | 0 |
 | DOMAIN_UBIQUITOUS | 56.7 | 🟡 MED              (0.50-0.69) | 32 | 2026-05-05T10:00:00Z | 0 |
 | DESIGN_THINKING | 54.8 | 🟡 MED              (0.50-0.69) | 30 | 2026-05-05T13:30:00Z | 0 |
-| SCOPE | 50.7 | 🟡 MED              (0.50-0.69) | 30 | 2026-05-05T12:00:00Z | 2 |
-| DECISION_ROUTING | 49.5 | 🟠 MED-LOW          (0.30-0.49) | 30 | 2026-05-05T14:00:00Z | 0 |
+| SCOPE | 60.3 | 🟡 MED              (0.50-0.69) | 78 | 2026-05-08T08:11:24Z | 0 |
+| DECISION_ROUTING | 49.8 | 🟠 MED-LOW          (0.30-0.49) | 33 | 2026-05-06T16:03:19Z | 0 |
 
 ## Decision-Class Thresholds
 
@@ -30,16 +30,16 @@
 
 | ts | category | event_type | delta | decision_id | reason |
 |---|---|---|---|---|---|
-| 2026-05-05T13:30:00Z | DECISION_ROUTING | charter_match | 0.2 | sync-tracker-auto | sync-tracker auto-update Stop hook ship (HH-B.5) |
-| 2026-05-05T12:30:00Z | DECISION_ROUTING | charter_match | 0.2 | session-end-linter | session-end checklist linter Stop hook (HH-C.1) |
-| 2026-05-05T12:35:00Z | DECISION_ROUTING | charter_match | 0.2 | project-md-staleness | project.md staleness check Stop hook (HH-C.2) |
-| 2026-04-29T15:00:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | Q-A2-routing | drift leading indicator A=LOC ceiling routing rule |
-| 2026-04-29T19:00:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | Q-E1 | self-detect-drift D=defense-in-depth A+B+C combined |
-| 2026-04-29T19:30:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | Q-E2 | agent-notes promotion frequency A=phase-boundary only |
-| 2026-04-29T20:00:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | Q-E3 | promotion target priority D=Hook FIRST → Skill → Charter |
-| 2026-04-29T20:30:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | Q-E4 | drift recovery flow C=open Q&A bundle async |
-| 2026-05-04T17:30:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | L-S43f-1 | bundled deny-lift cycle for sibling charter proposals |
-| 2026-05-05T10:30:00Z | DECISION_ROUTING | q_and_a_resolution | 0.1 | L-S46-2 | post-/clear TaskList loss completion-check before re-dispatch |
+| 2026-05-07T03:06:28Z | SCOPE | charter_match | 0.2 | auto-S-adr-1 | auto-detected new ADR mtime <6h |
+| 2026-05-07T03:06:28Z | SCOPE | charter_match | 0.2 | auto-S-adr-2 | auto-detected new ADR mtime <6h |
+| 2026-05-07T03:06:29Z | SCOPE | charter_match | 0.2 | auto-S-adr-3 | auto-detected new ADR mtime <6h |
+| 2026-05-07T04:15:34Z | SCOPE | charter_match | 0.2 | auto-S-adr-1 | auto-detected new ADR mtime <6h |
+| 2026-05-07T04:15:35Z | SCOPE | charter_match | 0.2 | auto-S-adr-2 | auto-detected new ADR mtime <6h |
+| 2026-05-07T04:15:36Z | SCOPE | charter_match | 0.2 | auto-S-adr-3 | auto-detected new ADR mtime <6h |
+| 2026-05-07T05:02:12Z | SCOPE | charter_match | 0.2 | auto-S-adr-1 | auto-detected new ADR mtime <6h |
+| 2026-05-07T05:02:13Z | SCOPE | charter_match | 0.2 | auto-S-adr-2 | auto-detected new ADR mtime <6h |
+| 2026-05-07T05:02:14Z | SCOPE | charter_match | 0.2 | auto-S-adr-3 | auto-detected new ADR mtime <6h |
+| 2026-05-08T08:11:24Z | SCOPE | charter_match | 0.2 | auto-S-adr-1 | auto-detected new ADR mtime <6h |
 
 ## How to use
 
