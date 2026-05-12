@@ -1,0 +1,100 @@
+=== lock-rc-probe ===
+timestamp=2026-05-10T22:11:47+07:00
+
+--- SIGNAL 1: hook PID (1058996) ---
+hook_pid=1058996
+
+--- SIGNAL 2: hook PPID ($PPID) ---
+hook_ppid=1
+
+--- SIGNAL 3: ps -ef (full snapshot; look for claude.exe ancestor) ---
+     UID     PID    PPID  TTY        STIME COMMAND
+      PC 1059114 1059012 ?        22:11:47 /usr/bin/mkdir
+      PC 1059116 1059107 ?        22:11:47 /usr/bin/bash
+      PC 1058998       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/essential-routing-fields-verifier.sh 
+      PC 1059102 1059084 ?        22:11:47 awk $1=="??"{print $2} 
+      PC 1059029       1 ?        22:11:47 /usr/bin/bash
+      PC 1059012       1 ?        22:11:47 /usr/bin/bash
+      PC 1059094 1059074 ?        22:11:47 C:\nvm4w\nodejs\node.exe -e "
+let s=''; process.stdin.on('data',c=>s+=c);
+process.stdin.on('end',()=>{ try { console.log(JSON.parse(s).source||''); } catch { console.log(''); } });" 
+      PC 1058915 1058476 ?        22:11:46 C:\Users\PC\.local\bin\claude.exe s=''; Ñ 
+      PC 1059067 1058999 ?        22:11:47 grep -qi claude.exe 
+      PC 1059007       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/working-memory-budget-audit.sh 
+      PC 1058999       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/single-claude-instance-lock.sh 
+      PC 1059093 1059084 ?        22:11:47 /mingw64/bin/git
+      PC 1059080 1059017 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/session-start-scan-unattested-observations.sh 
+      PC 1059055 1058999 ?        22:11:47 /c/Windows/system32/tasklist
+      PC 1058996       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/lock-rc-probe.sh 
+      PC 1058319  199171 ?        22:11:32 sleep 30 
+      PC 1059106 1059080 ?        22:11:47 /usr/bin/grep
+      PC 1059009       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/ghost-work-audit.sh 
+      PC 1059084 1059009 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/ghost-work-audit.sh 
+      PC 1058474       1 ?        22:11:44 /usr/bin/bash
+      PC 1059018       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/in-flight-subagent-watcher.sh 
+      PC 1058475       1 ?        22:11:44 bash /c/htdocs/stockforge/scripts/hooks/in-flight-subagent-watcher.sh 
+      PC 1059070 1058474 ?        22:11:47 /c/nvm4w/nodejs/node
+      PC 1059017       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/session-start-scan-unattested-observations.sh 
+      PC 1059008       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/qa-answered-detector.sh 
+      PC 1059022       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/continue-injector-spawn.sh 
+      PC 1059014       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/proposal-bundle-advisor.sh 
+      PC 1059107 1059011 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/sync-grilling-trigger.sh 
+      PC 1059103 1059022 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/continue-injector-spawn.sh 
+      PC 1059113 1059084 ?        22:11:47 /usr/bin/grep
+      PC 1059104 1059007 ?        22:11:47 /usr/bin/bash
+      PC 1058476       1 ?        22:11:45 bash /c/htdocs/stockforge/scripts/hooks/effort-escalation-detector.sh 
+      PC 1059117 1059008 ?        22:11:47 /usr/bin/bash
+      PC 1059002       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/session-start-bootstrap.sh 
+      PC 1059074 1059002 ?        22:11:47 /usr/bin/bash
+      PC 1059004       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/qa-pending-stale-mover.sh 
+      PC 1059099 1058475 ?        22:11:47 /usr/bin/bash
+      PC 1059011       1 ?        22:11:47 bash /c/htdocs/stockforge/scripts/hooks/sync-grilling-trigger.sh 
+      PC 1059078 1059004 ?        22:11:47 /usr/bin/bash
+      PC 1059110 1058996 ?        22:11:47 ps -ef 
+      PC 1059097 1059018 ?        22:11:47 /usr/bin/bash
+      PC  199171       1 ?        18:42:39 /usr/bin/bash -c -l shopt -u extglob 2>/dev/null || true && eval 'TASKDIR="C:/Users/PC/AppData/Local/Temp/claude/C--htdocs-stockforge/a360e1cf-9578-4b42-a05d-cbc696797217/tasks"; until [ $(ls "$TASKDIR" | grep -E "be3tovanl|b7ojtpw59|b0rx8vu4d|b2ly8zhl0|bsuzggvjh" | xargs -I {} sh -c "grep -lE '"'"'Thesis written|CostBudgetExceeded|BearCaseInvariantError|Traceback|INCOMPLETE|exit code'"'"' '"'"'$TASKDIR/{}'"'"'" 2>/dev/null | wc -l) -ge 5 ]; do sleep 30; done; echo "ALL 5 DONE at $(date -u +%H:%M:%SZ)"' < /dev/null && pwd -P >| /c/Users/PC/AppData/Local/Temp/claude-36a8-cwd 
+
+--- SIGNAL 4: tasklist //V (all claude.exe processes) ---
+
+Image Name                     PID Session Name        Session#    Mem Usage Status          User Name                                              CPU Time Window Title                                                            
+========================= ======== ================ =========== ============ =============== ================================================== ============ ========================================================================
+claude.exe                   18176 Console                    1    887,208 K Unknown         DESKTOP-2MBMI7S\PC                                      1:46:40 N/A                                                                     
+claude.exe                   37136 Console                    1    290,876 K Unknown         DESKTOP-2MBMI7S\PC                                      0:00:01 N/A                                                                     
+claude.exe                   11540 Console                    1    106,716 K Unknown         DESKTOP-2MBMI7S\PC                                      0:00:00 N/A                                                                     
+claude.exe                   21048 Console                    1    106,720 K Unknown         N/A                                                     0:00:00 N/A                                                                     
+
+--- SIGNAL 5: wmic process where name='claude.exe' (ProcessId,ParentProcessId,CommandLine) ---
+(wmic unavailable)
+
+--- SIGNAL 6: env vars (CLAUDE_* | STOCKFORGE_* | SESSION*) ---
+CLAUDE_CODE_ENTRYPOINT=sdk-cli
+CLAUDE_CONFIG_DIR=C:\Users\PC\.ccs\instances\nathanleewindy
+CLAUDE_ENV_FILE=C:\Users\PC\.ccs\instances\nathanleewindy\session-env\f912562b-4e48-4818-96ec-65ff4f19a08b\sessionstart-hook-1.sh
+CLAUDE_PROJECT_DIR=/c/htdocs/stockforge
+SESSIONNAME=Console
+STOCKFORGE_CITATION_STRICT=0
+STOCKFORGE_CLIFF_TOKENS=220000
+STOCKFORGE_DRIFT_STRICT=0
+STOCKFORGE_HOOK_PORTABILITY_TIER=1
+STOCKFORGE_HOOK_PROFILE=standard
+STOCKFORGE_LOC_STRICT=0
+STOCKFORGE_SAME_COMMIT_STRICT=0
+STOCKFORGE_SPAWNED=false
+STOCKFORGE_WATCHDOG_DISABLE=0
+STOCKFORGE_WIND_DOWN_TOKENS=180000
+
+--- SIGNAL 7: stdin JSON payload (raw) ---
+{"session_id":"f912562b-4e48-4818-96ec-65ff4f19a08b","transcript_path":"C:\\Users\\PC\\.ccs\\instances\\nathanleewindy\\projects\\C--htdocs-stockforge\\f912562b-4e48-4818-96ec-65ff4f19a08b.jsonl","cwd":"C:\\htdocs\\stockforge","hook_event_name":"SessionStart","source":"startup"}
+
+--- SIGNAL 7 (parsed fields via node) ---
+hook_event_name="SessionStart"
+session_id="f912562b-4e48-4818-96ec-65ff4f19a08b"
+pid=""
+ppid=""
+parent_pid=""
+process_id=""
+cwd="C:\\htdocs\\stockforge"
+tool_name=""
+ALL_KEYS=["session_id","transcript_path","cwd","hook_event_name","source"]
+
+=== end lock-rc-probe ===

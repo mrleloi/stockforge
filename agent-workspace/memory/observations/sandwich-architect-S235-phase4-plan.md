@@ -1,0 +1,14 @@
+---
+observation_id: sandwich-architect-S235-phase4-plan
+type: sandwich-architect-output
+session: S235
+target: Phase 4 master plan authoring
+verdict: PLAN-DELIVERED
+plan_reference: agent-workspace/session-plans/pending/008-S235-phase-4-master-plan.md
+fresh_context: true
+agent_id: sandwich-architect-S235
+---
+
+# Sandwich-Architect S235 Observation — Phase 4 Master Plan
+
+I executed a fresh-context Phase 4 PLAN dispatch as sandwich-architect persona per AP-1 separation-of-roles doctrine. The deliverable is `agent-workspace/session-plans/pending/008-S235-phase-4-master-plan.md` (~510 LOC, frontmatter + 5 substantive Tracks A-E + 16-session decomposition S235-S251 + 8 Acceptance Criteria SC-1..SC-8 + 8-row risk register R-P4-1..R-P4-8 + 6 open questions Q-P4-1..Q-P4-6 with the first 4 pre-staged as a single AskUserQuestion mega-bundle for the parent's SCOPE-tier authorization gate). I honored the LEAN brief rule (L-S43f-2): I read exactly the 6 pre-reads specified by the parent (sandwich-verifier S234 observation; S232 dogfood summary; master-plan 007 §M reference; `bull_agent.py:140-180`; `use_case_builder.py:140-175`; `ingest_crowd_sentiment.py:150-180`) plus this workspace's own CLAUDE.md contract reminder; no speculative file expansion. I honored L-S204-1 empirical-probe-first by NOT picking a Track A bull-role-hardening winner armchair-style — instead the plan REQUIRES S236 to run a 3-strategy probe matrix (A1 strict-JSON-mode, A2 retry-validator, A3 sonnet-swap) on the canonical 5-ticker dogfood set BEFORE selection. I honored AP-23 cheapest-by-RISK by keeping Track E sustained-backlog as a single 60-100K bundle session (S248) and explicitly DEFERRING L-S222-2 + speculative items pending observed signal at Phase 4 mid-point. The plan does NOT enter Phase 4 IMPL — Track A is gated behind the Q-P4-1..Q-P4-4 SCOPE bundle and S236 is a probe (THESIS-type), not an IMPL session. I imputed roughly 14-18K main-context tokens for this dispatch. I wrote no production code, no settings.json edits, no charter writes, no constitution writes, no commits. Files read (absolute): `C:\htdocs\stockforge\agent-workspace\memory\observations\sandwich-verifier-S234-phase3-close.md`, `C:\htdocs\stockforge\agent-workspace\memory\thesis-log\2026-05-09-dogfood-summary-S232.md`, `C:\htdocs\stockforge\agent-workspace\session-plans\pending\007-S44-phase-3-master-plan.md`, `C:\htdocs\stockforge\packages\infrastructure\analysis\perspectives\bull_agent.py`, `C:\htdocs\stockforge\apps\_shared\use_case_builder.py`, `C:\htdocs\stockforge\apps\cli\ingest_crowd_sentiment.py`. Files written (absolute): `C:\htdocs\stockforge\agent-workspace\session-plans\pending\008-S235-phase-4-master-plan.md`, `C:\htdocs\stockforge\agent-workspace\memory\observations\sandwich-architect-S235-phase4-plan.md` (this file).

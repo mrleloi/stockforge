@@ -1,0 +1,51 @@
+=== lock-rc-probe ===
+timestamp=2026-05-10T22:30:42+07:00
+
+--- SIGNAL 1: hook PID (1107292) ---
+hook_pid=1107292
+
+--- SIGNAL 2: hook PPID ($PPID) ---
+hook_ppid=1106496
+
+--- SIGNAL 3: ps -ef (full snapshot; look for claude.exe ancestor) ---
+     UID     PID    PPID  TTY        STIME COMMAND
+      PC 1106787 1106495 ?        22:30:40 bash scripts/hooks/firing-tests/single-claude-instance-lock-fire-test.sh 
+      PC 1107308 1107292 ?        22:30:42 ps -ef 
+      PC 1107263 1107262 ?        22:30:42 bash /c/htdocs/stockforge/scripts/hooks/firing-tests/../single-claude-instance-lock.sh 
+      PC 1106496       1 ?        22:30:32 bash /c/htdocs/stockforge/scripts/hooks/pre-dispatch-adr-number-check.sh 
+      PC 1107262 1106787 ?        22:30:42 bash scripts/hooks/firing-tests/single-claude-instance-lock-fire-test.sh 
+      PC 1107292 1106496 ?        22:30:42 bash scripts/hooks/lock-rc-probe.sh 
+      PC 1106617  199171 ?        22:30:39 sleep 30 
+      PC 1107304 1107263 ?        22:30:42 bash /c/htdocs/stockforge/scripts/hooks/firing-tests/../single-claude-instance-lock.sh 
+      PC 1106495       1 ?        22:30:32 bash /c/htdocs/stockforge/scripts/hooks/effort-escalation-detector.sh 
+      PC  199171       1 ?        18:42:39 /usr/bin/bash -c -l shopt -u extglob 2>/dev/null || true && eval 'TASKDIR="C:/Users/PC/AppData/Local/Temp/claude/C--htdocs-stockforge/a360e1cf-9578-4b42-a05d-cbc696797217/tasks"; until [ $(ls "$TASKDIR" | grep -E "be3tovanl|b7ojtpw59|b0rx8vu4d|b2ly8zhl0|bsuzggvjh" | xargs -I {} sh -c "grep -lE '"'"'Thesis written|CostBudgetExceeded|BearCaseInvariantError|Traceback|INCOMPLETE|exit code'"'"' '"'"'$TASKDIR/{}'"'"'" 2>/dev/null | wc -l) -ge 5 ]; do sleep 30; done; echo "ALL 5 DONE at $(date -u +%H:%M:%SZ)"' < /dev/null && pwd -P >| /c/Users/PC/AppData/Local/Temp/claude-36a8-cwd 
+
+--- SIGNAL 4: tasklist //V (all claude.exe processes) ---
+
+Image Name                     PID Session Name        Session#    Mem Usage Status          User Name                                              CPU Time Window Title                                                            
+========================= ======== ================ =========== ============ =============== ================================================== ============ ========================================================================
+claude.exe                   18176 Console                    1    891,656 K Unknown         DESKTOP-2MBMI7S\PC                                      1:47:40 N/A                                                                     
+
+--- SIGNAL 5: wmic process where name='claude.exe' (ProcessId,ParentProcessId,CommandLine) ---
+(wmic unavailable)
+
+--- SIGNAL 6: env vars (CLAUDE_* | STOCKFORGE_* | SESSION*) ---
+CLAUDE_CODE_ENTRYPOINT=cli
+CLAUDE_CONFIG_DIR=C:\Users\PC\.ccs\instances\nathanleewindy
+CLAUDE_PROJECT_DIR=/c/htdocs/stockforge
+SESSIONNAME=Console
+STOCKFORGE_CITATION_STRICT=0
+STOCKFORGE_CLIFF_TOKENS=220000
+STOCKFORGE_DRIFT_STRICT=0
+STOCKFORGE_HOOK_PORTABILITY_TIER=1
+STOCKFORGE_HOOK_PROFILE=standard
+STOCKFORGE_LOC_STRICT=0
+STOCKFORGE_SAME_COMMIT_STRICT=0
+STOCKFORGE_SPAWNED=false
+STOCKFORGE_WATCHDOG_DISABLE=0
+STOCKFORGE_WIND_DOWN_TOKENS=180000
+
+--- SIGNAL 7: stdin JSON payload (raw) ---
+(stdin was empty)
+
+=== end lock-rc-probe ===

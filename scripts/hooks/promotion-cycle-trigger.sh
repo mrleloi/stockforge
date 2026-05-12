@@ -44,7 +44,10 @@ if [ -n "$LAST_PROMOTE_FILE" ]; then
   #   content-search of filename token (NOT header-parse). Per L-S55-1 retrofit
   #   recipe: ratify false-positive via this comment. Lint flag persists in surface
   #   log (acceptable per soft-warn surface).
-  LAST_PROMOTE_SESSION=$(basename "$LAST_PROMOTE_FILE" | grep -oE 'S[0-9]+' | tr -d 'S' || echo 0)
+  # head -1: filenames like `promote-rule-S245-L-S240-5-cycle.md` contain TWO `S<N>` matches
+  # (S245 = cycle session, S240 = referenced lesson ID). Without head -1, both lines reach $((..))
+  # → multi-line LAST_PROMOTE_SESSION → "syntax error in expression" + SESSION_DELTA unbound (S245 RC fix).
+  LAST_PROMOTE_SESSION=$(basename "$LAST_PROMOTE_FILE" | grep -oE 'S[0-9]+' | head -1 | tr -d 'S' || echo 0)
   LAST_PROMOTE_PHASE=$(grep -oE 'phase: [0-9]+' "$LAST_PROMOTE_FILE" 2>/dev/null | head -1 | grep -oE '[0-9]+' || echo 0)
 fi
 

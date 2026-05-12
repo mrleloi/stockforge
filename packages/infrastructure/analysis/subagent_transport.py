@@ -55,6 +55,14 @@ log = logging.getLogger(__name__)
 _INNER_FENCE_RE = re.compile(r"```(?:json)?\s*\n(.*?)\n```", re.DOTALL)
 _DEFAULT_TIMEOUT_SEC = 300
 
+# Per-role timeout overrides (ADR D-054 B5 asymmetric budget).
+# Quant uses 180s: interpretive-not-generative; tighter envelope keeps cost under cap.
+# Bear/Bull default to _DEFAULT_TIMEOUT_SEC (300s).
+# Keys are PerspectiveRole string values to avoid circular import from domain.
+_ROLE_TIMEOUT_OVERRIDES: dict[str, int] = {
+    "quant": 180,
+}
+
 
 class SubagentSubstrateError(RuntimeError):
     """Raised when claude CLI subprocess substrate fails irrecoverably."""
@@ -138,12 +146,18 @@ def claude_cli_transport(
     system_prompt: str,
     user_message: str,
     temperature: float,  # noqa: ARG001 — accepted for signature compatibility
+    role: str | None = None,
 ) -> tuple[str, int, int]:
     """Call claude CLI in print mode and return (text, input_tokens, output_tokens).
 
     `temperature` is accepted for signature compatibility but ignored — claude
     CLI does not expose a temperature flag (uses model defaults).
+
+    `role` is the PerspectiveRole string value used to look up per-role timeout
+    override from _ROLE_TIMEOUT_OVERRIDES (ADR D-054 B5 asymmetric budget).
+    None defaults to _DEFAULT_TIMEOUT_SEC (300s).
     """
+    timeout_sec = _ROLE_TIMEOUT_OVERRIDES.get(role or "", _DEFAULT_TIMEOUT_SEC)
     cmd = [
         "claude",
         "-p",
@@ -163,11 +177,11 @@ def claude_cli_transport(
             text=True,
             encoding="utf-8",  # Windows: avoid cp1252 default that crashes on UTF-8 bytes
             errors="replace",
-            timeout=_DEFAULT_TIMEOUT_SEC,
+            timeout=timeout_sec,
             check=False,
         )
     except subprocess.TimeoutExpired as exc:
-        raise SubagentSubstrateError(f"claude CLI timeout after {_DEFAULT_TIMEOUT_SEC}s") from exc
+        raise SubagentSubstrateError(f"claude CLI timeout after {timeout_sec}s") from exc
     except FileNotFoundError as exc:
         raise SubagentSubstrateError("claude CLI not found on PATH") from exc
 

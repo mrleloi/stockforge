@@ -1,0 +1,124 @@
+{
+  "ticker": "BVH",
+  "analysis_date": "2026-05-10",
+  "perspective": "BULL",
+  "conviction_grade": "INSUFFICIENT_DATA",
+  "key_points": [
+    {
+      "id": 1,
+      "category": "TECHNICAL",
+      "conviction": "WEAK",
+      "claim": "Extreme RSI oversold (7.24) signals potential mean-reversion opportunity",
+      "evidence": "RSI(14) = 7.24, well below standard oversold threshold of 30. Price 70500 VND near lower Bollinger Band (position -0.5514).",
+      "source_url": "SharedContext/BVH/TA-Features",
+      "source_excerpt": "rsi_14: 7.2368 -- formula: RS=avg_gain_14/avg_loss_14; RSI=100-100/(1+RS) -- Wilder 1978 | bollinger_position: -0.5514 -- formula: (close - SMA_20) / (2 * stdev_20) -- Bollinger 2002",
+      "caveat": "Mechanical oversold signal lacks fundamental anchor. Extreme RSI may indicate justified downtrend (sector weakness, company deterioration) rather than opportunity. Price data 5.5 days stale; current oversold condition unknown."
+    },
+    {
+      "id": 2,
+      "category": "TECHNICAL",
+      "conviction": "WEAK",
+      "claim": "Long-term uptrend structure partially intact (price above SMA200)",
+      "evidence": "Current price 70500 is 13.67% above the 200-day SMA (62019.45), suggesting primary uptrend may still be in place despite recent pullback.",
+      "source_url": "SharedContext/BVH/TA-Features",
+      "source_excerpt": "sma_200: 62019.450000 -- formula: sum(closes[-N:]) / N -- Hull TA Encyclopedia 2e §3 | Price vs SMA(200): +13.67%",
+      "caveat": "Point 1 contradiction: stock is 7.3% below SMA20 and 9.0% below SMA50, suggesting recent downtrend dominance. Uptrend structure is conflicted, not clean. High realized volatility (51.6% annualized) indicates unstable price action."
+    }
+  ],
+  "bear_case": [
+    {
+      "id": 1,
+      "category": "DATA_QUALITY",
+      "conviction": "STRONG",
+      "claim": "Severe information scarcity blocks proper fundamental analysis",
+      "evidence": "Zero news articles in last 90 days. No peer comparable data. Financial statements dated 2026-03-31 (6+ weeks old). Price data stale (last quote 2026-04-29).",
+      "source_url": "SharedContext/BVH/Data-Gaps",
+      "source_excerpt": "Data Gaps: ['price_stale', 'no_news_90d'] | News: 0 articles / 0 claims in last 90 days"
+    },
+    {
+      "id": 2,
+      "category": "TECHNICAL",
+      "conviction": "STRONG",
+      "claim": "Recent price action trend is downward (pullback 18% from 52-week high)",
+      "evidence": "Stock is 18.02% below 52-week high. Price currently below both 20-day and 50-day SMAs, indicating downtrend dominance in the last 6-8 weeks.",
+      "source_url": "SharedContext/BVH/TA-Features",
+      "source_excerpt": "pct_off_52w_high: -0.180233 | Price vs SMA(20): -7.30% | Price vs SMA(50): -9.01%"
+    },
+    {
+      "id": 3,
+      "category": "VALUATION",
+      "conviction": "MODERATE",
+      "claim": "PE valuation cannot be contextualized without peer/market baseline",
+      "evidence": "TTM PE is 17.73. Without peer average, market average, or historical BVH average, cannot assess if this is attractive, average, or rich valuation.",
+      "source_url": "SharedContext/BVH/TTM-Ratios",
+      "source_excerpt": "PE: 17.72692984661805380940407342 -- formula: price_per_share / eps_ttm -- Damodaran Investment Valuation 3e §17.1"
+    },
+    {
+      "id": 4,
+      "category": "VOLATILITY",
+      "conviction": "MODERATE",
+      "claim": "High realized volatility (51.6% annualized) indicates uncertainty and execution risk",
+      "evidence": "90-day realized volatility annualized = 51.6%, suggesting stock experiences wide daily swings and may continue unpredictable price action.",
+      "source_url": "SharedContext/BVH/TA-Features",
+      "source_excerpt": "realized_vol_90d_annualized: 0.515956 -- formula: stdev(log_returns[-90:]) * sqrt(252) -- Hull Options 11e §15.4"
+    },
+    {
+      "id": 5,
+      "category": "MACRO",
+      "conviction": "WEAK",
+      "claim": "Absence of positive news/catalysts in 90 days suggests no near-term momentum drivers",
+      "evidence": "Zero articles extracted from news sources in last 90 days. No visible catalyst for re-rating or recovery momentum.",
+      "source_url": "SharedContext/BVH/News",
+      "source_excerpt": "News: 0 articles / 0 claims in last 90 days"
+    }
+  ],
+  "catalysts": [
+    {
+      "event": "Q1 2026 earnings release",
+      "timeframe": "Within 30-60 days (typically late May)",
+      "likelihood": "HIGH",
+      "description": "Quarterly results could reignite investor interest if revenue/profit beat expectations or guidance improves. Currently no narrative momentum to anchor on.",
+      "bull_case_impact": "Positive earnings + improved guidance could reverse 18% pullback",
+      "source": "Typical Vietnam listed company Q-earnings window"
+    },
+    {
+      "event": "Macro policy shift (foreign investment rules, sector regulation)",
+      "timeframe": "Uncertain (weeks to months)",
+      "likelihood": "MODERATE",
+      "description": "Vietnam policy on foreign investor limits or sector-specific regulation could provide tailwind or headwind. No current signal available.",
+      "bull_case_impact": "Positive policy surprise could unlock foreign buying",
+      "source": "Vietnam macroeconomic / regulatory cycle"
+    },
+    {
+      "event": "Sector rotation or market sentiment shift",
+      "timeframe": "Days to weeks",
+      "likelihood": "MODERATE",
+      "description": "If broader Vietnam market sentiment turns positive and foreign flows increase, all domestic stocks may see relief rally. BVH currently lacks specific bullish narrative.",
+      "bull_case_impact": "Broad market sentiment reset could lift BVH off lows",
+      "source": "Market regime change signal"
+    }
+  ],
+  "data_caveats": [
+    "Price data is 5.5 days stale (2026-04-29 last quote). Stock may have moved significantly since; oversold condition may have reversed or worsened.",
+    "Zero news articles in 90 days limits ability to assess recent company developments, management changes, or sector trends.",
+    "Financial statements dated 2026-03-31; 6+ weeks old. Cannot assess whether reported metrics still hold.",
+    "No peer comparable data (sector average PE, peer growth rates, peer dividend yields) to contextualize valuation.",
+    "TTM PE of 17.73 cannot be assessed as attractive, average, or expensive without reference points.",
+    "Bull case is constructed purely from mechanical technical signals (oversold RSI). Lacks fundamental anchor or catalyst evidence.",
+    "Research-aid framing: This analysis is for exploration only. Oversold technicals do not constitute investment thesis without supporting fundamentals or catalysts."
+  ],
+  "framing": "research_aid",
+  "recommendation_statement": "No investment recommendation. Bull case for BVH is insufficient at current information level. Analysis highlights data scarcity as primary blocker. Awaiting Q1 2026 earnings, updated news flow, and peer-normalized valuation metrics before substantive bull thesis can be constructed. Oversold technical signal alone does not justify long position initiation without confirmed recovery catalyst.",
+  "quality_assessment": {
+    "bull_points_count": 2,
+    "bull_points_distinct_categories": 2,
+    "bull_points_meet_specificity_bar": false,
+    "bear_points_count": 5,
+    "bear_points_grounded": true,
+    "meets_i_s3_threshold": false,
+    "reason_i_s3_fail": "Only 2 key_points (requires >=3). Both are weak mechanical signals lacking fundamental anchor. Fails specificity rule (Rule 5): boilerplate oversold + uptrend signals without concrete business evidence.",
+    "source_completeness": "PARTIAL - all claims cite source_url + excerpt, but data gaps prevent substantive analysis",
+    "real_thesis": false,
+    "note": "This is a dogfood-stage analysis (per S239 acceptance gate). BVH is marked 'validation-exhausted persistent gap' — content insufficient for publishable thesis. Output provided for schema validation and anti-flake testing purposes."
+  }
+}

@@ -74,3 +74,183 @@ Resolution path: review each bundle frontmatter `status:` field; mv answered one
 **Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
 
 **Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:30:14+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 252274 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 7216 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:31:36+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 252472 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 7297 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:36:32+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 253141 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 7594 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:38:52+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 253451 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 7733 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:40:06+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 253493 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 7807 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:46:06+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 253831 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 8167 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:47:15+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 254240 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 8236 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:47:24+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 254617 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 8246 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:48:59+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 254906 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 8341 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:52:05+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 255267 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 8527 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:53:20+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 255463 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 8601 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:54:25+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 255755 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 8667 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:55:40+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 255789 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 8741 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:56:29+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 256071 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 8791 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:57:42+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 256179 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 8863 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-10T23:58:04+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 256507 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 8885 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-11T20:10:34+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 262764 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 72605 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
+
+## [2026-05-12T07:57:20+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
+
+**Session**: unknown
+**Tokens**: 186508 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 25001 seconds (>7200 threshold)
+
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
+
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.

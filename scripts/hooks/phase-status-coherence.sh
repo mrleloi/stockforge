@@ -27,7 +27,7 @@ trap 'exit 0' ERR
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 SID="${CLAUDE_SESSION_ID:-unknown}"
-EVENT="${CLAUDE_HOOK_EVENT:-UserPromptSubmit}"
+EVENT="${1:-${CLAUDE_HOOK_EVENT:-UserPromptSubmit}}"
 mkdir -p "$PROJECT_DIR/agent-workspace/memory" 2>/dev/null || true
 
 CE="$PROJECT_DIR/agent-workspace/memory/current-execution.md"

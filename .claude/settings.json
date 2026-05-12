@@ -145,6 +145,10 @@
           },
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/single-claude-instance-lock.sh\""
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/essential-routing-fields-verifier.sh\""
           },
           {
@@ -197,15 +201,15 @@
           },
           {
             "type": "command",
-            "command": "CLAUDE_HOOK_EVENT=SessionStart bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/idle-escape-detector.sh\""
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/idle-escape-detector.sh\" SessionStart"
           },
           {
             "type": "command",
-            "command": "CLAUDE_HOOK_EVENT=SessionStart bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/phase-status-coherence.sh\""
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/phase-status-coherence.sh\" SessionStart"
           },
           {
             "type": "command",
-            "command": "CLAUDE_HOOK_EVENT=SessionStart bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/harness-health-self-scan.sh\""
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/harness-health-self-scan.sh\" SessionStart"
           },
           {
             "type": "command",
@@ -229,6 +233,10 @@
           {
             "type": "command",
             "command": "mkdir -p \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory\" && echo \"[$(date -Iseconds)] SessionEnd session=$CLAUDE_SESSION_ID\" >> \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory/.session-hooks.log\""
+          },
+          {
+            "type": "command",
+            "command": "rm -f \"${CLAUDE_PROJECT_DIR:-.}/agent-workspace/memory/.claude-instance.lock\" 2>/dev/null; exit 0"
           },
           {
             "type": "command",
@@ -266,15 +274,15 @@
           },
           {
             "type": "command",
-            "command": "CLAUDE_HOOK_EVENT=UserPromptSubmit bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/idle-escape-detector.sh\""
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/idle-escape-detector.sh\" UserPromptSubmit"
           },
           {
             "type": "command",
-            "command": "CLAUDE_HOOK_EVENT=UserPromptSubmit bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/phase-status-coherence.sh\""
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/phase-status-coherence.sh\" UserPromptSubmit"
           },
           {
             "type": "command",
-            "command": "CLAUDE_HOOK_EVENT=UserPromptSubmit bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/harness-health-self-scan.sh\""
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/harness-health-self-scan.sh\" UserPromptSubmit"
           }
         ]
       }
@@ -321,6 +329,10 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/charter-coherence-spot.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/adr-empirical-close-verify-spot-check.sh\""
           },
           {
             "type": "command",
@@ -429,6 +441,10 @@
           {
             "type": "command",
             "command": "[ \"${STOCKFORGE_HOOK_PROFILE:-standard}\" = \"strict\" ] && bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/tool-call-first-lint.sh\" || :"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/firing-test-spawn-context-lint.sh\""
           }
         ]
       }

@@ -285,7 +285,7 @@ echo "[$TS] harness-health-self-scan: state=$STATE high=$HIGH medium=$MEDIUM low
 
 # Emit system-reminder ONLY if non-GREEN AND running under UserPromptSubmit (CLAUDE_HOOK_EVENT env or similar)
 # We detect UserPromptSubmit by checking if stdin is a JSON payload (UserPromptSubmit feeds JSON).
-EVENT="${CLAUDE_HOOK_EVENT:-unknown}"
+EVENT="${1:-${CLAUDE_HOOK_EVENT:-unknown}}"
 if [ "$STATE" != "GREEN" ] && [ "$EVENT" = "UserPromptSubmit" ]; then
   REMINDER="HARNESS-HEALTH-SELF-SCAN: state=$STATE (high=$HIGH medium=$MEDIUM)
 Failures: $FAIL_DETAILS

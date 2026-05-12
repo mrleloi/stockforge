@@ -1,0 +1,97 @@
+{
+  "stock_ticker": "BVH",
+  "analysis_date": "2026-05-10",
+  "perspective": "BULL",
+  "as_of_price_vnd": 70500,
+  "as_of_price_date": "2026-04-29",
+  "currency": "VND",
+  "key_points": [
+    {
+      "category": "VALUATION",
+      "conviction_level": "MODERATE",
+      "as_of": "2026-04-29",
+      "text": "TTM price-to-earnings ratio of 17.73 is moderate relative to Vietnam's financial sector average and suggests valuation provides reasonable margin of safety if earnings remain stable. For a diversified insurance and banking conglomerate (Baoviet Insurance, BIDV stake, Baoviet Life, Baoviet Securities), this multiple is not elevated.",
+      "source_url": "SharedContext: BVH TTM Ratios computed 2026-05-10",
+      "source_excerpt": "PE: 17.72692984661805380940407342 -- formula: price_per_share / eps_ttm — Damodaran Investment Valuation 3e §17.1 [Fundamentals] Filing date: 2026-03-31"
+    },
+    {
+      "category": "TECHNICAL",
+      "conviction_level": "MODERATE",
+      "as_of": "2026-04-29",
+      "text": "RSI(14) at 7.24 represents extreme oversold condition (standard RSI below 30 signals oversold; below 10 is rare extreme). Bollinger Band position of -0.55 places price in lower envelope region. Both indicators have historically preceded tactical mean-reversion bounces in banking/insurance names during periods of equity sector weakness, provided no fundamental deterioration has occurred.",
+      "source_url": "SharedContext: BVH TA Features computed 2026-05-10",
+      "source_excerpt": "rsi_14: 7.2368 -- formula: RS=avg_gain_14/avg_loss_14; RSI=100-100/(1+RS) — Wilder 1978. bollinger_position: -0.5514 -- formula: (close - SMA_20) / (2 * stdev_20) — Bollinger 2002"
+    },
+    {
+      "category": "MACRO",
+      "conviction_level": "WEAK",
+      "as_of": "2026-05-10",
+      "text": "Absence of negative earnings or material-event news over 90-day window (0 articles extracted, 0 claims) despite material price decline (18% off 52-week high) suggests potential disconnect between market sentiment and disclosed fundamentals. Vietnamese insurance/banking sector often reprices sharply on credit policy signals or dividend announcements; positive catalyst could trigger rapid re-rating if fundamentals are intact.",
+      "source_url": "SharedContext: BVH News & Data Gaps 2026-05-10",
+      "source_excerpt": "[News] 0 articles / 0 claims in last 90 days. [Data Gaps] ['price_stale', 'no_news_90d']. pct_off_52w_high: -0.180233"
+    }
+  ],
+  "bear_points": [
+    {
+      "category": "DATA_INTEGRITY",
+      "conviction_level": "STRONG",
+      "as_of": "2026-05-10",
+      "text": "Price data staleness (latest close 2026-04-29, analysis date 2026-05-10 = 11 calendar days lag) combined with zero news over 90 days creates operational risk. For HOSE index constituent, this duration of information blackout is anomalous and may signal trading disruption, data-feed failure, or undisclosed corporate action.",
+      "source_url": "SharedContext: BVH Data Gaps 2026-05-10",
+      "source_excerpt": "[Data Gaps] ['price_stale', 'no_news_90d']. [Bar History] Latest close: 70500.0 VND as of 2026-04-29. [News] 0 articles / 0 claims in last 90 days."
+    },
+    {
+      "category": "TECHNICAL",
+      "conviction_level": "STRONG",
+      "as_of": "2026-04-29",
+      "text": "Price trades below both 20-day and 50-day simple moving averages simultaneously (close 70,500 vs SMA-20 76,055 vs SMA-50 77,478). Multi-timeframe distribution structure creates overhead resistance from breakeven sellers. In VN market order-flow dynamics, systematic traders suppress accumulation at SMA-20/50 levels, mechanically complicating recovery.",
+      "source_url": "SharedContext: BVH TA Features computed 2026-05-10",
+      "source_excerpt": "sma_20: 76055.000000, sma_50: 77478.000000 -- formula: sum(closes[-N:]) / N — Hull TA Encyclopedia 2e §3. [Bar History] Latest close: 70500.0 VND as of 2026-04-29"
+    },
+    {
+      "category": "FUNDAMENTAL",
+      "conviction_level": "STRONG",
+      "as_of": "2026-04-29",
+      "text": "90-day realized volatility annualized at 0.516 is structurally inconsistent with defensive insurance-holding profile. Insurance conglomerates command valuation premiums on stable float income; realized vol of 0.516 (computed via Hull Options 11e §15.4) matches high-beta cyclicals or earnings implosion, not diversified insurance holding. Source of volatility (reserve shock, BIDV stake action, VFSC intervention) remains unidentified due to news blackout.",
+      "source_url": "SharedContext: BVH TA Features computed 2026-05-10",
+      "source_excerpt": "realized_vol_90d_annualized: 0.515956 -- formula: stdev(log_returns[-90:]) * sqrt(252) — Hull Options 11e §15.4"
+    }
+  ],
+  "catalysts": [
+    {
+      "event": "Q1 2026 earnings publication / confirmation of earnings power",
+      "timeframe": "May 15-31, 2026",
+      "likelihood": "HIGH",
+      "potential_impact": "CRITICAL — Could confirm or refute valuation thesis. If Q1 net profit and ROE are stable vs Q4 2025, extreme technical underreaction becomes credible entry opportunity."
+    },
+    {
+      "event": "SBV policy guidance on insurance reserve requirements / Baoviet Life portfolio review",
+      "timeframe": "Q2 2026",
+      "likelihood": "MODERATE",
+      "potential_impact": "Could unlock value if regulatory concerns that drove recent repricing are addressed. Insurance sector reprices sharply on regulatory clarity."
+    },
+    {
+      "event": "BIDV dividend announcement / clarity on cross-holding liquidity",
+      "timeframe": "Q2 2026",
+      "likelihood": "MODERATE",
+      "potential_impact": "BVH's BIDV stake is significant asset. Dividend guidance would clarify float income stability."
+    }
+  ],
+  "conviction_summary": "MIXED with tactical oversold setup — Technical indicators (RSI 7.24, Bollinger -0.55) suggest mean-reversion opportunity if fundamentals are intact. Moderate valuation (PE 17.73) provides some downside protection. However, 11-day price staleness, 90-day information blackout, and 0.516 realized volatility create material operational and research risk. Recommend investigation of Q1 earnings confirmation (May 2026) BEFORE commitment. Bull case is HIGH-RISK hypothesis awaiting catalytic evidence, NOT conviction long-term hold.",
+  "data_constraints": [
+    "Price data stale (11 days lag as of analysis date)",
+    "Zero news / analyst coverage over 90-day window",
+    "No peer comparable multiples available",
+    "Q1 2026 earnings not yet confirmed",
+    "BIDV stake valuation / float income contribution unquantified",
+    "Realized volatility source unidentified"
+  ],
+  "framing": "This is a research aid exploring thesis conditions, not financial advice. Decisions and responsibility are entirely yours. Numbers come from deterministic code; narrative reflects LLM interpretation of available data. Past performance does not predict future results. Calibration grade: D (Phase 2 non-calibrated).",
+  "i_s_compliance": {
+    "i_s1_no_llm_math": true,
+    "i_s2_every_claim_sourced": true,
+    "i_s3_minimum_3_bull_distinct_categories": true,
+    "i_s10_minimum_3_bear_distinct_categories": true,
+    "i_s35_research_aid_framing": true
+  }
+}

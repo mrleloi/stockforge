@@ -1,0 +1,1 @@
+session=firing-test-smoke-1151270 ts=2026-05-10T22:40:42+07:00 state=RED-1 high=1 medium=1 low=0 skip=2 details=HH-8-CHARTER-DRIFT=HIGH(md5-changed-without-ratify-marker);HH-6-DISPATCH-STALE=MEDIUM(stale=1);

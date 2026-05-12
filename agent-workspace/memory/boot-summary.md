@@ -1,5 +1,5 @@
 ---
-rendered_at: 2026-05-08T15:11:24+07:00
+rendered_at: 2026-05-12T07:57:20+07:00
 cache_ttl_hours: 1
 purpose: compact-bootstrap-context-for-reboot
 fallback: read current-execution.md + checkpoint/latest.md if mtime > 1h or content stale
@@ -10,17 +10,17 @@ fallback: read current-execution.md + checkpoint/latest.md if mtime > 1h or cont
 > Per L-S65-reboot-cost-reduction. Read FIRST at SessionStart; full chain only if ambiguous.
 
 ## Active session/phase/track
-## S189 — Phase 3.5 — FOCUSED_IMPL-DONE: D-045 HH-H.1 threshold relaxation 300s→1800s SHIPPED — autonomous-loop revival after 26+h dead window from S188 close + D-044 H-c REJECTED at production verification
+## S253 — Phase 4 → Track 0 T8 COMPLETE: PROJECT_CHARTER.md v1.0 → v1.1 applied; Principle 11 inserted; D-056 authored; HH-8 rebaselined; constitution header cleaned; D-055 cool-down NOT yet elapsed (≥2026-05-14T~21Z)
 
-**S190 NEXT ACTION priority**:
+**S254 NEXT ACTION priority**:
 
 ## Recent ADRs (last 5; review for binding context)
 ```
-045-S189-hh-h1-threshold-relaxation.md
-044-S188-hook5-stdout-fix.md
-043-S186-userprompt-stdout-fix.md
-042-S184-continue-injector-spawn-extraction.md
-041-S181-HH-6-HH-10-batch-cleanup.md
+056-S253-charter-v1.1-principle-11-ratified.md
+054-bear-quant-retry-validator-symmetry.md
+053-S237-bull-A2-retry-validator-promote.md
+052-S229-anthropic-sdk-codepath-full-removal.md
+051-S228-news-extractor-subagent-refactor.md
 ```
 
 ## Recent mistakes (last 3 M-S<N>-<M>)
@@ -31,9 +31,7 @@ fallback: read current-execution.md + checkpoint/latest.md if mtime > 1h or cont
 ```
 
 ## In-flight subagent dispatch (M-S64-1 prevention check)
-```yaml
-in_flight_subagent_dispatch: []
-```
+(empty — no in-flight dispatch)
 
 ---
 **Bootstrap reads remaining** (cheap follow-up):

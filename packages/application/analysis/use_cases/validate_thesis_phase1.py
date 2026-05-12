@@ -18,9 +18,12 @@ This makes the ID deterministic per (model, prompt, ticker, date, data) tuple.
 Cost enforcement: the entire execute() runs inside scoped_budget(limit_usd=Decimal("3.00")).
 CostBudgetExceeded → thesis NOT persisted → Thesis.incomplete() returned.
 
-Bear retry: if bear case <3 distinct points after first call, use case retries
-bear_agent.analyze() once with the same context (retry_count=1 per BR-1).
-If still insufficient, BearCaseInvariantError is caught → Thesis.incomplete().
+Bear retry: agent-level retry-validator (ADR D-054 B5). BearPerspectiveAgent
+internally handles up to 3 attempts with re-prompt on validation failure.
+The use-case-level _retry_bear_if_needed (band-aid BR-1) has been REMOVED —
+it was a partial workaround for content insufficiency only and was bypassed
+entirely when bear raised a timeout exception (asyncio.gather propagation).
+BearCaseInvariantError is now caught at Thesis construction (line 5) as before.
 
 Source: specs/tier2-feature/006-phase-2-track-F-thesis-pipeline.md § B.3.
 """
@@ -142,8 +145,9 @@ class ValidateThesisPhase1UseCase:
     Constructor takes all dependencies as Protocol-typed parameters so the
     use case has zero infrastructure knowledge.
 
-    bear_retry_count: number of times to retry bear agent if <3 points.
-    Default 1 (BR-1 retry cap).
+    Bear retry is now handled agent-internally (ADR D-054 B5 — 3 attempts
+    with re-prompt). The use-case-level bear_retry_count parameter has been
+    removed; callers that passed bear_retry_count=N should drop that argument.
     """
 
     def __init__(
@@ -156,7 +160,6 @@ class ValidateThesisPhase1UseCase:
         thesis_repo: ThesisRepository,
         cost_tracker: CostTrackerPort,
         event_bus: object,  # EventBus Protocol
-        bear_retry_count: int = 1,
     ) -> None:
         self._data_gatherer = data_gatherer
         self._bear_agent = bear_agent
@@ -166,7 +169,6 @@ class ValidateThesisPhase1UseCase:
         self._thesis_repo = thesis_repo
         self._cost_tracker = cost_tracker
         self._event_bus = event_bus
-        self._bear_retry_count = bear_retry_count
 
     async def execute(
         self, ticker: Ticker, as_of: date | None = None
@@ -176,7 +178,7 @@ class ValidateThesisPhase1UseCase:
         Returns a Thesis with status=SUBMITTED on success.
         Returns Thesis.incomplete() if:
         - context has critical gaps
-        - bear agent fails to produce ≥3 distinct points after retry
+        - bear agent fails to produce >=3 distinct points after agent-level retry
         - CostBudgetExceeded is raised
         """
         effective_as_of = as_of or date.today()
@@ -211,21 +213,15 @@ class ValidateThesisPhase1UseCase:
             return Thesis.incomplete(ticker, as_of, context.gaps)
 
         # Step 2 — run 3 perspectives in parallel (I-S12 disagreement preserved)
+        # Agent-level retry-validator handles up to 3 attempts for bear (ADR D-054),
+        # so asyncio.gather no longer propagates a bare timeout exception from bear/quant.
         bear_t = self._bear_agent.analyze(ticker, context, PerspectiveRole.BEAR)
         bull_t = self._bull_agent.analyze(ticker, context, PerspectiveRole.BULL)
         quant_t = self._quant_agent.analyze(ticker, context, PerspectiveRole.QUANT)
         bear_p, bull_p, quant_p = await asyncio.gather(bear_t, bull_t, quant_t)
 
-        # Accumulate costs
+        # Accumulate costs (cumulative cost already captured inside each agent retry loop)
         budget.add(bear_p.cost_usd + bull_p.cost_usd + quant_p.cost_usd)
-
-        # Bear retry if <3 distinct points (BR-1)
-        bear_p_retry = await self._retry_bear_if_needed(
-            bear_p, ticker, context, budget
-        )
-        if bear_p_retry is None:
-            return Thesis.incomplete(ticker, as_of, ["bear_case_insufficient"])
-        bear_p = bear_p_retry
 
         perspectives: tuple[PerspectiveAnalysis, ...] = (bear_p, bull_p, quant_p)
 
@@ -291,39 +287,3 @@ class ValidateThesisPhase1UseCase:
             log.warning("Event bus publish failed (non-fatal): %s", exc)
 
         return thesis
-
-    async def _retry_bear_if_needed(
-        self,
-        bear_p: PerspectiveAnalysis,
-        ticker: Ticker,
-        context: SharedContext,
-        budget: Budget,
-    ) -> PerspectiveAnalysis | None:
-        """Retry bear agent if <3 distinct category points (BR-1 retry cap=1)."""
-        cats = {p.category for p in bear_p.key_points if p.category}
-        if len(bear_p.key_points) >= 3 and len(cats) >= 3:
-            return bear_p
-
-        for attempt in range(self._bear_retry_count):
-            log.info(
-                "Bear case insufficient (%d points, %d cats) — retry %d/%d",
-                len(bear_p.key_points),
-                len(cats),
-                attempt + 1,
-                self._bear_retry_count,
-            )
-            try:
-                bear_p = await self._bear_agent.analyze(
-                    ticker, context, PerspectiveRole.BEAR
-                )
-                budget.add(bear_p.cost_usd)
-            except CostBudgetExceeded:
-                raise
-            except Exception as exc:
-                log.warning("Bear retry failed with exception: %s", exc)
-                return None
-            cats = {p.category for p in bear_p.key_points if p.category}
-            if len(bear_p.key_points) >= 3 and len(cats) >= 3:
-                return bear_p
-
-        return None  # Still insufficient after retry

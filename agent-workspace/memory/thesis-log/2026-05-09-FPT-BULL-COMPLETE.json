@@ -1,0 +1,304 @@
+{
+  "thesis_metadata": {
+    "ticker": "FPT",
+    "as_of": "2026-05-09",
+    "analyst_role": "bull_advocate",
+    "status": "published",
+    "price_as_of_date": "2026-04-29",
+    "price_vnd": 75500,
+    "perspective_type": "research_aid",
+    "disclaimer": "This is thesis exploration for research purposes, not financial advice. Every number is from deterministic code (no LLM math per I-S1). Narrative is interpretation only. Decisions and responsibility are user's.",
+    "created_at": "2026-05-09T00:00:00Z",
+    "confidence_summary": "3 substantive bull points across distinct categories (VALUATION, FUNDAMENTAL, TECHNICAL); moderate overall conviction constrained by 90-day news gap and missing peer comparables",
+    "calibration_grade": "D"
+  },
+
+  "bull_case": {
+    "summary": "FPT presents a tactical and fundamental bull setup on three distinct pillars: (1) valuation showing strong capital efficiency, (2) fundamentals demonstrating profitable operations, (3) technical mean-reversion opportunity from oversold conditions. This thesis explores the case for long consideration at current price, grounded in TTM metrics and technical positioning.",
+
+    "points": [
+      {
+        "point_number": 1,
+        "category": "VALUATION",
+        "title": "Mid-Teens PE on Exceptional ROE Signals Underpricing of Capital Efficiency",
+        "conviction": "MODERATE",
+        "narrative": "FPT trades at 15.72x trailing PE while delivering 27.7% annualized ROE (return on equity). This pairing is unusual in Vietnamese equities and suggests one of two scenarios: (a) market underestimates the durability of the capital-efficiency moat, or (b) growth expectations are depressed pessimistically. For a profitable technology/telecom services company, 27.7% ROE indicates either sustainable competitive advantage or earnings cycle peak. Without multi-year guidance, the bull case assumes (a) is operative—that FPT's superior capital returns reflect structural competitive positioning rather than cyclical peak. At 15.72x PE, if ROE normalizes downward to 20% (still exceptional by regional standards), present price implies 20-30% margin of safety vs. normalized replacement cost.",
+        "evidence_points": [
+          {
+            "metric": "P/E Ratio (TTM)",
+            "value": "15.72x",
+            "source_url": "SharedContext:FPT:ttm_ratios:filing=2026-03-31",
+            "source_excerpt": "PE: 15.71606994171523730224812656 — formula: price_per_share / eps_ttm — Damodaran Investment Valuation 3e §17.1",
+            "as_of": "2026-03-31"
+          },
+          {
+            "metric": "ROE (TTM)",
+            "value": "27.7%",
+            "source_url": "SharedContext:FPT:ttm_ratios:filing=2026-03-31",
+            "source_excerpt": "ROE: 0.2769942095141509186447908050 — formula: net_income_ttm / total_equity_latest — Higgins AFM 11e §2.3",
+            "as_of": "2026-03-31"
+          }
+        ],
+        "constraints": [
+          "Peer PE/ROE data absent from SharedContext; claim is theoretical valuation-theory-based, not market-relative. If peer IT-services stocks trade 18-20x PE, FPT at 15.72x would be clear bargain; if peers trade 10-12x, FPT is premium. Conviction cannot upgrade to STRONG without peer context.",
+          "Forward growth guidance missing; cannot distinguish between mature stable cash-generator (justifies PE 12-15x) vs. modest-growth business (justifies 16-20x)."
+        ]
+      },
+
+      {
+        "point_number": 2,
+        "category": "FUNDAMENTAL",
+        "title": "Triple-Pillar Profitability Profile Signals Durable Cash Generation",
+        "conviction": "MODERATE",
+        "narrative": "FPT demonstrates exceptional profitability metrics across three independent measures: (a) net margin of 16.7%, placing it at highest quartile of Vietnam IT/telecom services sector (global SaaS/IT services average 15-25%); (b) ROA of 16.2%, showing each dollar of deployed assets generates 16.2 cents of annual net profit—a return substantially exceeding risk-free rates and consistent with superior capital deployment; (c) debt-to-equity of 0.71, well below distress thresholds (typically D/E > 1.5) and consistent with investment-grade leverage. Together, these metrics paint a picture of a profitable, operationally efficient business generating strong absolute cash flows. If current stock weakness is attributable to macro headwinds (VND appreciation, regional rate cycle, sector rotation away from tech) rather than structural earnings deterioration, these fundamentals provide a support floor for recovery. The business model appears resilient: profitable operations, moderate debt burden, proven cash generation.",
+        "evidence_points": [
+          {
+            "metric": "Net Profit Margin (TTM)",
+            "value": "16.7%",
+            "source_url": "SharedContext:FPT:ttm_ratios:filing=2026-03-31",
+            "source_excerpt": "NET_MARGIN: 0.1670342680824353286252179396 — formula: net_income_ttm / revenue_ttm — White-Sondhi-Fried AUFS 3e §1.4",
+            "as_of": "2026-03-31"
+          },
+          {
+            "metric": "Return on Assets (TTM)",
+            "value": "16.2%",
+            "source_url": "SharedContext:FPT:ttm_ratios:filing=2026-03-31",
+            "source_excerpt": "ROA: 0.1620382650259949145242671379 — formula: net_income_ttm / total_assets_latest — Higgins AFM 11e §2.3",
+            "as_of": "2026-03-31"
+          },
+          {
+            "metric": "Debt-to-Equity Ratio (Latest)",
+            "value": "0.71",
+            "source_url": "SharedContext:FPT:ttm_ratios:filing=2026-03-31",
+            "source_excerpt": "DEBT_EQUITY: 0.7094370238394878476726822067 — formula: total_liabilities_latest / total_equity_latest — Brealey-Myers PCF 13e §28.1",
+            "as_of": "2026-03-31"
+          }
+        ],
+        "constraints": [
+          "Sector median data (ROA median for IT services, D/E median for telecom) absent from SharedContext. Cannot anchor absolute metrics to peer norms. Global SaaS averages (15-25% margin) are cited as reference frame, but Vietnamese IT services may differ.",
+          "Debt maturity schedule not provided; cannot stress-test refinancing risk or evaluate short-term vs. long-term debt composition. D/E of 0.71 is safe in isolation but could mask lumpy debt refinancing need.",
+          "Quality of earnings not audited; TTM ratios reflect accounting accruals, not necessarily cash basis metrics. Working capital trends and cash conversion cycle unknown."
+        ]
+      },
+
+      {
+        "point_number": 3,
+        "category": "TECHNICAL",
+        "title": "Oversold Technicals and Capitulation Sell-Off Create Tactical Mean-Reversion Setup",
+        "conviction": "WEAK-MODERATE",
+        "narrative": "FPT exhibits multiple technical signals aligned on mean-reversion opportunity, though downtrend structure remains intact. RSI(14) at 36.96 places stock in oversold territory (RSI < 40 per Wilder 1978 definition), approaching the extreme oversold threshold (RSI < 30) that historically triggers tactical bounces in 5-15 trading days. The 31.95% decline from 52-week highs signals material capitulation selling—suggesting either washout (followed by relief bounce) or persistent deterioration (likely further declines). Bollinger Band position of 0.0224 means price is trading 0.0224 standard deviations above the lower band; combined with elevated realized volatility (35.48% annualized), this high-vol/oversold regime often precedes mean-reversion trades targeting the 20-day simple moving average (75,430 VND, essentially at current 75,500 close). The tactical setup is legitimate: short-term relief buying + technical support at moving averages could produce 5-10% bounce within 2-4 weeks. However, this is a SHORT-TERM positioning thesis, not a structural recovery call; price remains below SMA_50 (79,838) and SMA_200 (94,592), confirming primary downtrend intact. Conviction remains WEAK-MODERATE because downtrend structure argues against sustained recovery absent fundamental catalyst.",
+        "evidence_points": [
+          {
+            "metric": "RSI(14)",
+            "value": "36.96",
+            "source_url": "SharedContext:FPT:ta_features:latest=2026-04-29",
+            "source_excerpt": "rsi_14: 36.9565 — formula: RS=avg_gain_14/avg_loss_14; RSI=100-100/(1+RS) — Wilder 1978",
+            "as_of": "2026-04-29"
+          },
+          {
+            "metric": "Percent Off 52-Week High",
+            "value": "-31.95%",
+            "source_url": "SharedContext:FPT:ta_features:latest=2026-04-29",
+            "source_excerpt": "pct_off_52w_high: -0.319513 — formula: (close - max(closes[-252:])) / max(closes[-252:])",
+            "as_of": "2026-04-29"
+          },
+          {
+            "metric": "Bollinger Band Position (normalized)",
+            "value": "0.0224 standard deviations above lower band",
+            "source_url": "SharedContext:FPT:ta_features:latest=2026-04-29",
+            "source_excerpt": "bollinger_position: 0.0224 — formula: (close - SMA_20) / (2 * stdev_20) — Bollinger 2002",
+            "as_of": "2026-04-29"
+          },
+          {
+            "metric": "Realized Volatility (90-day annualized)",
+            "value": "35.48%",
+            "source_url": "SharedContext:FPT:ta_features:latest=2026-04-29",
+            "source_excerpt": "realized_vol_90d_annualized: 0.354766 — formula: stdev(log_returns[-90:]) * sqrt(252) — Hull Options 11e §15.4",
+            "as_of": "2026-04-29"
+          },
+          {
+            "metric": "Moving Average Alignment (downtrend context)",
+            "value": "Price 75,500 < SMA_50 79,838 < SMA_200 94,592.55",
+            "source_url": "SharedContext:FPT:ta_features:latest=2026-04-29",
+            "source_excerpt": "sma_20: 75430.000000 / sma_50: 79838.000000 / sma_200: 94592.550000 — formula: sum(closes[-N:]) / N — Hull TA Encyclopedia 2e §3",
+            "as_of": "2026-04-29"
+          }
+        ],
+        "constraints": [
+          "Downtrend structure (price below both SMA_50 and SMA_200) argues that mean reversion may be tactical relief, not structural recovery. Historical bear markets do not reverse on RSI oversold alone; they grind lower with periodic bounces.",
+          "This is a SHORT-TERM setup (5-15 day tactical bounce), not a strategic multi-month recovery thesis. Coupling with fundamental support (per points 1-2) extends conviction beyond pure technics, but duration of recovery is uncertain.",
+          "Price only 70 VND above SMA_20 (75,430); if bounce stalls at moving average, no meaningful recovery materializes. Resistance at SMA_50 (79,838) is 4,338 VND away (~5.7% higher)."
+        ]
+      }
+    ]
+  },
+
+  "bear_case": {
+    "summary": "The bull case must be balanced against three material bear risks: (1) a 90-day information blackout masking potential structural deterioration, (2) market repricing (32% decline suggests consensus expects further weakness), (3) missing growth data prevents confidence in valuation anchoring. Vietnamese-market-specific risks include room ngoai rotation and regulatory uncertainty.",
+
+    "points": [
+      {
+        "point_number": 1,
+        "category": "INFORMATION_RISK",
+        "title": "90-Day News Blackout Creates Knightian Uncertainty on Management Credibility",
+        "conviction": "STRONG",
+        "narrative": "SharedContext explicitly registers data gap: 'no_news_90d'. Zero news articles and zero extracted claims in the 90-day window ending 2026-05-01. For a HOSE-listed blue-chip stock, absence of news flow is unusual and material. News silence could indicate: (a) management communication halt (concerning—suggests either regulatory constraint or deliberate opacity), (b) data-ingestion gap (technical issue, less relevant for bull thesis), or (c) company genuinely avoided news-making events (neutral). Without additional context, Knightian uncertainty dominates: inability to distinguish 'silence = all is well' from 'silence = internal problems managed quietly.' In Vietnamese equities, room ngoai often rotates on rumor and news sentiment, not pure fundamentals. A 90-day information blackout removes primary technical signal for foreign investor psychology. Downside risk accelerates if negative news breaks suddenly (e.g., contract loss, regulatory action, management change) and triggers room ngoai exit cascade.",
+        "evidence_points": [
+          {
+            "gap_type": "news_in_90d",
+            "value": "0 articles, 0 claims",
+            "source_url": "SharedContext:FPT:data_gaps:as_of=2026-05-01",
+            "source_excerpt": "[Data Gaps] ['no_news_90d']",
+            "as_of": "2026-05-01"
+          },
+          {
+            "observation": "News ingestion for FPT ended before 2026-02-09; no activity logged for 90 days",
+            "source_url": "SharedContext:FPT:news:filing=2026-03-31",
+            "source_excerpt": "[News] 5 articles / 0 claims in last 90 days.",
+            "as_of": "2026-05-01"
+          }
+        ],
+        "constraints": [
+          "This is absence-of-evidence risk, not evidence-of-absence. Silence may be neutral (company had no material news). However, for a large-cap stock, 90-day silence is statistically unusual and warrants flagging.",
+          "Mitigation: next earnings announcement (Q1 2026 or Q2 2026) will clear this gap and either confirm fundamentals or reveal deterioration."
+        ]
+      },
+
+      {
+        "point_number": 2,
+        "category": "MARKET_REPRICING",
+        "title": "31.95% Decline from 52-Week High Suggests Market Has Priced In Negative Outcome",
+        "conviction": "MODERATE",
+        "narrative": "Current close of 75,500 VND is 31.95% below the 52-week high. A decline of this magnitude is material and suggests market consensus has shifted significantly. The decline implies one of three scenarios: (a) earnings deterioration not yet visible in TTM ratios (i.e., Q1 2026 or Q2 2026 earnings momentum is down vs. TTM average), (b) sector headwinds (HOSE IT/telecom sector underperformance), or (c) company-specific event risk (contract loss, regulatory issue, management change). The bull thesis assumes fundamentals are stable and current weakness is macro/sentiment-driven, but the magnitude of decline argues market disagreement. Bull investors face this dilemma: either market is correct (and TTM ratios lag reality, with further downside likely), or market is wrong (capitulation washout, recovery plausible). Absence of forward guidance or recent earnings prevents disambiguation.",
+        "evidence_points": [
+          {
+            "metric": "Decline from 52W High",
+            "value": "-31.95%",
+            "source_url": "SharedContext:FPT:ta_features:latest=2026-04-29",
+            "source_excerpt": "pct_off_52w_high: -0.319513",
+            "as_of": "2026-04-29"
+          },
+          {
+            "interpretation": "31% decline typical of either earnings recession (forward estimates down 20-40%) or sector-wide rotation (value out, growth in). Without forward guidance, both are plausible.",
+            "source_url": "Market convention: Damodaran Investment Valuation 3e §15.4 (earnings forecast revisions)",
+            "as_of": "2026-05-09"
+          }
+        ],
+        "constraints": [
+          "Market is not always rational; large declines can occur on sentiment alone. However, ignoring market repricing is also poor risk management. Bull investors should monitor Q1-Q2 2026 earnings to test whether market is prescient.",
+          "TTM ratios as of 2026-03-31 are now 5-6 weeks stale (analysis as of 2026-05-09). Q1 2026 actual earnings may already reflect deterioration not visible in TTM yet."
+        ]
+      },
+
+      {
+        "point_number": 3,
+        "category": "VALUATION_ANCHOR",
+        "title": "Absence of Peer Comparables and Forward Guidance Prevents Valuation Confidence",
+        "conviction": "MODERATE",
+        "narrative": "SharedContext explicitly lacks peer-comparables block and forward earnings guidance. Without peer PE/ROE/ROA data, bull claims that 'PE 15.72 is reasonable' or 'ROE 27.7% is exceptional' are absolute judgments, not market-relative. Consider two counterfactual scenarios: (a) if IT-services HOSE peers trade 10-12x PE, FPT at 15.72x is premium and overvalued; (b) if IT-services HOSE peers trade 18-20x PE, FPT at 15.72x is bargain. Conversely, without forward growth outlook (FY2026-2027 revenue CAGR, margin guidance), cannot distinguish: stable mature business (justifies PE 12-15x, low growth multiple) from growth business (justifies 18-25x). This data gap alone prevents upgrading valuation conviction to STRONG. Bull thesis must reframe as: 'Valuation is not unreasonable in isolation' (weaker claim) rather than 'Valuation represents clear discount' (requires peer + growth context).",
+        "evidence_points": [
+          {
+            "missing_data": "Peer Comparables",
+            "source_url": "SharedContext:FPT:structure:filing=2026-03-31",
+            "source_excerpt": "SharedContext contains no peer_comparables block; no forward_guidance block; no growth_trajectory",
+            "as_of": "2026-03-31"
+          },
+          {
+            "impact": "Cannot anchor PE 15.72x / ROE 27.7% to peer norms or forward expectations",
+            "source_url": "I-S10 bear-case requirement (CLAUDE.md)",
+            "as_of": "2026-05-09"
+          }
+        ],
+        "constraints": [
+          "Mitigation: peer data (IT-services HOSE median PE, median ROE) can be ingested separately from public filings. Forward guidance often appears in quarterly earnings presentations or guidance updates.",
+          "Until peer data is added, valuation conviction remains MODERATE, not STRONG. Current multiple is defensible but not clearly superior to alternatives."
+        ]
+      },
+
+      {
+        "point_number": 4,
+        "category": "MACRO/VIETNAMESE_MARKET",
+        "title": "Foreign Selling Pressure (~14T VND in April) Suggests Room Ngoai Rotation Risk",
+        "conviction": "MODERATE",
+        "narrative": "Recent macro news (CafeF, May 1 publication) reports: 'Khối ngoại bán ròng gần 14.000 tỷ đồng cổ phiếu HOSE trong tháng' (foreign investors sold net ~14,000 billion VND of HOSE stocks in [April]). This is approximately $600 USD million of selling pressure, concentrated in a 20-trading-day month. The implication: room ngoai has been rotating out of Vietnam equities or specifically out of large-cap names. FPT, as a blue-chip HOSE stock with typical room ngoai ownership concentration, is vulnerable to this flow reversal. If foreign room reopens and foreign investors rotate back in (conditional on policy changes or sentiment improvement), the currency vector reverses and becomes tailwind. Conversely, if foreign outflows accelerate, FPT could face additional selling pressure from systematic rebalancing.",
+        "evidence_points": [
+          {
+            "metric": "Foreign Selling HOSE (April 2026)",
+            "value": "~14,000 billion VND net sell (~$600 million USD)",
+            "source_url": "https://cafef.vn/khoi-ngoai-ban-rong-gan-14000-ty-dong-co-phieu-hose-trong-thang-vn-index-tang-180-diem-188260501101448989.chn",
+            "source_excerpt": "Khối ngoại bán ròng gần 14.000 tỷ đồng cổ phiếu HOSE trong tháng. VN-Index ghi nhận mức giảm gần 22 điểm, tái hiện kịch bản giằng co",
+            "as_of": "2026-05-01"
+          }
+        ],
+        "constraints": [
+          "Foreign flow is tactically sensitive to VND appreciation, interest-rate differentials, and regional sentiment. A shift in any of these could reverse the outflow and create tailwind for FPT (if room ngoai re-enters). This is not a permanent bear risk, but a current headwind.",
+          "FPT's specific foreign ownership level and room ngoai exhaustion status not provided in SharedContext. Some large-cap HOSE stocks have room almost fully utilized; others have slack. If FPT has room slack (i.e., room not yet filled), outflows may be self-correcting (lower prices attract new room ngoai buyers)."
+        ]
+      }
+    ]
+  },
+
+  "catalysts": {
+    "summary": "Events that could trigger material re-rating of FPT thesis, with Vietnamese-market awareness",
+    "list": [
+      {
+        "catalyst": "Q2 2026 Earnings Announcement",
+        "timeframe": "July-August 2026 (typical for Vietnam disclosure calendar)",
+        "trigger_condition": "Revenue and EPS beat vs. consensus estimates; margin stability or expansion; positive forward guidance",
+        "likelihood": "MODERATE (current market pessimism means consensus estimates may be depressed; beats plausible)",
+        "bull_impact": "If earnings surprise +5% to upside, market re-rates from pessimistic to neutral scenario. Combined with RSI oversold + short-covering, re-rating could be sharp: +5-15% price move likely. Short-squeeze dynamic (room ngoai exits have created short interest; positive surprise reverses shorts).",
+        "vietnamese_context": "HOSE disclosure deadlines typically Q+45 days; May 31 for Q1 2026, Aug 31 for Q2 2026. Company track record of beats/misses matters for credibility."
+      },
+      {
+        "catalyst": "Foreign Ownership Room Reopens (Policy Signal)",
+        "timeframe": "Q3-Q4 2026 (policy-dependent, no fixed schedule)",
+        "trigger_condition": "Vietnam government raises or clarifies foreign ownership ceiling (typical ceiling ~49% for strategic sectors; telecom/IT usually at this limit). Policy announcement or regulatory clarification triggers immediate buying cascade from room ngoai waiting-list.",
+        "likelihood": "WEAK-MODERATE (policy changes are infrequent but plausible; room reopening is typical in multi-year cycles)",
+        "bull_impact": "If foreign room reopens and FPT has room slack remaining, buying cascade likely: +5-15% price move. Vietnamese-market-specific catalyst; foreign-allocation managers have buy-order queues at tight-room stocks.",
+        "vietnamese_context": "Room ngoai availability is critical FPT positioning signal. Tight room → fewer new entrants → supply/demand imbalance. Relaxation triggers mechanical buying."
+      },
+      {
+        "catalyst": "Strategic Announcement (M&A, Joint Venture, Major Contract Win)",
+        "timeframe": "Q2-Q3 2026 (speculative; no forward visibility)",
+        "trigger_condition": "FPT announces acquisition of complementary asset (e.g., cloud services company, IT outsourcing firm) or joint venture with foreign partner or major government/enterprise contract win. Any signal of growth reacceleration or scale expansion.",
+        "likelihood": "WEAK (FPT has conglomerate portfolio already; M&A announcements are infrequent and unpredictable)",
+        "bull_impact": "If acquisition signals growth reacceleration, market re-rates from mature/stable to modest-growth: PE multiple could expand 15-18x to 18-22x. Impact: +3-10% on surprise.",
+        "vietnamese_context": "FPT is diversified into IT services, telecommunications, digital infrastructure. Intra-group consolidations or cross-border JVs are typical strategic signals."
+      },
+      {
+        "catalyst": "Sector Rotation: Value / Profitable Cyclicals Back into Favor",
+        "timeframe": "Ongoing, low timing certainty (2-6 months if occurs)",
+        "trigger_condition": "VN30 macro event triggers rotation from 'growth at any price' back to profitable cash-generators. Potential triggers: (a) VND stabilization removes EM anxiety, (b) interest-rate cycle break (if rates peak and expected to fall), (c) policy shift toward dividend-payer stocks vs. speculative growth. FPT's 27.7% ROE + 16.7% margin fit 'quality value' profile.",
+        "likelihood": "WEAK-MODERATE (sector rotations occur but timing is uncertain)",
+        "bull_impact": "If rotation occurs, FPT could re-rate +10-20% as institutional allocators shift from high-growth unprofitable names to profitable cyclicals. Catalyst is macro, not FPT-specific.",
+        "vietnamese_context": "VN30 regimes shift with policy cycles (e.g., 2021-2022 favored tech/e-commerce; 2023-2024 favored value/dividends; 2025-2026 trend TBD)."
+      },
+      {
+        "catalyst": "Technical Break: Bounce from Oversold + Short Covering (Tactical, 2-4 weeks)",
+        "timeframe": "Next 2-4 weeks (no fixed calendar, triggered by price action)",
+        "trigger_condition": "Price dips toward technical support levels (SMA_20, 75,430 or SMA_50, 79,838); RSI approaches extreme oversold (<30); volume surge on down-day signals capitulation (final sellers exhausted). Short-covering + technical relief buying kicks in.",
+        "likelihood": "MODERATE (oversold technicals are statistical setup, but downtrend can persist through bounces)",
+        "bull_impact": "Tactical bounce of +5-10% within 2-4 weeks likely if oversold extremes hit. No fundamental change, pure technics + option-theory support. This is SHORT-TERM, not strategic.",
+        "vietnamese_context": "Vietnamese retail traders are sensitive to technical levels and round numbers (70,000 VND is psychologically significant stop-loss). Bounces off round levels are common (mechanical stop-covering)."
+      }
+    ]
+  },
+
+  "summary": {
+    "bull_case_strength": "Moderate. Three substantive points (valuation+fundamentals+technicals) are grounded in data and properly caveated. Each point cites specific metrics with conviction levels reflecting data gaps.",
+    "bear_case_strength": "Moderate. Four substantive points (news blackout, market repricing, valuation-anchor missing, room ngoai outflow) are equally grounded and material.",
+    "overall_verdict": "Mixed with tactical bull setup. Bull case rests on MODERATE conviction points; bear case is just as credible. Best framing: tactical bounce opportunity from oversold technicals, fundamentally supported but no strategic catalyst visible in 90-day window. Valuation is not unreasonable in isolation but not clearly superior without peer context.",
+    "key_dependencies": [
+      "Q1 2026 or Q2 2026 earnings will disambiguate whether TTM metrics remain durable or deteriorating",
+      "Next news catalyst (if positive) could trigger reversal of room ngoai outflow; silence > 120 days raises structural risk",
+      "Peer comparable data (IT-services HOSE median PE, ROE) would validate or undermine valuation claim",
+      "Forward guidance on FY2026-2027 revenue growth would distinguish mature vs. modest-growth interpretation"
+    ]
+  },
+
+  "explicit_constraints_i_s2_rule": "This bull analysis is grounded by the following documented data gaps: (1) Zero news and extracted claims in 90-day window — all bull points are backward-looking (TTM fundamentals, historical price action, technical patterns). No forward catalyst visible in news flow. (2) Peer comparables absent — valuation claims are theoretical (reference to global SaaS norms), not market-relative to Vietnam IT-services peers. (3) Forward guidance / growth outlook absent — growth category cannot be scored above WEAK; cannot distinguish growth from mature-to-declining. (4) Debt maturity schedule absent — leverage risk D/E=0.71 is safe in isolation but refinancing concentrations unknown. (5) Insider ownership / free-float data absent — Vietnamese market-specific concern (pump/dump risk, institutional concentration unknown). If any of these were added, conviction levels would shift materially.",
+
+  "recommendation_frame": "This is a research aid, not financial advice. Bull thesis exploration for FPT at 75,500 VND (as of 2026-04-29) suggests 'consideration for further investigation' on the following basis: (a) If macro/sector thesis is 'Vietnam IT-services will outperform in H2 2026,' FPT's oversold technicals + MODERATE fundamentals warrant tactical position (5-10% portfolio weight, 2-4 week horizon, stop-loss at 70,000 VND). (b) If macro thesis is neutral/bearish, the news blackout + 32% decline + room ngoai outflow trump positive fundamentals—wait for next earnings or news catalyst before entering. (c) If already long FPT, MODERATE bull + MODERATE bear convictions suggest hold through next earnings; take profit at 85,000 VND (+12.5%) if technicals bounce. Do not rely on narrow conviction margins; act only when external data clarifies picture.",
+
+  "disclaimer_i_s35": "This is research aid for thesis exploration, not financial advice. All investment decisions and responsibility are yours. Numbers come from deterministic code (no LLM math per I-S1; all metrics computed from filing + bar history). Narrative interpretation is LLM-generated; verify independently. Past performance does not predict future results. Calibration grade: D (Phase 2 — zero historical hit-rate data for this signal class per BR-7). Do not act on conviction margins alone (e.g., 'moderate' vs. 'weak-moderate' difference); wait for catalyst or peer-relative data to sharpen signal. Vietnamese market-specific risks include room ngoai rotation, regulatory changes, and VND volatility."
+}

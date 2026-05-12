@@ -203,3 +203,22 @@ ts	category	event_type	delta	decision_id	source_evidence	reason
 2026-05-07T05:02:13Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
 2026-05-07T05:02:14Z	SCOPE	charter_match	0.2	auto-S-adr-3		auto-detected new ADR mtime <6h
 2026-05-08T08:11:24Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-10T13:09:16Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-10T13:09:17Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 1445 HIGH-drift events today
+2026-05-10T14:02:01Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-10T14:02:03Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 1485 HIGH-drift events today
+2026-05-10T15:00:51Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-10T15:00:52Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-10T15:00:53Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 1672 HIGH-drift events today
+2026-05-10T16:00:11Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-10T16:00:12Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-10T16:00:13Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 1763 HIGH-drift events today
+2026-05-10T17:03:03Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-10T17:03:04Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-10T17:03:05Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 1956 HIGH-drift events today
+2026-05-11T13:10:35Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 6 HIGH-drift events today
+2026-05-12T14:00:00Z	DECISION_ROUTING	q_and_a_resolution	0.1	S250-syncQ	S250 sync-Q3 = Hold+strengthen	extend FCV requirement to CHARTER tier
+2026-05-12T14:00:01Z	DECISION_ROUTING	q_and_a_resolution	0.1	S250-syncQ	S250 sync-Q3 = Hold+strengthen	component 2
+2026-05-12T14:00:02Z	DECISION_ROUTING	decision_correctness	0.2	S250-clusterQ	S250 Q1 = Minimum E cluster pick	Minimum E ratified path
+2026-05-12T14:00:03Z	LANGUAGE	q_and_a_resolution	0.1	S250-syncQ	S250 sync-Q4 = Hold as-is	VN-chat/EN-code mixing confirmed
+2026-05-12T14:00:04Z	SCOPE	decision_correctness	0.3	S250-phaseQ	S250 Q2 = Close Phase 3.5	major phase boundary resolved

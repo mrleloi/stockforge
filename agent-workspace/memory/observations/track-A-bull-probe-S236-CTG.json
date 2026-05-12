@@ -1,0 +1,54 @@
+{
+  "ticker": "CTG",
+  "perspective": "BULL",
+  "as_of_date": "2026-05-10",
+  "key_points": [
+    {
+      "category": "GROWTH",
+      "as_of": "2026-05-10",
+      "conviction": "STRONG",
+      "text": "Q1 2026 pre-tax profit reached 11.139 tỷ đồng, representing 63% year-on-year growth. This accelerating profitability in Vietnam's largest state-owned bank suggests sustained earnings momentum from credit cycle strength.",
+      "source_url": "https://cafef.vn/cap-nhat-bctc-quy-1-2026-sang-ngay-29-4-vietinbank-lai-hon-11000-ty-dong-vinaship-bao-lai-tang-435-lan-pan-lai-gap-3-lan-cung-ky-188260428234305816.chn",
+      "source_excerpt": "Vietinbank (CTG) báo lãi trước thuế Quý 1/2026 đạt 11.139 tỷ đồng, tăng trưởng mạnh mẽ 63% so với cùng kỳ năm 2025."
+    },
+    {
+      "category": "VALUATION",
+      "as_of": "2026-05-10",
+      "conviction": "MODERATE",
+      "text": "Stock trading 15.8% below 52-week high with RSI at 42.46 (neutral-to-oversold territory). Technical setup suggests potential support zone that warrants investigation as a potential entry point.",
+      "source_url": "internal:technical-analysis-computed",
+      "source_excerpt": "pct_off_52w_high: -0.157831; rsi_14: 42.4658 (formula: RS=avg_gain_14/avg_loss_14; RSI=100-100/(1+RS) — Wilder 1978)"
+    },
+    {
+      "category": "MACRO",
+      "as_of": "2026-05-10",
+      "conviction": "MODERATE",
+      "text": "Broad-based banking sector strength evident in peer results: MBB reported 15% earnings growth in Q1 2026. This peer momentum suggests favorable credit-cycle tailwinds benefiting the entire state-owned banking group.",
+      "source_url": "https://cafef.vn/cap-nhat-bctc-quy-1-2026-sang-ngay-29-4-vietinbank-lai-hon-11000-ty-dong-vinaship-bao-lai-tang-435-lan-pan-lai-gap-3-lan-cung-ky-188260428234305816.chn",
+      "source_excerpt": "MB (MBB) Tiếp tục duy trì phong độ vững chắc với lợi nhuận đạt 9.628 tỷ đồng, tăng trưởng 15%."
+    }
+  ],
+  "catalysts": [
+    {
+      "event": "Q2 2026 earnings release",
+      "timeframe": "June–July 2026",
+      "likelihood": "High",
+      "text": "Confirmation or acceleration of Q1 momentum (>50% YoY growth sustained) would trigger re-rating upward; deceleration <30% would pressure thesis."
+    },
+    {
+      "event": "Vietnam central bank credit growth guidance",
+      "timeframe": "H2 2026",
+      "likelihood": "Medium",
+      "text": "Explicit SBV signals on credit quota, interest-rate path, or monetary tightening could shift valuation multiples for state banks sector-wide."
+    }
+  ],
+  "conviction_summary": "MODERATE",
+  "summary_text": "Bull case for CTG grounded in Q1 2026 earnings acceleration (+63% YoY) and technical support (15.8% below 52w high, RSI neutral-oversold). Conviction capped at MODERATE by: (1) single quarter of visibility; (2) no full-year guidance disclosed; (3) lack of peer valuation multiples (TTM P/E, P/B) to assess relative value; (4) credit-cycle sustainability risk if lending demand weakens. Data constraints: no BIDV TTM ratios, no peer comparables in SharedContext. Thesis warrants investigation with additional inputs: TTM valuation multiples vs. peer group, ROE trend, asset quality trends, capital adequacy ratios.",
+  "data_gaps": [
+    "TTM P/E and P/B ratios not available in SharedContext",
+    "Peer valuation multiples (BIDV, ACB, EIB) not provided for relative-value assessment",
+    "Full-year 2026 guidance not yet disclosed",
+    "Asset quality trends and capital ratio dynamics not available in SharedContext",
+    "Foreign flow data / room ngoai availability not provided"
+  ]
+}

@@ -1,4 +1,5 @@
 hook_name	wired_events	status	linked_lessons	firing_test_path	last_modified
+adr-empirical-close-verify-spot-check.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/adr-empirical-close-verify-spot-check-fire-test.sh	see-fs
 attach-portability-smoke.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/attach-portability-smoke-fire-test.sh	see-fs
 auto-reboot-handoff-verify.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/auto-reboot-handoff-verify-fire-test.sh	see-fs
 autonomous-stop-watchdog.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/autonomous-stop-watchdog-fire-test.sh	see-fs
@@ -24,10 +25,13 @@ drift-signals-log-rotate.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/drift-si
 effort-escalation-detector.sh	UserPromptSubmit,PreToolUse	ACTIVE	none	scripts/hooks/firing-tests/effort-escalation-detector-fire-test.sh	see-fs
 essential-routing-fields-verifier.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/essential-routing-fields-verifier-fire-test.sh	see-fs
 file-pattern-hook-pre-flight-lint.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/file-pattern-hook-pre-flight-lint-fire-test.sh	see-fs
+firing-test-spawn-context-lint.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/firing-test-spawn-context-lint-fire-test.sh	see-fs
 ghost-work-audit.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/ghost-work-audit-fire-test.sh	see-fs
+guardian-output-inspect-first.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/guardian-output-inspect-first-fire-test.sh	see-fs
 harness-health-self-scan.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/harness-health-self-scan-fire-test.sh	see-fs
 harness-recovery-dod-watchdog.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/harness-recovery-dod-watchdog-fire-test.sh	see-fs
 hook-firing-counter.sh	UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/hook-firing-counter-fire-test.sh	see-fs
+hook-log-path-canonical-detector.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/hook-log-path-canonical-detector-fire-test.sh	see-fs
 idle-escape-detector.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/idle-escape-detector-fire-test.sh	see-fs
 in-flight-subagent-watcher.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/in-flight-subagent-watcher-fire-test.sh	see-fs
 index-registry-renderer.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/index-registry-renderer-fire-test.sh	see-fs
@@ -36,9 +40,11 @@ learning-loop-metric-check.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/learni
 learning-queue-sweeper.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/learning-queue-sweeper-fire-test.sh	see-fs
 lesson-synthesis-watchdog.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/lesson-synthesis-watchdog-fire-test.sh	see-fs
 loc-ceiling-check.sh	PostToolUse	ACTIVE	none	scripts/hooks/firing-tests/loc-ceiling-check-fire-test.sh	see-fs
+lock-rc-probe.sh	ORPHAN	ORPHAN	none	MISSING	see-fs
 memory-etl-processor.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/memory-etl-processor-fire-test.sh	see-fs
 memory-routing-audit.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/memory-routing-audit-fire-test.sh	see-fs
 metric-failure-mode-rate.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/metric-failure-mode-rate-fire-test.sh	see-fs
+no-anthropic-sdk-d10.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/no-anthropic-sdk-d10-fire-test.sh	see-fs
 phase-status-coherence.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/phase-status-coherence-fire-test.sh	see-fs
 post-dev-dispatch-attestation-check.sh	SubagentStop	ACTIVE	none	scripts/hooks/firing-tests/post-dev-dispatch-attestation-check-fire-test.sh	see-fs
 post-tool-citation-grep.sh	PostToolUse	ACTIVE	none	scripts/hooks/firing-tests/post-tool-citation-grep-fire-test.sh	see-fs
@@ -63,7 +69,10 @@ session-end-checklist-linter.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/sess
 session-export-raw.sh	SessionEnd	ACTIVE	none	scripts/hooks/firing-tests/session-export-raw-fire-test.sh	see-fs
 session-start-bootstrap.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/session-start-bootstrap-fire-test.sh	see-fs
 session-start-scan-unattested-observations.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/session-start-scan-unattested-observations-fire-test.sh	see-fs
+settings-inline-env-prefix-detector.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/settings-inline-env-prefix-detector-fire-test.sh	see-fs
+single-claude-instance-lock.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/single-claude-instance-lock-fire-test.sh	see-fs
 stale-prompt-detector.sh	UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/stale-prompt-detector-fire-test.sh	see-fs
+sub-plan-completion-coherence.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/sub-plan-completion-coherence-fire-test.sh	see-fs
 subagent-budget-classifier.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/subagent-budget-classifier-fire-test.sh	see-fs
 subagent-stop-logger.sh	SubagentStop	ACTIVE	none	scripts/hooks/firing-tests/subagent-stop-logger-fire-test.sh	see-fs
 sync-grilling-call.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/sync-grilling-call-fire-test.sh	see-fs

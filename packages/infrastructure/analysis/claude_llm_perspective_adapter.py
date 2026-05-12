@@ -221,9 +221,17 @@ class ClaudeLLMPerspectiveAdapter:
         prompt_hash = hashlib.sha256(system_prompt.encode("utf-8")).hexdigest()[:16]
 
         try:
-            raw_text, input_tokens, output_tokens = self.transport(
-                model, system_prompt, user_message, self.temperature
-            )
+            # Pass role string for per-role timeout lookup (ADR D-054 B5).
+            # Try the extended signature first; fall back to legacy 4-arg signature
+            # so that test stubs using the old signature continue to work.
+            try:
+                raw_text, input_tokens, output_tokens = self.transport(  # type: ignore[call-arg]
+                    model, system_prompt, user_message, self.temperature, role=str(role)
+                )
+            except TypeError:
+                raw_text, input_tokens, output_tokens = self.transport(
+                    model, system_prompt, user_message, self.temperature
+                )
         except Exception as exc:
             log.error("LLM call failed for role=%s model=%s: %s", role, model, exc)
             # Return empty key_points JSON — caller handles insufficient case

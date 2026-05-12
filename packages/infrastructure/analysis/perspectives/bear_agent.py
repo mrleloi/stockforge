@@ -9,6 +9,10 @@ Post-LLM validation:
 3. Jaccard overlap <40% between key_phrases of any two points (§ A.11 rule 3)
 4. Category distinctness: bear points must have distinct BearCategory values
 
+Post-LLM validation: A2-mirror retry-validator (ADR D-054). Max 3 attempts;
+re-prompt with error on retry; cumulative cost; explicit bear_failure_mode=
+"validation-exhausted" WARNING on triple-fail. Mirrors bull_agent.py (D-053).
+
 Source: specs/tier2-feature/006-phase-2-track-F-thesis-pipeline.md § B.5.1.
 """
 
@@ -134,12 +138,73 @@ def _filter_by_jaccard(points: list[GroundedPoint]) -> list[GroundedPoint]:
     return kept
 
 
+# ---------------------------------------------------------------------------
+# Validation helpers (production default, ADR D-054 — mirrors bull_agent D-053)
+# ---------------------------------------------------------------------------
+
+def _validate_bear_output(raw: str) -> tuple[bool, str | None]:
+    """Validate raw LLM output for structural compliance (I-S10 gate).
+
+    Checks:
+      (a) valid JSON parse
+      (b) top-level dict with 'key_points' list
+      (c) each point has 'category' + 'text' (or 'evidence'/'claim') + 'as_of' fields
+      (d) >=3 distinct categories across points (I-S10 strict gate — fail-fast for retry)
+
+    Returns:
+      (True, None)               — valid; ready for _parse_grounded_points
+      (False, reason_string)     — invalid; reason describes the first failure
+    """
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return False, f"JSON parse error: {exc}"
+
+    if not isinstance(payload, dict):
+        return False, f"Expected top-level dict, got {type(payload).__name__}"
+
+    points = payload.get("key_points")
+    if not isinstance(points, list):
+        return False, "Missing or non-list 'key_points' field"
+
+    if len(points) == 0:
+        return False, "key_points list is empty"
+
+    for i, pt in enumerate(points):
+        if not isinstance(pt, dict):
+            return False, f"key_points[{i}] is not a dict"
+        missing = [f for f in ("category", "as_of") if not pt.get(f)]
+        # Accept either 'text' or 'evidence' or 'claim' as the claim body field
+        if not pt.get("text") and not pt.get("evidence") and not pt.get("claim"):
+            missing.append("text/evidence/claim")
+        if missing:
+            return False, f"key_points[{i}] missing required fields: {missing}"
+
+    # I-S10 gate: >=3 distinct categories required for bear case validity
+    distinct_cats = {
+        pt["category"]
+        for pt in points
+        if isinstance(pt, dict) and pt.get("category")
+    }
+    if len(distinct_cats) < 3:
+        return False, (
+            f"I-S10: bear case requires >=3 distinct categories; "
+            f"got {len(distinct_cats)}: {sorted(distinct_cats)}"
+        )
+
+    return True, None
+
+
 class BearPerspectiveAgent:
     """Concrete BEAR perspective agent.
 
     Takes a ClaudeLLMPerspectiveAdapter adapter as its dependency — this agent
     does not instantiate the SDK itself. The adapter handles the system prompt
     injection and LLM call; this agent owns BEAR-specific validation.
+
+    A2-mirror retry-validator (ADR D-054): max 3 attempts, re-prompt with error
+    on retry, cumulative cost, explicit bear_failure_mode="validation-exhausted"
+    WARNING on triple-fail. Mirrors BullPerspectiveAgent (ADR D-053).
     """
 
     def __init__(self, adapter: object) -> None:
@@ -148,36 +213,122 @@ class BearPerspectiveAgent:
     async def analyze(
         self, ticker: Ticker, context: object, _role: PerspectiveRole
     ) -> PerspectiveAnalysis:
-        """Run BEAR analysis. Returns PerspectiveAnalysis with validated key_points."""
+        """Run BEAR analysis. Returns PerspectiveAnalysis with validated key_points.
+
+        Production default (A2-mirror via ADR D-054): retry-validator with
+        max-2 retries (3 total attempts). Each retry includes the validation error
+        in re-prompt. After 3 total failures → log explicit WARNING + emit
+        bear_failure_mode="validation-exhausted"; does NOT silently empty.
+        """
         as_of_str = str(getattr(context, "as_of", ""))
         prompt = SYSTEM_PROMPT.replace("{TICKER}", ticker.symbol).replace(
             "{AS_OF}", as_of_str
         )
-        call_llm = getattr(self._adapter, "call_llm")  # noqa: B009
-        raw_json, cost_usd, model_id, prompt_hash = await call_llm(
-            system_prompt=prompt,
+        return await self._analyze_with_retry(
+            prompt=prompt,
             context=context,
-            role=PerspectiveRole.BEAR,
+            ticker=ticker,
         )
-        try:
-            payload = json.loads(raw_json)
-            raw_points: list[object] = payload.get("key_points", []) if isinstance(payload, dict) else []
-        except (json.JSONDecodeError, AttributeError):
-            raw_points = []
 
-        points = _parse_grounded_points(raw_points)
-        points = _filter_by_jaccard(points)
-        overall = Conviction.WEAK
-        if points:
-            # Most common conviction level wins
-            counts = {c: sum(1 for p in points if p.conviction == c) for c in Conviction}
-            overall = max(counts, key=lambda c: counts[c])
+    async def _analyze_with_retry(
+        self,
+        prompt: str,
+        context: object,
+        ticker: Ticker,
+    ) -> PerspectiveAnalysis:
+        """Retry-validator loop (production default, ADR D-054 — mirrors D-053).
 
+        Attempt 1: normal call.
+        Attempt 2: re-prompt with validation error (if attempt 1 fails).
+        Attempt 3: re-prompt with validation error (if attempt 2 fails).
+        After 3 total failures: log explicit WARNING; emit bear_failure_mode=
+        'validation-exhausted'; return empty bear (NOT silent).
+        """
+        call_llm = getattr(self._adapter, "call_llm")  # noqa: B009
+        cumulative_cost = Decimal("0")
+        last_model_id = "unknown"
+        last_prompt_hash = ""
+        validation_error: str | None = None
+
+        for attempt in range(1, 4):  # 1, 2, 3
+            if attempt > 1 and validation_error:
+                retry_prompt = (
+                    prompt
+                    + f"\n\nATTEMPT {attempt} RETRY: Previous response failed validation: "
+                    f"{validation_error}. "
+                    "Output ONLY valid JSON with key_points list. "
+                    "Each point MUST have: category (string), as_of (YYYY-MM-DD), "
+                    "text (string), source_url (string), source_excerpt (string). "
+                    "MUST include at least 3 points with 3 DISTINCT categories from "
+                    "{FUNDAMENTAL, STRUCTURAL, VALUATION, COMPETITIVE, GOVERNANCE, MACRO}."
+                )
+            else:
+                retry_prompt = prompt
+
+            try:
+                raw_json, cost_usd, model_id, prompt_hash = await call_llm(
+                    system_prompt=retry_prompt,
+                    context=context,
+                    role=PerspectiveRole.BEAR,
+                )
+            except Exception as exc:  # noqa: BLE001
+                log.warning(
+                    "bear_agent attempt %d/%d LLM call error for %s: %s",
+                    attempt, 3, ticker.symbol, exc,
+                )
+                validation_error = f"LLM call error: {exc}"
+                continue
+
+            cumulative_cost += Decimal(str(cost_usd))
+            last_model_id = str(model_id)
+            last_prompt_hash = str(prompt_hash)
+
+            valid, reason = _validate_bear_output(raw_json)
+            if valid:
+                try:
+                    payload = json.loads(raw_json)
+                    raw_points: list[object] = (
+                        payload.get("key_points", []) if isinstance(payload, dict) else []
+                    )
+                except (json.JSONDecodeError, AttributeError):
+                    raw_points = []
+                points = _parse_grounded_points(raw_points)
+                points = _filter_by_jaccard(points)
+                overall = Conviction.WEAK
+                if points:
+                    counts = {c: sum(1 for p in points if p.conviction == c) for c in Conviction}
+                    overall = max(counts, key=lambda c: counts[c])
+                log.info(
+                    "bear_agent validated OK on attempt %d/%d for %s: %d points",
+                    attempt, 3, ticker.symbol, len(points),
+                )
+                return PerspectiveAnalysis(
+                    role=PerspectiveRole.BEAR,
+                    key_points=tuple(points),
+                    overall_conviction=overall,
+                    cost_usd=cumulative_cost,
+                    model_id=last_model_id,
+                    prompt_hash=last_prompt_hash,
+                )
+            else:
+                validation_error = reason
+                log.warning(
+                    "bear_agent validation fail on attempt %d/%d for %s: %s",
+                    attempt, 3, ticker.symbol, reason,
+                )
+
+        # All 3 attempts exhausted — explicit warning (NOT silent)
+        log.warning(
+            "bear_agent VALIDATION-EXHAUSTED for %s after 3 attempts. "
+            "bear_failure_mode=validation-exhausted. "
+            "Last error: %s",
+            ticker.symbol, validation_error,
+        )
         return PerspectiveAnalysis(
             role=PerspectiveRole.BEAR,
-            key_points=tuple(points),
-            overall_conviction=overall,
-            cost_usd=Decimal(str(cost_usd)),
-            model_id=str(model_id),
-            prompt_hash=str(prompt_hash),
+            key_points=(),
+            overall_conviction=Conviction.WEAK,
+            cost_usd=cumulative_cost,
+            model_id=last_model_id,
+            prompt_hash=last_prompt_hash,
         )

@@ -209,7 +209,6 @@ def _make_use_case(
     repo: MockThesisRepo | None = None,
     cost_limit: Decimal = Decimal("3.00"),
     context: SharedContext | None = None,
-    bear_retry: int = 1,
 ) -> tuple[ValidateThesisPhase1UseCase, MockThesisRepo, MockEventBus]:
     repo = repo or MockThesisRepo()
     bus = MockEventBus()
@@ -226,6 +225,7 @@ def _make_use_case(
     tracker = MockCostTracker(limit=cost_limit)
     gatherer = MockDataGatherer(context or _make_good_context())
 
+    # bear_retry_count removed in ADR D-054: retry is now agent-internal
     uc = ValidateThesisPhase1UseCase(
         data_gatherer=gatherer,
         bear_agent=bear_agent,
@@ -235,7 +235,6 @@ def _make_use_case(
         thesis_repo=repo,
         cost_tracker=tracker,
         event_bus=bus,
-        bear_retry_count=bear_retry,
     )
     return uc, repo, bus
 
@@ -270,37 +269,38 @@ def test_critical_gaps_returns_incomplete() -> None:
     assert len(repo.saved) == 0  # NOT persisted
 
 
-def test_bear_retry_insufficient_then_incomplete() -> None:
-    """Bear produces <3 category points on all attempts → INCOMPLETE."""
+def test_bear_insufficient_returns_incomplete() -> None:
+    """Bear agent returns <3 distinct categories → BearCaseInvariantError → INCOMPLETE.
+
+    ADR D-054: retry is now agent-internal (3 attempts). The use-case sees one
+    PerspectiveAnalysis from bear_agent.analyze(); if it lacks >=3 distinct
+    categories, Thesis.__post_init__ raises BearCaseInvariantError → INCOMPLETE.
+    """
     bad_bear = _make_perspective(
         PerspectiveRole.BEAR,
         points=(
             _make_point("claim1", BearCategory.FUNDAMENTAL),
-            _make_point("claim2", BearCategory.FUNDAMENTAL),  # same category
+            _make_point("claim2", BearCategory.FUNDAMENTAL),  # same category — <3 distinct
         ),
     )
     uc, repo, _ = _make_use_case(
-        bear_responses=[bad_bear, bad_bear],  # both attempts fail
-        bear_retry=1,
+        bear_responses=[bad_bear],
     )
     thesis = asyncio.run(uc.execute(_TICKER, _TODAY))
     assert thesis.status == ThesisStatus.INCOMPLETE
     assert len(repo.saved) == 0
 
 
-def test_bear_retry_succeeds_on_second_attempt() -> None:
-    """Bear fails first attempt (<3 cats), succeeds on retry → SUBMITTED."""
-    bad_bear = _make_perspective(
-        PerspectiveRole.BEAR,
-        points=(
-            _make_point("claim1", BearCategory.FUNDAMENTAL),
-            _make_point("claim2", BearCategory.FUNDAMENTAL),
-        ),
-    )
+def test_bear_good_response_submits_thesis() -> None:
+    """Bear agent returns >=3 distinct categories → thesis SUBMITTED.
+
+    ADR D-054: the use-case calls bear_agent.analyze() once; agent internally
+    handles retries. When first analyze() call returns a valid bear perspective,
+    thesis is submitted directly (no use-case-level retry loop).
+    """
     good_bear = _make_good_bear()
     uc, repo, _ = _make_use_case(
-        bear_responses=[bad_bear, good_bear],
-        bear_retry=1,
+        bear_responses=[good_bear],
     )
     thesis = asyncio.run(uc.execute(_TICKER, _TODAY))
     assert thesis.status == ThesisStatus.SUBMITTED

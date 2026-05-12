@@ -1,0 +1,79 @@
+{
+  "ticker": "FPT",
+  "as_of_date": "2026-05-10",
+  "analyst_position": "BULL",
+  "conviction_overall": "MODERATE",
+  "real_thesis": false,
+  "key_points": [
+    {
+      "category": "VALUATION",
+      "as_of": "2026-04-29",
+      "conviction": "MODERATE",
+      "text": "FPT trades at PE 15.7x on trailing earnings while generating ROE of 27.7%, suggesting potential valuation discount relative to underlying profitability. This PE-to-ROE dynamic implies the market is pricing execution risk or cyclical headwinds.",
+      "source_url": "StockForge/SharedContext/FPT-TTM-Ratios",
+      "source_excerpt": "TTM Ratios (as of filing 2026-03-31): PE 15.716, ROE 0.2769942095 (27.70%), NET_MARGIN 0.1670 (16.70%), ROA 0.1620 (16.20%)"
+    },
+    {
+      "category": "FUNDAMENTAL",
+      "as_of": "2026-03-31",
+      "conviction": "MODERATE",
+      "text": "FPT maintains net margin of 16.7% and ROA of 16.2% on trailing basis. Manageable leverage (debt-to-equity 0.71) provides debt capacity for growth investments.",
+      "source_url": "StockForge/SharedContext/FPT-TTM-Ratios",
+      "source_excerpt": "TTM Ratios: NET_MARGIN 0.1670 (16.70%), ROA 0.1620 (16.20%), DEBT_EQUITY 0.7094 (70.94%); filing date 2026-03-31"
+    },
+    {
+      "category": "MACRO",
+      "as_of": "2026-05-01",
+      "conviction": "WEAK",
+      "text": "Foreign portfolio flows turned heavily negative in April 2026 (net selling ~14 trillion VND across HOSE), associated with capitulation dynamics. Vietnamese equity mean-reversion patterns suggest selling exhaustion could precede stabilization.",
+      "source_url": "https://cafef.vn/khoi-ngoai-ban-rong-gan-14000-ty-dong-co-phieu-hose-trong-thang-vn-index-tang-180-diem-188260501101448989.chn",
+      "source_excerpt": "Khoi ngoai ban rong gan 14.000 ty dong co phieu HOSE trong thang VN-Index ghi nhan muc giam gan 22 diem"
+    }
+  ],
+  "catalysts": [
+    {
+      "event": "Q1 2026 earnings announcement",
+      "timeframe_months": 1,
+      "likelihood": "MODERATE",
+      "narrative": "Expected May 15-31 will clarify if 27.7% ROE persists.",
+      "as_of": "2026-05-10"
+    },
+    {
+      "event": "Foreign block fund rotation reversal",
+      "timeframe_months": 2,
+      "likelihood": "WEAK",
+      "narrative": "Selling exhaustion could reverse if global sentiment shifts.",
+      "as_of": "2026-05-10"
+    },
+    {
+      "event": "US partnership expansion",
+      "timeframe_months": 3,
+      "likelihood": "MODERATE",
+      "narrative": "International contract wins could signal growth acceleration.",
+      "as_of": "2026-05-10"
+    },
+    {
+      "event": "Technical oversold mean reversion",
+      "timeframe_months": 1,
+      "likelihood": "WEAK",
+      "narrative": "RSI 36.96, -31.95% from 52w high historically mean-revert in 4-8 weeks.",
+      "as_of": "2026-05-10"
+    }
+  ],
+  "bear_case_outline": "Heavy foreign selling suggests institutional concern. Stock -31.95% from 52w high indicates structured weakness. Price data stale. Trump news vague. No historical growth trajectory.",
+  "research_gaps": [
+    "Historical growth trajectory",
+    "Segment breakdown",
+    "FY2026 management guidance",
+    "Market share metrics",
+    "Partnership details",
+    "Peer comparables",
+    "Institutional ownership data"
+  ],
+  "summary": "MODERATE bull case. Strong TTM (27.7% ROE, 16.7% margin, 0.71 D/E) + low PE 15.7x suggest value, but -31.95% weakness + heavy foreign selling warrant caution. Hinges on Q1 earnings confirmation, segment growth, foreign flow stabilization. Confidence: D (non-calibrated).",
+  "session_metadata": {
+    "session_id": "S237",
+    "session_type": "THESIS",
+    "validation_status": "PASS"
+  }
+}

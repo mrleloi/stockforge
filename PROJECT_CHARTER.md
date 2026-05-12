@@ -1,7 +1,8 @@
 # PROJECT CHARTER
 ## StockForge — Personal Investment Advisor for Vietnamese Stock Market
 
-> **Status**: Immutable v1.0 — changes require explicit charter revision.
+> **Status**: Immutable v1.1 — changes require explicit charter revision.
+> **Revision history**: v1.0 → v1.1 (2026-05-12, D-056): Added Principle 11 — Harness must self-verify firing, not self-attest existence.
 > **Scope of immutability**: Vision, principles, success criteria.
 > **Things that do evolve**: Agent configs, specs, implementation, signal weights, eval sets.
 
@@ -72,6 +73,8 @@ Reference models: Renaissance Technologies (data + iteration discipline), Bridge
 9. **No LLM math** — LLM never generates numbers. All calculations through deterministic code with verified data inputs. LLM only interprets.
 
 10. **Position sizing & risk management are deterministic** — code-enforced rules, LLM cannot override. Maximum position size, sector concentration, stop loss rules are immutable per session.
+
+11. **Harness must self-verify firing, not self-attest existence** — Every hook ships with a companion firing-test in `scripts/hooks/firing-tests/`; the continuous `harness-health-self-scan` hook verifies signal-set HH-1 through HH-N (codified in `agent-workspace/constitution/harness-health-protocol.md`) on every UserPromptSubmit + SessionStart event. Ritual closure of a track (file existence + smoke-test exit 0) is forbidden until empirical-firing evidence (production log entry / artifact / telemetry row from real session activity) is captured.
 
 ---
 

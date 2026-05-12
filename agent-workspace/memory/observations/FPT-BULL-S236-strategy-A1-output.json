@@ -1,0 +1,148 @@
+{
+  "metadata": {
+    "ticker": "FPT",
+    "as_of": "2026-05-10",
+    "role": "BULL",
+    "perspective_type": "research_aid",
+    "session": "S236",
+    "strategy_label": "A1_strict_json_mode",
+    "compliance_check": "bull_points_count >= 3 AND distinct_categories >= 3 AND no_silent_empty"
+  },
+  "recommendation": "watch",
+  "confidence_level": "medium",
+  "conviction_summary": "3 substantive points (MODERATE); grounded in valuation technicals, fundamental profitability, and Vietnamese tech sector macro. Constrained by stale price data and lack of forward guidance.",
+  "bull_points": [
+    {
+      "category": "VALUATION",
+      "conviction": "MODERATE",
+      "title": "Oversold Technical Setup; Price 32% Below 52-Week High",
+      "thesis": "FPT is trading at a significant technical discount with indicators in oversold territory, creating a low-risk entry for mean-reversion thesis. TTM PE of 15.72 is below Vietnamese market median for tech/IT (estimated 18-22x). RSI 36.96 is in caution zone (classical oversold <30, but 30-40 is technical watch). Price is 32% below 52-week peak of ~110,870 VND.",
+      "evidence": [
+        "Price: 75,500 VND (2026-04-29)",
+        "TTM PE: 15.7161",
+        "pct_off_52w_high: -31.95%",
+        "RSI_14: 36.9565 (Wilder 1978, oversold watch zone)",
+        "Peak 52W: ~110,870 VND estimated from (75,500 / (1 - (-0.3195)))"
+      ],
+      "caveat": "Price data stale (11 days old as of 2026-05-10). No visibility into cause of decline; could be company-specific, sector, or macro. Oversold technicals are static reflections of price, not catalysts.",
+      "source_url": "SharedContext — Bar History, TTM Ratios, TA Features",
+      "source_excerpt": "Bar history: 248 bars loaded; latest close 75,500 VND as of 2026-04-29. TTM PE: 15.71606994171523730224812656 (price_per_share / eps_ttm per Damodaran Investment Valuation 3e §17.1). RSI 14-period: 36.9565 (Wilder 1978). pct_off_52w_high: -0.319513."
+    },
+    {
+      "category": "FUNDAMENTAL",
+      "conviction": "MODERATE",
+      "title": "Strong Return on Equity (27.7%) and Net Margin (16.7%); Evidence of Capital Efficiency",
+      "thesis": "FPT's TTM profitability metrics are strong, indicating capital-efficient operations and pricing power. 27.7% ROE is well above 15% hurdle rate and competitive with top-quartile tech companies globally. 16.7% net margin is solid for emerging-market IT services. 16.2% ROA confirms asset productivity.",
+      "evidence": [
+        "TTM ROE: 0.27699 = 27.7% (net_income_ttm / total_equity_latest)",
+        "TTM Net Margin: 0.16703 = 16.7% (net_income_ttm / revenue_ttm)",
+        "TTM ROA: 0.16204 = 16.2% (net_income_ttm / total_assets_latest)",
+        "TTM Debt/Equity: 0.7094 (moderate leverage, manageable)"
+      ],
+      "caveat": "TTM metrics are backward-looking; no forward guidance on trajectory. No peer comparables provided — cannot assess if 27.7% ROE is leading or lagging peers. High ROE may be amplified by leverage (DEBT_EQUITY = 0.71); pure ROA (16.2%) is more conservative signal.",
+      "source_url": "SharedContext — TTM Ratios (financial statement filing 2026-03-31)",
+      "source_excerpt": "TTM ROE: 0.2769942095141509186447908050 per Higgins AFM 11e §2.3 (net_income_ttm / total_equity_latest). TTM Net Margin: 0.1670342680824353286252179396 per White-Sondhi-Fried AUFS 3e §1.4. TTM ROA: 0.1620382650259949145242671379 per Higgins AFM 11e §2.3."
+    },
+    {
+      "category": "MACRO",
+      "conviction": "WEAK-MODERATE",
+      "title": "Vietnamese Tech Sector Tailwind; Market-Opening Regulatory Backdrop",
+      "thesis": "Vietnam's telecom and IT sectors are experiencing structural tailwinds from regulatory liberalization and digital transformation policy. Government's Nghị quyết 72-NQ/TW emphasizes digital transformation across public and private sectors, driving IT services spending. Starlink market entry signals regulatory openness, benefiting modernization of Vietnamese tech infrastructure.",
+      "evidence": [
+        "Starlink approved to enter Vietnamese market (May 2026 news)",
+        "Government digital transformation policy (Nghị quyết 72-NQ/TW) emphasizes IT services for healthcare, business, and infrastructure",
+        "Regulatory openness signals commitment to competitive market structure",
+        "FPT, as major domestic tech/telecom player, positioned to benefit from digitalization and infrastructure upgrades"
+      ],
+      "caveat": "FPT business-mix unknown — revenue breakdown by segment not provided. If FPT derives 80% of revenue from mature legacy services, digital transformation tailwind may not benefit proportionally. Macro tailwinds are top-down; FPT must execute bottom-up to capture share. Foreign investor flows are currently negative (14T VND sold in April 2026), suggesting macro sentiment is weak despite tech sector fundamentals.",
+      "source_url_1": "CafeF: 26 năm sau cột mốc lịch sử, thấy gì về việc Việt Nam đồng ý mở cửa cho doanh nghiệp Mỹ vào cạnh tranh trực tiếp với Viettel, VNPT? (2026-05-01)",
+      "source_excerpt_1": "Ít ai ở thời điểm đó có thể tưởng tượng ra được một ngày, Việt Nam - với ngành viễn thông bấy giờ còn độc quyền, chưa có Internet - đến nay lại có doanh nghiệp đứng số 1 thế giới về sức mạnh thương hiệu viễn thông, cũng đã mở cửa cho Starlink - dịch vụ Internet của Mỹ - tham gia thị trường.",
+      "source_url_2": "CafeF: Kết nối nguồn lực công - tư phát triển y tế cộng đồng (2026-05-01)",
+      "source_excerpt_2": "Hiện nay, các chính sách y tế nhấn mạnh sự chuyển đổi quan trọng trong chăm sóc sức khỏe từ tư duy khám chữa bệnh sang chủ động phòng ngừa bệnh tật. Trong đó, Nghị quyết 72-NQ/TW về đột phá, tăng cường bảo vệ, chăm sóc và nâng cao sức khỏe nhân dân của Bộ Chính trị đã chỉ rõ định hướng phát"
+    }
+  ],
+  "bear_points": [
+    {
+      "category": "MOMENTUM",
+      "conviction": "STRONG",
+      "title": "Price Momentum Negative; -32% from 52W High Suggests Structural Repricing",
+      "thesis": "FPT is down 32% from its 52-week peak (75,500 current vs ~110,870 peak). This magnitude of drawdown reflects either company-specific deterioration, sector headwind, or broad market stress. Without visibility into cause, reversing this drawdown requires positive catalyst or macro stabilization. Current momentum is bearish.",
+      "evidence": [
+        "pct_off_52w_high: -31.95%",
+        "Current price: 75,500 VND",
+        "Estimated 52W peak: ~110,870 VND"
+      ],
+      "source_url": "SharedContext — Bar history (pct_off_52w_high = -0.319513)"
+    },
+    {
+      "category": "FLOWS",
+      "conviction": "MODERATE",
+      "title": "Foreign Investor Flows are Negative; 'Room Ngoai' Headwind Active",
+      "thesis": "Vietnam's stock market experienced net foreign selling of ~14 trillion VND in April 2026, with specific mentions of 'bluechip' names being dumped at scale. While FPT not explicitly named, FPT as a large-cap tech/telecom stock is likely exposed to this outflow pressure. Foreign flows are leading indicator of institutional sentiment and can sustain downward pressure independent of fundamentals.",
+      "evidence": [
+        "April 2026: ~14 trillion VND net foreign outflows on HOSE",
+        "Specific 'bluechip' dumping: 300 billion VND per session mentioned",
+        "FPT likely in bluechip category, exposed to sector flows"
+      ],
+      "source_url": "CafeF: Khối ngoại bán ròng gần 14.000 tỷ đồng cổ phiếu HOSE trong tháng VN-Index tăng 180 điểm (2026-05-01)",
+      "source_excerpt": "Khối ngoại bán ròng gần 14.000 tỷ đồng cổ phiếu HOSE trong tháng... một cổ phiếu bluechip bị 'xả' gần 300 tỷ đồng"
+    },
+    {
+      "category": "INFORMATION_GAP",
+      "conviction": "MODERATE",
+      "title": "No Forward Guidance; FPT's Competitive Position and Growth Trajectory Opaque",
+      "thesis": "SharedContext provides only TTM backward-looking metrics, with no forward-looking guidance, management commentary, or peer comparables. Without visibility into whether FPT's 27.7% ROE is stabilizing, improving, or contracting, investors are extrapolating past performance. Absence of comparable peers prevents relative valuation assessment.",
+      "evidence": [
+        "No FPT Q1 2026 earnings guidance or results in SharedContext",
+        "No peer TTM ratios for comparison (Viettel, VNPT, Mobiletech, etc.)",
+        "No analyst consensus estimates",
+        "No investor presentations or management commentary"
+      ],
+      "source_url": "SharedContext — Data gaps"
+    }
+  ],
+  "catalysts": [
+    {
+      "event": "FPT Q1 2026 earnings announcement",
+      "timeframe": "May 15 – May 31, 2026 (expected)",
+      "likelihood": "HIGH",
+      "trigger": "Revenue growth ≥8% YoY; Net profit growth ≥10% YoY; Net margin stable or improved",
+      "bull_impact": "Earnings beat validates 27.7% ROE as sustainable. Expected reaction: +5-10% on beat; potential 2-3x upside multiple on surprise.",
+      "bear_impact": "Earnings miss or guidance cut invalidates all three bull points. Expected reaction: -10-15% on miss."
+    },
+    {
+      "event": "Foreign investor flows stabilize or reverse",
+      "timeframe": "Jun 2026 – Q3 2026",
+      "likelihood": "MODERATE",
+      "trigger": "Net foreign buying resumes in Vietnamese equities; sentiment shifts from 'EM outflow' to 'selective EM recovery'",
+      "bull_impact": "Macro rebalancing event. If flows stabilize, liquidity improves and technicals improve. Expected impact: +3-8% as valuation re-rates.",
+      "bear_impact": "Sustained foreign outflows pressure price. Expected impact: continued downward momentum."
+    },
+    {
+      "event": "FPT international partnership announcement (speculative)",
+      "timeframe": "Jun – Aug 2026",
+      "likelihood": "WEAK",
+      "trigger": "FPT announces material partnership with global tech/infrastructure player (implied by 'Trump partner' headline, context unclear)",
+      "bull_impact": "If partnership is material (e.g., $100M+ capital or revenue commitment), market could re-rate FPT's growth profile. Expected impact: +10-20%.",
+      "bear_impact": "Partnership fails to materialize or is immaterial. Expected impact: -5-10%."
+    }
+  ],
+  "data_constraints": [
+    "Price data is stale (latest bar 2026-04-29; analysis 2026-05-10 = 11 days old). Current FPT price unknown.",
+    "No FPT-specific forward guidance or management commentary.",
+    "No peer comparables; cannot assess relative valuation of 27.7% ROE.",
+    "FPT business-mix unknown; revenue breakdown by segment not provided.",
+    "Trump partnership context incomplete (article excerpt truncated; full context unclear).",
+    "Foreign flow context sector-level only; FPT-specific inflows/outflows unknown."
+  ],
+  "framing": "This is a thesis exploration, not a recommendation. Each bull point is grounded in available data and cites source + as-of date (I-S2). Bear case included (I-S10). Conviction levels reflect evidence strength and data constraints. Frame as 'consideration for further investigation,' not 'buy' signals (I-S35). Research aid only. Reader discretion required.",
+  "compliance": {
+    "i_s1_no_llm_math": true,
+    "i_s2_every_claim_cited": true,
+    "i_s3_bull_points_count": 3,
+    "i_s3_distinct_categories": 3,
+    "i_s10_bear_points_count": 3,
+    "i_s35_framing_research_aid": true,
+    "silent_empty_check": false
+  }
+}

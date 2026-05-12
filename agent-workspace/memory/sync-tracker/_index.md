@@ -1,7 +1,7 @@
 # Confidence Score Index — sync-tracker
 
 > **Auto-generated** by `scripts/hooks/sync-tracker-render.sh`. Do NOT edit by hand.
-> **Last rendered**: 2026-05-08T08:11:25Z
+> **Last rendered**: 2026-05-11T13:10:36Z
 > **Source**: D-006 (Track 8a) + Charter Principle 8 (Calibration over confidence)
 > **Storage**: bash+TSV flat-file MVP per IMPL-S17-1; SQLite migration deferred Phase 1+
 
@@ -12,8 +12,8 @@
 | LANGUAGE | 51.4 | 🟡 MED              (0.50-0.69) | 31 | 2026-05-05T15:00:00Z | 0 |
 | DOMAIN_UBIQUITOUS | 56.7 | 🟡 MED              (0.50-0.69) | 32 | 2026-05-05T10:00:00Z | 0 |
 | DESIGN_THINKING | 54.8 | 🟡 MED              (0.50-0.69) | 30 | 2026-05-05T13:30:00Z | 0 |
-| SCOPE | 60.3 | 🟡 MED              (0.50-0.69) | 78 | 2026-05-08T08:11:24Z | 0 |
-| DECISION_ROUTING | 49.8 | 🟠 MED-LOW          (0.30-0.49) | 33 | 2026-05-06T16:03:19Z | 0 |
+| SCOPE | 61.9 | 🟡 MED              (0.50-0.69) | 86 | 2026-05-10T17:03:04Z | 0 |
+| DECISION_ROUTING | 48 | 🟠 MED-LOW          (0.30-0.49) | 39 | 2026-05-11T13:10:35Z | 0 |
 
 ## Decision-Class Thresholds
 
@@ -30,16 +30,16 @@
 
 | ts | category | event_type | delta | decision_id | reason |
 |---|---|---|---|---|---|
-| 2026-05-07T03:06:28Z | SCOPE | charter_match | 0.2 | auto-S-adr-1 | auto-detected new ADR mtime <6h |
-| 2026-05-07T03:06:28Z | SCOPE | charter_match | 0.2 | auto-S-adr-2 | auto-detected new ADR mtime <6h |
-| 2026-05-07T03:06:29Z | SCOPE | charter_match | 0.2 | auto-S-adr-3 | auto-detected new ADR mtime <6h |
-| 2026-05-07T04:15:34Z | SCOPE | charter_match | 0.2 | auto-S-adr-1 | auto-detected new ADR mtime <6h |
-| 2026-05-07T04:15:35Z | SCOPE | charter_match | 0.2 | auto-S-adr-2 | auto-detected new ADR mtime <6h |
-| 2026-05-07T04:15:36Z | SCOPE | charter_match | 0.2 | auto-S-adr-3 | auto-detected new ADR mtime <6h |
-| 2026-05-07T05:02:12Z | SCOPE | charter_match | 0.2 | auto-S-adr-1 | auto-detected new ADR mtime <6h |
-| 2026-05-07T05:02:13Z | SCOPE | charter_match | 0.2 | auto-S-adr-2 | auto-detected new ADR mtime <6h |
-| 2026-05-07T05:02:14Z | SCOPE | charter_match | 0.2 | auto-S-adr-3 | auto-detected new ADR mtime <6h |
-| 2026-05-08T08:11:24Z | SCOPE | charter_match | 0.2 | auto-S-adr-1 | auto-detected new ADR mtime <6h |
+| 2026-05-10T15:00:51Z | SCOPE | charter_match | 0.2 | auto-S-adr-1 | auto-detected new ADR mtime <6h |
+| 2026-05-10T15:00:52Z | SCOPE | charter_match | 0.2 | auto-S-adr-2 | auto-detected new ADR mtime <6h |
+| 2026-05-10T15:00:53Z | DECISION_ROUTING | drift_signal | -0.3 | auto-S-drift | auto-detected 1672 HIGH-drift events today |
+| 2026-05-10T16:00:11Z | SCOPE | charter_match | 0.2 | auto-S-adr-1 | auto-detected new ADR mtime <6h |
+| 2026-05-10T16:00:12Z | SCOPE | charter_match | 0.2 | auto-S-adr-2 | auto-detected new ADR mtime <6h |
+| 2026-05-10T16:00:13Z | DECISION_ROUTING | drift_signal | -0.3 | auto-S-drift | auto-detected 1763 HIGH-drift events today |
+| 2026-05-10T17:03:03Z | SCOPE | charter_match | 0.2 | auto-S-adr-1 | auto-detected new ADR mtime <6h |
+| 2026-05-10T17:03:04Z | SCOPE | charter_match | 0.2 | auto-S-adr-2 | auto-detected new ADR mtime <6h |
+| 2026-05-10T17:03:05Z | DECISION_ROUTING | drift_signal | -0.3 | auto-S-drift | auto-detected 1956 HIGH-drift events today |
+| 2026-05-11T13:10:35Z | DECISION_ROUTING | drift_signal | -0.3 | auto-S-drift | auto-detected 6 HIGH-drift events today |
 
 ## How to use
 

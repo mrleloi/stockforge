@@ -21,6 +21,56 @@ Use this template:
 
 ## Recent Rules (digest; last 5)
 
+### 2026-05-11 (S248): AP-23 "harness-firing-test-gap" class consolidated under deterministic hook — L-S247-1
+**Context**: 6 AP-23 instances accumulated (M-S189-1, S243 lock-trap, S245 lock-pid-secondary, S245 env-prefix Form-A, S245 grep-multi-S-token, S247 env-prefix Form-B). All were statically detectable via regex on `.claude/settings.json` + structural lint on companion firing-test fixtures. AP-23 HOOK-promotion threshold (>=3 instances) was overdue by 3 instances. Root cause shared across all 6: firing-test authors modeled dev-shell invocation instead of actual Windows Claude Code hook-executor spawn topology.
+**Rule**: `scripts/hooks/firing-test-spawn-context-lint.sh` (L-S247-1 promoted hook) now enforces three deterministic passes at every Stop event:
+  (1) Form-B env-wrap detection: any `"command": "env VAR=val bash ..."` in settings.json → WARN (sibling `settings-inline-env-prefix-detector.sh` covers Form-A)
+  (2) bash-c / stdin-redirect hooks missing companion firing-test → WARN
+  (3) bash-c / stdin-redirect hooks whose companion firing-test lacks `# SPAWN-CONTEXT:` marker → WARN
+  Form-C (positional-arg) is safe in Windows executor — requires firing-test but NOT SPAWN-CONTEXT marker.
+**Anti-example** (all 6 prior instances): firing-test invoked hook via `bash "$HOOK"` in dev-shell context — did not exercise env-var absence, PPID=1, or Windows PE32+ executor path.
+**Correct example**: For bash-c/stdin-redirect hooks, include in firing-test: `# SPAWN-CONTEXT: bash-c` block documenting that the fixture exercises the actual spawn topology, NOT dev-shell shortcut.
+**Severity**: high. **Auto-detect**: yes — `firing-test-spawn-context-lint.sh` is the auto-detector (WARN-only; promote to BLOCKING after 5 clean sessions per S99 ritual-demotion mirror).
+**Coverage of prior instances**: All 6 prior instances are now covered by this hook. No additional inline rules needed.
+
+### 2026-05-10 (S246): Task-tool subagent runs in-process; does NOT fire SessionStart hooks — L-S246-B
+**Context**: S246-B sandwich-verifier empirical test (Scope 1) at 22:30+07:00 found that Agent-tool subagent dispatch on Windows runs in-process within parent claude.exe — NOT as a separate OS process. `tasklist //FI "IMAGENAME eq claude.exe"` showed ONLY the parent (pid 18176). `agent-workspace/memory/.session-hooks.log` had zero SessionStart entries during subagent execution. This is OPPOSITE to my and the architect's prior assumption.
+**Rule**: Task-tool/Agent-tool subagent dispatch DOES NOT fire SessionStart hooks. Only `claude --print` / `claude -p` (e.g., from `subagent_transport.py:subprocess.run`) spawns separate claude.exe processes that fire SessionStart hooks. **These two "subagent" mechanisms have entirely different harness implications:**
+  - **Agent-tool**: in-process, no SessionStart, no lock-hook firing, no separate billing path
+  - **claude --print**: separate process, SessionStart fires, lock-hook fires, separate per-call billing
+**Anti-example**: Architect's S246 plan (and my S246-B dispatch) assumed Agent-tool subagent SessionStart would BLOCK — speculative analysis without empirical test. The Strategy (f) hook is therefore production-safe for Agent-tool subagents (BLOCK is unreachable via that path).
+**Correct example**: Verify subagent spawn topology empirically before designing hook compatibility — `tasklist` + `.session-hooks.log` + `lock-rc-probe.sh` are deterministic checks.
+**Why**: Hook design assumed a class of failure that doesn't exist on this platform. Empirical RC discrimination (Strategy f vs e vs c) was correct; the in-process-vs-spawn-process distinction was missed by both PLAN and IMPL but caught by VERIFY.
+**How to apply**: When designing SessionStart-tier hooks that affect autonomous-mode behavior, distinguish (a) Agent-tool subagents (bypass hook chain entirely) from (b) claude-CLI-spawned subagents (fire full hook chain). Only the latter path needs hook-compatibility consideration.
+**Severity**: high (knowledge-correcting). **Auto-detect**: yes — `lock-rc-probe.sh` retained as diagnostic for future spawn-topology verification.
+
+### 2026-05-10 (S245): Two new AP-23-family harness defects — env-prefix-fails-spawn + grep-multi-S-token — L-S245+-2/3
+**Context**: Both surfaced from user-displayed TUI errors mid-S245 turn. (1) `.claude/settings.json` lines 204/208/212/277/281/285 used `CLAUDE_HOOK_EVENT=X bash "..."` env-prefix syntax — Claude Code's hook spawn layer fails this with `bash: CLAUDE_HOOK_EVENT=...: No such file or directory` (3 SessionStart + 3 UserPromptSubmit hooks all silently broken since add; harness-health log last entry 20:43:40 confirms zero production fires post-add). (2) `scripts/hooks/promotion-cycle-trigger.sh:47` `grep -oE 'S[0-9]+'` on basename `promote-rule-S245-L-S240-5-cycle.md` returned TWO matches (S245+S240) → multi-line `LAST_PROMOTE_SESSION` → line 51 `$((..))` syntax error → SESSION_DELTA unbound at line 55.
+**Rule**: (1) When wiring env-vars in Claude Code hook commands, prepend `env` (e.g. `env VAR=val bash "..."`) — DO NOT rely on inline POSIX env-prefix syntax which the hook spawn layer mishandles. (2) When parsing session-IDs from `promote-rule-S<N>-*.md` filenames, ALWAYS pipe `grep -oE 'S[0-9]+'` through `| head -1` because filename may contain referenced lesson IDs (`L-S<M>-*`) producing multi-line output that breaks downstream arithmetic.
+**Anti-example** (1): `"command": "CLAUDE_HOOK_EVENT=UserPromptSubmit bash \"...\""` — fails at runtime. (2): `LAST_PROMOTE_SESSION=$(basename ... | grep -oE 'S[0-9]+' | tr -d 'S')` — multi-line on `S245-L-S240` filenames.
+**Correct example** (1): `"command": "env CLAUDE_HOOK_EVENT=UserPromptSubmit bash \"...\""` — `env` is a real executable that the spawn layer recognizes. (2): `LAST_PROMOTE_SESSION=$(basename ... | grep -oE 'S[0-9]+' | head -1 | tr -d 'S')`.
+**Why**: Both are AP-23 family "harness ships with verification-time defect because firing-test fixture didn't exercise actual-Windows-spawn-context or actual-filename-edge-case." Class instance count: 5+ (M-S189-1, S243 lock-trap, S245 lock-pid, S245 env-prefix, S245 grep-multi-S). AP-23 promotion threshold OVERDUE.
+**How to apply**: Both fixes shipped this session (settings.json + promotion-cycle-trigger.sh edits, smoke-tested EXIT=0). Promote-rule cycle queued for next session to formalize "env-wrapper required pattern" + "head-1-after-grep-on-multi-token-filename pattern" as bash-hook-lint extensions.
+**Severity**: high. **Auto-detect**: yes — two new lint targets for next bash-hook-lint extension (S246+).
+
+### 2026-05-10 (S245): Phantom-dispatch cross-session race — L-S240-5 PROMOTED to HOOK
+**Context**: 4 instances between 2026-05-09 (M-S238-2) and 2026-05-10 (L-S239-4 + L-S240-5 + S243 cross-session race confirmed by `dispatch.jsonl` showing 2 different `parent_session_id`s). AP-23 4-instance threshold MET (overdue from instance #2).
+**Rule**: When `autonomous_mode=true` and >1 claude.exe runs concurrently in the same project, each instance independently consumes routing inputs and dispatches its own copy of work. **Process-level mutual exclusion via `single-claude-instance-lock.sh` SessionStart hook is now BINDING.** Hook holds a session-lifetime lock at `agent-workspace/memory/.claude-instance.lock`; SessionEnd hook cleans it. No `trap` on EXIT in the hook script (S244 fix: that defeats the lock).
+**Anti-example** (M-S238-2 / S243): two parents both running autonomous-mode → both dispatch sandwich-verifier → composite observation file with redundant content. Lock with line-30 EXIT trap removed lock immediately after creation, defeating the design.
+**Correct example**: post-S244 hook holds lock until SessionEnd hook removes it; 2nd parent's SessionStart sees live lock + emits `[BLOCK]` + exit 2 + sets `STOCKFORGE_AUTONOMOUS_DISABLE=1`.
+**Why**: Cross-session phantom claudes from `continue-injector.ps1` SendKeys + `budget-watchdog.sh` cliff-auto-reboot via `session-self-reboot.sh`. Without lock: cost amplification + observation race + verifier misattribution to "in-session" bugs that don't exist.
+**How to apply**: Hook is shipped at S244. Promotion formalizes binding. SECONDARY DEFECT (S245-lock-pid): holder_pid=1 in spawned hook context defeats BLOCK check; S246 fix path required.
+**Severity**: high. **Auto-detect**: yes — hook `single-claude-instance-lock.sh` is the auto-detector itself.
+
+### 2026-05-10 (S245): Trap-eats-state hook lifetime asymmetry — L-S243+-1 PROMOTED to HOOK lint-check
+**Context**: 2 instances (M-S189-1 HH-H.1 300s threshold designed for fast turns + S243 lock-trap defect line-30 `trap 'rm -f "$LOCK"' EXIT` removing lock microseconds after creation). AP-23 2-instance threshold MET. Class: harness hook ships with verification-time defect because firing-test fixture didn't exercise actual lifetime / env / process-tree edge case.
+**Rule**: When authoring a SessionStart-tier hook that creates persistent state (lock files, marker files, etc.), the hook MUST NOT register `trap '<cleanup>' EXIT` on the script-exit signal — that defeats persistence by removing the state when the hook process exits. Cleanup belongs in a separate SessionEnd hook OR in a separate timestamped expiry check.
+**Anti-example**: `single-claude-instance-lock.sh` line 30 `trap 'rm -f "$LOCK"' EXIT` (S243 defect; fixed S244).
+**Correct example**: Lock created at SessionStart hook; SessionEnd hook independently removes it via `.claude/settings.json` SessionEnd chain.
+**Why**: Hook-execution-lifetime ≠ session-lifetime. Persistent state requires separate write (SessionStart) + clear (SessionEnd) hooks, not script-local trap.
+**How to apply**: Implementation deferred to S246 FOCUSED_IMPL — extend `bash-hook-lint.sh` (or create new) that greps `scripts/hooks/*.sh` for `trap '.*EXIT'` patterns in SessionStart-tier hooks; flag for review.
+**Severity**: high. **Auto-detect**: yes — deterministic regex lint.
+
 ### 2026-05-07 (S176): File-pattern hooks MUST validate against real-state inventory + ship companion firing-test — L-S176-1
 **Context**: HH-C.2 audit (D-038) found project-md-staleness-check.sh was double-broken no-op since 2026-05-06 inception. Check A regex `^\*\*Phase\*\*:` matched zero lines in current-execution.md (actual format: `## SNNN — Phase X.Y` section headers); Check B glob `D-*.md` matched zero files in decisions/ (actual naming: `NNN-*.md`). Zero WARN entries in 10836-line .session-hooks.log = silent failure for 22+ sessions. Same recurrence-class as M-S171-1 (idle-loop heuristic too narrow).
 **Rule**: When authoring a file-pattern-matching hook (regex on file content OR glob on directory), MUST execute three pre-flight checks before declaring complete:

@@ -1,10 +1,22 @@
 ---
 schema_version: 1
 created_at: 2026-04-29
-updated_at: 2026-05-07
-last_check: 2026-05-07
-last_check_session: S170
+updated_at: 2026-05-12
+last_check: 2026-05-12
+last_check_session: S250
 last_check_outcome: |
+  S250 sync-grilling (AskUserQuestion-tier; 25 sessions overdue since 2026-05-07; fired in S250-entry bundle alongside D-052 cluster blocker):
+  - Q-bundle scope: D-052 cluster remediation pick (Charter blocker — answered: Minimum E = E.2+E.3+E.4) + Phase 3.5 close-or-continue (answered: Close now; T5+T8 → DEFERRED-DOCUMENTATION) + DECISION_ROUTING re-confirm (answered: Hold + strengthen — extend fresh-context verifier requirement to CHARTER tier per E.4 amendment) + LANGUAGE re-confirm (answered: Hold as-is — VN-chat / EN-code mixing correct).
+  - DECISION_ROUTING delta: +0.4 (q_and_a_resolution × 4 + decision_correctness on cluster pick); current_score 48.0 → 48.4. Still MED-LOW; trajectory positive. Next re-grill at S253 (3-session cadence) OR earlier if any new ARCH+ ADR is self-reviewed-only (E.4 amendment will prevent that post-cool-down).
+  - LANGUAGE delta: +0.1 (q_and_a_resolution); 51.4 → 51.5.
+  - SCOPE delta: +0.3 (decision_correctness on Phase 3.5 close pick — major scope checkpoint resolved); 61.9 → 62.2.
+  - DOMAIN_UBIQUITOUS, DESIGN_THINKING: no change this turn (not grilled; carry-over).
+  - Phase 3.5 status: CLOSING this session per user pick. T1-T4 + T6 + T7 SHIPPED; T5 (harness-health-protocol.md) + T8 (charter Principle 11) marked DEFERRED-DOCUMENTATION — authored in dedicated post-Phase-4-entry session(s) without phase-blocking.
+  - E.3 hook (adr-empirical-close-verify-spot-check.sh) authored + wired + firing-test PASS this turn.
+  - E.4 charter amendment: PROPOSAL drafted at agent-workspace/proposals/E4-fresh-context-verifier-arch-charter-tier.md; 48hr cool-down starts 2026-05-12T~21Z; apply window opens ≥2026-05-14T~21Z.
+  - Per "Full autonomous, no SUPERVISED mode" user binding: AskUserQuestion appropriate this turn since D-052 cluster is genuine CHARTER-tier blocker + sync-grilling 25 sessions overdue. Bundled all 4 Qs to honor qa_bundle_all_pending mega-bundle doctrine.
+  - Recommend next sync-grilling at S253 OR Phase 4 entry (whichever first). If user submits new SCOPE-tier prompt in interval → re-grill earlier.
+
   S83 sync-grilling refresher (auto-tiered; no AskUserQuestion fired):
   - Rationale: zero new SCOPE-tier divergence signal in S81+S82 work (pure harness routine — Pattern F Check 10 lint promotion at S81 + retroactive backfill of 7 production scripts at S82 per L-S69-2 doctrine; 63/63 PASS regression sustained both sessions). No charter / BC / process changes.
   - Identity (sync-007/008/013): unchanged from S68/S23 confirmed-aligned (AI-first VN stock advisory + self+3-5 peers + NOT-SaaS)

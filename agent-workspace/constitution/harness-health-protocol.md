@@ -1,11 +1,11 @@
 # Harness Health Protocol — Empirical-Firing Signal Catalog (v1.0)
 
-> **Status**: Constitution-tier draft authored S173 2026-05-07; **RATIFIED** via `AskUserQuestion` S173 Q1=A user explicit approval (`human-workspace/q-and-a/pending/2026-05-07-001-phase-3.5-T5-T6-T8-charter-gate.md`).
-> **Current location**: `agent-workspace/proposals/harness-health-protocol.md` — **PENDING mv** to `agent-workspace/constitution/harness-health-protocol.md`.
-> **mv blocker (M-S173-1)**: settings.json deny rule `Edit(agent-workspace/constitution/**)` + `Write(agent-workspace/constitution/**)` is path-based and intercepts both Edit/Write tools AND Bash filesystem ops (mv/cp/redirect) regardless of `defaultMode: bypassPermissions`. Q-B2 user-gate satisfied (Q1=A explicit approval) but technical deny-lift mechanism not functional in autonomous-full mode. Workarounds: (a) user manual `mv` via terminal; (b) settings.json amendment removing deny for this specific file (charter-tier change); (c) future session with explicit user-permission deny-lift prompt.
-> **Functional status**: T6 hook `harness-health-self-scan.sh` implements signals inline (does NOT read protocol file at runtime), so file location does NOT impact hook firing. Protocol = source-of-truth + reference doc for human review + future amendments.
-> **Companion artifacts**: `scripts/hooks/harness-health-self-scan.sh` (T6 hook impl, D-035) + `PROJECT_CHARTER.md` Principle 11 (T8 proposal — D-034; ratification ≥S180+ post-48hr cool-down per Charter Revision Protocol).
-> **Authority chain**: Phase 3.5 master plan §T5 (`agent-workspace/session-plans/pending/010-S50-phase-3.5-harness-deepening-master-plan.md` lines 213-258) → S173 charter user-gate → this file.
+> **Status**: RATIFIED — Constitution-tier; mv completed S220 D-048 (from proposals/); charter v1.1-aligned post-S253 (D-056).
+> **Current location**: `agent-workspace/constitution/harness-health-protocol.md` (canonical).
+> **Ratification chain**: S173 Q1=A user explicit approval → S220 D-048 mv-to-constitution (one-time deny-lift bundled with D-047) → S252 cross-reference reconciliation → S253 D-056 charter v1.1 Principle 11 ratified.
+> **Functional status**: T6 hook `harness-health-self-scan.sh` implements signals inline (does NOT read protocol file at runtime). Protocol = source-of-truth + reference doc for human review + future amendments.
+> **Companion artifacts**: `scripts/hooks/harness-health-self-scan.sh` (T6 hook impl, D-035) + `PROJECT_CHARTER.md` Principle 11 (T8; D-056; RATIFIED 2026-05-12).
+> **Authority chain**: Phase 3.5 master plan §T5 (`agent-workspace/session-plans/pending/010-S50-phase-3.5-harness-deepening-master-plan.md` lines 213-258) → S173 charter user-gate → D-048 mv → D-056 charter v1.1 → this file.
 
 ---
 
