@@ -129,3 +129,4 @@ agent-workspace/learning-data/archive/
 # Conversation exports (transcripts — not project artifacts)
 *-local-command-caveat*.txt
 20??-??-??-*-local-command-*.txt
+stockforge-backups/

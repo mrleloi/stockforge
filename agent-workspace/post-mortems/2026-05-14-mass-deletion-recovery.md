@@ -145,20 +145,17 @@ Either way: **a subagent had the tool access to issue a project-wide destructive
 
 Still worth doing as additional layer: review `.claude/agents/sandwich-verifier.md` — verifier is conceptually read-only. Consider narrowing its Bash to test-execution only. Lower priority now that R1 command-guard is shipped.
 
-### R2 — Project-integrity watchdog (NEW HOOK)
+### R2 — Project-integrity watchdog ✅ SHIPPED 2026-05-14
 
-Add `scripts/hooks/project-integrity-watchdog.sh` (Stop hook, LATE chain):
-- Checks existence of canonical files: `PROJECT_CHARTER.md`, `CLAUDE.md`, `AGENT_OPERATING_MANUAL.md`, `.git/HEAD`, `agent-workspace/memory/agent-notes.md`
-- If ANY missing → emit CRITICAL severity row + alert + auto-block (refuses next prompts until user acknowledges)
-- Companion firing-test verifies behavior
+**STATUS: SHIPPED + 7/7 firing-test PASS + wired into Stop chain (after severity-classifier).**
 
-### R3 — Daily backup hook (NEW HOOK)
+`scripts/hooks/project-integrity-watchdog.sh` — Stop hook. Checks 7 canonical files (`PROJECT_CHARTER.md`, `CLAUDE.md`, `AGENT_OPERATING_MANUAL.md`, `.git/HEAD`, `agent-notes.md`, `current-execution.md`, `mistake-log.md`) + 5 canonical dirs (`constitution/`, `scripts/hooks/`, `.claude/`, `decisions/`, `sessions/`). If ANY missing → writes `.autonomous-BLOCKED` flag DIRECTLY (early-warning, doesn't wait for severity-classifier round-trip) + CRITICAL severity row + urgent.md alert + Telegram push. **Would have caught the 2026-05-14 event within ONE Stop event instead of hours later.** RC=0 always (block is via flag, not exit code).
 
-Add `scripts/hooks/daily-backup.sh` (Stop hook, weekly schedule via marker):
-- Zip critical directories to `C:/backups/stockforge-YYYY-MM-DD.zip`
-- Rotate: keep 14 days
-- Include: agent-workspace/, scripts/hooks/, .claude/, packages/, root *.md files
-- Exclude: node_modules, __pycache__, large binaries
+### R3 — Daily backup hook ✅ SHIPPED 2026-05-14
+
+**STATUS: SHIPPED + 6/6 firing-test PASS + wired into Stop chain (end). Live-verified: 30MB content-verified archive.**
+
+`scripts/hooks/daily-backup.sh` — Stop hook, once-per-calendar-day via marker. Creates `<project-parent>/stockforge-backups/stockforge-YYYY-MM-DD.tar.gz` (out-of-tree). Includes agent-workspace/, scripts/, .claude/, packages/, bdd/, specs/, docs/, root *.md. Excludes .git, caches, forensic dirs. 14-day retention. Content-verified (tar -tzf must list canonical entries) — not size-thresholded. `STOCKFORGE_BACKUP_DIR` env overridable. **Had this existed pre-incident, uncommitted session work would have had a same-day local restore point.**
 
 ### R4 — Subagent rm permission removal
 
