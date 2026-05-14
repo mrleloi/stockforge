@@ -2,7 +2,9 @@
 id: D-034-S173-T8-charter-revision-v1.1-principle-11-proposal
 title: T8 — Charter Revision v1.0 → v1.1 PROPOSAL (Principle 11 — Harness Self-Verify Firing) — Cool-down 48hr Active
 date: 2026-05-07
-status: PROPOSED
+status: SUPERSEDED-BY-D-056
+superseded_at: 2026-05-12 (D-056 ratified charter v1.1 + Principle 11)
+superseded_at_observed: 2026-05-14T02:45Z (S310 severity-classifier surfaced 170h staleness; user approved supersession)
 level: CHARTER
 author:
   - "Claude Opus 4.7"

@@ -1,0 +1,4 @@
+# severity-state.tsv — generated 2026-05-14T09:45:08+07:00 by severity-classifier.sh
+# columns: severity\tartifact_path\tage_hours\tnext_action\tclassified_at
+# severity: CRITICAL | HIGH | MEDIUM | LOW
+# next_action: BLOCK | ESCALATE-ASKUSERQUESTION | DIGEST | LOG-ONLY

@@ -124,4 +124,54 @@ if [ "$UNMENTIONED_COUNT" -ge 1 ]; then
     "$UNMENTIONED_COUNT" "$NOTIF_FILE" >&2
 fi
 
+# === D3 FSM check: refuse checkpoint close if any OBSERVATION_WRITTEN row for current session ===
+# An OBSERVATION_WRITTEN row means the subagent wrote its output but sidecar not yet attested.
+# Closing checkpoint in this state risks orphaning the row (L-S258-2 pattern).
+# Per 012-S311-wave-0-W0-1-fsm-impl.md D3: "refuse close if any OBSERVATION_WRITTEN state row
+# for current session".
+REGISTRY="$MEMORY_DIR/.unattested-observations.tsv"
+CURRENT_SESSION="${CLAUDE_SESSION_ID:-}"
+OBS_WRITTEN_COUNT=0
+OBS_WRITTEN_LIST=""
+
+if [ -f "$REGISTRY" ] && [ -n "$CURRENT_SESSION" ]; then
+  while IFS= read -r reg_line; do
+    case "$reg_line" in
+      detected_ts*|"#"*|"") continue ;;
+    esac
+    reg_session="$(printf '%s' "$reg_line" | cut -f2)"
+    reg_state="$(printf '%s' "$reg_line" | cut -f6)"
+    reg_bn="$(printf '%s' "$reg_line" | cut -f3)"
+    # Only flag rows for current session in OBSERVATION_WRITTEN state
+    if [ "$reg_session" = "$CURRENT_SESSION" ] && [ "$reg_state" = "OBSERVATION_WRITTEN" ]; then
+      OBS_WRITTEN_COUNT=$((OBS_WRITTEN_COUNT + 1))
+      OBS_WRITTEN_LIST="${OBS_WRITTEN_LIST}${reg_bn}\n"
+    fi
+  done < "$REGISTRY"
+fi
+
+if [ "$OBS_WRITTEN_COUNT" -ge 1 ]; then
+  TS2="$(date -u +%FT%TZ 2>/dev/null || true)"
+  mkdir -p "$NOTIF_DIR" 2>/dev/null || true
+  NOTIF_FILE2="$NOTIF_DIR/${TS2//[:.]/-}-checkpoint-obs-written-block.md"
+  {
+    printf '# WARN: Checkpoint close blocked — OBSERVATION_WRITTEN rows pending attestation\n\n'
+    printf '**Detected at**: %s (Stop hook pre-checkpoint-close-verifier)\n' "$TS2"
+    printf '**Session**: %s\n\n' "${CURRENT_SESSION}"
+    printf '## Rows in OBSERVATION_WRITTEN state for current session\n\n'
+    printf '%b' "$OBS_WRITTEN_LIST" | awk 'NF>0 {print "- `"$0"`"}'
+    printf '\n## Why this matters\n\n'
+    printf 'Per D3 (012-S311-wave-0-W0-1-fsm-impl): an OBSERVATION_WRITTEN row means the\n'
+    printf 'subagent wrote its observation .md file but the sidecar has NOT been attested yet.\n'
+    printf 'Closing checkpoint now risks orphaning the row (L-S258-2 recurrence pattern).\n\n'
+    printf '## Recommended action\n\n'
+    printf '1. Attest the observation: run attestation check for each listed basename\n'
+    printf '2. Or manually transition row state to SIDECAR_ATTESTED in registry\n'
+    printf '3. Then re-run checkpoint close\n\n'
+    printf 'Registry: `agent-workspace/memory/.unattested-observations.tsv`\n'
+  } > "$NOTIF_FILE2"
+  printf 'WARN: %d OBSERVATION_WRITTEN row(s) pending attestation for session %s — see %s\n' \
+    "$OBS_WRITTEN_COUNT" "$CURRENT_SESSION" "$NOTIF_FILE2" >&2
+fi
+
 exit 0

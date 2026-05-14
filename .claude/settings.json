@@ -132,7 +132,8 @@
     "STOCKFORGE_CITATION_STRICT": "0",
     "STOCKFORGE_DRIFT_STRICT": "0",
     "STOCKFORGE_SAME_COMMIT_STRICT": "0",
-    "STOCKFORGE_WATCHDOG_DISABLE": "0"
+    "STOCKFORGE_WATCHDOG_DISABLE": "0",
+    "STOCKFORGE_LINT_DOCTRINE_PHASE_0_PORTABILITY": "0"
   },
   "hooks": {
     "SessionStart": [
@@ -213,6 +214,14 @@
           },
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/idle-state-advisory.sh\" SessionStart"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/escalation-engine.sh\" SessionStart"
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/continue-injector-spawn.sh\""
           }
         ]
@@ -250,6 +259,14 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/autonomous-block-enforcer.sh\" UserPromptSubmit"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/escalation-engine.sh\" UserPromptSubmit"
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/userprompt-invariants-injector.sh\""
           },
           {
@@ -283,6 +300,10 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/harness-health-self-scan.sh\" UserPromptSubmit"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/idle-state-advisory.sh\" UserPromptSubmit"
           }
         ]
       }
@@ -305,6 +326,14 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/telemetry-rotate.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/session-hooks-log-rotate.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/urgent-md-rotate.sh\""
           },
           {
             "type": "command",
@@ -377,6 +406,22 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/lesson-synthesis-watchdog.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/severity-classifier.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/python-determinism-check.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/observation-orphan-detector.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/escalation-engine.sh\" Stop"
           },
           {
             "type": "command",
@@ -455,6 +500,14 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/destructive-command-guard.sh\" PreToolUse"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/autonomous-block-enforcer.sh\" PreToolUse"
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/dispatch-jsonl-recorder.sh\""
           },
           {
@@ -482,6 +535,15 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/budget-watchdog.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/python-determinism-check.sh\""
           }
         ]
       },

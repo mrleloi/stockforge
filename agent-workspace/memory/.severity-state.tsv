@@ -1,0 +1,31 @@
+# severity-state.tsv — generated 2026-05-14T11:40:14+07:00 by severity-classifier.sh
+# columns: severity\tartifact_path\tage_hours\tnext_action\tclassified_at
+# severity: CRITICAL | HIGH | MEDIUM | LOW
+# next_action: BLOCK | ESCALATE-ASKUSERQUESTION | DIGEST | LOG-ONLY
+LOW	agent-workspace/memory/decisions/059-python-determinism-contract.md	1	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-023428-bash-hook-lint-warn.md	2	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-024926-bash-hook-lint-warn.md	1	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-025911-bash-hook-lint-warn.md	1	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-030925-bash-hook-lint-warn.md	1	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-031656-bash-hook-lint-warn.md	1	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-032612-bash-hook-lint-warn.md	1	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-033250-bash-hook-lint-warn.md	1	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-033525-bash-hook-lint-warn.md	1	LOG-ONLY	2026-05-14T11:40:14+07:00
+HIGH	human-workspace/notifications/20260514-033933-python-determinism-warn.md	1	ESCALATE-ASKUSERQUESTION	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-034300-bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-034351-bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-034441-bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-034532-bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-034624-bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-034819-bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-035441-bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-14T11:40:14+07:00
+HIGH	human-workspace/notifications/20260514-035633-python-determinism-warn.md	0	ESCALATE-ASKUSERQUESTION	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-035941-bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-040010-bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-14T11:40:14+07:00
+HIGH	human-workspace/notifications/20260514-040026-python-determinism-warn.md	0	ESCALATE-ASKUSERQUESTION	2026-05-14T11:40:14+07:00
+HIGH	human-workspace/notifications/20260514-040113-python-determinism-warn.md	0	ESCALATE-ASKUSERQUESTION	2026-05-14T11:40:14+07:00
+HIGH	human-workspace/notifications/20260514-040210-python-determinism-warn.md	0	ESCALATE-ASKUSERQUESTION	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-041042-bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-041131-bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-14T11:40:14+07:00
+LOW	human-workspace/notifications/20260514-041219-bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-14T11:40:14+07:00
+HIGH	human-workspace/notifications/20260514-041726-python-determinism-warn.md	0	ESCALATE-ASKUSERQUESTION	2026-05-14T11:40:14+07:00

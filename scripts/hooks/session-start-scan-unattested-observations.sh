@@ -85,28 +85,55 @@ for f in "$OBS_DIR"/sandwich-dev-*.md; do
   fi
 done
 
+# D3 FSM-aware: only ALERT for ORPHANED state rows.
+# SIDECAR_ATTESTED rows are legitimate-pending (normal, attested externally or via marker).
+# Legacy rows (no state col) default to SIDECAR_ATTESTED per back-compat rule (D1 spec).
+ORPHANED_LIST=""
+ORPHANED_COUNT=0
 if [ "$UNATTESTED_COUNT" -ge 1 ]; then
+  # Re-scan registry for ORPHANED-state rows only
+  while IFS= read -r reg_line; do
+    case "$reg_line" in
+      detected_ts*|"#"*|"") continue ;;
+    esac
+    reg_state="$(printf '%s' "$reg_line" | cut -f6)"
+    reg_bn="$(printf '%s' "$reg_line" | cut -f3)"
+    # Legacy rows (empty state col) → treat as SIDECAR_ATTESTED → skip
+    if [ -z "$reg_state" ]; then
+      continue
+    fi
+    if [ "$reg_state" = "ORPHANED" ]; then
+      ORPHANED_COUNT=$((ORPHANED_COUNT + 1))
+      ORPHANED_LIST="${ORPHANED_LIST}${reg_bn} [ORPHANED]\n"
+    fi
+  done < "$REGISTRY"
+fi
+
+if [ "$ORPHANED_COUNT" -ge 1 ]; then
   mkdir -p "$NOTIF_DIR" 2>/dev/null || true
   NOTIF_FILE="$NOTIF_DIR/${TS//[:.]/-}-unattested-observations.md"
   {
-    printf '# Unattested sandwich-dev observations (L-S68-1 mitigation)\n\n'
+    printf '# ALERT: Orphaned sandwich-dev observations (FSM state=ORPHANED)\n\n'
     printf '**Detected at**: %s (SessionStart scan)\n' "$TS"
     printf '**Session**: %s\n' "${CLAUDE_SESSION_ID:-unknown}"
     printf '**Source**: %s\n\n' "${SOURCE:-unknown}"
-    printf '## Files lacking BOTH attestation marker AND attestation-log row\n\n'
-    printf '%b' "$UNATTESTED" | awk 'NF>0 {print "- `"$0"`"}'
+    printf '## Rows in ORPHANED state (stale IN_FLIGHT/OBSERVATION_WRITTEN >30 min)\n\n'
+    printf '%b' "$ORPHANED_LIST" | awk 'NF>0 {print "- `"$0"`"}'
     printf '\n## Recommended action\n\n'
-    printf 'Per L-S68-1: when /clear (or other event) killed the SubagentStop chain,\n'
-    printf 'the post-dev-dispatch-attestation-check.sh hook never fired. Manual fallback:\n\n'
-    printf '1. Read each observation frontmatter; cross-check claimed metrics empirically\n'
-    printf '   (pytest + git-status)\n'
-    printf '2. If empirical state matches → manually `touch` the marker file:\n'
-    printf '   `agent-workspace/memory/.attestation-checked-<basename>`\n'
-    printf '3. If divergence → treat as M-S67-3 / M-S66-1 pattern; catalog in mistake-log\n\n'
-    printf 'Registry log: `agent-workspace/memory/.unattested-observations.tsv`\n'
+    printf 'Per L-S258-2 FSM closure (D-058 Wave 0 W0-1): ORPHANED rows require rectification.\n\n'
+    printf '1. Check observation file for the subagent dispatch\n'
+    printf '2. If subagent completed: transition row to SIDECAR_ATTESTED by attesting the observation\n'
+    printf '3. If subagent failed: transition to RESOLVED after manual cleanup\n'
+    printf '4. Use orphan-detector hook to re-scan or manually update state column in registry\n\n'
+    printf 'Registry: `agent-workspace/memory/.unattested-observations.tsv`\n'
+    printf 'Note: SIDECAR_ATTESTED rows are normal — only ORPHANED rows require action.\n'
   } > "$NOTIF_FILE"
-  printf 'WARN: %d unattested sandwich-dev observation(s) detected — see %s\n' \
-    "$UNATTESTED_COUNT" "$NOTIF_FILE" >&2
+  printf 'ALERT: %d ORPHANED sandwich-dev observation(s) detected — see %s\n' \
+    "$ORPHANED_COUNT" "$NOTIF_FILE" >&2
+elif [ "$UNATTESTED_COUNT" -ge 1 ]; then
+  # Non-orphaned unattested rows: still log to registry (for audit trail) but do NOT alert
+  printf 'INFO: %d unattested sandwich-dev observation(s) in registry (non-ORPHANED states, no alert)\n' \
+    "$UNATTESTED_COUNT" >&2
 fi
 
 exit 0

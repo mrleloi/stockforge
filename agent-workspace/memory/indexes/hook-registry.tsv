@@ -2,6 +2,7 @@ hook_name	wired_events	status	linked_lessons	firing_test_path	last_modified
 adr-empirical-close-verify-spot-check.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/adr-empirical-close-verify-spot-check-fire-test.sh	see-fs
 attach-portability-smoke.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/attach-portability-smoke-fire-test.sh	see-fs
 auto-reboot-handoff-verify.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/auto-reboot-handoff-verify-fire-test.sh	see-fs
+autonomous-block-enforcer.sh	UserPromptSubmit,PreToolUse	ACTIVE	none	scripts/hooks/firing-tests/autonomous-block-enforcer-fire-test.sh	see-fs
 autonomous-stop-watchdog.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/autonomous-stop-watchdog-fire-test.sh	see-fs
 bash-hook-lint.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/bash-hook-lint-fire-test.sh	see-fs
 bootstrap-summary-renderer.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/bootstrap-summary-renderer-fire-test.sh	see-fs
@@ -23,6 +24,7 @@ drift-rollup-daily.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/drift-rollup-d
 drift-signals-D1-D9.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/drift-signals-D1-D9-fire-test.sh	see-fs
 drift-signals-log-rotate.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/drift-signals-log-rotate-fire-test.sh	see-fs
 effort-escalation-detector.sh	UserPromptSubmit,PreToolUse	ACTIVE	none	scripts/hooks/firing-tests/effort-escalation-detector-fire-test.sh	see-fs
+escalation-engine.sh	SessionStart,UserPromptSubmit,Stop	ACTIVE	none	scripts/hooks/firing-tests/escalation-engine-fire-test.sh	see-fs
 essential-routing-fields-verifier.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/essential-routing-fields-verifier-fire-test.sh	see-fs
 file-pattern-hook-pre-flight-lint.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/file-pattern-hook-pre-flight-lint-fire-test.sh	see-fs
 firing-test-spawn-context-lint.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/firing-test-spawn-context-lint-fire-test.sh	see-fs
@@ -33,6 +35,7 @@ harness-recovery-dod-watchdog.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/har
 hook-firing-counter.sh	UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/hook-firing-counter-fire-test.sh	see-fs
 hook-log-path-canonical-detector.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/hook-log-path-canonical-detector-fire-test.sh	see-fs
 idle-escape-detector.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/idle-escape-detector-fire-test.sh	see-fs
+idle-state-advisory.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/idle-state-advisory-fire-test.sh	see-fs
 in-flight-subagent-watcher.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/in-flight-subagent-watcher-fire-test.sh	see-fs
 index-registry-renderer.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/index-registry-renderer-fire-test.sh	see-fs
 learning-index-rebuild.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/learning-index-rebuild-fire-test.sh	see-fs
@@ -45,6 +48,7 @@ memory-etl-processor.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/memory-etl-p
 memory-routing-audit.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/memory-routing-audit-fire-test.sh	see-fs
 metric-failure-mode-rate.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/metric-failure-mode-rate-fire-test.sh	see-fs
 no-anthropic-sdk-d10.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/no-anthropic-sdk-d10-fire-test.sh	see-fs
+observation-orphan-detector.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/observation-orphan-detector-fire-test.sh	see-fs
 phase-status-coherence.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/phase-status-coherence-fire-test.sh	see-fs
 post-dev-dispatch-attestation-check.sh	SubagentStop	ACTIVE	none	scripts/hooks/firing-tests/post-dev-dispatch-attestation-check-fire-test.sh	see-fs
 post-tool-citation-grep.sh	PostToolUse	ACTIVE	none	scripts/hooks/firing-tests/post-tool-citation-grep-fire-test.sh	see-fs
@@ -56,6 +60,7 @@ profile-template-auto-populate.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/pr
 project-md-adr-staleness.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/project-md-adr-staleness-fire-test.sh	see-fs
 promotion-cycle-trigger.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/promotion-cycle-trigger-fire-test.sh	see-fs
 proposal-bundle-advisor.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/proposal-bundle-advisor-fire-test.sh	see-fs
+python-determinism-check.sh	Stop,PostToolUse	ACTIVE	none	scripts/hooks/firing-tests/python-determinism-check-fire-test.sh	see-fs
 qa-answered-detector.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/qa-answered-detector-fire-test.sh	see-fs
 qa-pending-auto-mover.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/qa-pending-auto-mover-fire-test.sh	see-fs
 qa-pending-stale-mover.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/qa-pending-stale-mover-fire-test.sh	see-fs
@@ -67,9 +72,11 @@ scheduled-drift-detector-trigger.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/
 self-awareness-aggregate.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/self-awareness-aggregate-fire-test.sh	see-fs
 session-end-checklist-linter.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/session-end-checklist-linter-fire-test.sh	see-fs
 session-export-raw.sh	SessionEnd	ACTIVE	none	scripts/hooks/firing-tests/session-export-raw-fire-test.sh	see-fs
+session-hooks-log-rotate.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/session-hooks-log-rotate-fire-test.sh	see-fs
 session-start-bootstrap.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/session-start-bootstrap-fire-test.sh	see-fs
 session-start-scan-unattested-observations.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/session-start-scan-unattested-observations-fire-test.sh	see-fs
 settings-inline-env-prefix-detector.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/settings-inline-env-prefix-detector-fire-test.sh	see-fs
+severity-classifier.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/severity-classifier-fire-test.sh	see-fs
 single-claude-instance-lock.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/single-claude-instance-lock-fire-test.sh	see-fs
 stale-prompt-detector.sh	UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/stale-prompt-detector-fire-test.sh	see-fs
 sub-plan-completion-coherence.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/sub-plan-completion-coherence-fire-test.sh	see-fs
@@ -81,10 +88,12 @@ sync-tracker-auto-update.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/sync-tra
 sync-tracker-render.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/sync-tracker-render-fire-test.sh	see-fs
 sync-tracker-update.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/sync-tracker-update-fire-test.sh	see-fs
 taskcompleted-audit.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/taskcompleted-audit-fire-test.sh	see-fs
+telegram-push.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/telegram-push-fire-test.sh	see-fs
 telemetry-rotate.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/telemetry-rotate-fire-test.sh	see-fs
 tier1-bloat-check.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/tier1-bloat-check-fire-test.sh	see-fs
 tool-call-first-lint.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/tool-call-first-lint-fire-test.sh	see-fs
 tracking-retention.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/tracking-retention-fire-test.sh	see-fs
+urgent-md-rotate.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/urgent-md-rotate-fire-test.sh	see-fs
 userprompt-invariants-injector.sh	UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/userprompt-invariants-injector-fire-test.sh	see-fs
 vendor-api-probe.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/vendor-api-probe-fire-test.sh	see-fs
 working-memory-budget-audit.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/working-memory-budget-audit-fire-test.sh	see-fs

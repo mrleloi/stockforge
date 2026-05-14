@@ -122,3 +122,10 @@ agent-workspace/memory/self-awareness/*.db-journal
 # index/ + dogfood/ + loop/ are tracked (small reference artifacts).
 agent-workspace/learning-data/events/
 agent-workspace/learning-data/archive/
+
+# Forensic backup — 2026-05-14 mass-deletion incident
+.git-corrupt-20260514/
+
+# Conversation exports (transcripts — not project artifacts)
+*-local-command-caveat*.txt
+20??-??-??-*-local-command-*.txt

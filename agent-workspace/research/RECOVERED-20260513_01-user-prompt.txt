@@ -1,0 +1,16 @@
+RECOVERED CONTENT — original file: human-workspace/user_prompt/20260513_01.txt
+Lost in 2026-05-14 mass-deletion incident. Reconstructed from this-conversation transcript
+(content was displayed verbatim early in the S310 session before destruction).
+Original mtime: 2026-05-13 13:26 local. Faithful reconstruction — verify against memory.
+
+To restore: human should manually copy this content back to
+  human-workspace/user_prompt/20260513_01.txt
+(agent is contract-forbidden from writing to human-workspace/user_prompt/ — CLAUDE.md hard rule)
+
+=== ORIGINAL CONTENT BELOW ===
+
+1. tôi cần tham khảo các repo trong "C:\htdocs\research" để học hỏi về các thành phần, kiến trúc, cách triển khai, hiệu quả của các  repo này để tích hợp vào stockforge.
+- có rất nhiều thứ giá trị, production battle-tested, có thể kết hợp với các đặc điểm customize của stockforge và các well designed pattern từ các repo này
+- cả về mặt stock business, financial business, hay craw data, đều có thể học hỏi.
+- hầu hết đã có folder "docs" bên trong từng repo như một entry point để onboard rồi, deepdive từ đó để dễ dàng tích hợp vào stockforge hơn
+=> phân tích kĩ và tự đánh giá, đề xuất các phương án, các thành phần, các design, các tính năng nên bổ sung cho stockforge. từ đó lên plan để tích hợp.

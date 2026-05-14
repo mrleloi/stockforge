@@ -1,1 +1,1 @@
-session=unknown ts=2026-05-12T07:37:48+07:00 state=GREEN severity=LOW delta_hours=0.0 newest_adr=053-S237-bull-A2-retry-validator-promote.md warn_count=0
+session=unknown ts=2026-05-14T10:08:30+07:00 state=WARN severity=MEDIUM delta_hours=50.0 newest_adr=034-S173-T8-charter-revision-v1.1-principle-11-proposal.md warn_count=1
