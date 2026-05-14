@@ -9,6 +9,34 @@
 
 ---
 
+## 🚨 INCIDENT + RECOVERY — 2026-05-14 mass-deletion (RESOLVED 12:31 SEAST)
+
+**What happened**: ~2688 files destroyed by a recency-based mass deletion (every file NOT touched in the S310 session died — including `.git/HEAD`, `PROJECT_CHARTER.md`, 82 hook scripts, root dirs). Correlated with S316 sandwich-verifier execution window 10:57-11:16. Exact command unrecoverable (Claude Code subagent transcripts are 0-byte by design).
+
+**Recovery**: COMPLETE. `git clone` from remote (`https://github.com/mrleloi/stockforge.git`, last commit 378adad) + `git checkout HEAD --` restored 2688 tracked files. Dangling-blob mining of `.git-corrupt-20260514/objects/` recovered 0 additional (all 20 dangling blobs were already-surviving session work). Forensic backups preserved at `C:/htdocs/{stockforge-rescue-20260514, stockforge-fresh-20260514}` + `./.git-corrupt-20260514/`.
+
+**Permanent losses** (never committed nor staged → unrecoverable): `agent-workspace/research/INTEGRATION_PROPOSAL{,_SUPPLEMENT}_2026-05-13.md` + 7 `general-purpose-S259-deepdive-*.md` observation files. Findings preserved in D-058 + Q-INT bundle. `20260513_01.txt` user-prompt RECONSTRUCTED → `agent-workspace/research/RECOVERED-20260513_01-user-prompt.txt` (human must copy back to `user_prompt/`).
+
+**Prevention SHIPPED** (commits 770c101 + 39e4c75):
+- ✅ **R1** `destructive-command-guard.sh` — PreToolUse hook (FIRST in chain), blocks `rm -rf`/`find -delete`/`git reset --hard`/`git checkout -- .`/`git clean`/`git stash`/`git worktree remove`/etc. for ALL agents+subagents. 39/39 firing-test. Override: `STOCKFORGE_ALLOW_DESTRUCTIVE=1`.
+- ✅ **R2** `project-integrity-watchdog.sh` — Stop hook, verifies 7 canonical files + 5 dirs; missing → instant `.autonomous-BLOCKED`. 7/7 firing-test.
+- ✅ **R3** `daily-backup.sh` — Stop hook, daily out-of-tree tar.gz to `../stockforge-backups/`, 14-day retention. 6/6 firing-test. Live-verified 30MB archive.
+- ⏸ **R4** remove broad `Bash(rm:*)` from settings allow (pending — R1 covers the risk class)
+- ⏸ **R5** git destructive deny (mostly covered by R1; settings.json deny-list addition pending)
+- ⏸ **R6** `transcript-archive.sh` SubagentStop hook (pending — forensic trail for future incidents)
+
+**Post-mortem**: `agent-workspace/post-mortems/2026-05-14-mass-deletion-recovery.md` (full RCA + R1-R6).
+
+**State**: hooks RE-ENABLED. Full regression 102/102 firing-tests + 58/58 pytest PASS. 2 commits made (no push — human pushes manual). Repo healthy: 3628 files, git working.
+
+**NEXT STEPS** (resume point for next session):
+1. (optional) R4/R5/R6 follow-up prevention — lower priority, R1 covers the risk class
+2. **Resume Wave 0 substrate**: W0-2 verified PASS-WITH-CONCERNS (S316) → author W0-2.1 follow-up plan (fixes D-IMPORTANT-1 grep comment-filter bug + D-IMPORTANT-2 `next(iter())` miss) → then W0-3 (TradingAgents atomic temp-file-replace) / W0-4 / W0-5
+3. Plan 014 (W0-2) still in `pending/` — move to `completed/` (W0-2 shipped + verified)
+4. With R1 destructive-command-guard active, subagent dispatches are now SAFE to resume
+
+---
+
 ## ⚠️ BEHAVIORAL HOLD — BINDING (S310 expanded 2026-05-14 ~09:25 SEAST after user 2nd directive)
 
 **Status**: BINDING (was PROPOSED at S310 entry; upgraded after user directive "fix đi chứ?"). Demotion now in effect — does NOT require further ratification. Reversion only via explicit user override.
