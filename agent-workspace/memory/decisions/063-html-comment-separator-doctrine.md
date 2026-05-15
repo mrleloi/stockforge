@@ -187,14 +187,80 @@ Files NOT subject to this rule (single-document, not entry-segmented):
 
 **Charter Principle 11** satisfied: hook ships with companion firing-test.
 
-## Live Audit Count (S332 IMPL, 2026-05-15)
+## Live Audit Count (S334 remediation, 2026-05-15)
 
-W0-4 audited-zone files lacking `<!-- ENTRY_END -->` separator:
+**Hook-sourced count (L-S333-1 compliance)**: empirical re-run of
+`scripts/hooks/html-separator-check.sh` in Stop mode at HEAD (S334 commit), then read from
+`.session-hooks.log`:
 
-- `agent-workspace/memory/mistake-log.md` — 111 lines, lacks separator (< 200 line threshold, HS-R1 won't fire yet)
-- `agent-workspace/memory/agent-notes.md` — 697 lines, lacks separator (will trigger HS-R1)
+```
+[2026-05-15T19:55:07+07:00] html-separator-check: 29 violation(s) (HS-R1/R2/R3)
+```
 
-**Total: 2 files** → deferred to W0-4.1 cleanup session. Count within normal range.
+**Hook-reported total: 29 violations across 29 unique files.**
+
+The earlier S332 claim of "Total: 2 files" was false — sourced from manual developer grep rather
+than the hook's own Stop-mode emission. The S333 verifier empirically confirmed the discrepancy
+(57 HS-R1 emissions → 29 unique files). S334 fresh run confirms: 29 violations.
+Evidence: `agent-workspace/memory/observations/sandwich-verifier-S333-wave-0-W0-3-4-5-verify.md`
+§ I-2, lines 52-58.
+
+Full list of 29 files (from hook at HEAD, grouped by directory):
+
+**memory zone (1 file)**
+- `agent-workspace/memory/agent-notes.md` — 708 lines, 10 headings (HS-R1)
+
+**thesis-log/ (4 files)**
+- `agent-workspace/memory/thesis-log/2026-05-01-FPT-BULL-PERSPECTIVE.md` — 205 lines, 7 headings (HS-R1)
+- `agent-workspace/memory/thesis-log/2026-05-09-BID-BULL-PERSPECTIVE.md` — 269 lines, 8 headings (HS-R1)
+- `agent-workspace/memory/thesis-log/2026-05-10-CTG-BULL-PERSPECTIVE.md` — 268 lines, 9 headings (HS-R1)
+- `agent-workspace/memory/thesis-log/2026-05-10-GAS-BULL-PERSPECTIVE.md` — 218 lines, 8 headings (HS-R1)
+
+**observations/ (23 files)**
+- `agent-workspace/memory/observations/2026-05-05-harness-alignment-audit.md` — 733 lines, 14 headings (HS-R1)
+- `agent-workspace/memory/observations/2026-05-05-root-cause-3-axes.md` — 767 lines, 12 headings (HS-R1)
+- `agent-workspace/memory/observations/2026-05-07-S172-phase-audit-reconciliation.md` — 268 lines, 11 headings (HS-R1)
+- `agent-workspace/memory/observations/2026-05-07-S178-file-pattern-hook-compliance-audit.md` — 208 lines, 9 headings (HS-R1)
+- `agent-workspace/memory/observations/2026-05-07-S186-userprompt-stdout-fix-validation.md` — 410 lines, 14 headings (HS-R1)
+- `agent-workspace/memory/observations/2026-05-09-S191-d046-h-a-1st-production-observation.md` — 225 lines, 17 headings (HS-R1)
+- `agent-workspace/memory/observations/fpt-bull-analysis-s240-fresh.md` — 201 lines, 11 headings (HS-R1)
+- `agent-workspace/memory/observations/intent-2026-04-29-UP04-3e294318.md` — 217 lines, 3 headings (HS-R1)
+- `agent-workspace/memory/observations/master-planner-A-10-deepdive-nautilus_trader.md` — 223 lines, 8 headings (HS-R1)
+- `agent-workspace/memory/observations/master-planner-A-13-deepdive-TradingAgents.md` — separator drift: 3 correct + 3 naive ASCII (HS-R3)
+- `agent-workspace/memory/observations/master-planner-A-14-deepdive-TradingAgents-CN.md` — 474 lines, 11 headings (HS-R1)
+- `agent-workspace/memory/observations/promote-rule-S245-L-S240-5-cycle.md` — 217 lines, 8 headings (HS-R1)
+- `agent-workspace/memory/observations/promote-rule-S35.md` — 280 lines, 7 headings (HS-R1)
+- `agent-workspace/memory/observations/promote-rule-S52.md` — 516 lines, 11 headings (HS-R1)
+- `agent-workspace/memory/observations/sandwich-architect-S241-bear-quant-retry-arch.md` — 548 lines, 11 headings (HS-R1)
+- `agent-workspace/memory/observations/sandwich-architect-S251-phase-4-master-plan-refresh.md` — 213 lines, 10 headings (HS-R1)
+- `agent-workspace/memory/observations/sandwich-dev-S320-plan015-S319a-batch-BDC.md` — 242 lines, 10 headings (HS-R1)
+- `agent-workspace/memory/observations/sandwich-dev-S320-plan015-S319b-batch-L.md` — 293 lines, 13 headings (HS-R1)
+- `agent-workspace/memory/observations/sandwich-dev-S321-plan015-remediation.md` — 256 lines, 12 headings (HS-R1)
+- `agent-workspace/memory/observations/sandwich-dev-S66-BC-7-track-J.md` — 210 lines, 12 headings (HS-R1)
+- `agent-workspace/memory/observations/sandwich-verifier-S21-phase0-final.md` — 209 lines, 16 headings (HS-R1)
+- `agent-workspace/memory/observations/sandwich-verifier-S243-D054-ratification.md` — 287 lines, 14 headings (HS-R1)
+- `agent-workspace/memory/observations/sandwich-verifier-S64-BC-6.md` — 266 lines, 7 headings (HS-R1)
+
+**post-mortems/ (1 file)**
+- `agent-workspace/memory/post-mortems/2026-05-05-phase-2.5-empirical-firing-gap.md` — 284 lines, 11 headings (HS-R1)
+
+**Note on mistake-log.md**: Currently 114 lines — below the 200-line HS-R1 threshold. Hook
+does not fire on it. Not in the 29-file list.
+
+---
+
+## W0-4.1 Cleanup Scope Expansion
+
+**Plan-018 RM10 count-shock rule** (master-plan § RM10, referenced in plan-018):
+"If any count >10, recommend separate cleanup session per W0-2 → W0-2.1 precedent."
+
+The empirical count of 29 files triggers this rule (29 > 10 threshold). W0-4.1 is no longer a
+"2-file edit" as the S332 dev estimated — it is a **29-file cleanup task** requiring a dedicated
+session, analogous to W0-2.1 (which was a separate session for the python-determinism cleanup
+work). Future readers: do NOT attempt W0-4.1 inline in a session doing other work. Schedule as
+a dedicated FOCUSED_IMPL session (estimated: 29 files × ~30 lines append each = ~870 LOC, well
+within one session budget). The cleanup is mechanical (append `\n\n<!-- ENTRY_END -->\n\n` after
+final entry in each file) but the file count warrants proper scoping.
 
 ## Acceptance Record
 

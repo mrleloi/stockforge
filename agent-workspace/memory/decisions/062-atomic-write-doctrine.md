@@ -183,19 +183,65 @@ tmp_path.replace(target)   # atomic on POSIX; near-atomic Windows ≥10 NTFS
 **Charter Principle 11** (companion firing-test mandate): satisfied.
 Hook `atomic-write-check.sh` ships with companion `atomic-write-check-fire-test.sh` (15 TC).
 
-## Live Audit Count (S332 IMPL, 2026-05-15)
+## Live Audit Count (S334 remediation, 2026-05-15)
 
-W0-3 violations in `packages/` + `apps/` at HEAD (production, non-test files):
+**Hook-sourced count (L-S333-1 compliance)**: empirical re-run of
+`scripts/hooks/atomic-write-check.sh` in Stop mode at HEAD (S334 commit), then read from
+`.session-hooks.log`:
 
-- `packages/infrastructure/influence/llm_recommendation_extractor.py:466` — `fname.write_text(payload, encoding="utf-8")`
-- `apps/cli/ingest_fundamentals_vn30.py:199` — `path.write_text("\n".join(lines) + "\n", encoding="utf-8")`
-- `apps/cli/ingest_news_cafef.py:309` — `path.write_text("\n".join(lines) + "\n", encoding="utf-8")`
-- `apps/cli/ingest_vhm.py:138` — `path.write_text("\n".join(lines) + "\n", encoding="utf-8")`
-- `apps/cli/ingest_vn30.py:202` — `path.write_text("\n".join(lines) + "\n", encoding="utf-8")`
-- `apps/cli/validate_thesis.py:153` — `out_path.write_text(md, encoding="utf-8")`
+```
+[2026-05-15T19:55:07+07:00] atomic-write-check: OK (0 violations across 346 file(s))
+```
 
-**Total: 6 violations** → deferred to W0-3.1 cleanup session. Count is < 10 threshold; single
-bundled cleanup session expected.
+**Hook-reported total: 0 violations across 346 scanned files.**
+
+This is the authoritative count for the AW-R1/R2/R3/R4 detection rules as currently implemented.
+
+---
+
+## Known patterns the hook regex cannot detect (2-line assign+write)
+
+The 0-violation result does NOT mean the codebase is fully compliant. AW-R2's detection regex
+(`audited_ext_re.search(stripped)` at `scripts/hooks/atomic-write-check.sh:106`) requires the
+audited extension (`.json`, `.md`, `.csv`, etc.) to appear on the **same line** as the
+`.write_text()` call. Six production files use a 2-line pattern where the variable is assigned
+with the extension on line N, and the write call on line N+M uses only the variable name
+(no extension visible):
+
+- **Line N**: `path = output_dir / f"...ext"` (variable carries the extension)
+- **Line N+M**: `path.write_text(...)` (call site lacks any extension — `path` has no extension
+  string on that line; `audited_ext_re.search(stripped)` finds no match → no AW-R2 violation)
+
+The 6 production files identified by manual analysis that exhibit this undetectable pattern:
+
+1. `apps/cli/ingest_fundamentals_vn30.py:199` — `path.write_text(...)` where `path: Path` is a
+   function parameter; extension appears at the caller site (not within the function scope)
+2. `apps/cli/ingest_news_cafef.py:309` — same parameter pattern
+3. `apps/cli/ingest_vhm.py:138` — same parameter pattern
+4. `apps/cli/ingest_vn30.py:202` — same parameter pattern
+5. `apps/cli/validate_thesis.py:153` — `out_path.write_text(md, ...)` where `out_path` assigned
+   earlier in same function with extension; call site line has no extension string
+6. `packages/infrastructure/influence/llm_recommendation_extractor.py:466` —
+   `fname.write_text(payload, ...)` where `fname` assigned at line 457 as
+   `fname = _RAW_RESPONSE_DIR / f"{ts}-{url_hash}.json"` (9 lines earlier; beyond look-ahead)
+
+**Evidence**: S333 verifier observation
+`agent-workspace/memory/observations/sandwich-verifier-S333-wave-0-W0-3-4-5-verify.md` § I-1,
+lines 36-48, verbatim:
+> "AW-R2 regex requires the audited extension (`.json`/`.md`/`.csv`/etc.) to appear on the
+> SAME LINE as the `.write_text()` call. The 6 cited production files use a 2-line `assign +
+> write` pattern: Line N: `path = output_dir / f"...md"` (variable carries the extension) /
+> Line N+M: `path.write_text(...)` (call site lacks any extension on that line, so the hook
+> returns no violation)."
+
+These 6 cases are deferred to W0-3.1 cleanup session. Count is < 10 threshold; single bundled
+cleanup session expected.
+
+**Recommended fix path for W0-3.1** (Option B from D-062 § options_considered applied to
+AW-R2): widen AW-R2 to fire on any bare `.write_text()` in production layers (without requiring
+audited extension on same line) and rely on `# atomic-write-ok: <rationale>` inline marker
+exemption for legitimately non-auditable writes. Only 6 production `.write_text()` calls exist
+at HEAD; false-positive surface is manageable.
 
 ## Acceptance Record
 
