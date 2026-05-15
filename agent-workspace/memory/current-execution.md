@@ -92,9 +92,9 @@
 - ✅ W0-1b: re-escalation + col7 (SHIPPED S313; VERIFIED S314 PASS; L-S258-2 ROBUSTLY CLOSED)
 - ✅ W0-2: Python determinism banned-patterns DST-style (SHIPPED S315 agentId=a82bab00b64f2dade; 12/12 firing-test + bash-hook-lint clean; ADR D-059 PROPOSED; 2 pre-existing violations in production code flagged: `capture_sentiment_snapshot_use_case.py` R2 + `sqlite_thesis_repository.py` R1)
 - ✅ W0-2 VERIFY: S316 sandwich-verifier + S329 W0-2.1 follow-up PASS (SHIPPED `510f533`)
-- ✅ W0-3: TradingAgents atomic temp-file-replace doctrine (SHIPPED S332; 15/15 firing-test PASS; ADR D-062 PROPOSED; 6 pre-existing violations flagged)
-- ✅ W0-4: TradingAgents HTML-comment separator (SHIPPED S332; 12/12 firing-test PASS; ADR D-063 PROPOSED; mistake-log.md + agent-notes.md deferred to W0-4.1)
-- ✅ W0-5: Vibe-Trading path-safety 5-invariant (SHIPPED S332; 18/18 firing-test + 23/23 pytest PASS; ADR D-064 PROPOSED; domain layer clean P1b=0/P5=0)
+- ✅ W0-3: TradingAgents atomic temp-file-replace doctrine (SHIPPED S332; 15/15 firing-test PASS; ADR D-062 PROPOSED; VERIFIED S333 PASS-WITH-CONCERNS — D-062 live-audit ATTESTATION FALSE: claims 6 violations, hook reports 0 — regex blind-spot on 2-line assign+write pattern, S334 follow-up to rewrite ADR + optional AW-R2 widening)
+- ✅ W0-4: TradingAgents HTML-comment separator (SHIPPED S332; 12/12 firing-test PASS; ADR D-063 PROPOSED; VERIFIED S333 PASS-WITH-CONCERNS — D-063 live-audit ATTESTATION FALSE: claims 2 files, hook reports 29 unique files; W0-4.1 cleanup scope expanded from 2 → 29 files per plan-018 RM10 count-shock rule)
+- ✅ W0-5: Vibe-Trading path-safety 5-invariant (SHIPPED S332; 18/18 firing-test + 23/23 pytest PASS; ADR D-064 PROPOSED; VERIFIED S333 PASS-WITH-CONCERNS — clean; URL-scheme detection gap deferred per plan § Out-of-scope item 10)
 
 **S315 RESULT** (sandwich-dev returned 10:51 SEAST):
 - ✅ D1-D5 all PASS per dev self-report; spot-verified by main session
@@ -178,6 +178,28 @@ User `continue` (post-S327 close). S328 main session resumed at checkpoint succe
 **Coordination rule (post-S332)**: main avoids `packages/_shared/path_safety.py` + `test_path_safety.py` + 3 new hooks + 3 firing-tests + `decisions/062-*`/`063-*`/`064-*` until S333 verifier returns + merges. Session 332 observation file: `observations/sandwich-dev-S332-W0-3-4-5-bundle.md` (pending write by dev per plan DC-AGG obs file requirement).
 
 **Next action**: S333 sandwich-verifier dispatch (fresh-context Opus, AP-1). Plan-018 `pending/` → `completed/` only after verifier PASS verdict.
+
+**S333 RESULT** (sandwich-verifier returned 19:00 SEAST; agentId=`a0fd97df308542f16`; ~198K tokens; 27-min run, 103 tool uses; Opus fresh-context AP-1):
+- **VERDICT: PASS-WITH-CONCERNS — MERGE-ELIGIBLE: YES** (substrate functionally ships; 2 IMPORTANT defects are bookkeeping-accuracy issues, not substrate gaps)
+- ✅ V1-V6 checklist all empirically re-run; 65 DoD criteria largely met
+- ✅ 3 firing-tests indep: 15/15 + 12/12 + 18/18 PASS; `run-all.sh` 107/107 PASS files
+- ✅ pytest packages+apps: 914 passed (dev reported 892 = net add, no regression); test_path_safety 23/23
+- ✅ mypy --strict --explicit-package-bases packages/_shared/: clean; ruff: clean; bash-hook-lint: 0 violations
+- ✅ settings.json: JSON valid; 3 hooks wired AFTER python-determinism-check in BOTH PostToolUse + Stop chains (relative order correct)
+- ✅ D-062/D-063/D-064 source_evidence cites 7/6/10 ≥ targets 6/6/7; status PROPOSED level IMPL; License attribution Apache-2.0/MIT correct
+- ⚠️ **IMPORTANT-1**: D-062 § "Live Audit Count" lists 6 production W0-3 violations by file:line — hook itself reports 0 (regex blind-spot on 2-line assign+write pattern: AW-R2 requires audited extension on same-line as call; production code uses `path = ...ext; path.write_text(...)` 2-line form). Recommended fix: widen AW-R2 OR add 2-line binding-aware variant; rewrite D-062 § "Live Audit Count" w/ "Known patterns the hook regex cannot detect" subsection.
+- ⚠️ **IMPORTANT-2**: D-063 § "Live Audit Count" claims 2 files lacking separator — hook reports **57 HS-R1 emissions across 29 unique files** at HEAD (off by an order of magnitude; thesis-log + observations + post-mortems dominate). W0-4.1 cleanup scope expanded from 2 → 29 files per plan-018 RM10 count-shock rule.
+- 🔹 4 MINOR (track + defer): M-1 run-all.sh semantic miscount (107 files not 148 TCs) / M-2 basename allow-list `*_test.py` suffix overpermissive / M-3 Stop-chain ordering inherited from W0-2 (classifier before detectors) / M-4 `_rejects_unc` doesn't catch URL schemes (faithful to Vibe-Trading upstream, out-of-scope per plan)
+- 🎯 **M-S332-1 (FOUND-AT-S333) recorded**: dev's M-S332-NONE attestation disproven by IMPORTANT-1+2; medium severity; root cause = hand-curated counts via manual grep instead of running hook in Stop mode. Mistake-log digest updated; original NONE row marked SUPERSEDED.
+- 📚 **L-S333-1 + L-S333-2 + L-S333-3 promotion candidates** (AP-23 1st-instance HOLD; promote on 2nd-instance): live-audit attestation discipline / line-by-line regex blind-spot / suffix-allow-list overreach. agent-notes.md digest updated.
+
+**Plan-018 mv**: `pending/` → `completed/018-S331-wave-0-W0-3-4-5-bundle.md` per S333 PASS-WITH-CONCERNS authorization.
+
+**Wave 0 substrate progress**: 5 of 5 sub-waves SHIPPED + VERIFIED PASS (W0-2.1 PASS clean; W0-3/4/5 PASS-WITH-CONCERNS w/ bookkeeping follow-up). Phase B closure pending S334 ADR-correction follow-up.
+
+**Next action**: dispatch S334 sandwich-dev (background, fresh-context AP-1) for tight ADR-correction follow-up — rewrite D-062 + D-063 § "Live Audit Count" sections to match hook reality + optionally widen AW-R2 regex. NO new hooks → Charter Principle 11 firing-test mandate NOT triggered (unless AW-R2 widening lands). After S334 commit + spot-check: Wave 0 substrate fully sealed; Phase B closed; next master-plan beat = Phase C (S335 Theme G charter/constitution write per master plan § 6.3 if confirmed needed).
+
+**Compliance attestation (S328+S331+S332+S333)**: harness_priority_one ✓ (5-stray-file noted; HH-6 legacy stale aging out) / AP-1 ✓ (3 fresh-context dispatches: S331 architect + S332 dev + S333 verifier; main NOT same agent at any tier) / dont_self_pause_at_session_boundary ✓ (4 dispatches in-turn) / autonomous_continue_no_self_pause ✓ / stop_offering_routing_branches ✓ / D-060 ✓ (4 main commits `6e08755`/`9519923`/`6cc6546` + agent commit `9e81fcb`; 0 pushes) / verify_phase_before_next_phase ✓ (verifier caught the 2 false-attestations main spot-check would have missed — AP-1 working as designed; main relies on AP-1 not self-judgment) / 0 charter / 0 constitution / SYNC-GRILLING NOT fired (BEHAVIORAL HOLD § (1) cadence suspended). M-S332-1 medium (FOUND-AT-S333; bookkeeping accuracy, no defect shipped, S334 remediation queued).
 
 ---
 
