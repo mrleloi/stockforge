@@ -202,6 +202,13 @@ FMODE=""')"
     DID="${AGENT_ID:-unknown}"; TOOL_USE_ID_JSON="null"
   fi
   printf '%s\n' "{\"event\":\"COMPLETED\",\"dispatch_id\":\"${DID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\",\"parent_session_id\":\"${PARENT_SID}\",\"bg\":true,\"ts_ms\":${TS_MS},\"outcome\":${OUTCOME},\"tokens_used\":${TOKENS_REAL_JSON},\"duration_ms\":${DURATION_MS_JSON},\"failure_mode\":${FAILURE_MODE_JSON},\"tool_use_id\":${TOOL_USE_ID_JSON}}" >> "$DISPATCH_JSONL"
+  # HH-6 root-cause fix (L-S326-2 / companion to L-S326-1 rotation): close the
+  # sidecar loop so harness-health-self-scan tail-1 stops counting completed
+  # dispatches as stale-pending. Only appends when FIFO match resolved a real
+  # DISPATCHED row (TID populated) — avoids spurious closes on orphan SubagentStop.
+  if [ -n "${TID:-}" ]; then
+    printf '%s\n' "{\"dispatch_id\":\"${TID}\",\"tool_use_id\":\"${TID}\",\"agent_type\":\"${ATYPE}\",\"model\":\"${MODEL}\",\"parent_session_id\":\"${PARENT_SID}\",\"ts_ms\":${TS_MS},\"state\":\"completed\",\"outcome\":${OUTCOME}}" >> "$SIDECAR"
+  fi
 fi
 ) </dev/null >/dev/null 2>&1 &
 disown 2>/dev/null || true

@@ -148,7 +148,16 @@ if ! grep '"event":"COMPLETED"' "$DISPATCH_JSONL" | grep -q "$TID"; then
   cat "$DISPATCH_JSONL"
   exit 1
 fi
-echo "PASS TC5: SubagentStop DONE → COMPLETED row with FIFO match"
+# L-S326-2 sidecar-close assertion: sidecar tail-1 must show state:completed so
+# harness-health-self-scan HH-6 stops counting this session as stale-pending.
+SIDECAR_TC5="$TEMPDIR/agent-workspace/memory/.dispatch-pending-${SID}.jsonl"
+if ! tail -1 "$SIDECAR_TC5" 2>/dev/null | grep -q '"state":"completed"'; then
+  echo "FAIL TC5: sidecar tail-1 should be state:completed after SubagentStop"
+  echo "--- sidecar contents ---"
+  cat "$SIDECAR_TC5"
+  exit 1
+fi
+echo "PASS TC5: SubagentStop DONE → COMPLETED row + sidecar state:completed"
 
 # --- TC6: 2 DISPATCHED + 1 SubagentStop → match oldest ---
 clean_state
@@ -189,7 +198,23 @@ if echo "$COMPLETED_LINE" | grep -q "$TID2"; then
   echo "$COMPLETED_LINE"
   exit 1
 fi
-echo "PASS TC6: 2 DISPATCHED + 1 SubagentStop → FIFO match oldest ($TID1)"
+# L-S326-2 sidecar-close: tail-1 of sidecar must show state:completed referencing
+# TID1 (the FIFO-matched oldest); TID2 still has its pending row earlier in the file
+# but the LAST row determines HH-6 staleness.
+SIDECAR_TC6="$TEMPDIR/agent-workspace/memory/.dispatch-pending-${SID}.jsonl"
+TAIL_TC6=$(tail -1 "$SIDECAR_TC6" 2>/dev/null || true)
+if ! echo "$TAIL_TC6" | grep -q '"state":"completed"'; then
+  echo "FAIL TC6: sidecar tail-1 should be state:completed after first SubagentStop"
+  echo "--- sidecar contents ---"
+  cat "$SIDECAR_TC6"
+  exit 1
+fi
+if ! echo "$TAIL_TC6" | grep -q "$TID1"; then
+  echo "FAIL TC6: sidecar completed row should reference FIFO-matched TID1 ($TID1)"
+  echo "tail line: $TAIL_TC6"
+  exit 1
+fi
+echo "PASS TC6: 2 DISPATCHED + 1 SubagentStop → FIFO match oldest ($TID1) + sidecar state:completed"
 
 echo ""
 echo "=== Existing tests: 6/6 complete ==="
