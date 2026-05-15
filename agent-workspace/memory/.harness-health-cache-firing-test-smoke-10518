@@ -1,0 +1,1 @@
+session=firing-test-smoke-10518 ts=2026-05-14T17:05:52+07:00 state=RED-2 high=1 medium=2 low=0 skip=2 details=HH-2-USERPROMPT-NOT-FIRING=HIGH(recent_10min=0);HH-9-MISTAKE-LOG-UNFRESH=MEDIUM(delta_sec=4439 no-explicit-declaration);HH-6-DISPATCH-STALE=MEDIUM(stale=1);

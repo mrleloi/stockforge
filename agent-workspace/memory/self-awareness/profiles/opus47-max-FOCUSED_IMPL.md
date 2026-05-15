@@ -4,9 +4,9 @@ effort: max
 thinking: enabled
 task_class:
   - FOCUSED_IMPL
-samples_count: 90
-sample_sessions: [S26, S28, S30, S32, S35, S47, S48b, S48c, S48d, S48f, S48g, S48h, S48l, S49, S55, S56, S57, S58, S59, S60, S61, S62, S63, S69, S70, S71, S72, S73, S74, S75, S76, S77, S78, S79, S80, S81, S82, S83, S84, S85, S86, S87, S88, S89, S90, S91, S92, S93, S94, S95, S96, S97, S98, S101, S102, S103, S104, S105, S106, S107, S108, S109, S110, S111, S112, S113, S114, S116, S117, S121, S122, S128, S130, S131, S134, S135, S141, S173, S174, S175, S184, S186, S188, S189, S256, S268, S269, S311, S313, S315]
-last_updated: 2026-05-14T10:59:15+07:00
+samples_count: 91
+sample_sessions: [S26, S28, S30, S32, S35, S47, S48b, S48c, S48d, S48f, S48g, S48h, S48l, S49, S55, S56, S57, S58, S59, S60, S61, S62, S63, S69, S70, S71, S72, S73, S74, S75, S76, S77, S78, S79, S80, S81, S82, S83, S84, S85, S86, S87, S88, S89, S90, S91, S92, S93, S94, S95, S96, S97, S98, S101, S102, S103, S104, S105, S106, S107, S108, S109, S110, S111, S112, S113, S114, S116, S117, S121, S122, S128, S130, S131, S134, S135, S141, S173, S174, S175, S184, S186, S188, S189, S256, S268, S269, S311, S313, S315, S318]
+last_updated: 2026-05-14T17:40:32+07:00
 status: BIASED-PRE-REBUILD-S65 (user 2026-05-06 flagged tracking gap; rebuild after cost-ledger.tsv accumulates ≥10 sessions)
 source: manual session log review (S48i HH-F.1 ETL backfill — auto-populate hook gap S48e..S48h investigation deferred S48j)
 ---

@@ -23,3 +23,7 @@ ts	dispatch_id	observation_passed	empirical_passed	divergence	verdict
 2026-05-14T03:11:06Z	sandwich-verifier-S312-W0-1-fsm	NA	NA	NA	PASS-WITH-CONCERNS
 2026-05-14T03:29:15Z	sandwich-verifier-S314-W0-1b	NA	NA	NA	PASS
 2026-05-14T04:15:42Z	sandwich-verifier-S316-W0-2-python-determinism	NA	NA	NA	PASS-WITH-CONCERNS
+2026-05-14T07:24:49.850Z	sandwich-dev-S237-A2-promote	0	322	322	BLOCK
+2026-05-15T01:20:19.240Z	sandwich-dev-S320-plan015-S319b-batch-L	0	322	322	BLOCK
+2026-05-15T05:09:22.750Z	sandwich-dev-S322b-plan016-batch-e-lint-zero	0	322	322	BLOCK
+2026-05-15T12:15:00Z	FALSE-POSITIVE-DOCUMENTED	S322b-FP-mismatched-scope	NA	NA	NA	FP-DOC

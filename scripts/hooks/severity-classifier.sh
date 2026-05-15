@@ -170,10 +170,18 @@ if [ -d "$PROJECT_DIR/human-workspace/notifications" ]; then
     case "$base" in
       urgent.md|urgent-archived-*.md|digest-*.md) continue ;;
     esac
-    # Skip notifications already resolved/answered/deferred (frontmatter status)
+    # Skip notifications already resolved/answered/deferred (frontmatter `status:` OR
+    # `level:` signal). L-S322-1 (S322 promote-to-hook from M-S322-1): authors may write
+    # `level: RESOLVED` to in-place-deprioritize a notification — must short-circuit BEFORE
+    # body-grep fallback at the case-default branch below, which would re-trip on legacy
+    # CRITICAL/WARN keywords in the body content.
     nstatus=$(head -10 "$n" 2>/dev/null | grep -m1 '^status:' || true)
     case "$nstatus" in
       *ANSWERED*|*RESOLVED*|*DEFERRED*|*answered-*|*resolved-*|*deferred-*) continue ;;
+    esac
+    nlevel_resolved=$(head -10 "$n" 2>/dev/null | grep -m1 '^level:' || true)
+    case "$nlevel_resolved" in
+      *RESOLVED*|*ANSWERED*|*CLOSED*|*resolved*|*answered*|*closed*) continue ;;
     esac
     rel="${n#$PROJECT_DIR/}"
     age=$(age_hours "$n")

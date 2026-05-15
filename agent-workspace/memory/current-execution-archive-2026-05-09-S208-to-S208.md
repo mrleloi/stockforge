@@ -939,3 +939,91 @@ User trivial-prompt "continue" triggered S223 PRIORITY 1 follow-on (S224-project
 
 
 **Migrated to archive at S237 (auto-migrate via tracking-retention.sh; sessions>5; S135+S141 promotions).**
+
+## S309 — SYNC-GRILLING cadence DUE post-S308 (S306→S309 3-session cadence; 18th in lineage S257/S260/S263/S266/S270/S273/S276/S279/S282/S285/S288/S291/S294/S297/S300/S303/S306/S309): User `continue` at 2026-05-14T08:50:~ local (01:50:~Z); per `autonomous_continue_no_self_pause` + `dont_self_pause_at_session_boundary` + S308 close NEXT-ACTION PRIORITY 1 sync-grilling DUE: execute auto-tier SCOPE charter_match per established lineage; zero NEW SCOPE-tier divergence outside pending Q-INT mega-bundle sustained user-blocked; S307 + S308 intervening sessions both pure-idle non-SCOPE; invoked `sync-grilling-call.sh SCOPE charter_match sync-grilling-S309` → events.tsv +1 row at 01:50:31Z; sync-tracker state SCOPE 67.0→67.2 (+0.2 sample 111→112 tier MED sustained; threshold MED→HIGH at 75 still 7.8 points away); DECISION_ROUTING 49.4 unchanged sample 52 tier MED-LOW (no q_and_a_resolution event this session); sync-state.md last_check_session=S306→S309 auto-updated by wrapper + outcome narrative prepended with S309 entry preserving S306 verbatim per L-S43f-3 + L-S256-1; sync-tracker-render RC=0 _index.md refreshed; **HH-H.4 marker absence 18th-cycle SUSTAINED** (S292-S309 entries; pattern firmly entrenched well beyond AP-23 3rd-cycle promotion-eligibility threshold; downgrade-execution still DEFERRED to consolidated promote-rule cycle); Q-INT mega-bundle 14262B unchanged at May 13 16:47 sustained user-blocked; latest user_prompt 20260513_01.txt unchanged; D-055 cool-down ~12h54m remaining (deadline ≥2026-05-14T~14:45Z); L-S283-1 PATTERN-VALIDATION sustained from S289 (4-event post-resolution lineage); harness GREEN per S290 atomic-noclobber fix sustained; M-S309-NONE [0 commits/charter-edits/constitution-writes/production-code-edits]
+
+**Pre-state**: S308 closed cleanly as ROUTINE-IDLE post-S307 at 2026-05-14T01:47Z (24th idle-tier close; HH-H.4 self-resolving 17th-cycle validated). S308 close prediction "S309 = SYNC-GRILLING DUE per cadence S306→S309; expected auto-tier SCOPE charter_match 18th in lineage" — empirically confirmed at S309 entry.
+
+**Trigger**: User `continue` at 2026-05-14T08:50:~ local (01:50:~Z). Same conversation as S301-S308.
+
+**Execution path (single turn, mechanical sync-grilling)**:
+1. Pre-flight delta-check at 01:50:15Z: state.tsv UNCHANGED (SCOPE 67.0 sample 111 last_updated 01:38:09Z); events.tsv last entry sync-grilling-S306 at 01:38:09Z; HH-H.4 marker absent 18th-cycle.
+2. Lineage-match SCOPE auto-tier: zero NEW SCOPE-tier divergence; anti-mixing rule honored.
+3. Invoke `bash scripts/hooks/sync-grilling-call.sh SCOPE charter_match sync-grilling-S309 ...` → RC=0; wrapper appended events.tsv row at 01:50:31Z + auto-updated sync-state.md last_check_session=S309.
+4. Verification: tail events.tsv shows sync-grilling-S306 (01:38:09Z) → sync-grilling-S309 (01:50:31Z); state.tsv SCOPE 67.2 sample 112.
+5. Prepend S309 outcome narrative to sync-state.md (preserving S306 entry verbatim per L-S43f-3 + L-S256-1). Edit succeeded first-try.
+6. Re-render `bash scripts/hooks/sync-tracker-render.sh` → RC=0; _index.md refreshed.
+7. Close S309 with archive S308 latest.md + S309 row prepended + session-309.md log + slim S309-close checkpoint.
+
+**Files this turn (S309)**:
+- M `agent-workspace/memory/sync-tracker/events.tsv` (sync-grilling-S309 row appended at 01:50:31Z; charter_match +0.2)
+- M `agent-workspace/memory/sync-tracker/state.tsv` (SCOPE 67.0→67.2 sample 111→112 last_updated_ts 01:50:31Z tier MED)
+- M `agent-workspace/memory/sync-state.md` (last_check_session S306→S309 auto-updated by wrapper; outcome narrative prepended with S309 entry preserving S306 verbatim per L-S43f-3 + L-S256-1)
+- M `agent-workspace/memory/sync-tracker/_index.md` (re-rendered via sync-tracker-render.sh RC=0)
+- A `agent-workspace/memory/checkpoints/2026-05-14-S308-close.md` (archive of S308 latest.md content)
+- M `agent-workspace/memory/current-execution.md` (this S309 row prepended; linter expected to trim oldest)
+- A `agent-workspace/memory/sessions/2026-05-14-session-309.md` (session log)
+- M `agent-workspace/memory/checkpoints/latest.md` (S308-close archived; slim S309-close written)
+
+**Mistakes this session (S309)**: M-S309-NONE — no execution errors. sync-grilling-call.sh RC=0 first-try; verification all succeeded; sync-tracker-render.sh RC=0 first-try; sync-state.md narrative Edit first-try success; close artifacts written first-try.
+
+**Candidate lessons (NEW S309)**: NONE NEW promotion candidates. HH-H.4 self-resolving classification 18th-cycle SUSTAINED — pattern firmly entrenched well beyond AP-23 3rd-cycle promotion-eligibility threshold. L-S283-1 continues sustained.
+
+**S310 NEXT-ACTION priority** (sync-grilling next at S312; S310/S311 likely pure-idle per sustained blocking conditions; all PRIORITY 1-13 still user-blocked / cool-down-pending / not-due / held):
+1. **PRIORITY 1** (post-cool-down ≥2026-05-14T~14:45Z; ~12h51m remaining at S309 close) — D-055 ratification + mandatory fresh-context sandwich-verifier.
+2. **PRIORITY 2** — Q-INT mega-bundle ratification still pending (user-blocked).
+3. **PRIORITY 3** — User review of S289-S290 harness fix (no commits per CLAUDE.md).
+4. **PRIORITY 4** — Backlog: fix 8 latent vulnerabilities Check 11 caught in production scripts.
+5. **PRIORITY 5** (post-D-055 + Q-INT-10=A) — Wave 0 substrate session (W0-1 nautilus FSM).
+6. **PRIORITY 6** (post-D-055) — G.1+G.2 anthropic SDK removal IMPL.
+7. **PRIORITY 7** (post-Q-INT) — Phase 4 master-plan 011-S251 amendment.
+8. **PRIORITY 8** — Sync-grilling next at S312 (3-session cadence S309→S312).
+9. **PRIORITY 9-11** — Consolidated promote-rule cycle candidates: HH-H.4 (18th-cycle) + L-S283-1 + L-S257-2 + L-S258-1 + L-S262-1 + L-S264-3 + alarm-fatigue tracker + L-S258-2 + L-S282-1.
+10. **PRIORITY 12** — sync-021/022/023 triage (defer).
+11. **PRIORITY 13** — L-S261-1 broader pattern HELD pending 3rd-instance.
+
+**Quality gates honored S309**: harness_priority_one ✓ / autonomous_continue_no_self_pause ✓ / dont_self_pause_at_session_boundary ✓ / verify_phase_before_next_phase ✓ (sync-grilling wrapper RC=0 verified; HH-H.4 marker-absence 18th-cycle empirically verified) / AP-1 ✓ / AP-7 ✓ / AP-8 ✓ / AP-23 ✓ (HH-H.4 firmly beyond 3rd-cycle but downgrade-execution deferred to consolidated cycle) / L-S43f-3 ✓ (sync-state.md S306 narrative preserved verbatim) / L-S65-2 ✓ / L-S69-1 ✓ / L-S139-1 ✓ / M-S98-1/M-S101-1 prevention ✓ (wrapper used) / M-S130-1 prevention ✓ / Charter Principle 11 ✓ / UP-06 ✓ / qa_bundle_all_pending ✓ / stop_offering_routing_branches ✓ / 0 commits ✓ / 0 charter edits ✓ / 0 constitution writes ✓ / 0 production-code edits ✓
+
+---
+
+
+**Migrated to archive at S318 (auto-migrate via tracking-retention.sh; LOC>200; S135+S141 promotions).**
+
+## S322 — Plan 015/016 close + Wave 1 ratification + 4 agent commits + Phase A dispatch — 2026-05-15
+
+User `continue` post-/clear → checkpoint mid-session state recovered. 2 in-flight backgrounds returned this turn: (1) **S322-verify** `ab07b4b4f4c728a64` fresh-context Opus AP-1: **PASS / MERGE-ELIGIBLE** (0 Critical / 0 Important / 1 Minor non-blocking) — lint 0 / run-all 103/103 (332s) / per-hook fire-tests 91 PASS / ghost-green probe negative / commit hygiene clean / D-060 compliant; (2) **Wave 1+ master-planner** `af5426096140bbc83`: authored `master-plans/2026-05-15-wave-1-research-integration.md` (821 LOC) — reconstructs lost S259 + 8 new repos + Phase A-K decomposition; also surfaced **L-S322-2** attestation-hook scope-mismatch FP class via self-defense against false-positive attestation-check BLOCK.
+
+**Wave 1 ratification gate fired** (AskUserQuestion ≤4 per master-plan § 8): user picked **A/A/A/A** (all Recommended) — ALL 15 repos enter Phase A / § 6.4 critical-path ordering L→I→H→J→K / Defer I-S1-1 to Phase A findings / Thin Phase A deep-dive only for low-fit video repos.
+
+**5 commits ship this session** (4 S322a/b agent commits + 1 S321 da02ad0 carry):
+```
+49fe2ca S322 Batch E lint 6→0                                          [S322b]
+5d9e5f2 S255 urgent-md-rotate + session-hooks-log-rotate Stop hooks    [S322a-3]
+40012ed S317 block-mechanism + harness hygiene                          [S322a-2]
+9923c49 S318 notification-spam GENERATION root fix                      [S322a-1]
+da02ad0 S319+S321 bash-hook-lint 33→6 (S321 carry)
+```
+0 pushes. D-060 compliant.
+
+**Plans moved**: `015-S319-bash-hook-lint-violation-remediation.md` + `016-S322-batch-e-untangle-and-lint-zero.md` → `completed/`.
+
+**Backlog cleanup**: 11 stale notifications archived; D-059 ratified PROPOSED → ACCEPTED; 4 stale Q&A audited (no-move per contract); attestation-log.tsv FP annotated.
+
+**Mistakes**: M-S322-1 (low, NEW): notification-RESOLVED in-place frontmatter edit didn't deprioritize → mv-to-archived/ workaround; L-S322-1 prevention rule promoted.
+
+**Promotions to agent-notes**: L-S322-1 (notification-RESOLVED MOVE-not-edit), L-S322-2 (attestation-hook scope-filter); both promote-to-hook candidates.
+
+**S323 NEXT ACTION = Phase A INGEST DISPATCH** (same turn, `run_in_background=true`): 15 parallel general-purpose subagents, one per repo at `C:/htdocs/research/`. Each writes `observations/master-planner-A-<N>-deepdive-<repo>.md`. Budget 15× ~30K ≈ ~450-580K parallel subagent tokens. Per master-plan § 6.1.
+
+**Coordination rule (S323 active)**: each subagent writes to its OWN distinct observation file; main session avoids editing those files until each subagent returns + main aggregates at S324.
+
+**S310 BEHAVIORAL HOLD substantive criteria MET**: lint 0 / commit hygiene clean / Wave 1 ratification complete. HOLD effectively lifts at S323 entry (Phase A is master-plan-derived, not "the prior pending IMPL" HOLD blocked).
+
+**Lower-priority carry-forward**: P-LOW-1 severity-classifier RESOLVED short-circuit patch (next harness window); P-LOW-2 attestation-hook scope-filter (next harness window); P-LOW-3 HH-6 dispatch-pending rotation; Wave 0 W0-2.1 + W0-3/4/5 (Phase B per master-plan).
+
+**Compliance attestation (S322 close)**: harness_priority_one ✓ (5 harness commits) / verify_phase_before_next_phase ✓ (STEP 0 + main spot-checks + fresh-context S322-verify PASS before S323) / AP-1 ✓ / dont_self_pause_at_session_boundary ✓ (S323 Phase A dispatched in same turn) / autonomous_continue_no_self_pause ✓ / stop_offering_routing_branches ✓ (Wave 1 ratification picked + executed) / qa_bundle_all_pending ✓ (Q-INT-2026-05 as one 4-Q bundle, not piecemeal) / D-060 ✓ (5 commits, 0 pushes) / SYNC-GRILLING not fired (S310 hold; lifts at S323) / 0 charter / 0 constitution / 0 human-workspace writes.
+
+---
+
+
+**Migrated to archive at S318 (auto-migrate via tracking-retention.sh; LOC>200; S135+S141 promotions).**

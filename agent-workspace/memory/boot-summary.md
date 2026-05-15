@@ -1,5 +1,5 @@
 ---
-rendered_at: 2026-05-14T10:59:16+07:00
+rendered_at: 2026-05-15T15:52:58+07:00
 cache_ttl_hours: 1
 purpose: compact-bootstrap-context-for-reboot
 fallback: read current-execution.md + checkpoint/latest.md if mtime > 1h or content stale
@@ -10,13 +10,13 @@ fallback: read current-execution.md + checkpoint/latest.md if mtime > 1h or cont
 > Per L-S65-reboot-cost-reduction. Read FIRST at SessionStart; full chain only if ambiguous.
 
 ## Active session/phase/track
-## ⚠️ BEHAVIORAL HOLD — BINDING (S310 expanded 2026-05-14 ~09:25 SEAST after user 2nd directive)
+## 🚨 INCIDENT + RECOVERY — 2026-05-14 mass-deletion (RESOLVED — archived)
 
 ## Recent ADRs (last 5; review for binding context)
 ```
+061-wave-1-integration-ratification.md
+060-S321-commit-policy-agent-may-commit.md
 059-python-determinism-contract.md
-058-Q-INT-mega-bundle-ratification.md
-057-S255-pre-wave-1-harness-audit-and-Q-AUDIT-picks.md
 056-S253-charter-v1.1-principle-11-ratified.md
 054-bear-quant-retry-validator-symmetry.md
 ```

@@ -55,7 +55,7 @@ The agent owns this directory but must keep it AUDITABLE — every artifact prov
 
 5. **Provenance is mandatory.** Every decision file references its source (human prompt / spec clause / drift detection / agent inference). Every thesis cites source + as-of date (I-S2). Every confidence claim cites historical hit rate (I-S20-equivalent).
 
-6. **Agents never `git commit` in this directory unless user explicitly requests.** Stage only.
+6. **Agents MAY `git commit`; agents MUST NOT `git push`.** Pushing to remote is human-only. (Updated 2026-05-15 per project-owner directive; see `memory/decisions/060-*`.)
 
 7. **`patterns-discovered/` artifacts are READ-ONLY for production code.** Patterns must be promoted to constitution / skills / hook scripts before becoming binding. (Otherwise they're informal notes, not contracts.)
 

@@ -84,7 +84,7 @@ Read these when relevant to current task.
 - **Never edit `obsidian-vault/raw/`.** Immutable. All writes go to `wiki/`.
 - **Never modify `PROJECT_CHARTER.md`.** Requires explicit human revision with version bump.
 - **Never modify files in `agent-workspace/constitution/` without explicit human approval.**
-- **Agents MUST NOT `git commit` unless user explicitly requests.** Stage changes, report, let user decide.
+- **Agents MAY `git commit`; agents MUST NOT `git push`.** Commit freely at coherent checkpoints (the deterministic-gates rule below still applies); pushing to remote is human-only. (Updated 2026-05-15 per project-owner directive — superseded the prior "agents MUST NOT commit" rule; see `agent-workspace/memory/decisions/060-*`.)
 - **User prompt overrides ALL defaults.** If user says "skip X", that trumps any skill/workflow.
 - **Context-threshold band (per D-004 — Opus 4.7 recalibrated)**: 180K wind-down (auto-prep handoff) / 220K cliff (auto-reboot via session-self-reboot.sh) / 250K hard_cap (mandatory split). Operational defaults in `scripts/hooks/budget-watchdog.sh`. Re-evaluate empirically after 10 sessions or on Anthropic model/policy change.
 - **Deterministic gates (mypy, pytest, ruff) must pass before commit.** Max 3 retry before escalate.

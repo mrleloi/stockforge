@@ -261,3 +261,66 @@ ts	category	event_type	delta	decision_id	source_evidence	reason
 2026-05-14T03:08:31Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
 2026-05-14T03:08:33Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
 2026-05-14T03:08:34Z	DECISION_ROUTING	q_and_a_resolution	0.1	auto-S-qa		auto-detected 1 Q&A in answered/ <6h
+2026-05-14T05:36:09Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-14T05:36:10Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-14T05:36:11Z	SCOPE	charter_match	0.2	auto-S-adr-3		auto-detected new ADR mtime <6h
+2026-05-14T05:36:12Z	DECISION_ROUTING	q_and_a_resolution	0.1	auto-S-qa		auto-detected 7 Q&A in answered/ <6h
+2026-05-14T06:03:44Z	DESIGN_THINKING	q_and_a_resolution	0.1		2026-04-29-001-phase0-clusters.md	qa bundle answered
+2026-05-14T06:03:45Z	DESIGN_THINKING	q_and_a_resolution	0.1		2026-04-29-004-up06-track-5.5-amendment.md	qa bundle answered
+2026-05-14T06:03:46Z	DESIGN_THINKING	q_and_a_resolution	0.1		2026-05-01-001-S35-charter-promote-batch.md	qa bundle answered
+2026-05-14T06:03:46Z	DESIGN_THINKING	q_and_a_resolution	0.1		2026-05-01-002-S41-track-F-scope-gates.md	qa bundle answered
+2026-05-14T06:03:47Z	DESIGN_THINKING	q_and_a_resolution	0.1		2026-05-01-003-S39-track-E-bundle-2-scope-amendments.md	qa bundle answered
+2026-05-14T06:03:48Z	DESIGN_THINKING	q_and_a_resolution	0.1		2026-05-06-S98-tracking-bloat-rca.md	qa bundle answered
+2026-05-14T06:03:48Z	DESIGN_THINKING	q_and_a_resolution	0.1		smoke2-bundle.md	qa bundle answered
+2026-05-14T06:15:29Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-14T06:15:30Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-14T06:15:31Z	SCOPE	charter_match	0.2	auto-S-adr-3		auto-detected new ADR mtime <6h
+2026-05-14T06:15:32Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 6 HIGH-drift events today
+2026-05-14T06:15:33Z	DECISION_ROUTING	q_and_a_resolution	0.1	auto-S-qa		auto-detected 7 Q&A in answered/ <6h
+2026-05-14T07:08:24Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-14T07:08:26Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-14T07:08:27Z	SCOPE	charter_match	0.2	auto-S-adr-3		auto-detected new ADR mtime <6h
+2026-05-14T07:08:28Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 18 HIGH-drift events today
+2026-05-14T07:08:28Z	DECISION_ROUTING	q_and_a_resolution	0.1	auto-S-qa		auto-detected 8 Q&A in answered/ <6h
+2026-05-14T07:31:23Z	DESIGN_THINKING	q_and_a_resolution	0.1		2026-05-07-001-phase-3.5-T5-T6-T8-charter-gate.md	qa bundle answered
+2026-05-14T08:35:45Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-14T08:35:46Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-14T08:35:47Z	SCOPE	charter_match	0.2	auto-S-adr-3		auto-detected new ADR mtime <6h
+2026-05-14T08:35:48Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 36 HIGH-drift events today
+2026-05-14T08:35:49Z	DECISION_ROUTING	q_and_a_resolution	0.1	auto-S-qa		auto-detected 8 Q&A in answered/ <6h
+2026-05-14T09:45:59Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-14T09:46:00Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-14T09:46:01Z	SCOPE	charter_match	0.2	auto-S-adr-3		auto-detected new ADR mtime <6h
+2026-05-14T09:46:02Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 42 HIGH-drift events today
+2026-05-14T09:46:03Z	DECISION_ROUTING	q_and_a_resolution	0.1	auto-S-qa		auto-detected 8 Q&A in answered/ <6h
+2026-05-14T10:40:33Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-14T10:40:35Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-14T10:40:37Z	SCOPE	charter_match	0.2	auto-S-adr-3		auto-detected new ADR mtime <6h
+2026-05-14T10:40:38Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 48 HIGH-drift events today
+2026-05-14T10:40:39Z	DECISION_ROUTING	q_and_a_resolution	0.1	auto-S-qa		auto-detected 8 Q&A in answered/ <6h
+2026-05-14T11:23:48Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 60 HIGH-drift events today
+2026-05-14T11:23:49Z	DECISION_ROUTING	q_and_a_resolution	0.1	auto-S-qa		auto-detected 1 Q&A in answered/ <6h
+2026-05-14T12:18:16Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 66 HIGH-drift events today
+2026-05-14T12:18:17Z	DECISION_ROUTING	q_and_a_resolution	0.1	auto-S-qa		auto-detected 1 Q&A in answered/ <6h
+2026-05-14T13:41:58Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 78 HIGH-drift events today
+2026-05-14T14:09:05Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 90 HIGH-drift events today
+2026-05-15T01:08:47Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-15T02:28:48Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-15T02:28:50Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 24 HIGH-drift events today
+2026-05-15T03:01:19Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-15T03:01:20Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 48 HIGH-drift events today
+2026-05-15T04:44:49Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-15T04:44:51Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 60 HIGH-drift events today
+2026-05-15T05:06:22Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-15T05:06:24Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-15T05:06:25Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 66 HIGH-drift events today
+2026-05-15T06:02:35Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-15T06:02:36Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-15T06:02:38Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 66 HIGH-drift events today
+2026-05-15T07:00:32Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-15T07:00:34Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-15T07:00:35Z	SCOPE	charter_match	0.2	auto-S-adr-3		auto-detected new ADR mtime <6h
+2026-05-15T07:00:36Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 66 HIGH-drift events today
+2026-05-15T08:25:08Z	SCOPE	charter_match	0.2	auto-S-adr-1		auto-detected new ADR mtime <6h
+2026-05-15T08:25:09Z	SCOPE	charter_match	0.2	auto-S-adr-2		auto-detected new ADR mtime <6h
+2026-05-15T08:25:10Z	DECISION_ROUTING	drift_signal	-0.3	auto-S-drift		auto-detected 66 HIGH-drift events today

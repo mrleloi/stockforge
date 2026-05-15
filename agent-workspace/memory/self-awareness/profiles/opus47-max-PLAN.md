@@ -4,9 +4,9 @@ effort: max
 thinking: enabled
 task_class:
   - PLAN
-samples_count: 7
-sample_sessions: [S15, S24, S31, S44, S48a, S48e, S65]
-last_updated: 2026-05-06T07:52:48+07:00
+samples_count: 8
+sample_sessions: [S15, S24, S31, S44, S48a, S48e, S65, S325]
+last_updated: 2026-05-15T13:43:45+07:00
 source: manual session log review + master-planner subagent observations + S48i HH-F.1 ETL backfill
 status: BIASED-PRE-REBUILD-S65 (user 2026-05-06 flagged tracking gap; rebuild after cost-ledger.tsv accumulates ≥10 sessions per session-type)
 ---

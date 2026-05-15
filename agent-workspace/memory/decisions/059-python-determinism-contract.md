@@ -2,7 +2,7 @@
 id: D-059-python-determinism-contract
 title: Python Determinism Contract — DST-style banned-pattern enforcement
 date: 2026-05-14
-status: PROPOSED
+status: ACCEPTED
 level: IMPL
 
 author:
@@ -54,6 +54,10 @@ approval_chain:
     action: PROPOSED
     at: 2026-05-14
     via: "S315 sandwich-dev dispatch (014-S315 plan)"
+  - actor: human
+    action: ACCEPTED
+    at: 2026-05-15
+    via: "S322 chat — blanket-approval directive 'follow your recommendation, human approve your recommendation' covering backlog cleanup; D-059 was authored at IMPL tier with PASS firing-test (12/12) at S315 and the W0-2 SHIP was already verified at S316 — ratification was procedural"
 
 verified_by:
   - mechanism: firing-test
@@ -229,3 +233,4 @@ Per plan, WARN-only for current session. The ratchet to BLOCKING is NOT automate
 ## Acceptance Record
 
 - **2026-05-14**: PROPOSED by Claude Sonnet 4.6 (sandwich-dev S315)
+- **2026-05-15**: ACCEPTED by human (S322 blanket-approval directive). Hook + firing-test + ADR ship at S315/S316 was procedurally complete; this records the explicit ratification.
