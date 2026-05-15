@@ -441,6 +441,134 @@ cat > "$TEMPDIR/agent-workspace/constitution/d-identity-tc-self-ref.md" <<'EOF'
 The drift signal `bash-hook-lint.sh § D-IDENTITY` scans LIVE config for `SUPERVISED|autonomous_mode:\s*false|until Track 7` regression and soft-warns.
 EOF
 
+# === S319b NEW TCs — Check 1 (L-S11-1) skip-marker support ===
+# TC-L-S11-1-skipmarker: hook with skip-marker should NOT be flagged even with python3 invocation.
+cat > "$TEMPDIR/scripts/hooks/python3-with-skipmarker.sh" <<'EOF'
+#!/usr/bin/env bash
+# bash-hook-lint:allow L-S11-1 graceful fallback chain exists; python3 is primary, sed is fallback.
+set -u
+LOG="$PROJECT_DIR/log.txt"
+if command -v python3 >/dev/null 2>&1; then
+  python3 -c "print('hello')" 2>/dev/null || true
+else
+  echo "fallback" >> "$LOG"
+fi
+EOF
+
+# TC-L-S11-1-genuine: hook WITHOUT skip-marker and with python3 should STILL be flagged.
+cat > "$TEMPDIR/scripts/hooks/python3-no-skipmarker.sh" <<'EOF'
+#!/usr/bin/env bash
+set -u
+LOG="$PROJECT_DIR/log.txt"
+python3 -c "print('hello')" 2>/dev/null || true
+EOF
+
+# === S319b NEW TCs — Check 8 (L-S53-2) skip-marker support ===
+# TC-L-S53-2-skipmarker: hook with skip-marker should NOT be flagged for unanchored positional grep.
+cat > "$TEMPDIR/scripts/hooks/unanchored-with-skipmarker.sh" <<'EOF'
+#!/usr/bin/env bash
+# bash-hook-lint:allow L-S53-2 grep targets mid-string token in variable content; ^ anchor wrong.
+set -u
+DEC_ID="sync-grilling-S102"
+if printf '%s' "$DEC_ID" | grep -qE 'S[0-9]+' 2>/dev/null; then
+  echo "found"
+fi
+EOF
+
+# TC-L-S53-2-genuine: hook WITHOUT skip-marker with unanchored positional grep should STILL fire.
+# (re-uses existing unanchored-positional-grep.sh TC-D — already covers this)
+
+# === S319b NEW TCs — Check 6b (L-S108-1) calibration ===
+# TC-L-S108-1-bucket: BUCKET variable in marker should NOT trigger L-S108-1 (date-bucket = correct).
+cat > "$TEMPDIR/scripts/hooks/sid-bucket-marker.sh" <<'EOF'
+#!/usr/bin/env bash
+set -u
+SID="${CLAUDE_SESSION_ID:-unknown}"
+CACHE="$PROJECT_DIR/agent-workspace/memory/.some-cache-${SID}"
+BUCKET="$(date +%Y%m%d-%H)"
+MARKER="$PROJECT_DIR/agent-workspace/memory/.some-fired-${BUCKET}"
+[ -f "$MARKER" ] && exit 0
+touch "$MARKER"
+EOF
+
+# TC-L-S108-1-sid-marker: SID variable in marker SHOULD still trigger L-S108-1 (session-ID lockout risk).
+cat > "$TEMPDIR/scripts/hooks/sid-in-marker.sh" <<'EOF'
+#!/usr/bin/env bash
+set -u
+SID="${CLAUDE_SESSION_ID:-main}"
+MARKER="$PROJECT_DIR/agent-workspace/memory/.some-fired-${SID}"
+[ -f "$MARKER" ] && exit 0
+touch "$MARKER"
+EOF
+
+# === S321 MINOR-3 NEW TCs — Check 7/9: backslash-continuation carry path ===
+# TC-C-backslash-fire: a genuine grep spread across physical backslash-continued lines SHOULD fire.
+# Tests that the substr carry-join correctly reassembles the logical line and detects the grep.
+cat > "$TEMPDIR/scripts/hooks/pipefail-backslash-grep-fire.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+LOG="$PROJECT_DIR/log.txt"
+RESULT=$(grep -E \
+  'some-pattern' \
+  "$LOG")
+echo "$RESULT"
+EOF
+
+# TC-C-backslash-guarded: a grep spread over backslash-continued lines WITH || true on the
+# final continuation line should NOT fire (guard is properly recognized when lines are joined).
+cat > "$TEMPDIR/scripts/hooks/pipefail-backslash-grep-guarded.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+LOG="$PROJECT_DIR/log.txt"
+RESULT=$(grep -E \
+  'some-pattern' \
+  "$LOG" || true)
+echo "$RESULT"
+EOF
+
+# === S321 MINOR-2 NEW TC — Check 6b: SESSION_ID form in marker MUST trigger L-S108-1 ===
+# The S319b narrowed regex [^A-Z_] failed to match ${SESSION_ID} because after SESSION the
+# next char is _ (underscore), which is in the [^A-Z_] exclusion class. The S321 fix adds
+# (_ID)? so SESSION_ID is matched, then [^A-Z_] applies to the char after _ID (e.g. "}").
+cat > "$TEMPDIR/scripts/hooks/session-id-in-marker.sh" <<'EOF'
+#!/usr/bin/env bash
+set -u
+SESSION_ID="${CLAUDE_SESSION_ID:-main}"
+MARKER="$PROJECT_DIR/agent-workspace/memory/.check-fired-${SESSION_ID}"
+[ -f "$MARKER" ] && exit 0
+touch "$MARKER"
+EOF
+
+# === S319b NEW TCs — Check 7 (L-S48d-1) inline-comment skip ===
+# TC-C-inline-comment: grep in inline comment (not a command) should NOT fire L-S48d-1.
+cat > "$TEMPDIR/scripts/hooks/pipefail-inline-comment-grep.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+LOG="$PROJECT_DIR/log.txt"
+# This function does grep internally
+run_check() {  # grep log — cheap
+  if grep -q "pattern" "$LOG" 2>/dev/null; then echo "found"; fi
+}
+run_check
+EOF
+
+# === S321 MINOR-1 NEW TC — Check 7: hash inside quoted string before a real grep SHOULD STILL FIRE ===
+# TC-C-hash-in-string: `echo "a#b" && VAR=$(grep ...)` — the "#" is inside a string, NOT a comment.
+# The S319b heuristic (index(full,"#") < index(full,"grep") → skip) wrongly suppressed this.
+# The S321 fix (require "#" to be preceded by whitespace/;/&) correctly fires on this case.
+cat > "$TEMPDIR/scripts/hooks/pipefail-hash-in-string-grep.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+LOG="$PROJECT_DIR/log.txt"
+echo "a#b"
+VAR=$(grep "pattern" "$LOG")
+echo "$VAR"
+EOF
+
 chmod +x "$TEMPDIR/scripts/hooks/"*.sh
 
 # Run bash-hook-lint pointed at tempdir
@@ -571,6 +699,44 @@ else
   echo "PASS [TC-clean] no false-positive on clean-hook.sh"
   PASS=$((PASS+1))
 fi
+
+# === S319b NEW assertions — Check 1 (L-S11-1) skip-marker support ===
+# skip-marker suppresses the false-positive
+assert_NOT_flagged "TC-L-S11-1-skipmarker" "L-S11-1-PORTABILITY" "python3-with-skipmarker"
+# genuine violation (no skip-marker) still fires
+assert_flagged     "TC-L-S11-1-genuine"    "L-S11-1-PORTABILITY" "python3-no-skipmarker"
+
+# === S319b NEW assertions — Check 8 (L-S53-2) skip-marker support ===
+# skip-marker suppresses the false-positive
+assert_NOT_flagged "TC-L-S53-2-skipmarker" "L-S53-2-UNANCHORED-POSITIONAL-GREP" "unanchored-with-skipmarker"
+# genuine violation without skip-marker still fires (TC-D covers this — reuse)
+assert_flagged     "TC-L-S53-2-genuine"    "L-S53-2-UNANCHORED-POSITIONAL-GREP" "unanchored-positional-grep"
+
+# === S319b NEW assertions — Check 6b (L-S108-1) date-bucket calibration ===
+# BUCKET variable in marker should NOT trigger (date-bucket = correct pattern)
+assert_NOT_flagged "TC-L-S108-1-bucket"     "L-S108-1-CLAUDE-SESSION-ID-FALLBACK-CONSTANT" "sid-bucket-marker"
+# SID variable in marker SHOULD still trigger (session-ID lockout risk)
+assert_flagged     "TC-L-S108-1-sid-marker" "L-S108-1-CLAUDE-SESSION-ID-FALLBACK-CONSTANT" "sid-in-marker"
+
+# === S321 MINOR-2 NEW assertion — Check 6b: SESSION_ID form in marker MUST trigger ===
+# The [^A-Z_] boundary in S319b defeated the SESSION arm (SESSION_ID has _ after SESSION).
+# The S321 fix adds (_ID)? before the boundary to match SESSION_ID correctly.
+assert_flagged "TC-L-S108-1-session-id" "L-S108-1-CLAUDE-SESSION-ID-FALLBACK-CONSTANT" "session-id-in-marker"
+
+# === S319b NEW assertions — Check 7 (L-S48d-1) inline-comment skip ===
+# grep appearing only in inline comment (after #) should NOT fire
+assert_NOT_flagged "TC-C-inline-comment" "L-S48d-1-PIPEFAIL-BARE-GREP" "pipefail-inline-comment-grep"
+
+# === S321 MINOR-3 NEW assertions — Check 7: backslash-continuation carry path ===
+# A grep spanning physical backslash-continued lines SHOULD fire (carry joins to logical line)
+assert_flagged     "TC-C-backslash-fire"    "L-S48d-1-PIPEFAIL-BARE-GREP" "pipefail-backslash-grep-fire"
+# A guarded grep with || true on the final continuation line should NOT fire (guard recognized)
+assert_NOT_flagged "TC-C-backslash-guarded" "L-S48d-1-PIPEFAIL-BARE-GREP" "pipefail-backslash-grep-guarded"
+
+# === S321 MINOR-1 NEW assertion — Check 7: hash inside quoted string before grep MUST STILL fire ===
+# echo "a#b" has a "#" inside a string; the real grep on the NEXT line must NOT be suppressed.
+# This was the blind spot: S319b heuristic saw "#" position < grep position → wrongly skipped.
+assert_flagged "TC-C-hash-in-string" "L-S48d-1-PIPEFAIL-BARE-GREP" "pipefail-hash-in-string-grep"
 
 echo ""
 printf '=== TOTAL: PASS=%d FAIL=%d ===\n' "$PASS" "$FAIL"

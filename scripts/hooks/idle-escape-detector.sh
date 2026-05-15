@@ -73,8 +73,9 @@ set +o pipefail
 # current-execution.md prepends new sessions at top).
 # ============================================================================
 HEADERS=$(grep -m 5 -E '^## S[0-9]+[a-z]?[[:space:]]+—[[:space:]]+Phase' "$CE" 2>/dev/null)
-HEADER_COUNT=$(echo "$HEADERS" | grep -c '^## S' 2>/dev/null || echo 0)
-[[ "$HEADER_COUNT" =~ ^[0-9]+$ ]] || HEADER_COUNT=0
+# L-S80-2: avoid VAR=$(grep -c ... || echo 0) multi-line capture trap.
+# HEADER_COUNT only needs to be ≥1 to pass the threshold check below; binary 0/1 is sufficient.
+if echo "$HEADERS" | grep -q '^## S' 2>/dev/null; then HEADER_COUNT=1; else HEADER_COUNT=0; fi
 
 if [ "$HEADER_COUNT" -lt 1 ]; then
   touch "$MARKER" 2>/dev/null || true

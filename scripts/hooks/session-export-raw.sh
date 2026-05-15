@@ -61,23 +61,76 @@ DATE_STR="$(date -u +%Y-%m-%d)"
 RAW_FILE="$RAW_DIR/${DATE_STR}-session-${SESSION_N}.md"
 
 # cleanText: strip Claude Code system reminders / command markers / task notifications.
+# S319b L-S11-1: rewritten from python3 to awk (bash+POSIX). Multi-line XML tag ranges
+# handled via awk state machine. S321 IMPORTANT-2 fix: corrected 3 behavioral divergences
+# from the python re.sub reference:
+#   (a) same-line text BEFORE an opening / AFTER a closing multi-line tag was LOST — now
+#       the pre-tag prefix is kept and the post-close suffix is kept (strip in place).
+#   (b) on a mixed line (single-line tag + opening multi-line tag), strip_inline now runs
+#       BEFORE the open-multi-line check, so inline-stripped text is preserved.
+#   (c) an unclosed multi-line tag to EOF now flushes a single "[stripped]" instead of
+#       silently dropping buffered context (matches python fallback behaviour).
 clean_text() {
-  python3 -c "
-import sys, re
-text = sys.stdin.read()
-patterns = [
-    r'<system-reminder>[\s\S]*?</system-reminder>',
-    r'<command-name>.*?</command-name>',
-    r'<command-message>.*?</command-message>',
-    r'<command-args>.*?</command-args>',
-    r'<task-notification>[\s\S]*?</task-notification>',
-    r'<local-command-stdout>[\s\S]*?</local-command-stdout>',
-    r'<user-prompt-submit-hook>[\s\S]*?</user-prompt-submit-hook>',
-]
-for p in patterns:
-    text = re.sub(p, '[stripped]', text)
-sys.stdout.write(text)
-" 2>/dev/null
+  awk '
+  function strip_inline(line,    i, out, t, open_pos, close_pos, close_pat) {
+    # Strip single-line tags: <tag>...</tag> on same line → [stripped]
+    tags[1]="system-reminder"; tags[2]="command-name"; tags[3]="command-message";
+    tags[4]="command-args";    tags[5]="task-notification";
+    tags[6]="local-command-stdout"; tags[7]="user-prompt-submit-hook";
+    out = line
+    for (i=1; i<=7; i++) {
+      t = tags[i]
+      while (index(out, "<" t ">") > 0 && index(out, "</" t ">") > 0) {
+        open_pos = index(out, "<" t ">")
+        close_pat = "</" t ">"
+        close_pos = index(out, close_pat)
+        if (close_pos > open_pos) {
+          out = substr(out, 1, open_pos - 1) "[stripped]" substr(out, close_pos + length(close_pat))
+        } else { break }
+      }
+    }
+    return out
+  }
+  BEGIN {
+    in_tag = 0; cur_tag = ""
+    split("system-reminder command-name command-message command-args task-notification local-command-stdout user-prompt-submit-hook", tag_list, " ")
+  }
+  {
+    if (in_tag) {
+      # We are inside a multi-line tag; look for the closing tag on this line.
+      close_pat = "</" cur_tag ">"
+      if (index($0, close_pat) > 0) {
+        # S321 fix (a): keep text AFTER the closing tag on the same line.
+        after_close = substr($0, index($0, close_pat) + length(close_pat))
+        print "[stripped]" after_close
+        in_tag = 0; cur_tag = ""
+      }
+      # Lines wholly inside the multi-line tag range are suppressed (next).
+      next
+    }
+    # S321 fix (b): run strip_inline FIRST so single-line tags on a mixed line are
+    # handled before we test for an opening multi-line tag.
+    line = strip_inline($0)
+    # Check for an opening multi-line tag (open but no close on the same post-inline line).
+    for (i in tag_list) {
+      t = tag_list[i]
+      if (index(line, "<" t ">") > 0 && index(line, "</" t ">") == 0) {
+        # S321 fix (a): keep text BEFORE the opening tag on this line.
+        open_pos = index(line, "<" t ">")
+        prefix = substr(line, 1, open_pos - 1)
+        if (length(prefix) > 0) { printf "%s", prefix }
+        in_tag = 1; cur_tag = t
+        next
+      }
+    }
+    print line
+  }
+  END {
+    # S321 fix (c): if we reach EOF while still inside a multi-line tag, emit [stripped]
+    # rather than silently dropping the buffered context.
+    if (in_tag) { print "[stripped]" }
+  }
+  ' 2>/dev/null
 }
 
 # Compose: read transcript → cleanText → redact-secrets → write.
@@ -86,10 +139,9 @@ TRANSCRIPT_CLEAN="$(printf '%s' "$TRANSCRIPT_RAW" | clean_text)"
 TRANSCRIPT_REDACTED="$(printf '%s' "$TRANSCRIPT_CLEAN" | bash "$PROJECT_DIR/scripts/hooks/redact-secrets.sh")"
 
 # Compute hash for idempotency.
-HASH="$(printf '%s' "$TRANSCRIPT_REDACTED" | python3 -c "
-import sys, hashlib
-print(hashlib.sha256(sys.stdin.buffer.read()).hexdigest()[:8])
-" 2>/dev/null || echo "00000000")"
+# S319b L-S11-1: rewritten from python3 hashlib to sha256sum (available on Git-Bash/Linux/macOS).
+# sha256sum outputs "<hexhash>  -"; take first 8 chars of the hash field.
+HASH="$(printf '%s' "$TRANSCRIPT_REDACTED" | sha256sum 2>/dev/null | cut -c1-8 || echo "00000000")"
 
 # Skip re-export if hash matches existing file (idempotency).
 if [ -f "$RAW_FILE" ]; then

@@ -21,6 +21,7 @@
 # target: promote to BLOCKING after 5 sessions of clean state per S99 ritual-demotion.
 # Per CLAUDE.md hard rule: hook ships with companion firing-test
 # (scripts/hooks/firing-tests/firing-test-spawn-context-lint-fire-test.sh).
+# bash-hook-lint:allow L-S11-1 python3 used for JSON parsing but hook degrades gracefully: if HOOK_INVENTORY empty (python3 unavailable), emits SKIP and exits cleanly.
 set -uo pipefail
 trap 'exit 0' ERR
 

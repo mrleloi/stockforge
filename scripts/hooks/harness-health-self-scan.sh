@@ -5,6 +5,7 @@
 # Triggers: UserPromptSubmit (every prompt; same-session caching) + SessionStart (each session entry).
 # Phase 3.5 T6 deliverable; D-035 ratified S173 via AskUserQuestion Q3=A.
 # <2s perf budget on UserPromptSubmit. Exit 0 ALWAYS (informational, not blocking).
+# bash-hook-lint:allow L-S11-1 python3 is ONLY a fallback for `date -d` math (date -d ... || python3 ...); primary is bash-builtin date; graceful degradation.
 set -uo pipefail
 trap 'exit 0' ERR
 
@@ -53,10 +54,11 @@ emit_skip() {
 HH1_check() {
   [ ! -f "$HOOK_LOG" ] && { emit_skip "HH-1" "log-missing"; return; }
   local start_line stop_count
-  start_line=$(grep -n "SessionStart session=$SID" "$HOOK_LOG" 2>/dev/null | tail -1 | cut -d: -f1)
+  # S319b L-S48d-1: add || true so grep no-match (rc=1) does not tip ERR trap.
+  start_line=$(grep -n "SessionStart session=$SID" "$HOOK_LOG" 2>/dev/null | tail -1 | cut -d: -f1 || true)
   [ -z "$start_line" ] && { emit_skip "HH-1" "no-SessionStart-for-SID"; return; }
-  stop_count=$(awk "NR>$start_line" "$HOOK_LOG" 2>/dev/null | grep -c "Stop session=$SID" || echo 0)
-  [[ "$stop_count" =~ ^[0-9]+$ ]] || stop_count=0
+  # L-S80-2: avoid VAR=$(... grep -c ... || echo 0) multi-line capture trap.
+  if awk "NR>$start_line" "$HOOK_LOG" 2>/dev/null | grep -q "Stop session=$SID"; then stop_count=1; else stop_count=0; fi
   if [ "$stop_count" -lt 1 ]; then
     # KI-S49b-1 suppression check
     local sev="HIGH"
@@ -71,8 +73,8 @@ HH2_check() {
   local cutoff recent
   cutoff=$(date -d "10 min ago" -Iseconds 2>/dev/null || python3 -c "import datetime; print((datetime.datetime.now()-datetime.timedelta(minutes=10)).isoformat())" 2>/dev/null || echo "")
   [ -z "$cutoff" ] && { emit_skip "HH-2" "date-math-unavail"; return; }
-  recent=$(awk -v cutoff="[$cutoff" '$0 > cutoff' "$HOOK_LOG" 2>/dev/null | grep -c "UserPromptSubmit" || echo 0)
-  [[ "$recent" =~ ^[0-9]+$ ]] || recent=0
+  # L-S80-2: avoid VAR=$(... grep -c ... || echo 0) multi-line capture trap.
+  if awk -v cutoff="[$cutoff" '$0 > cutoff' "$HOOK_LOG" 2>/dev/null | grep -q "UserPromptSubmit"; then recent=1; else recent=0; fi
   if [ "$recent" -lt 1 ]; then
     emit_fail "HH-2-USERPROMPT-NOT-FIRING" "HIGH" "recent_10min=0"
   fi
@@ -100,7 +102,9 @@ HH4_check() {
   local notes="$PROJECT_DIR/agent-workspace/memory/agent-notes.md"
   [ ! -f "$notes" ] && { emit_skip "HH-4" "agent-notes-missing"; return; }
   local candidates hooks orphan_delta
-  candidates=$(grep -c "Auto-detect:.*yes" "$notes" 2>/dev/null || echo 0)
+  # L-S80-2: preserve actual count (used in orphan_delta arithmetic) — remove || echo 0
+  # to avoid "0\n0" multi-line capture; the existing [[ ]] || candidates=0 guard handles empty.
+  candidates=$(grep -c "Auto-detect:.*yes" "$notes" 2>/dev/null || true)
   hooks=$(find "$PROJECT_DIR/scripts/hooks" -maxdepth 1 -name '*.sh' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
   [[ "$candidates" =~ ^[0-9]+$ ]] || candidates=0
   [[ "$hooks" =~ ^[0-9]+$ ]] || hooks=0
@@ -238,8 +242,9 @@ HH12_check() {
     return
   fi
   local ce_phase proj_phase
-  ce_phase=$(grep -m1 -E '^## S[0-9]+ — Phase' "$ce" 2>/dev/null | grep -oE 'Phase [0-9.]+' | head -1)
-  proj_phase=$(grep -E '^\| [0-9.]+ —' "$proj" 2>/dev/null | grep -i 'IN PROGRESS' | head -1 | grep -oE 'Phase [0-9.]+' | head -1)
+  # S319b L-S48d-1: || true guards prevent ERR-trap on grep no-match.
+  ce_phase=$(grep -m1 -E '^## S[0-9]+ — Phase' "$ce" 2>/dev/null | grep -oE 'Phase [0-9.]+' | head -1 || true)
+  proj_phase=$(grep -E '^\| [0-9.]+ —' "$proj" 2>/dev/null | grep -i 'IN PROGRESS' | head -1 | grep -oE 'Phase [0-9.]+' | head -1 || true)
   if [ -z "$ce_phase" ] || [ -z "$proj_phase" ]; then
     emit_skip "HH-12" "phase-parse-failed"
     return

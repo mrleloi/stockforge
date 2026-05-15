@@ -8,6 +8,7 @@
 # Wired: SubagentStop (after subagent-stop-logger.sh, before cost-ledger-recorder.sh)
 # Kill switch: STOCKFORGE_ATTESTATION_DISABLE=1
 # Strict mode: STOCKFORGE_ATTESTATION_STRICT=1 → block on warn-only conditions
+# bash-hook-lint:allow L-S11-1 python (not python3) used as fallback for pytest; guarded by `command -v python` check; WARN-only if unavailable.
 
 set -uo pipefail
 trap 'exit 0' ERR

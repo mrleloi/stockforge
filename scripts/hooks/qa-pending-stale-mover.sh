@@ -4,6 +4,7 @@
 # move to stale/ and emit notification. Hook runs OUTSIDE Claude permission model so can write
 # to deny-listed paths (per agent-notes 2026-04-29 hooks-bypass-permissions rule).
 # Track 5 deliverable (deferred from Track 4 in S2).
+# bash-hook-lint:allow L-S11-1 python3 is guarded by `if command -v python3` check; fallback path `continue` when unavailable; graceful degradation.
 set -uo pipefail
 trap 'exit 0' ERR
 

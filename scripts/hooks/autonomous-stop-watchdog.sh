@@ -10,6 +10,8 @@
 # tool calls (firing-test re-runs, final pytest, summary text) routinely consume 60-180s, pushing Stop
 # event past the legacy 60s gate. Override via env STOCKFORGE_MODE_D_MAX_AGE (e.g. 900 for 15min).
 # Pairs the existing failure-mode recovery with end-of-session continuation (clean session boundary).
+# bash-hook-lint:allow L-S11-1 jq is guarded by `if command -v jq ... else BASH_REMATCH` fallback — graceful degradation, not a hard dep.
+# bash-hook-lint:allow L-S53-2 grep targets transcript-tail narration mid-JSON-line; ^ anchor would never match (lines begin with JSON braces); see inline rationale lines 68-77.
 
 set -uo pipefail
 

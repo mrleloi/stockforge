@@ -73,10 +73,12 @@ if [ -f "$MEMORY_DIR/mistake-log.md" ]; then
   # only matched archive file; main file was always empty. New anchor matches table-row digest.
   # S180 follow-up: truncate each row to MAX_MISTAKE_LEN; defends against Forward Policy violations
   # (entries that span multiple paragraphs in single table cell).
-  RECENT_MISTAKES="$(grep -E '^\| M-S[0-9]+' "$MEMORY_DIR/mistake-log.md" 2>/dev/null | tail -3 | awk -v max="$MAX_MISTAKE_LEN" '{
+  # L-S48d-1: wrap grep with || true on same physical line (Check 7 detects unguarded greps
+  # under pipefail+ERR-trap; guard must be visible on grep's own line, not a later line).
+  RECENT_MISTAKES="$({ grep -E '^\| M-S[0-9]+' "$MEMORY_DIR/mistake-log.md" 2>/dev/null || true; } | tail -3 | awk -v max="$MAX_MISTAKE_LEN" '{
     if (length($0) > max) print substr($0, 1, max) " ...(truncated; see mistake-log.md)"
     else print $0
-  }' || true)"
+  }')"
 fi
 
 # Section 4: In-flight subagent dispatch from checkpoint (latest.md)

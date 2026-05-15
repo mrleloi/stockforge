@@ -79,6 +79,45 @@ else
   note_fail "TC6: no archive produced"
 fi
 
+# TC7: S321 IMPORTANT-1 regression — large archive with EARLY-matching entry must still be
+# marked content-verified (ARCHIVE_OK=1). Under `set -o pipefail`, `grep -q` exits early on
+# the first match → tar gets SIGPIPE (RC=141) → pipefail propagates → ARCHIVE_OK stays 0 →
+# good backup silently logged as FAILED. The fix uses subshell+grep-c+|| echo 0 to absorb SIGPIPE.
+#
+# Strategy: create an archive where PROJECT_CHARTER.md (the first pattern in the grep -cE
+# alternation) appears VERY EARLY in the tar listing — before many other entries. With a
+# large tar stream this deterministically exercises the SIGPIPE path. We ensure it is the
+# FIRST entry by creating PROJECT_CHARTER.md first and making the rest of the archive large.
+setup_project
+# Place PROJECT_CHARTER.md very early; pad the rest of agent-workspace with many files.
+rm -f "$TMP/agent-workspace/memory/.daily-backup-done-${TODAY}"
+for i in $(seq 1 200); do
+  printf 'padding file %d to inflate archive size so tar stream is long\n' "$i" > "$TMP/agent-workspace/memory/padding-${i}.txt"
+done
+# Remove any existing archive so the hook actually runs
+rm -f "$BACKUP/stockforge-${TODAY}.tar.gz"
+run_hook Stop
+ARCHIVE="$BACKUP/stockforge-${TODAY}.tar.gz"
+if [ ! -f "$ARCHIVE" ]; then
+  note_fail "TC7: no archive produced (SIGPIPE-path regression test)"
+else
+  # Check the backup log: should NOT say "WARN archive failed content-verify"
+  LOG_WARN=0
+  if [ -f "$TMP/agent-workspace/memory/.daily-backup.log" ]; then
+    if grep -q "WARN archive failed content-verify" "$TMP/agent-workspace/memory/.daily-backup.log"; then
+      LOG_WARN=1
+    fi
+  fi
+  MARKER_FILE="$TMP/agent-workspace/memory/.daily-backup-done-${TODAY}"
+  if [ "$LOG_WARN" -eq 1 ]; then
+    note_fail "TC7: SIGPIPE regression — large archive with early-match logged WARN (grep -q exited early → SIGPIPE → ARCHIVE_OK=0)"
+  elif [ ! -f "$MARKER_FILE" ]; then
+    note_fail "TC7: day-marker not written — content-verify may have failed silently"
+  else
+    note_pass
+  fi
+fi
+
 TOTAL=$((PASS+FAIL))
 echo "daily-backup-fire-test: $PASS/$TOTAL PASS"
 [ "$FAIL" -gt 0 ] && { for e in "${ERRORS[@]}"; do echo "  - $e"; done; exit 1; }

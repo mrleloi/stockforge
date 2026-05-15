@@ -7,6 +7,7 @@
 #
 # Wire as Stop hook in .claude/settings.json once L-S11-1 portability check (Phase 0 = bash+POSIX) passes.
 # Output goes to stderr + drift-log; non-zero exit only at hard-block.
+# bash-hook-lint:allow L-S53-2 grep targets basename token (promote-rule-S52.md); S<N> appears mid-string after prefix; ^ anchor would never match; see inline rationale lines 38-46.
 set -euo pipefail
 trap 'exit 0' ERR
 

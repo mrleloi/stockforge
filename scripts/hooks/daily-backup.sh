@@ -83,12 +83,13 @@ if [ -f "$ARCHIVE" ]; then
   # NOTE: use `grep -c` (consumes ALL input) not `grep -q` (quits early) — with
   # `set -o pipefail`, grep -q exiting early on a large tar stream gives tar SIGPIPE,
   # and pipefail then propagates tar's failure → false negative. grep -c avoids this.
+  # S321 IMPORTANT-1 fix: revert to grep -c form. L-S80-2 trap (multi-line "0\n0") is
+  # avoided by wrapping in a subshell with `|| echo 0` so SIGPIPE-driven non-zero from
+  # tar is absorbed and the captured value is always a clean integer (no multi-line).
   ARCHIVE_OK=0
   if [ "$ARCHIVE_BYTES" -gt 0 ]; then
-    VERIFY_HITS=$(tar -tzf "$ARCHIVE" 2>/dev/null | grep -cE 'PROJECT_CHARTER\.md|CLAUDE\.md|agent-workspace/' 2>/dev/null || echo 0)
-    VERIFY_HITS="${VERIFY_HITS:-0}"
-    [[ "$VERIFY_HITS" =~ ^[0-9]+$ ]] || VERIFY_HITS=0
-    if [ "$VERIFY_HITS" -gt 0 ]; then
+    VERIFY_HITS="$( ( tar -tzf "$ARCHIVE" 2>/dev/null | grep -cE 'PROJECT_CHARTER\.md|CLAUDE\.md|agent-workspace/' ) || echo 0 )"
+    if [ "${VERIFY_HITS:-0}" -gt 0 ]; then
       ARCHIVE_OK=1
     fi
   fi

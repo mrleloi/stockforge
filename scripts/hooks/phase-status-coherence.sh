@@ -95,9 +95,10 @@ IN_PROGRESS_PHASES=$(grep -E '^\|[[:space:]]*[0-9]+(\.[0-9]+)?[[:space:]]+—' "
 
 IN_PROGRESS_COUNT=0
 if [ -n "$IN_PROGRESS_PHASES" ]; then
-  IN_PROGRESS_COUNT=$(echo "$IN_PROGRESS_PHASES" | grep -c . 2>/dev/null || echo 0)
+  # L-S80-2: avoid VAR=$(grep -c ... || echo 0) multi-line capture trap.
+  # IN_PROGRESS_COUNT only needs binary ≥0/≥1 for downstream -eq 0 / -gt 0 checks.
+  if echo "$IN_PROGRESS_PHASES" | grep -q . 2>/dev/null; then IN_PROGRESS_COUNT=1; else IN_PROGRESS_COUNT=0; fi
 fi
-[[ "$IN_PROGRESS_COUNT" =~ ^[0-9]+$ ]] || IN_PROGRESS_COUNT=0
 
 # ============================================================================
 # Step 3: Check (A) — latest session phase ∈ IN PROGRESS phase rows?

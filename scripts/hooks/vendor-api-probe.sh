@@ -5,6 +5,7 @@
 # emit drift-log if API surface differs from master-plan-claimed.
 #
 # Wire as SessionStart hook AFTER Phase 0 close (S22+).
+# bash-hook-lint:allow L-S11-1 Phase 1+ explicit designation (see line 2 header); python used for importlib probe which is the entire purpose of this hook.
 set -euo pipefail
 trap 'exit 0' ERR
 

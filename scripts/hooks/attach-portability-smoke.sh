@@ -14,6 +14,7 @@
 # Source: agent-workspace/session-plans/pending/010-S50-phase-3.5-harness-deepening-master-plan.md
 #         + .claude/skills/attach/SKILL.md § Smoke Test
 #         + .claude/skills/attach/references/procedures.md
+# bash-hook-lint:allow L-S11-1 python (not python3) used for YAML manifest parsing via PyYAML — no portable bash YAML parser exists; this is a deliberate hard dependency. If python/PyYAML absent the hook exits 2 (fatal) explicitly per design.
 set -uo pipefail
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
@@ -220,10 +221,10 @@ fi
 # Verify settings.json env-var rewrite hypothesis (SOURCE_ABS path; sed-replace would happen at /attach time)
 SETTINGS_SRC="$PROJECT_DIR/.claude/settings.json"
 if [ -f "$SETTINGS_SRC" ]; then
-  STOCKFORGE_ENV_COUNT=$(grep -c "STOCKFORGE_" "$SETTINGS_SRC" 2>/dev/null || echo 0)
-  [[ "$STOCKFORGE_ENV_COUNT" =~ ^[0-9]+$ ]] || STOCKFORGE_ENV_COUNT=0
+  # L-S80-2: avoid VAR=$(grep -c ... || echo N) multi-line "0\nN" capture trap.
+  if grep -qE "STOCKFORGE_" "$SETTINGS_SRC" 2>/dev/null; then STOCKFORGE_ENV_COUNT=1; else STOCKFORGE_ENV_COUNT=0; fi
   if [ "$STOCKFORGE_ENV_COUNT" -gt 0 ]; then
-    assert "STRUCTURAL: settings.json contains ${STOCKFORGE_ENV_COUNT} STOCKFORGE_ env vars (sed-replace required at /attach)" "1"
+    assert "STRUCTURAL: settings.json contains STOCKFORGE_ env vars (sed-replace required at /attach)" "1"
   else
     assert "STRUCTURAL: settings.json STOCKFORGE_ env vars detected" "1"
   fi

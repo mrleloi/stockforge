@@ -5,6 +5,7 @@
 # Without this hook the agent re-fires AskUserQuestion to clarify, blocking autonomous flow.
 # Hook is NON-BLOCKING: only injects additionalContext warning. Agent decides action.
 # Wired as UserPromptSubmit in .claude/settings.local.json (after invariants-injector).
+# bash-hook-lint:allow L-S53-2 grep targets free-form user-input; Track/Session refs appear mid-prompt; ^ anchor would miss mid-prompt tokens; see inline rationale lines 71-105.
 set -uo pipefail
 trap 'exit 0' ERR
 

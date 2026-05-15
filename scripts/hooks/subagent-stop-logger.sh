@@ -5,6 +5,7 @@
 #
 # Stdin (JSON): { "agent_id": "...", "status": "...", "session_id": "..." }
 # Falls back to env vars (CLAUDE_AGENT_ID, CLAUDE_AGENT_STATUS) if stdin unavailable.
+# bash-hook-lint:allow L-S11-1 jq is guarded by `if command -v jq` check; complete BASH_REMATCH fallback path when jq absent.
 
 set -euo pipefail
 

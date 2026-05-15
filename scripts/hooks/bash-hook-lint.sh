@@ -36,12 +36,19 @@ emit() {
 
 # === Check 1: L-S11-1 Phase 0 portability — no python/jq/yq/pip/npm in scripts/hooks ===
 # Exempt: comments, strings, and explicit Phase-1+ stubs marked with "# PHASE-1+" guard comment.
+# S319b lint-calibration: skip-marker support added. A file containing the line
+#   # bash-hook-lint:allow L-S11-1 <reason>
+# is explicitly ratified as a false-positive (graceful fallback / Phase-1+ tool) and is
+# excluded from this check. This is the detector-side fix for confirmed FPs; genuine
+# violations (no fallback, no rationale) must still add the skip-marker with a real reason.
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
     bn="$(basename "$f")"
     # Skip self.
     [ "$bn" = "bash-hook-lint.sh" ] && continue
+    # S319b lint-calibration: honour explicit skip-marker (ratified false-positive or Phase-1+).
+    if grep -qE '^[[:space:]]*#[[:space:]]*bash-hook-lint:allow L-S11-1' "$f" 2>/dev/null; then continue; fi
     # Strip comments + heredocs roughly: scan only "executable" lines (not # comments).
     NON_COMMENT="$(grep -vE '^[[:space:]]*#' "$f" 2>/dev/null || true)"
     # Look for forbidden tooling invocations as command tokens.
@@ -178,8 +185,16 @@ fi
 # stuck in pending/ for 24+h). Check 6 only catches DIRECT $CLAUDE_SESSION_ID in marker;
 # misses INDIRECT-via-VAR form. Fix: use date hour-bucket or session-log basename.
 #
-# Detection: file has BOTH (a) fallback-to-constant assignment AND (b) any marker filename
-# pattern using $VAR. The combination indicates likely indirect-via-VAR lockout.
+# Detection: file has BOTH (a) fallback-to-constant assignment AND (b) a marker filename
+# pattern using the SAME session-ID-derived VAR (not date-bucket variables).
+#
+# S319b lint-calibration: narrowed (b) to exclude date-bucket variables (BUCKET/TODAY/DATE_HR
+# and similar) that are CORRECTLY used for hour-bucketed idempotency. The original broad
+# regex matched ANY uppercase variable, causing false-positives on files that already use
+# the correct hour-bucket pattern alongside a benign ${CLAUDE_SESSION_ID:-unknown} for a
+# performance-cache filename. The lock-out risk only exists when the MARKER uses a
+# session-ID-derived variable (one whose name suggests session identity: SID/SESSION/SESS
+# or the raw CLAUDE_SESSION_ID). Date-bucket vars are correctly keyed to time, not session.
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
@@ -188,8 +203,13 @@ if [ -d "$HOOKS_DIR" ]; then
     # (a) Suspicious assignment: ${CLAUDE_SESSION_ID:-WORD} where WORD is alphabetic
     HAS_FALLBACK="$(grep -nE '\$\{CLAUDE_SESSION_ID:-[a-zA-Z][a-zA-Z0-9_-]*\}' "$f" 2>/dev/null | grep -vE "^[[:space:]]*[0-9]+:[[:space:]]*#" || true)"
     if [ -n "$HAS_FALLBACK" ]; then
-      # (b) Marker filename pattern using ANY $VAR (dot-prefixed -fired/-marker/-ran/-flag/-written/-pending suffix)
-      HAS_MARKER="$(grep -nE '\.[a-zA-Z0-9_-]+-(fired|marker|ran|flag|written|pending)-\$\{?[A-Z_]' "$f" 2>/dev/null | grep -vE "^[[:space:]]*[0-9]+:[[:space:]]*#" || true)"
+      # (b) Marker filename using session-ID-derived variable (SID/SESSION/SESS/CLAUDE_SESSION_ID).
+      # S319b: explicitly EXCLUDES date-bucket variables (BUCKET, TODAY, DATE_HR, DATE_BUCKET,
+      # HOUR, TS_BUCKET) which are correctly keyed to time and do NOT cause cross-session collision.
+      # S321 MINOR-2 fix: the trailing [^A-Z_] boundary defeated the SESSION arm because
+      # SESSION_ID has underscore after SESSION, failing [^A-Z_]. Fix: allow (_ID)? before
+      # the trailing boundary so SESSION_ID is matched, then require a non-uppercase char.
+      HAS_MARKER="$(grep -nE '\.[a-zA-Z0-9_-]+-(fired|marker|ran|flag|written|pending)-\$\{?(SID|SESSION(_ID)?|SESS|CLAUDE_SESSION_ID)[^A-Z_]' "$f" 2>/dev/null | grep -vE "^[[:space:]]*[0-9]+:[[:space:]]*#" || true)"
       if [ -n "$HAS_MARKER" ]; then
         emit "L-S108-1-CLAUDE-SESSION-ID-FALLBACK-CONSTANT" "$bn" "fallback-to-constant \${CLAUDE_SESSION_ID:-WORD} + marker filename present (likely per-session lockout on Windows; use date hour-bucket or session-log basename — L-S108-1)"
       fi
@@ -242,10 +262,12 @@ if [ -d "$HOOKS_DIR" ]; then
 BEGIN { pipefail_off = 1; carry = "" }
 {
   line = $0
-  # Match physical line ending with literal `\` (backslash continuation).
-  # /\\$/ in awk source = regex `\\` (literal backslash) + `$` (EOL anchor).
-  # Confirmed empirically: `awk '/\\$/'` matches lines ending with literal `\`.
-  if (line ~ /\\$/) {
+  # S319b lint-calibration: FIXED carry-line detection (was /\\$/ which matched
+  # any line containing dollar-sign on Windows/GNU-awk 5.3.2, false-joining
+  # variable lines and losing per-line if-guard context).
+  # M-S80-1 family + S319a KEY FINDING: /\\$/ matches literal "$" on this platform.
+  # Fix: substr last-char compare — unambiguous on all platforms.
+  if (length(line) > 0 && substr(line, length(line)) == "\\") {
     sub(/\\$/, "", line)
     carry = (carry == "" ? line : carry " " line)
     next
@@ -266,6 +288,23 @@ BEGIN { pipefail_off = 1; carry = "" }
   if (full ~ /grep[[:space:]]/) {
     if (full ~ /^[[:space:]]*(if|while|until|elif)[[:space:]]/) next
     if (full ~ /grep[[:space:]].*[[:space:]](&&|\|\|)[[:space:]]/) next
+    # S319b: skip if grep appears ONLY after a trailing inline comment marker.
+    # Handles lines like `cmd   # grep foo` where grep is in the comment, not a command.
+    # S321 MINOR-1 fix: tightened heuristic — only treat "#" as a comment start when it is
+    # preceded by whitespace, ";" or "&" (i.e. a shell word-boundary). This prevents a "#"
+    # inside a quoted string (e.g. echo "a#b") from suppressing a genuine grep that follows.
+    # WRONG (S319b): hash_pos = index(full, "#")  — matches any "#" anywhere, incl. in strings.
+    # RIGHT: match(full, /[[:space:];&#]/) then test char at that position is "#".
+    comment_pos = 0
+    n = split(full, chars, "")
+    for (ci = 2; ci <= n; ci++) {
+      prev = chars[ci-1]
+      if (chars[ci] == "#" && (prev == " " || prev == "\t" || prev == ";" || prev == "&")) {
+        comment_pos = ci; break
+      }
+    }
+    grep_pos = index(full, "grep")
+    if (comment_pos > 0 && comment_pos < grep_pos) next
     print NR ":" full
     exit
   }
@@ -285,11 +324,20 @@ fi
 # Detection: 2-pass — (a) find grep lines whose pattern contains routing-marker regex
 # tokens (S[0-9]+, Track [0-9]+, Session N, Session [0-9]+, ## S[0-9]+); (b) exclude
 # lines where the pattern body starts with `^` anchor (whitelist).
+#
+# S319b lint-calibration: skip-marker support added. A file containing the line
+#   # bash-hook-lint:allow L-S53-2 <reason>
+# is explicitly ratified as a false-positive (content-search context / basename token /
+# free-form user-input where ^ anchor would be semantically wrong). Per L-S55-1: ratify
+# via detector-side skip-marker, not via comment on the grep line itself (which does
+# not silence the lint per the ratify-via-comment trap documented in § Risks & Gotchas).
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
     bn="$(basename "$f")"
     [ "$bn" = "bash-hook-lint.sh" ] && continue
+    # S319b lint-calibration: honour explicit skip-marker (ratified false-positive).
+    if grep -qE '^[[:space:]]*#[[:space:]]*bash-hook-lint:allow L-S53-2' "$f" 2>/dev/null; then continue; fi
     BAD_D="$(grep -nE "grep[[:space:]]+(-[a-zA-Z][a-zA-Z0-9]*[[:space:]]+)*['\"][^'\"]*(S\[0-9\]\+|Track[[:space:]]+\[0-9|Session[[:space:]]+(N|\[0-9)|## S\[0-9)" "$f" 2>/dev/null \
       | grep -vE "grep[[:space:]]+(-[a-zA-Z][a-zA-Z0-9]*[[:space:]]+)*['\"]\^" \
       | grep -vE '^[[:space:]]*[0-9]+:[[:space:]]*#' \
@@ -336,10 +384,10 @@ if [ -d "$HOOKS_DIR" ]; then
 BEGIN { pipefail_off = 1; carry = "" }
 {
   line = $0
-  # Match physical line ending with literal `\` (backslash continuation).
-  # /\\$/ in awk source = regex `\\` (literal backslash) + `$` (EOL anchor).
-  # Confirmed empirically: `awk '/\\$/'` matches lines ending with literal `\`.
-  if (line ~ /\\$/) {
+  # S319b lint-calibration: FIXED carry-line detection (same fix as Check 7).
+  # Was /\\$/ which on Windows/GNU-awk 5.3.2 matches any line containing "$"
+  # (dollar sign), not lines ending with literal backslash. Using substr instead.
+  if (length(line) > 0 && substr(line, length(line)) == "\\") {
     sub(/\\$/, "", line)
     carry = (carry == "" ? line : carry " " line)
     next
@@ -434,11 +482,11 @@ if [ -d "$HOOKS_DIR" ]; then
 fi
 
 # === Emit results ===
+# S318: fixed-name idempotent notification (per-fire timestamps caused 682-file spam); cleared when violations resolve. History stays in .session-hooks.log.
+NOTIF_FILE="$NOTIF_DIR/bash-hook-lint-warn.md"
 if [ "$VIOLATIONS" -gt 0 ]; then
   printf '[%s] bash-hook-lint WARN %d violation(s):\n%s' "$TS" "$VIOLATIONS" "$VIOLATION_LIST" >> "$LOG"
   if [ -d "$NOTIF_DIR" ]; then
-    TS_FILE="$(date -u +%Y%m%d-%H%M%S 2>/dev/null || echo unknown)"
-    NOTIF_FILE="$NOTIF_DIR/$TS_FILE-bash-hook-lint-warn.md"
     {
       printf '# bash-hook-lint — Warnings\n\n'
       printf 'Per L-S11-1 + L-S13-1 + S16 D-IDENTITY (S15 close user correction): %d violation(s) detected.\n\n' "$VIOLATIONS"
@@ -458,6 +506,7 @@ if [ "$VIOLATIONS" -gt 0 ]; then
   fi
 else
   printf '[%s] bash-hook-lint OK (0 violations)\n' "$TS" >> "$LOG"
+  rm -f "$NOTIF_FILE" 2>/dev/null || true
 fi
 
 exit 0

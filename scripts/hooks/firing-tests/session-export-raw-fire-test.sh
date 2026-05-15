@@ -192,7 +192,105 @@ if [ "$SESSION_N" != "0" ]; then
 fi
 echo "PASS TC7 (M-S53-2 regression): archive-prose 'S42 NEXT branching gate' does NOT match (^ anchor works)"
 
+# ============================================================
+# TC8-TC12: S321 IMPORTANT-2 — clean_text behavioral coverage
+# These TCs exercise the awk state machine directly via a
+# transcript that contains each edge-case shape. They verify
+# that the raw-session output file contains the expected text
+# (using the stub redact-secrets.sh that is a passthrough).
+# ============================================================
+
+# Helper: invoke hook and return raw-session content for given session_n
+get_raw_content() {
+  local transcript_content="$1"
+  local session_n="${2:-52}"
+  rm -f "$TEMPDIR/agent-workspace/raw-sessions/"*.md
+
+  printf '## S%s — test\n' "$session_n" > "$TEMPDIR/agent-workspace/memory/current-execution.md"
+  local transcript_path="$TEMPDIR/transcript_ct.jsonl"
+  printf '%s\n' "$transcript_content" > "$transcript_path"
+  local payload
+  payload=$(printf '{"transcript_path":"%s","session_id":"test-ct"}' "$transcript_path")
+  CLAUDE_PROJECT_DIR="$TEMPDIR" bash "$HOOK" <<< "$payload" >/dev/null 2>&1 || true
+
+  local raw_file="$TEMPDIR/agent-workspace/raw-sessions/${DATE_STR}-session-${session_n}.md"
+  if [ -f "$raw_file" ]; then
+    # Strip the YAML frontmatter (lines 1..5) and return the body
+    tail -n +6 "$raw_file"
+  else
+    echo "(raw file not created)"
+  fi
+}
+
+# TC8: normal multi-line tag — tag on its own line → [stripped]; surrounding plain text preserved
+CONTENT_TC8="$(printf 'line before tag\n<system-reminder>\ntag content hidden\n</system-reminder>\nline after tag\n')"
+OUT8="$(get_raw_content "$CONTENT_TC8" 53)"
+if printf '%s' "$OUT8" | grep -q 'tag content hidden'; then
+  echo "FAIL TC8: multi-line tag inner content should be stripped but found 'tag content hidden'"
+  exit 1
+fi
+if printf '%s' "$OUT8" | grep -q '\[stripped\]' && printf '%s' "$OUT8" | grep -q 'line before tag' && printf '%s' "$OUT8" | grep -q 'line after tag'; then
+  echo "PASS TC8: multi-line tag stripped; surrounding text preserved"
+else
+  echo "FAIL TC8: expected [stripped] + surrounding text; got: $OUT8"
+  exit 1
+fi
+
+# TC9: single-line tag — stripped inline, surrounding text preserved
+CONTENT_TC9="$(printf 'hello <command-name>foo-cmd</command-name> world\n')"
+OUT9="$(get_raw_content "$CONTENT_TC9" 54)"
+if printf '%s' "$OUT9" | grep -q 'foo-cmd'; then
+  echo "FAIL TC9: single-line tag inner content should be stripped but found 'foo-cmd'"
+  exit 1
+fi
+if printf '%s' "$OUT9" | grep -q 'hello \[stripped\] world'; then
+  echo "PASS TC9: single-line tag stripped in place; surrounding text preserved"
+else
+  echo "FAIL TC9: expected 'hello [stripped] world'; got: $OUT9"
+  exit 1
+fi
+
+# TC10 (IMPORTANT-2 fix a): same-line text before opening / after closing multi-line tag
+# Python re.sub: "line before [stripped] line after"
+CONTENT_TC10="$(printf 'line before <system-reminder>\nhidden content\n</system-reminder> line after\n')"
+OUT10="$(get_raw_content "$CONTENT_TC10" 55)"
+if printf '%s' "$OUT10" | grep -q 'hidden content'; then
+  echo "FAIL TC10: hidden content inside tag should be stripped"
+  exit 1
+fi
+if printf '%s' "$OUT10" | grep -q 'line before' && printf '%s' "$OUT10" | grep -q 'line after'; then
+  echo "PASS TC10 (fix-a): same-line text before opening and after closing preserved"
+else
+  echo "FAIL TC10: expected 'line before' AND 'line after' preserved; got: $OUT10"
+  exit 1
+fi
+
+# TC11 (IMPORTANT-2 fix b): mixed line — single-line tag followed by opening multi-line tag
+# Python re.sub: "mixed [stripped] then [stripped]\n[stripped]"
+CONTENT_TC11="$(printf 'mixed <command-name>x</command-name> then <system-reminder>\nmore content\n</system-reminder>\n')"
+OUT11="$(get_raw_content "$CONTENT_TC11" 56)"
+if printf '%s' "$OUT11" | grep -q 'more content'; then
+  echo "FAIL TC11: multi-line tag content should be stripped"
+  exit 1
+fi
+if printf '%s' "$OUT11" | grep -q 'mixed' && printf '%s' "$OUT11" | grep -q '\[stripped\]' && printf '%s' "$OUT11" | grep -q 'then'; then
+  echo "PASS TC11 (fix-b): mixed line: inline strip ran + surrounding text preserved"
+else
+  echo "FAIL TC11: expected 'mixed' + '[stripped]' + 'then'; got: $OUT11"
+  exit 1
+fi
+
+# TC12 (IMPORTANT-2 fix c): unclosed multi-line tag at EOF — should emit [stripped], not drop content
+CONTENT_TC12="$(printf 'normal line\nunclosed <task-notification>\nline after open tag\nEOF line\n')"
+OUT12="$(get_raw_content "$CONTENT_TC12" 57)"
+if printf '%s' "$OUT12" | grep -q '\[stripped\]'; then
+  echo "PASS TC12 (fix-c): unclosed tag at EOF emits [stripped] (no silent content loss)"
+else
+  echo "FAIL TC12: unclosed tag at EOF should emit [stripped]; got: $OUT12"
+  exit 1
+fi
+
 echo ""
-echo "=== ALL FIRING-TESTS PASSED (7/7) ==="
-echo "session-export-raw.sh M-S52-1 + M-S53-1 + M-S53-2 fix verified empirically."
+echo "=== ALL FIRING-TESTS PASSED (12/12) ==="
+echo "session-export-raw.sh M-S52-1 + M-S53-1 + M-S53-2 fix + S321 IMPORTANT-2 clean_text fix verified empirically."
 exit 0

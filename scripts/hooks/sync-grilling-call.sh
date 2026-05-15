@@ -40,6 +40,7 @@
 # Phase 0 portability per L-S11-1: bash + POSIX only.
 # Per L-S65-2 (harness priority #1) + L-S69-1 (2nd-instance promote): this wrapper is
 # the codification path; eliminates manual narrative backfill cycles.
+# bash-hook-lint:allow L-S53-2 grep targets decision_id variable content (e.g. "sync-grilling-S102"); S<N> appears mid-string after prefix; ^ anchor would never match.
 
 set -euo pipefail
 

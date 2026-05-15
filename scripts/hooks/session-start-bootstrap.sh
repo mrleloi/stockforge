@@ -10,6 +10,7 @@
 # Start-Process spawn truncates the SessionStart hook chain on Windows after the
 # spawning hook completes (S183 root-cause finding); placing the spawn LAST means
 # the truncation no longer suppresses any downstream chain hook.
+# bash-hook-lint:allow L-S53-2 grep targets awk-scoped section content (free-form markdown); ^ anchor wrong for Class B probe; see inline rationale lines 78-89.
 set -euo pipefail
 trap 'exit 0' ERR
 

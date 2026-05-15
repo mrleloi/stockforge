@@ -5,6 +5,7 @@
 # any future log/alert outputs.
 # Patterns covered: API keys (sk-/sk-ant-/AIza...), AWS access keys, Bearer tokens,
 # DB connection strings, SSH private keys, JWT tokens, generic 32+ hex secrets.
+# bash-hook-lint:allow L-S11-1 graceful degradation chain: python3 (primary) → node (fallback) → sed (Phase-0 floor; incomplete but functional for basic patterns).
 set -uo pipefail
 
 INPUT="$(cat)"
