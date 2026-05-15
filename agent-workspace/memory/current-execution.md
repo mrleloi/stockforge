@@ -160,6 +160,21 @@ User `continue` → checkpoint S322 → S323 (15 deep-dive returns landed across
 
 ---
 
+## S329 — W0-2.1 Python-determinism fixes SHIPPED — 2026-05-15
+
+sandwich-dev (fresh-context, this plan file). R1 (`datetime.now()` → `datetime.now(UTC)` at `sqlite_thesis_repository.py:206`) + R2 (`random.sample()` → `self.rng.sample()` with constructor-injected `random.Random` field at `capture_sentiment_snapshot_use_case.py:180`) fixed. 2 new tests added (DC5: `test_rebuild_thesis_fallback_uses_utc_aware_datetime` + `test_snapshot_sample_ids_deterministic_when_rng_seeded`). Gates: mypy --strict 0 errors (4 files); ruff 0 violations; pytest 90/90 PASS (baseline 88 + 2); `python-determinism-check.sh` OK (0 violations across 343 files); firing-test 12/12 PASS. Commit `510f533`. `python-determinism-warn.md` marked RESOLVED. No mistakes this session. **W0-2.1 DONE**. **Next**: S330 sandwich-verifier (AP-1) → DoD DC1-DC13 empirical check → plan 017 pending→completed → W0-3 (TradingAgents atomic temp-file-replace doctrine).
+
+**Wave 0 substrate progress** (updated):
+- W0-1: nautilus 8-state lifecycle FSM — SHIPPED S311, VERIFIED S314 PASS
+- W0-1b: re-escalation + col7 — SHIPPED S313, VERIFIED S314 PASS; L-S258-2 ROBUSTLY CLOSED
+- W0-2: Python determinism hook + ADR D-059 — SHIPPED S315, VERIFIED S316 PASS
+- **W0-2.1: Production cleanup (R1+R2 violations) — SHIPPED S329** (this session)
+- W0-3: TradingAgents atomic temp-file-replace doctrine — PENDING (after S330 verify)
+- W0-4: TradingAgents HTML-comment separator — PENDING
+- W0-5: Vibe-Trading path-safety quad — PENDING
+
+---
+
 ## S326 — Q-INT-bis ratified + L-S326-2 SHIPPED + S328 PLAN dispatched — 2026-05-15
 
 User chat 2026-05-15T15:30+07:00 "approved all your recommendation for all pendings item and blocking items. continue" → blanket-A on Q-INT-2026-05-5/6/7/8. D-061 PROPOSED → **ACCEPTED** + approval_chain entry; master plan `pending-ratification` → `ratified`; Q-INT-bis frontmatter `status: pending` → `answered-2026-05-15-via-chat-blanket-A` (auto-mv on next Stop). Commits: `2e77b1f` L-S326-2 (dispatch-jsonl-recorder sidecar close-the-loop; HH-6 root-cause companion to L-S326-1; firing-test 12/12 + lint clean + run-all 104/104) and `27967fb` S326-close ratification chain (Phase A synthesis 3 files / 1480 LOC, never-committed PLAN-tier work now persisted as audit anchor). **S327 RECOVERY SKIPPED** (blanket-A = no master-plan rework). **S328 PLAN dispatched** (`sandwich-architect` `ad236ac4f690e243b`, background) → output target `session-plans/pending/017-S329-wave-0-W0-2.1-python-determinism-fixes.md` per master plan § 6.2 (50-80K envelope; W0-2.1 = 2 pre-existing R1+R2 violations in `sqlite_thesis_repository.py` + `capture_sentiment_snapshot_use_case.py`). Coordination: main session avoids those 2 .py files + their tests + `python-determinism-warn.md` until plan returns. **Compliance**: harness_priority_one ✓ / AP-1 ✓ / dont_self_pause_at_session_boundary ✓ (dispatched S328 in-turn, did not idle on gate-resolve) / D-060 commits ✓ (2 commits, 0 push) / 0 charter / 0 constitution / no mistakes this session.
