@@ -33,7 +33,7 @@ echo '#!/usr/bin/env bash' > "$TEMPDIR/scripts/hooks/flagged-hook.sh"
 echo '#!/usr/bin/env bash' > "$TEMPDIR/scripts/hooks/safe-hook.sh"
 
 # Create fake bash-hook-lint-warn notification flagging flagged-hook.sh
-NOTIF_FILE="$TEMPDIR/human-workspace/notifications/20260509-120000-bash-hook-lint-warn.md"
+NOTIF_FILE="$TEMPDIR/human-workspace/notifications/bash-hook-lint-warn.md"
 cat > "$NOTIF_FILE" <<'EOF'
 # bash-hook-lint — Warnings
 

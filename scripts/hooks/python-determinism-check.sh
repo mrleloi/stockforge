@@ -223,9 +223,9 @@ if [ "$VIOLATIONS" -gt 0 ]; then
     "$TS" "$VIOLATIONS" "$VIOLATION_LIST" >> "$LOG"
 
   # Write notification for severity-classifier to pick up as HIGH
+  # S318: fixed-name idempotent notification (per-fire timestamps caused notifications/ spam). No auto-clear: dual-mode (PostToolUse single-file + Stop full-tree) + hour-bucket marker make VIOLATIONS==0 ambiguous.
   mkdir -p "$NOTIF_DIR" 2>/dev/null || true
-  local_TS_FILE="$(date -u +%Y%m%d-%H%M%S 2>/dev/null || echo unknown)"
-  NOTIF_FILE="$NOTIF_DIR/${local_TS_FILE}-python-determinism-warn.md"
+  NOTIF_FILE="$NOTIF_DIR/python-determinism-warn.md"
   {
     printf '# python-determinism-check — ALERT\n\n'
     printf 'Determinism violations detected: %d\n\n' "$VIOLATIONS"

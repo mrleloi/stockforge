@@ -105,10 +105,11 @@ fi
 
 echo "[$TS] working-memory-budget-audit: total=${TOTAL_BYTES}B ceiling=${CEILING_BYTES}B over_budget=${OVER_BUDGET} source=$SOURCE missing_count=${MISSING_COUNT}" >> "$HOOK_LOG"
 
+# S318: fixed-name idempotent notification (was date-bucketed); cleared when budget back under ceiling.
+NOTIF_FILE="$NOTIF_DIR/working-memory-budget-OVER.md"
 if [ "$OVER_BUDGET" -eq 1 ]; then
   OVER_BY=$((TOTAL_BYTES - CEILING_BYTES))
   PCT_OVER=$((OVER_BY * 100 / CEILING_BYTES))
-  NOTIF_FILE="$NOTIF_DIR/working-memory-budget-OVER-$(date +%Y-%m-%d 2>/dev/null || echo unknown).md"
   {
     echo "# Working-memory budget exceeded — $TS"
     echo ""
@@ -146,6 +147,8 @@ process.stdout.write(JSON.stringify({
 }));
 " "$CTX" 2>/dev/null || true
   fi
+else
+  rm -f "$NOTIF_FILE" 2>/dev/null || true
 fi
 
 exit 0

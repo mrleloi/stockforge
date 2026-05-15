@@ -97,7 +97,7 @@ if grep -q "learning-loop-metric-check WARN" "$LOG"; then
   exit 1
 fi
 NOTIF_COUNT=0
-NOTIF_COUNT=$(find "$NOTIF_DIR" -name '*-loop-metric-check-warn.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
+NOTIF_COUNT=$(find "$NOTIF_DIR" -name 'loop-metric-check-warn.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
 if [ "$NOTIF_COUNT" -ne 0 ]; then
   echo "FAIL TC3: notif should NOT be written when 0 violations"
   ls -la "$NOTIF_DIR"
@@ -134,7 +134,7 @@ if ! grep -q "2026-05-06-bad-experiment-frame.md" "$LOG"; then
   exit 1
 fi
 NOTIF_COUNT=0
-NOTIF_COUNT=$(find "$NOTIF_DIR" -name '*-loop-metric-check-warn.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
+NOTIF_COUNT=$(find "$NOTIF_DIR" -name 'loop-metric-check-warn.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
 if [ "$NOTIF_COUNT" -lt 1 ]; then
   echo "FAIL TC4: notif file should be written when violations > 0"
   ls -la "$NOTIF_DIR" 2>/dev/null
@@ -172,7 +172,7 @@ if ! grep -q "missing or placeholder metric_function" "$LOG"; then
   exit 1
 fi
 NOTIF_COUNT=0
-NOTIF_COUNT=$(find "$NOTIF_DIR" -name '*-loop-metric-check-warn.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
+NOTIF_COUNT=$(find "$NOTIF_DIR" -name 'loop-metric-check-warn.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
 if [ "$NOTIF_COUNT" -lt 1 ]; then
   echo "FAIL TC5: notif file should be written for placeholder violation"
   ls -la "$NOTIF_DIR" 2>/dev/null

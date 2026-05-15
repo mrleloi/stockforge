@@ -8,7 +8,7 @@
 #
 # Behavior on breach: WARN to log + notification + additionalContext. Always exit 0.
 #
-# Test cases (8 TC):
+# Test cases (9 TC):
 #   TC1 — clean state under budget (15 KB total) → over_budget=0, no notification
 #   TC2 — breach: total > 20480 (e.g. 22 KB) → over_budget=1, notification + ctx
 #   TC3 — boundary EXACTLY 20480 → over_budget=0 (strict greater-than)
@@ -19,6 +19,7 @@
 #   TC7 — source=PreCompact → exit 0 no-op skip line in log
 #   TC8 — single oversized file (25 KB checkpoint alone) → over_budget=1; notification
 #         per-file breakdown lists exact byte counts
+#   TC9 — clear-on-resolve: breach notification removed when budget returns under ceiling (S318)
 #
 # Exit 0 = all pass. Exit 1 = any fail.
 set -uo pipefail
@@ -37,7 +38,7 @@ CHECKPOINT_DIR="$MEM_DIR/checkpoints"
 CHECKPOINT="$CHECKPOINT_DIR/latest.md"
 ROUTING_CONFIG="$MEM_DIR/routing-config.md"
 LOG="$MEM_DIR/.session-hooks.log"
-NOTIF_FILE="$NOTIF_DIR/working-memory-budget-OVER-$(date +%Y-%m-%d 2>/dev/null || echo unknown).md"
+NOTIF_FILE="$NOTIF_DIR/working-memory-budget-OVER.md"
 
 clean_state() {
   rm -rf "$TEMPDIR/agent-workspace" "$TEMPDIR/human-workspace"
@@ -268,5 +269,27 @@ if ! grep -q "checkpoints/latest.md | 25000" "$NOTIF_FILE"; then
 fi
 echo "PASS TC8: single oversized checkpoint 25000B → breach detected + per-file breakdown lists 25000B"
 
-echo "ALL PASS (8/8)"
+# --- TC9: clear-on-resolve — notification removed when budget returns under ceiling (S318) ---
+clean_state
+make_bytes 2000  "$BOOT_SUMMARY"
+make_bytes 10000 "$CHECKPOINT"
+make_bytes 10000 "$ROUTING_CONFIG"   # 22 KB → breach
+run_hook_default
+TC9_MID=0
+[ -f "$NOTIF_FILE" ] && TC9_MID=1
+# Shrink files back under budget IN PLACE (no clean_state — must preserve notif to test removal)
+make_bytes 1500 "$BOOT_SUMMARY"
+make_bytes 7000 "$CHECKPOINT"
+make_bytes 6500 "$ROUTING_CONFIG"    # 15 KB → under ceiling
+run_hook_default
+TC9_AFTER=0
+[ -f "$NOTIF_FILE" ] && TC9_AFTER=1
+if [ "$TC9_MID" -eq 1 ] && [ "$TC9_AFTER" -eq 0 ]; then
+  echo "PASS TC9: clear-on-resolve — notification removed when budget back under ceiling"
+else
+  echo "FAIL TC9: mid=$TC9_MID after=$TC9_AFTER (expected 1/0)"
+  exit 1
+fi
+
+echo "ALL PASS (9/9)"
 exit 0

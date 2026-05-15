@@ -230,7 +230,7 @@ cat > "$HOOKS_TEST_DIR/buggy-glob3.sh" <<'EOF'
 ADR_COUNT=$(find "$DECISIONS_DIR" -maxdepth 1 -name 'D-*.md' | wc -l)
 EOF
 run_lint
-NOTIF_COUNT=$(find "$NOTIF_DIR" -maxdepth 1 -name 'N-*-INFO-file-pattern-lint.md' 2>/dev/null | wc -l | tr -d '[:space:]')
+NOTIF_COUNT=$(find "$NOTIF_DIR" -maxdepth 1 -name 'N-INFO-file-pattern-lint.md' 2>/dev/null | wc -l | tr -d '[:space:]')
 if [ "${NOTIF_COUNT:-0}" -ge 1 ]; then
   echo "  TC TC11-notification-on-violation: PASS"; PASS=$((PASS+1))
 else

@@ -83,8 +83,9 @@ fi
 VCOUNT="${#VIOLATIONS[@]}"
 echo "[$TS] essential-routing-fields-verifier: violations=$VCOUNT source=$SOURCE" >> "$HOOK_LOG"
 
+# S318: fixed-name idempotent notification (was date-bucketed — twin of working-memory-budget-audit); cleared when routing fields present.
+NOTIF_FILE="$NOTIF_DIR/essential-routing-fields-MISSING.md"
 if [ "$VCOUNT" -gt 0 ]; then
-  NOTIF_FILE="$NOTIF_DIR/essential-routing-fields-MISSING-$(date +%Y-%m-%d 2>/dev/null || echo unknown).md"
   {
     echo "# Essential routing field(s) missing — $TS"
     echo ""
@@ -119,6 +120,8 @@ process.stdout.write(JSON.stringify({
 }));
 " "$CTX" 2>/dev/null || true
   fi
+else
+  rm -f "$NOTIF_FILE" 2>/dev/null || true
 fi
 
 exit 0

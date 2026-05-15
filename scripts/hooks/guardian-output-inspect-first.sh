@@ -57,10 +57,10 @@ case "$NORM" in
 esac
 BN="$(basename "$NORM")"
 
-# Find latest bash-hook-lint-warn notification (sorted by mtime descending)
+# Find the bash-hook-lint-warn notification (S318: fixed-name idempotent file — was per-fire timestamped)
 LATEST_NOTIF=""
 if [ -d "$NOTIF_DIR" ]; then
-  LATEST_NOTIF=$(ls -t "$NOTIF_DIR"/*-bash-hook-lint-warn.md 2>/dev/null | head -1 || true)
+  LATEST_NOTIF=$(ls -t "$NOTIF_DIR"/bash-hook-lint-warn.md 2>/dev/null | head -1 || true)
 fi
 [ -z "$LATEST_NOTIF" ] && exit 0
 [ ! -f "$LATEST_NOTIF" ] && exit 0

@@ -106,9 +106,9 @@ fi
 printf '{"as_of":"%s","events_at_build":%d,"sample_lines":%d}\n' \
   "$TS" "$EVENTS_TOTAL" "$(wc -l < "$SAMPLE" 2>/dev/null | tr -d '[:space:]' || echo 0)" > "$STATE_FILE"
 
+# S318: fixed-name idempotent notification (per-fire timestamps caused 92-file spam); overwritten each rebuild — event signal, agent consumes + deletes (no auto-clear).
 if [ "$EVENTS_DELTA" -ge "$N_EVENTS_THRESHOLD" ] && [ -d "$NOTIF_DIR" ]; then
-  TS_FILE="$(date -u +%Y%m%d-%H%M%S 2>/dev/null || echo unknown)"
-  NOTIF_FILE="$NOTIF_DIR/$TS_FILE-learning-analysis-ready.md"
+  NOTIF_FILE="$NOTIF_DIR/learning-analysis-ready.md"
   {
     printf '# Background Learning Analysis Ready\n\n'
     printf 'Index rebuilt at %s (Stop hook).\n\n' "$TS"

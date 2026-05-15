@@ -169,7 +169,7 @@ if ! grep -q '"total_events":5' "$MANIFEST"; then
 fi
 # notif file written when delta >= threshold AND NOTIF_DIR exists
 NOTIF_COUNT=0
-NOTIF_COUNT=$(find "$NOTIF_DIR" -name '*-learning-analysis-ready.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
+NOTIF_COUNT=$(find "$NOTIF_DIR" -name 'learning-analysis-ready.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
 if [ "$NOTIF_COUNT" -lt 1 ]; then
   echo "FAIL TC3: notification file should be written when delta >= threshold"
   ls -la "$NOTIF_DIR" 2>/dev/null
@@ -206,7 +206,7 @@ if ! grep -q '"events_at_build":0' "$STATE_FILE"; then
 fi
 sleep 1
 NOTIF_COUNT=0
-NOTIF_COUNT=$(find "$NOTIF_DIR" -name '*-learning-analysis-ready.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
+NOTIF_COUNT=$(find "$NOTIF_DIR" -name 'learning-analysis-ready.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
 if [ "$NOTIF_COUNT" -ne 0 ]; then
   echo "FAIL TC4: notif should NOT be written when delta < threshold (delta=0, threshold=100)"
   ls -la "$NOTIF_DIR" 2>/dev/null

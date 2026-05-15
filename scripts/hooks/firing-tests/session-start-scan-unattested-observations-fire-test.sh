@@ -63,23 +63,29 @@ PAYLOAD_RESUME='{"hook_event_name":"SessionStart","source":"resume","session_id"
 PAYLOAD_OTHER='{"hook_event_name":"SessionStart","source":"compact","session_id":"test-sess"}'
 
 # ----------------------------------------------------------------------
-# TC1 — single unattested obs → registry row + notification + WARN to stderr
-# (TC1 uses direct bash invocation to capture stderr; run_hook suppresses it)
+# TC1 — unattested obs WITH an ORPHANED registry row → notification + ALERT to stderr
+# Post-W0-1-FSM (S311/S313, VERIFIED S312/S314): the hook ALERTs only for state=ORPHANED
+# rows; a fresh legacy row defaults to SIDECAR_ATTESTED → no alert. So an ORPHANED row
+# must pre-exist for the notification path to fire. (S318: TC1 realigned to FSM semantics —
+# pre-S318 it expected a notif from a non-ORPHANED fixture, which was the 102/103 red.)
 # ----------------------------------------------------------------------
 setup_sandbox
 make_obs "sandwich-dev-S99-tc1"
+# Pre-seed registry with a 7-col ORPHANED-state row (W0-1b schema: col6=state).
+printf 'detected_ts\tsession_id\tobservation_basename\tmarker_present\tlog_row_present\tstate\tlast_transition_at\n' > "$REGISTRY"
+printf '2026-05-01T00:00:00Z\told-sess\tsandwich-dev-S99-tc1\t0\t0\tORPHANED\t2026-05-01T00:00:00Z\n' >> "$REGISTRY"
 STDERR="$(CLAUDE_PROJECT_DIR="$PROJECT_DIR" CLAUDE_SESSION_ID="test-sess-tc1" \
   bash "$HOOK" <<< "$PAYLOAD_STARTUP" 2>&1 >/dev/null || true)"
 REG_ROWS="$(grep -c "sandwich-dev-S99-tc1" "$REGISTRY" 2>/dev/null || true)"
 REG_ROWS="${REG_ROWS:-0}"
-NOTIF_COUNT="$(ls "$NOTIF_DIR"/*-unattested-observations.md 2>/dev/null | wc -l || true)"
+NOTIF_COUNT="$(ls "$NOTIF_DIR"/unattested-observations.md 2>/dev/null | wc -l || true)"
 NOTIF_COUNT="${NOTIF_COUNT:-0}"
-WARN_HIT="$(printf '%s' "$STDERR" | grep -c 'WARN.*unattested' 2>/dev/null || true)"
-WARN_HIT="${WARN_HIT:-0}"
-if [ "$REG_ROWS" -eq 1 ] && [ "$NOTIF_COUNT" -eq 1 ] && [ "$WARN_HIT" -ge 1 ]; then
-  assert_pass "single unattested → registry row + notification + WARN stderr" "1"
+ALERT_HIT="$(printf '%s' "$STDERR" | grep -c 'ALERT.*ORPHANED' 2>/dev/null || true)"
+ALERT_HIT="${ALERT_HIT:-0}"
+if [ "$REG_ROWS" -eq 1 ] && [ "$NOTIF_COUNT" -eq 1 ] && [ "$ALERT_HIT" -ge 1 ]; then
+  assert_pass "unattested obs + ORPHANED registry row → notification + ALERT stderr" "1"
 else
-  assert_fail "TC1: reg_rows=$REG_ROWS notif=$NOTIF_COUNT warn=$WARN_HIT (expected 1/1/≥1)" "1"
+  assert_fail "TC1: reg_rows=$REG_ROWS notif=$NOTIF_COUNT alert=$ALERT_HIT (expected 1/1/≥1)" "1"
 fi
 
 # ----------------------------------------------------------------------
@@ -91,7 +97,7 @@ touch "$MEMORY_DIR/.attestation-checked-sandwich-dev-S99-tc2"
 run_hook "$PAYLOAD_STARTUP" >/dev/null 2>&1
 REG_ROWS="$(grep -c "sandwich-dev-S99-tc2" "$REGISTRY" 2>/dev/null || true)"
 REG_ROWS="${REG_ROWS:-0}"
-NOTIF_COUNT="$(ls "$NOTIF_DIR"/*-unattested-observations.md 2>/dev/null | wc -l || true)"
+NOTIF_COUNT="$(ls "$NOTIF_DIR"/unattested-observations.md 2>/dev/null | wc -l || true)"
 NOTIF_COUNT="${NOTIF_COUNT:-0}"
 if [ "$REG_ROWS" -eq 0 ] && [ "$NOTIF_COUNT" -eq 0 ]; then
   assert_pass "obs with marker → not flagged (attested)" "2"
@@ -109,7 +115,7 @@ printf '2026-05-06T00:00:00Z\tsandwich-dev-S99-tc3\t10\t10\t0\tPASS\n' >> "$ATTE
 run_hook "$PAYLOAD_STARTUP" >/dev/null 2>&1
 REG_ROWS="$(grep -c "sandwich-dev-S99-tc3" "$REGISTRY" 2>/dev/null || true)"
 REG_ROWS="${REG_ROWS:-0}"
-NOTIF_COUNT="$(ls "$NOTIF_DIR"/*-unattested-observations.md 2>/dev/null | wc -l || true)"
+NOTIF_COUNT="$(ls "$NOTIF_DIR"/unattested-observations.md 2>/dev/null | wc -l || true)"
 NOTIF_COUNT="${NOTIF_COUNT:-0}"
 if [ "$REG_ROWS" -eq 0 ] && [ "$NOTIF_COUNT" -eq 0 ]; then
   assert_pass "obs with attestation-log row → not flagged (attested)" "3"
@@ -125,7 +131,7 @@ make_obs "sandwich-dev-S99-tc4"
 STOCKFORGE_UNATTESTED_SCAN_DISABLE=1 run_hook "$PAYLOAD_STARTUP" >/dev/null 2>&1
 REG_EXISTS="0"
 if [ -f "$REGISTRY" ]; then REG_EXISTS="1"; fi
-NOTIF_COUNT="$(ls "$NOTIF_DIR"/*-unattested-observations.md 2>/dev/null | wc -l || true)"
+NOTIF_COUNT="$(ls "$NOTIF_DIR"/unattested-observations.md 2>/dev/null | wc -l || true)"
 NOTIF_COUNT="${NOTIF_COUNT:-0}"
 if [ "$REG_EXISTS" = "0" ] && [ "$NOTIF_COUNT" -eq 0 ]; then
   assert_pass "kill switch → no scan, no registry, no notification" "4"
@@ -141,7 +147,7 @@ make_obs "sandwich-dev-S99-tc5"
 run_hook "$PAYLOAD_OTHER" >/dev/null 2>&1
 REG_EXISTS="0"
 if [ -f "$REGISTRY" ]; then REG_EXISTS="1"; fi
-NOTIF_COUNT="$(ls "$NOTIF_DIR"/*-unattested-observations.md 2>/dev/null | wc -l || true)"
+NOTIF_COUNT="$(ls "$NOTIF_DIR"/unattested-observations.md 2>/dev/null | wc -l || true)"
 NOTIF_COUNT="${NOTIF_COUNT:-0}"
 if [ "$REG_EXISTS" = "0" ] && [ "$NOTIF_COUNT" -eq 0 ]; then
   assert_pass "source=compact → hook exits without scan" "5"
@@ -205,7 +211,7 @@ setup_sandbox
 # OBS_DIR exists but empty
 run_hook "$PAYLOAD_STARTUP" >/dev/null 2>&1
 EXIT_CODE=$?
-NOTIF_COUNT="$(ls "$NOTIF_DIR"/*-unattested-observations.md 2>/dev/null | wc -l || true)"
+NOTIF_COUNT="$(ls "$NOTIF_DIR"/unattested-observations.md 2>/dev/null | wc -l || true)"
 NOTIF_COUNT="${NOTIF_COUNT:-0}"
 if [ "$EXIT_CODE" -eq 0 ] && [ "$NOTIF_COUNT" -eq 0 ]; then
   assert_pass "empty observations dir → exit 0, no notification" "8"

@@ -171,10 +171,10 @@ done
   fi
 } >> "$LOG" 2>/dev/null || true
 
+# S318: fixed-name idempotent notification (per-fire timestamps are the notification-spam anti-pattern); cleared when violations resolve.
+NOTIF_FILE="$NOTIF_DIR/N-INFO-file-pattern-lint.md"
 if [ "$VIOLATIONS" -gt 0 ]; then
   mkdir -p "$NOTIF_DIR" 2>/dev/null || true
-  TS_FILE="$(date '+%Y%m%dT%H%M%SZ' 2>/dev/null || echo unknown)"
-  NOTIF_FILE="$NOTIF_DIR/N-${TS_FILE}-INFO-file-pattern-lint.md"
   {
     echo "# File-pattern-lint violations — $TS"
     echo
@@ -186,6 +186,8 @@ if [ "$VIOLATIONS" -gt 0 ]; then
     echo
     printf '%s' "$VIOLATION_LIST"
   } > "$NOTIF_FILE" 2>/dev/null || true
+else
+  rm -f "$NOTIF_FILE" 2>/dev/null || true
 fi
 
 exit 0

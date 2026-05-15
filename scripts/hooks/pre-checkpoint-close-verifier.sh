@@ -100,10 +100,11 @@ while IFS= read -r line; do
   fi
 done <<< "$GIT_STATUS"
 
+# S318: fixed-name idempotent notification (per-fire timestamps caused 203-file spam); cleared when checkpoint is consistent.
+NOTIF_FILE="$NOTIF_DIR/checkpoint-mentions-incomplete.md"
 if [ "$UNMENTIONED_COUNT" -ge 1 ]; then
   TS="$(date -u +%FT%TZ 2>/dev/null || true)"
   mkdir -p "$NOTIF_DIR" 2>/dev/null || true
-  NOTIF_FILE="$NOTIF_DIR/${TS//[:.]/-}-checkpoint-mentions-incomplete.md"
   {
     printf '# Checkpoint mentions incomplete (L-S67-5 / M-S67-3 prevention)\n\n'
     printf '**Detected at**: %s (Stop hook)\n' "$TS"
@@ -122,6 +123,8 @@ if [ "$UNMENTIONED_COUNT" -ge 1 ]; then
   } > "$NOTIF_FILE"
   printf 'WARN: %d unmentioned git-status entry(ies) in checkpoint — see %s\n' \
     "$UNMENTIONED_COUNT" "$NOTIF_FILE" >&2
+else
+  rm -f "$NOTIF_FILE" 2>/dev/null || true
 fi
 
 # === D3 FSM check: refuse checkpoint close if any OBSERVATION_WRITTEN row for current session ===
@@ -150,10 +153,11 @@ if [ -f "$REGISTRY" ] && [ -n "$CURRENT_SESSION" ]; then
   done < "$REGISTRY"
 fi
 
+# S318: fixed-name idempotent notification; cleared when no OBSERVATION_WRITTEN rows pending.
+NOTIF_FILE2="$NOTIF_DIR/checkpoint-obs-written-block.md"
 if [ "$OBS_WRITTEN_COUNT" -ge 1 ]; then
   TS2="$(date -u +%FT%TZ 2>/dev/null || true)"
   mkdir -p "$NOTIF_DIR" 2>/dev/null || true
-  NOTIF_FILE2="$NOTIF_DIR/${TS2//[:.]/-}-checkpoint-obs-written-block.md"
   {
     printf '# WARN: Checkpoint close blocked — OBSERVATION_WRITTEN rows pending attestation\n\n'
     printf '**Detected at**: %s (Stop hook pre-checkpoint-close-verifier)\n' "$TS2"
@@ -172,6 +176,8 @@ if [ "$OBS_WRITTEN_COUNT" -ge 1 ]; then
   } > "$NOTIF_FILE2"
   printf 'WARN: %d OBSERVATION_WRITTEN row(s) pending attestation for session %s — see %s\n' \
     "$OBS_WRITTEN_COUNT" "$CURRENT_SESSION" "$NOTIF_FILE2" >&2
+else
+  rm -f "$NOTIF_FILE2" 2>/dev/null || true
 fi
 
 exit 0

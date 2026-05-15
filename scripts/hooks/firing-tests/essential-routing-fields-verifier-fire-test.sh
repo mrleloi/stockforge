@@ -34,7 +34,7 @@ MEM_DIR="$TEMPDIR/agent-workspace/memory"
 NOTIF_DIR="$TEMPDIR/human-workspace/notifications"
 EXEC_FILE="$MEM_DIR/current-execution.md"
 LOG="$MEM_DIR/.session-hooks.log"
-NOTIF_FILE="$NOTIF_DIR/essential-routing-fields-MISSING-$(date +%Y-%m-%d 2>/dev/null || echo unknown).md"
+NOTIF_FILE="$NOTIF_DIR/essential-routing-fields-MISSING.md"
 
 clean_state() {
   rm -rf "$TEMPDIR/agent-workspace" "$TEMPDIR/human-workspace"

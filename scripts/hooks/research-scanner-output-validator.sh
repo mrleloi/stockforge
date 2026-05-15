@@ -49,12 +49,12 @@ while IFS= read -r -d '' file; do
   fi
 done < <(find "$DOGFOOD_DIR" -name 'agent-pick-*-research-report-*.md' -type f -print0 2>/dev/null)
 
+# S318: fixed-name idempotent notification (per-fire timestamps are the notification-spam anti-pattern); cleared when violations resolve.
+NOTIF_FILE="$NOTIF_DIR/research-scanner-validator-warn.md"
 if [ "$VIOLATIONS" -gt 0 ]; then
   printf '[%s] research-scanner-output-validator WARN %d report(s) missing discipline elements:\n%s' \
     "$TS" "$VIOLATIONS" "$VIOLATION_LIST" >> "$LOG"
   if [ -d "$NOTIF_DIR" ]; then
-    TS_FILE="$(date -u +%Y%m%d-%H%M%S 2>/dev/null || echo unknown)"
-    NOTIF_FILE="$NOTIF_DIR/$TS_FILE-research-scanner-validator-warn.md"
     {
       printf '# Research-Scanner Output Validator — Warnings\n\n'
       printf 'Per L-S12-2 (agent-notes 2026-04-29): every research-scanner dispatch output MUST include picked + as_of frontmatter, Adversarial Bear Case section, Provenance Log section.\n\n'
@@ -65,6 +65,7 @@ if [ "$VIOLATIONS" -gt 0 ]; then
   fi
 else
   printf '[%s] research-scanner-output-validator OK (0 violations)\n' "$TS" >> "$LOG"
+  rm -f "$NOTIF_FILE" 2>/dev/null || true
 fi
 
 exit 0

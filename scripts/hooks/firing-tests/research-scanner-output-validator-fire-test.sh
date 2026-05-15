@@ -106,7 +106,7 @@ if grep -q "research-scanner-output-validator WARN" "$LOG"; then
   exit 1
 fi
 NOTIF_COUNT=0
-NOTIF_COUNT=$(find "$NOTIF_DIR" -name '*-research-scanner-validator-warn.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
+NOTIF_COUNT=$(find "$NOTIF_DIR" -name 'research-scanner-validator-warn.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
 if [ "$NOTIF_COUNT" -ne 0 ]; then
   echo "FAIL TC3: notif should NOT be written when 0 violations"
   ls -la "$NOTIF_DIR"
@@ -151,7 +151,7 @@ if ! grep -q "agent-pick-2-research-report-2026-05-06.md" "$LOG"; then
   exit 1
 fi
 NOTIF_COUNT=0
-NOTIF_COUNT=$(find "$NOTIF_DIR" -name '*-research-scanner-validator-warn.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
+NOTIF_COUNT=$(find "$NOTIF_DIR" -name 'research-scanner-validator-warn.md' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
 if [ "$NOTIF_COUNT" -lt 1 ]; then
   echo "FAIL TC4: notif file should be written when violations > 0"
   ls -la "$NOTIF_DIR" 2>/dev/null

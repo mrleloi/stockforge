@@ -109,9 +109,10 @@ if [ "$UNATTESTED_COUNT" -ge 1 ]; then
   done < "$REGISTRY"
 fi
 
+# S318: fixed-name idempotent notification (per-fire timestamps caused 162-file spam); cleared when no ORPHANED rows.
+NOTIF_FILE="$NOTIF_DIR/unattested-observations.md"
 if [ "$ORPHANED_COUNT" -ge 1 ]; then
   mkdir -p "$NOTIF_DIR" 2>/dev/null || true
-  NOTIF_FILE="$NOTIF_DIR/${TS//[:.]/-}-unattested-observations.md"
   {
     printf '# ALERT: Orphaned sandwich-dev observations (FSM state=ORPHANED)\n\n'
     printf '**Detected at**: %s (SessionStart scan)\n' "$TS"
@@ -134,6 +135,9 @@ elif [ "$UNATTESTED_COUNT" -ge 1 ]; then
   # Non-orphaned unattested rows: still log to registry (for audit trail) but do NOT alert
   printf 'INFO: %d unattested sandwich-dev observation(s) in registry (non-ORPHANED states, no alert)\n' \
     "$UNATTESTED_COUNT" >&2
+  rm -f "$NOTIF_FILE" 2>/dev/null || true
+else
+  rm -f "$NOTIF_FILE" 2>/dev/null || true
 fi
 
 exit 0

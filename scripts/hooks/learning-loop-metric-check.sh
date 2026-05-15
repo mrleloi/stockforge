@@ -52,12 +52,12 @@ if [ -d "$LOOP_DIR" ]; then
   done < <(find "$LOOP_DIR" -name '*-experiment-frame.md' -type f -print0 2>/dev/null)
 fi
 
+# S318: fixed-name idempotent notification (per-fire timestamps are the notification-spam anti-pattern); cleared when violations resolve.
+NOTIF_FILE="$NOTIF_DIR/loop-metric-check-warn.md"
 if [ "$VIOLATIONS" -gt 0 ]; then
   printf '[%s] learning-loop-metric-check WARN %d framing(s) without metric_function:\n%s' \
     "$TS" "$VIOLATIONS" "$VIOLATION_LIST" >> "$LOG"
   if [ -d "$NOTIF_DIR" ]; then
-    TS_FILE="$(date -u +%Y%m%d-%H%M%S 2>/dev/null || echo unknown)"
-    NOTIF_FILE="$NOTIF_DIR/$TS_FILE-loop-metric-check-warn.md"
     {
       printf '# Learning-Loop Metric-Function Check — Warnings\n\n'
       printf 'Per L-S12-1 (agent-notes 2026-04-29): every Karpathy framing artifact MUST cite a deterministic metric function.\n\n'
@@ -68,6 +68,7 @@ if [ "$VIOLATIONS" -gt 0 ]; then
   fi
 else
   printf '[%s] learning-loop-metric-check OK (0 violations)\n' "$TS" >> "$LOG"
+  rm -f "$NOTIF_FILE" 2>/dev/null || true
 fi
 
 exit 0

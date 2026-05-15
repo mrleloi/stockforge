@@ -49,7 +49,7 @@ setup_sandbox() {
 count_notif() {
   local count=0
   local f
-  for f in "$NOTIF_DIR"/*-checkpoint-mentions-incomplete.md; do
+  for f in "$NOTIF_DIR"/checkpoint-mentions-incomplete.md; do
     if [ -f "$f" ]; then
       count=$((count+1))
     fi
@@ -106,7 +106,7 @@ N="${N:-0}"
 WARN_HIT="$(printf '%s' "$STDERR" | grep -c 'WARN.*unmentioned' 2>/dev/null || true)"
 WARN_HIT="${WARN_HIT:-0}"
 if [ "$N" -eq 1 ] && [ "$WARN_HIT" -ge 1 ]; then
-  CONTENT="$(cat "$NOTIF_DIR"/*-checkpoint-mentions-incomplete.md 2>/dev/null)"
+  CONTENT="$(cat "$NOTIF_DIR"/checkpoint-mentions-incomplete.md 2>/dev/null)"
   if printf '%s' "$CONTENT" | grep -qF "unmentioned_file.py"; then
     assert_pass "checkpoint omits entry → notification names omitted file + WARN stderr" "2"
   else
@@ -191,7 +191,7 @@ N="${N:-0}"
 # hook actually fired. Whitelist should skip ALL the auto-files → 0 unmentioned → 0 notif.
 # The "some-notif.md" we pre-seeded is also in human-workspace/notifications/ which IS
 # whitelisted, so does NOT count toward unmentioned. Final notif count should be 0.
-WHITELISTED_NOTIFS="$(ls "$NOTIF_DIR"/*-checkpoint-mentions-incomplete.md 2>/dev/null | wc -l || true)"
+WHITELISTED_NOTIFS="$(ls "$NOTIF_DIR"/checkpoint-mentions-incomplete.md 2>/dev/null | wc -l || true)"
 WHITELISTED_NOTIFS="${WHITELISTED_NOTIFS:-0}"
 if [ "$WHITELISTED_NOTIFS" -eq 0 ]; then
   assert_pass "whitelist auto-paths (indexes/learning-data/raw-sessions/notifications) → no notification" "6"
@@ -215,7 +215,7 @@ if [ "$N" -eq 0 ]; then
   assert_pass "extra whitelist via env → custom path skipped" "7"
 else
   # If a notif WAS generated, check it doesn't include custom_skip.txt
-  CONTENT="$(cat "$NOTIF_DIR"/*-checkpoint-mentions-incomplete.md 2>/dev/null)"
+  CONTENT="$(cat "$NOTIF_DIR"/checkpoint-mentions-incomplete.md 2>/dev/null)"
   if printf '%s' "$CONTENT" | grep -qF "custom_skip.txt"; then
     assert_fail "TC7: extra whitelist not honored (custom_skip.txt still in notif)" "7"
   else
@@ -237,6 +237,27 @@ if [ "$EC" -eq 0 ] && [ "$N" -eq 0 ]; then
   assert_pass "clean working tree → exit 0, no notification" "8"
 else
   assert_fail "TC8: exit=$EC notif=$N (expected 0/0)" "8"
+fi
+
+# ----------------------------------------------------------------------
+# TC9 — clear-on-resolve: fixed-name notification removed when checkpoint becomes consistent (S318)
+# ----------------------------------------------------------------------
+setup_sandbox
+write_session_ready
+echo "p1" > "$PROJECT_DIR/orphan_file.py"
+write_checkpoint "checkpoint omits the file entirely"
+CLAUDE_PROJECT_DIR="$PROJECT_DIR" bash "$HOOK" <<< "$PAYLOAD_STOP" 2>/dev/null
+N_BEFORE="$(count_notif)"
+N_BEFORE="${N_BEFORE:-0}"
+# Author a consistent checkpoint + re-run → the fixed-name notification must be removed
+write_checkpoint "checkpoint now mentions orphan_file.py explicitly"
+CLAUDE_PROJECT_DIR="$PROJECT_DIR" bash "$HOOK" <<< "$PAYLOAD_STOP" 2>/dev/null
+N_AFTER="$(count_notif)"
+N_AFTER="${N_AFTER:-0}"
+if [ "$N_BEFORE" -eq 1 ] && [ "$N_AFTER" -eq 0 ]; then
+  assert_pass "clear-on-resolve → notification removed once checkpoint is consistent" "9"
+else
+  assert_fail "TC9: n_before=$N_BEFORE n_after=$N_AFTER (expected 1/0)" "9"
 fi
 
 # ----------------------------------------------------------------------
