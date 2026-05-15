@@ -99,10 +99,20 @@ done <<< "$ZERO_CLAIMS"
 
 if [ "$DIVERGENCE_COUNT" -gt 0 ]; then
   echo "[$(date -Iseconds 2>/dev/null || date)] adr-empirical-spot-check: $DIVERGENCE_COUNT divergence(s) in $ADR_ID — see $LOG" >> "$HOOK_LOG"
-  # Emit system-reminder (stdout JSON for Stop hook surface; falls back to stderr WARN).
-  cat <<JSON 2>/dev/null || printf '[adr-empirical-spot-check] WARN: %d divergence(s) in %s; see %s\n' "$DIVERGENCE_COUNT" "$ADR_ID" "$LOG" >&2
-{"hookEventName":"Stop","hookSpecificOutput":{"additionalContext":"adr-empirical-spot-check: $DIVERGENCE_COUNT divergence(s) in $ADR_ID — empirical_close_verify claims diverge from working tree. See $LOG for details. Consider fresh-context sandwich-verifier dispatch (E.4 charter rule, post-cool-down)."}}
-JSON
+  # Emit agent-visible WARN. Stop hooks have NO `hookSpecificOutput` variant in the
+  # Claude Code hook schema (only PreToolUse/UserPromptSubmit/PostToolUse/PostToolBatch
+  # do) — only top-level fields are valid for Stop. The old form emitted
+  # {"hookEventName":"Stop","hookSpecificOutput":{...}} which failed schema validation
+  # ("hookSpecificOutput missing required field hookEventName"). Use top-level
+  # `systemMessage` instead — valid for any hook event. JSON-encode via node when
+  # available (safe escaping), else fall back to plain stderr WARN.
+  MSG="adr-empirical-spot-check: $DIVERGENCE_COUNT divergence(s) in $ADR_ID — empirical_close_verify claims diverge from working tree. See $LOG for details. Consider fresh-context sandwich-verifier dispatch (E.4 charter rule, post-cool-down)."
+  if command -v node >/dev/null 2>&1; then
+    node -e "process.stdout.write(JSON.stringify({systemMessage:process.argv[1]}))" "$MSG" 2>/dev/null \
+      || printf '[adr-empirical-spot-check] WARN: %s\n' "$MSG" >&2
+  else
+    printf '[adr-empirical-spot-check] WARN: %s\n' "$MSG" >&2
+  fi
 else
   echo "[$(date -Iseconds 2>/dev/null || date)] adr-empirical-spot-check: ${ADR_ID} clean (${ZERO_CLAIMS:+probed }$(echo "$ZERO_CLAIMS" | wc -l) claim(s))" >> "$HOOK_LOG"
 fi

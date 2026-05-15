@@ -3,10 +3,15 @@
 #
 # When `agent-workspace/memory/.autonomous-BLOCKED` flag exists:
 #   - UserPromptSubmit cadence ($1=UserPromptSubmit): inject loud BLOCKED context via stdout
-#   - PreToolUse cadence ($1=PreToolUse): exit RC=2 (block) for Edit/Write/Bash/MultiEdit/NotebookEdit
+#   - PreToolUse cadence ($1=PreToolUse): exit RC=2 (block) for Edit/Write/Bash/MultiEdit/NotebookEdit/Agent
 #     (Read/Glob/Grep stay allowed for diagnostic)
+#   - ESCAPE HATCH: a Bash call that invokes `block-control.sh` is ALWAYS allowed, even
+#     while blocked — that script's only job is gate management (status/clear/raise), so
+#     the agent/human can clear the gate without a manual file delete (the S316 deadlock).
 #
-# Override: STOCKFORGE_FORCE_AUTONOMOUS=1 env bypasses block (and logs to mistake-log).
+# Clearing the gate: the normal path is `block-control.sh check-prompt` (UserPromptSubmit
+# hook) auto-clearing when the human replies "approved" / "unblock" / etc. — see
+# block-control.sh. Override: STOCKFORGE_FORCE_AUTONOMOUS=1 env bypasses block (and logs to mistake-log).
 #
 # Bash + POSIX only per L-S11-1. Default RC=0 (allow); RC=2 (block) only when guarded tool + flag present.
 # SPAWN-CONTEXT: bash-c (companion firing-test required per L-S247-1 / firing-test-spawn-context-lint.sh)
@@ -44,21 +49,25 @@ case "$EVENT" in
       printf '%s\n' "$FLAG_CONTENT"
       printf -- '--- End flag content ---\n\n'
       printf 'Agent instructions this turn:\n'
-      printf '  1. DO NOT proceed with any new work (Edit/Write/Bash tools are blocked by PreToolUse hook).\n'
-      printf '  2. Respond to user with one-paragraph status of the blocking artifacts (Read/Glob/Grep allowed for diagnostic).\n'
-      printf '  3. Wait for human to resolve + delete the flag file.\n'
-      printf '  4. Emergency only: user can set STOCKFORGE_FORCE_AUTONOMOUS=1 env to bypass (logged to mistake-log).\n'
+      printf '  1. DO NOT proceed with any new work (Edit/Write/MultiEdit/Agent + most Bash blocked by PreToolUse hook).\n'
+      printf '  2. Respond to user with a one-paragraph status of the blocking artifact(s) (Read/Glob/Grep allowed for diagnostic).\n'
+      printf '  3. TO RESUME: the user replies "approved" / "unblock" / "run autonomous" / "tiep tuc" — block-control.sh check-prompt auto-clears the gate. No manual file delete needed.\n'
+      printf '  4. The agent MAY run "bash scripts/hooks/block-control.sh status|clear" — block-control.sh is exempt from the Bash block (escape hatch).\n'
+      printf '  5. Emergency: user can set STOCKFORGE_FORCE_AUTONOMOUS=1 env to bypass (logged to mistake-log).\n'
     }
     printf '[%s] autonomous-block-enforcer: UserPromptSubmit injection emitted\n' "$TS" >> "$LOG"
     exit 0
     ;;
   PreToolUse)
     # Read tool name from Claude Code's env: CLAUDE_TOOL_NAME (newer) or stdin JSON.
-    # Fallback: assume guarded unless explicitly allowed via env.
+    # Also capture stdin JSON for Bash calls so we can recognise the block-control.sh
+    # escape hatch. Guard the `cat` with [ ! -t 0 ] so it never blocks on a TTY.
     TOOL_NAME="${CLAUDE_TOOL_NAME:-}"
-    if [ -z "$TOOL_NAME" ] && [ ! -t 0 ]; then
-      # Try parsing stdin JSON for tool_name
+    STDIN_JSON=""
+    if { [ -z "$TOOL_NAME" ] || [ "$TOOL_NAME" = "Bash" ]; } && [ ! -t 0 ]; then
       STDIN_JSON=$(cat 2>/dev/null || true)
+    fi
+    if [ -z "$TOOL_NAME" ] && [ -n "$STDIN_JSON" ]; then
       TOOL_NAME=$(printf '%s' "$STDIN_JSON" | grep -o '"tool_name":"[^"]*"' | head -1 | sed 's/.*:"\([^"]*\)"/\1/' || echo "")
     fi
     case "$TOOL_NAME" in
@@ -66,9 +75,23 @@ case "$EVENT" in
         # Read-only or unknown — allow (default safe)
         exit 0
         ;;
-      Edit|Write|Bash|MultiEdit|NotebookEdit|Agent)
+      Bash)
+        # ESCAPE HATCH: a Bash call that invokes block-control.sh is ALWAYS allowed —
+        # that script's only job is gate management (status/clear/raise), so it is safe
+        # even while blocked. Without this, clearing a gate is a deadlock (the S316 bug).
+        case "$STDIN_JSON" in
+          *block-control.sh*)
+            printf '[%s] autonomous-block-enforcer: PreToolUse ALLOWED Bash block-control.sh (escape hatch)\n' "$TS" >> "$LOG"
+            exit 0
+            ;;
+        esac
+        echo "AUTONOMOUS-BLOCKED: tool=Bash denied. Flag at $BLOCK_FLAG. To resume: reply 'approved'/'unblock' to the agent, or run 'bash scripts/hooks/block-control.sh clear'. Emergency override: STOCKFORGE_FORCE_AUTONOMOUS=1 env." >&2
+        printf '[%s] autonomous-block-enforcer: PreToolUse BLOCKED tool=Bash\n' "$TS" >> "$LOG"
+        exit 2
+        ;;
+      Edit|Write|MultiEdit|NotebookEdit|Agent)
         # Block via RC=2 with stderr message
-        echo "AUTONOMOUS-BLOCKED: tool=$TOOL_NAME denied. Flag at $BLOCK_FLAG. See flag content for resolution path. Emergency override: STOCKFORGE_FORCE_AUTONOMOUS=1 env." >&2
+        echo "AUTONOMOUS-BLOCKED: tool=$TOOL_NAME denied. Flag at $BLOCK_FLAG. To resume: reply 'approved'/'unblock' to the agent, or run 'bash scripts/hooks/block-control.sh clear'. Emergency override: STOCKFORGE_FORCE_AUTONOMOUS=1 env." >&2
         printf '[%s] autonomous-block-enforcer: PreToolUse BLOCKED tool=%s\n' "$TS" "$TOOL_NAME" >> "$LOG"
         exit 2
         ;;

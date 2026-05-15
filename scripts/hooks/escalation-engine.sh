@@ -35,6 +35,23 @@ mkdir -p "$MEM_DIR" "$(dirname "$URGENT")"
 # Skip if state file absent (classifier hasn't run yet)
 [ -f "$STATE_FILE" ] || exit 0
 
+# === Block-grace: if block-control.sh recently cleared the gate, suppress CRITICAL
+# auto-raise for the grace window (anti-deadlock — gives the agent room to fix the
+# root cause without escalation-engine instantly re-blocking the same CRITICAL). ===
+GRACE_FILE="$MEM_DIR/.block-grace"
+GRACE_ACTIVE=0
+if [ -f "$GRACE_FILE" ]; then
+  GRACE_EXP=$(grep '^expiry_epoch=' "$GRACE_FILE" 2>/dev/null | head -1 | sed 's/^expiry_epoch=//' || echo 0)
+  case "$GRACE_EXP" in ''|*[!0-9]*) GRACE_EXP=0 ;; esac
+  GRACE_NOW=$(date +%s 2>/dev/null || echo 0)
+  case "$GRACE_NOW" in ''|*[!0-9]*) GRACE_NOW=0 ;; esac
+  if [ "$GRACE_EXP" -gt "$GRACE_NOW" ]; then
+    GRACE_ACTIVE=1
+  else
+    rm -f "$GRACE_FILE" 2>/dev/null || true
+  fi
+fi
+
 # Per-event idempotency markers (hour-bucket to avoid stale-marker bug — L-S108-1)
 MARKER="$MEM_DIR/.escalation-fired-${EVENT}-${BUCKET}"
 
@@ -56,22 +73,36 @@ CRIT_N=$([ -z "$CRIT_ROWS" ] && echo 0 || printf '%s\n' "$CRIT_ROWS" | grep -c .
 HIGH_N=$([ -z "$HIGH_ROWS" ] && echo 0 || printf '%s\n' "$HIGH_ROWS" | grep -c .)
 MED_N=$([ -z "$MED_ROWS" ] && echo 0 || printf '%s\n' "$MED_ROWS" | grep -c .)
 
-# === CRITICAL handling — write block flag (always; idempotent via flag presence check) ===
+# HIGH rows that are genuine Q&A bundles (severity-classifier Layer 2). Only these
+# warrant the "MUST fire AskUserQuestion" demand — L-S310-1 rule 3 is explicitly
+# scoped to a "SCOPE+CHARTER bundle pending >6h". HIGH rows from Layer 5
+# (notification files) escalate to urgent.md but are NOT AskUserQuestion-eligible:
+# notifications are agent->human informational pushes, not blocked decisions.
+# Without this split, a backlog of HIGH notifications falsely demands a (possibly
+# huge) AskUserQuestion every UserPromptSubmit.
+HIGH_QA_ROWS=$(printf '%s\n' "$HIGH_ROWS" | grep 'q-and-a/pending/' 2>/dev/null || true)
+HIGH_QA_N=$([ -z "$HIGH_QA_ROWS" ] && echo 0 || printf '%s\n' "$HIGH_QA_ROWS" | grep -c .)
+
+# === CRITICAL handling — write block flag (idempotent via flag presence check) ===
+# Suppressed while .block-grace is active (a human just cleared the gate) — see the
+# Block-grace block above + block-control.sh.
 if [ "$CRIT_N" -gt 0 ]; then
-  if [ ! -f "$BLOCK_FLAG" ]; then
+  if [ ! -f "$BLOCK_FLAG" ] && [ "$GRACE_ACTIVE" -eq 0 ]; then
     {
       printf 'BLOCKED at %s by escalation-engine.sh (event=%s)\n' "$TS" "$EVENT"
       printf 'CRITICAL_COUNT=%s\n' "$CRIT_N"
       printf 'Affected artifacts:\n'
       printf '%s\n' "$CRIT_ROWS" | awk -F'\t' '{printf "  - %s (age=%sh, next=%s)\n", $2, $3, $4}'
-      printf '\nResolution required:\n'
-      printf '  1. Review each affected artifact above\n'
-      printf '  2. Resolve OR explicitly downgrade severity\n'
-      printf '  3. Delete this flag file: rm "%s"\n' "$BLOCK_FLAG"
-      printf '  4. Submit any prompt to resume autonomous mode\n'
-      printf '\nEmergency override: set env STOCKFORGE_FORCE_AUTONOMOUS=1 (will log warning to mistake-log)\n'
+      printf '\nTO RESUME (simplest first):\n'
+      printf '  1. Reply to the agent with: "approved" / "unblock" / "run autonomous" / "tiep tuc".\n'
+      printf '     block-control.sh check-prompt (UserPromptSubmit hook) auto-clears the gate. No file delete needed.\n'
+      printf '  2. Or run:  bash scripts/hooks/block-control.sh clear\n'
+      printf '  3. Review/resolve the affected artifact(s) above so they do not re-trigger after the grace window.\n'
+      printf '  4. Emergency bypass: set env STOCKFORGE_FORCE_AUTONOMOUS=1 (will log warning to mistake-log).\n'
     } > "$BLOCK_FLAG"
     echo "escalation-engine: $CRIT_N CRITICAL items detected; .autonomous-BLOCKED flag written" >&2
+  elif [ "$GRACE_ACTIVE" -eq 1 ]; then
+    printf '[%s] escalation-engine: %s CRITICAL but .block-grace active — auto-raise suppressed\n' "$TS" "$CRIT_N" >> "$LOG"
   fi
 fi
 
@@ -92,9 +123,19 @@ if [ "$HIGH_N" -gt 0 ] && [ "$HAS_HIGH_DELTA" -eq 1 ]; then
   {
     printf '\n## ESCALATION — %s — %d HIGH-severity items (event=%s)\n\n' "$TS" "$HIGH_N" "$EVENT"
     printf 'Fired by: scripts/hooks/escalation-engine.sh\n'
-    printf 'Action required from agent: fire AskUserQuestion to surface these to user.\n\n'
+    if [ "$HIGH_QA_N" -gt 0 ]; then
+      printf 'Action required from agent: fire AskUserQuestion for the %d Q&A bundle(s) below.\n' "$HIGH_QA_N"
+      printf 'Remaining HIGH rows are notification escalations — informational, no AskUserQuestion.\n\n'
+    else
+      printf 'Action: review the HIGH-severity notification(s) below. These are informational\n'
+      printf 'escalations (no pending Q&A bundle) — no AskUserQuestion required.\n\n'
+    fi
     printf '%s\n' "$HIGH_ROWS" | awk -F'\t' '{printf "- `%s` (age=%sh, action=%s)\n", $2, $3, $4}'
-    printf '\nPer L-S310-1 rule 3: agent MUST fire AskUserQuestion when SCOPE+CHARTER bundle pending >6h with no user signal.\n\n'
+    if [ "$HIGH_QA_N" -gt 0 ]; then
+      printf '\nPer L-S310-1 rule 3: agent MUST fire AskUserQuestion when SCOPE+CHARTER bundle pending >6h with no user signal.\n\n'
+    else
+      printf '\n'
+    fi
     printf -- '---\n'
   } >> "$URGENT"
 fi
@@ -120,8 +161,10 @@ fi
 if [ "$EVENT" = "UserPromptSubmit" ]; then
   if [ "$CRIT_N" -gt 0 ]; then
     printf 'SEVERITY-ESCALATION CRITICAL: %d item(s) require human resolution. .autonomous-BLOCKED flag is ACTIVE. Agent should: respond with one-paragraph status of blocking artifacts (see %s), then await human action. Tools other than Read/Glob/Grep are blocked by autonomous-block-enforcer.sh.\n' "$CRIT_N" "$BLOCK_FLAG"
+  elif [ "$HIGH_QA_N" -gt 0 ]; then
+    printf 'SEVERITY-ESCALATION HIGH: %d Q&A bundle(s) age >6h require AskUserQuestion. Agent MUST fire AskUserQuestion this turn for the pending bundles before resuming other work. See `%s` for the row list.\n' "$HIGH_QA_N" "$STATE_FILE"
   elif [ "$HIGH_N" -gt 0 ]; then
-    printf 'SEVERITY-ESCALATION HIGH: %d item(s) age >6h require AskUserQuestion. Agent MUST fire AskUserQuestion this turn for the pending bundles before resuming other work. See `%s` for the row list.\n' "$HIGH_N" "$STATE_FILE"
+    printf 'SEVERITY-ESCALATION HIGH: %d HIGH-severity notification(s) appended to urgent.md (no pending Q&A bundle). These are informational escalations — review urgent.md when convenient; no AskUserQuestion required.\n' "$HIGH_N"
   fi
 fi
 

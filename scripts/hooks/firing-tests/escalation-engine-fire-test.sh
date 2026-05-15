@@ -7,6 +7,8 @@
 #   TC3: HIGH row → urgent.md entry but no block flag
 #   TC4: UserPromptSubmit event with CRITICAL → stdout contains "AUTONOMOUS-BLOCKED"
 #   TC5: idempotency — second call same bucket → no duplicate urgent.md entry
+#   TC6: CRITICAL row + ACTIVE .block-grace → block flag SUPPRESSED (anti-deadlock)
+#   TC7: CRITICAL row + EXPIRED .block-grace → block flag written + expired grace removed
 #
 # SPAWN-CONTEXT: positional-arg
 
@@ -82,6 +84,23 @@ COUNT1=$(grep -c "ESCALATION" "$TMP/human-workspace/notifications/urgent.md" 2>/
 run_hook Stop >/dev/null 2>&1
 COUNT2=$(grep -c "ESCALATION" "$TMP/human-workspace/notifications/urgent.md" 2>/dev/null || echo 0)
 if [ "$COUNT2" -eq "$COUNT1" ]; then note_pass; else note_fail "TC5: second call duplicated entry ($COUNT1 → $COUNT2)"; fi
+
+# === TC6: CRITICAL row + ACTIVE .block-grace → block flag SUPPRESSED ===
+setup_tmp
+write_state "$(printf 'CRITICAL\ttest-artifact.md\t0\tBLOCK\t2026-05-14T02:00:00Z')"
+GRACE_FUTURE=$(( $(date +%s 2>/dev/null || echo 0) + 1800 ))
+printf 'expiry_epoch=%s\ncleared_at=test\n' "$GRACE_FUTURE" > "$TMP/agent-workspace/memory/.block-grace"
+run_hook Stop >/dev/null 2>&1
+[ -f "$TMP/agent-workspace/memory/.autonomous-BLOCKED" ] && note_fail "TC6: block flag should be SUPPRESSED while .block-grace active" || note_pass
+
+# === TC7: CRITICAL row + EXPIRED .block-grace → block flag written + expired grace removed ===
+setup_tmp
+write_state "$(printf 'CRITICAL\ttest-artifact.md\t0\tBLOCK\t2026-05-14T02:00:00Z')"
+GRACE_PAST=$(( $(date +%s 2>/dev/null || echo 0) - 100 ))
+printf 'expiry_epoch=%s\ncleared_at=test\n' "$GRACE_PAST" > "$TMP/agent-workspace/memory/.block-grace"
+run_hook Stop >/dev/null 2>&1
+if [ -f "$TMP/agent-workspace/memory/.autonomous-BLOCKED" ]; then note_pass; else note_fail "TC7: block flag should be written when grace is expired"; fi
+[ -f "$TMP/agent-workspace/memory/.block-grace" ] && note_fail "TC7: expired .block-grace should be removed" || note_pass
 
 # Summary
 TOTAL=$((PASS+FAIL))

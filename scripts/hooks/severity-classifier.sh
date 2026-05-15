@@ -53,10 +53,14 @@ emit_row() {
   printf '%s\t%s\t%s\t%s\t%s\n' "$sev" "$path" "$age" "$action" "$TS" >> "$TMP"
 }
 
-# === Layer 1: CRITICAL — stale-checkpoint marker, autonomous-BLOCKED flag, charter violation markers ===
+# === Layer 1: CRITICAL — stale-checkpoint marker, charter violation markers ===
+# NOTE: .autonomous-BLOCKED is deliberately NOT in this list. It is escalation
+# OUTPUT (written by escalation-engine.sh when CRITICAL rows exist), not input.
+# Including it created a self-perpetuating deadlock: flag present -> CRITICAL row
+# -> escalation-engine re-writes flag -> never clears. Mirrors the urgent.md
+# self-loop guard in Layer 5.
 CRIT_MARKERS=(
   "$MEM_DIR/.auto-reboot-PRE-BLOCKED-stale-checkpoint"
-  "$MEM_DIR/.autonomous-BLOCKED"
   "$MEM_DIR/.charter-violation-detected"
   "$MEM_DIR/.ghost-greening-confirmed"
 )
@@ -149,7 +153,14 @@ if [ -f "$MISTAKE_LOG" ]; then
   ) || true
 fi
 
-# === Layer 5: Notifications WARN/ALERT keyword scan (last 24h via mtime) ===
+# === Layer 5: Notifications severity scan (last 24h via mtime) ===
+# Classification is driven by the frontmatter `level:` field — the authoritative
+# self-declared severity (notifications are named N-<TS>-<level>-<slug>.md per
+# human-workspace/CLAUDE.md). Body-text keyword grep is FALLBACK ONLY, for legacy
+# notifications with no `level:` field.
+# Why: the old body-grep-first logic mis-escalated any notification that merely
+# MENTIONED the word "critical" (e.g. an ALERT file *describing* a critical
+# finding) to CRITICAL severity → false autonomous-mode block.
 if [ -d "$PROJECT_DIR/human-workspace/notifications" ]; then
   while IFS= read -r n; do
     [ -z "$n" ] && continue
@@ -167,15 +178,30 @@ if [ -d "$PROJECT_DIR/human-workspace/notifications" ]; then
     rel="${n#$PROJECT_DIR/}"
     age=$(age_hours "$n")
     [ "$age" -le 24 ] || continue
-    if grep -q "CRITICAL\|critical" "$n" 2>/dev/null; then
-      emit_row "CRITICAL" "$rel" "$age" "BLOCK"
-    elif grep -q "ALERT\|alert\|URGENT" "$n" 2>/dev/null; then
-      emit_row "HIGH" "$rel" "$age" "ESCALATE-ASKUSERQUESTION"
-    elif grep -q "WARN\|warn" "$n" 2>/dev/null; then
-      emit_row "MEDIUM" "$rel" "$age" "DIGEST"
-    else
-      emit_row "LOW" "$rel" "$age" "LOG-ONLY"
-    fi
+    # Authoritative: frontmatter `level:` field (strip whitespace incl. CR for CRLF files).
+    nlevel=$(head -10 "$n" 2>/dev/null | grep -m1 '^level:' | sed 's/^level:[[:space:]]*//' | tr -d '[:space:]' || true)
+    case "$nlevel" in
+      CRITICAL|critical|Critical)
+        emit_row "CRITICAL" "$rel" "$age" "BLOCK" ;;
+      ALERT|alert|Alert|URGENT|urgent|Urgent)
+        emit_row "HIGH" "$rel" "$age" "ESCALATE-ASKUSERQUESTION" ;;
+      WARN|warn|Warn|WARNING|warning|Warning)
+        emit_row "MEDIUM" "$rel" "$age" "DIGEST" ;;
+      INFO|info|Info|SUMMARY|summary|Summary)
+        emit_row "LOW" "$rel" "$age" "LOG-ONLY" ;;
+      *)
+        # No recognized `level:` frontmatter — fall back to body keyword scan (legacy).
+        if grep -q "CRITICAL\|critical" "$n" 2>/dev/null; then
+          emit_row "CRITICAL" "$rel" "$age" "BLOCK"
+        elif grep -q "ALERT\|alert\|URGENT" "$n" 2>/dev/null; then
+          emit_row "HIGH" "$rel" "$age" "ESCALATE-ASKUSERQUESTION"
+        elif grep -q "WARN\|warn" "$n" 2>/dev/null; then
+          emit_row "MEDIUM" "$rel" "$age" "DIGEST"
+        else
+          emit_row "LOW" "$rel" "$age" "LOG-ONLY"
+        fi
+        ;;
+    esac
   done < <(find "$PROJECT_DIR/human-workspace/notifications" -maxdepth 1 -type f -name "*.md" 2>/dev/null | sort)
 fi
 
