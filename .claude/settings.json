@@ -429,6 +429,18 @@
           },
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/atomic-write-check.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/html-separator-check.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/path-safety-check.sh\""
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/observation-orphan-detector.sh\""
           },
           {
@@ -560,6 +572,18 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/python-determinism-check.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/atomic-write-check.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/html-separator-check.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/path-safety-check.sh\""
           }
         ]
       },
