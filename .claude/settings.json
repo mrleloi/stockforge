@@ -12,6 +12,7 @@
       "Bash(git diff:*)",
       "Bash(git log:*)",
       "Bash(git add:*)",
+      "Bash(git commit:*)",
       "Bash(python -m pytest:*)",
       "Bash(pytest:*)",
       "Bash(mypy:*)",
@@ -109,7 +110,6 @@
       "Edit(human-workspace/decisions/**)",
       "Edit(human-workspace/q-and-a/answered/**)",
       "Edit(human-workspace/q-and-a/stale/**)",
-      "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(rm -rf:*)",
       "Bash(DROP:*)",
@@ -259,6 +259,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/block-control.sh\" check-prompt"
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/autonomous-block-enforcer.sh\" UserPromptSubmit"
           },
           {
@@ -334,6 +338,10 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/urgent-md-rotate.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/dispatch-pending-rotation.sh\""
           },
           {
             "type": "command",

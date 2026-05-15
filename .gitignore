@@ -92,6 +92,7 @@ agent-workspace/memory/.*-fired-*
 agent-workspace/memory/.cliff-fired*
 agent-workspace/memory/.last-event-ts-*
 agent-workspace/memory/.dispatch-pending-*.jsonl
+agent-workspace/memory/.dispatch-pending-archive/
 agent-workspace/memory/.*-last-rotate-week
 agent-workspace/memory/.attestation-checked-*
 agent-workspace/memory/.auto-reboot-BLOCKED-*
