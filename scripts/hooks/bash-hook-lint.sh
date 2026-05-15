@@ -63,12 +63,16 @@ fi
 # `printf -- '-foo'`. Encountered 2x during HR-3 deploy per L-S43b-9. False-positive-safe:
 # matches only lines where printf is followed by a literal quoted dash, AND the same line
 # does NOT also contain `printf --` (which means the sentinel is already present).
+# S322 calibration: added third filter to exclude `awk ... '{printf "-...'` lines — the
+# `printf` there is AWK's builtin, not shell's, and does not need the `--` sentinel.
+# Discriminating pattern: `\{printf` (awk-script opening brace before printf) distinguishes
+# awk-context printf from shell printf. Dual-property TC in bash-hook-lint-fire-test.sh.
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
     bn="$(basename "$f")"
     [ "$bn" = "bash-hook-lint.sh" ] && continue
-    BAD="$(grep -nE "printf[[:space:]]+['\"]-" "$f" 2>/dev/null | grep -vE "printf[[:space:]]+--" || true)"
+    BAD="$(grep -nE "printf[[:space:]]+['\"]-" "$f" 2>/dev/null | grep -vE "printf[[:space:]]+--" | grep -vE "\{printf" || true)"
     if [ -n "$BAD" ]; then
       emit "L-S43b-9-PRINTF-DASH" "$bn" "printf format starts with '-' without '--' sentinel — use 'printf -- ...'"
     fi
@@ -288,6 +292,12 @@ BEGIN { pipefail_off = 1; carry = "" }
   if (full ~ /grep[[:space:]]/) {
     if (full ~ /^[[:space:]]*(if|while|until|elif)[[:space:]]/) next
     if (full ~ /grep[[:space:]].*[[:space:]](&&|\|\|)[[:space:]]/) next
+    # S322 calibration: skip if the logical line (possibly multi-continuation joined) starts
+    # with `(` — signals a `( ... ) || true` subshell-guard block. The grep(s) inside the
+    # subshell are protected by the outer `|| true` on the matching `)` closing line.
+    # Dual-property TC in bash-hook-lint-fire-test.sh: TC-C-subshell-guard (not flagged)
+    # + TC-C-subshell-real (genuine bare-grep not inside subshell still flagged).
+    if (full ~ /^[[:space:]]*\(/) next
     # S319b: skip if grep appears ONLY after a trailing inline comment marker.
     # Handles lines like `cmd   # grep foo` where grep is in the comment, not a command.
     # S321 MINOR-1 fix: tightened heuristic — only treat "#" as a comment start when it is

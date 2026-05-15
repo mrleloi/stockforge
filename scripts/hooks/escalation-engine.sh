@@ -69,9 +69,9 @@ CRIT_ROWS=$(grep "^CRITICAL"$'\t' "$STATE_FILE" 2>/dev/null || true)
 HIGH_ROWS=$(grep "^HIGH"$'\t' "$STATE_FILE" 2>/dev/null || true)
 MED_ROWS=$(grep "^MEDIUM"$'\t' "$STATE_FILE" 2>/dev/null || true)
 
-CRIT_N=$([ -z "$CRIT_ROWS" ] && echo 0 || printf '%s\n' "$CRIT_ROWS" | grep -c .)
-HIGH_N=$([ -z "$HIGH_ROWS" ] && echo 0 || printf '%s\n' "$HIGH_ROWS" | grep -c .)
-MED_N=$([ -z "$MED_ROWS" ] && echo 0 || printf '%s\n' "$MED_ROWS" | grep -c .)
+CRIT_N=$([ -z "$CRIT_ROWS" ] && echo 0 || printf '%s\n' "$CRIT_ROWS" | wc -l | tr -d '[:space:]')
+HIGH_N=$([ -z "$HIGH_ROWS" ] && echo 0 || printf '%s\n' "$HIGH_ROWS" | wc -l | tr -d '[:space:]')
+MED_N=$([ -z "$MED_ROWS" ] && echo 0 || printf '%s\n' "$MED_ROWS" | wc -l | tr -d '[:space:]')
 
 # HIGH rows that are genuine Q&A bundles (severity-classifier Layer 2). Only these
 # warrant the "MUST fire AskUserQuestion" demand — L-S310-1 rule 3 is explicitly
@@ -81,7 +81,7 @@ MED_N=$([ -z "$MED_ROWS" ] && echo 0 || printf '%s\n' "$MED_ROWS" | grep -c .)
 # Without this split, a backlog of HIGH notifications falsely demands a (possibly
 # huge) AskUserQuestion every UserPromptSubmit.
 HIGH_QA_ROWS=$(printf '%s\n' "$HIGH_ROWS" | grep 'q-and-a/pending/' 2>/dev/null || true)
-HIGH_QA_N=$([ -z "$HIGH_QA_ROWS" ] && echo 0 || printf '%s\n' "$HIGH_QA_ROWS" | grep -c .)
+HIGH_QA_N=$([ -z "$HIGH_QA_ROWS" ] && echo 0 || printf '%s\n' "$HIGH_QA_ROWS" | wc -l | tr -d '[:space:]')
 
 # === CRITICAL handling — write block flag (idempotent via flag presence check) ===
 # Suppressed while .block-grace is active (a human just cleared the gate) — see the

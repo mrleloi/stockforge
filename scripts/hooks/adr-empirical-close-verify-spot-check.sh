@@ -77,7 +77,7 @@ while IFS= read -r claim_line; do
   # heuristic: extract the longest unbroken alphabetic substring (>=5 chars) and probe for
   # it as a fixed string. Lossy but reliably catches gross AP-7 ghost-greening cases
   # (e.g. "anthropic" claimed 0-hits but actually present).
-  PROBE_TOKEN="$(echo "$PATTERN" | grep -oE '[A-Za-z_]{5,}' | awk '{ if (length($0) > max) { max=length($0); tok=$0 } } END { print tok }')"
+  PROBE_TOKEN="$(echo "$PATTERN" | { grep -oE '[A-Za-z_]{5,}' 2>/dev/null || true; } | awk '{ if (length($0) > max) { max=length($0); tok=$0 } } END { print tok }')"
   [ -z "$PROBE_TOKEN" ] && continue
 
   ACTUAL_HITS=0

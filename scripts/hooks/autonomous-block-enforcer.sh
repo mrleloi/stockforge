@@ -45,7 +45,7 @@ case "$EVENT" in
     # Output via stdout becomes additionalContext for the LLM
     {
       printf 'AUTONOMOUS-BLOCKED active. Flag location: %s\n\n' "$BLOCK_FLAG"
-      printf '--- Flag content (verbatim) ---\n'
+      printf -- '--- Flag content (verbatim) ---\n'
       printf '%s\n' "$FLAG_CONTENT"
       printf -- '--- End flag content ---\n\n'
       printf 'Agent instructions this turn:\n'

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Firing-test for bash-hook-lint.sh patterns A/B/C/D/E/F extension (Phase 3.5 T3.4 + S54 refinement + S58 KI-S54-1 closure per L-S51-1 + S80 L-S68-2 family three-variant promotion + S81 L-S80-2 Pattern F promotion + S117 Check 3 D-IDENTITY backfill per L-S69-1 self-reference rule).
+# Firing-test for bash-hook-lint.sh patterns A/B/C/D/E/F extension (Phase 3.5 T3.4 + S54 refinement + S58 KI-S54-1 closure per L-S51-1 + S80 L-S68-2 family three-variant promotion + S81 L-S80-2 Pattern F promotion + S117 Check 3 D-IDENTITY backfill per L-S69-1 self-reference rule + S322 Check 4 awk-context printf calibration).
 #
 # Stages synthetic hook scripts (dirty + clean) into a tempdir scripts/hooks/ layout,
 # runs bash-hook-lint pointed at the tempdir, and asserts:
@@ -402,6 +402,51 @@ COUNT=0
 echo "$COUNT"
 EOF
 
+# === S322 NEW TCs — Check 7 (L-S48d-1) subshell-guard pattern calibration (dual-property) ===
+# TC-C-subshell-guard: grep inside `( ... ) || true` subshell should NOT fire L-S48d-1.
+# The `( subshell ) || true` pattern is the standard multi-line pipeline guard; greps inside
+# are protected. Mirrors severity-classifier.sh Layer 4 tail|grep|grep-v|head|while form.
+cat > "$TEMPDIR/scripts/hooks/pipefail-subshell-guard-grep.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+LOG="$PROJECT_DIR/log.txt"
+( grep -E "Severity (critical|high)" "$LOG" 2>/dev/null \
+  | grep -v -E "resolved|carryover" 2>/dev/null \
+  | head -5 \
+  | while IFS= read -r line; do echo "$line"; done
+) || true
+EOF
+
+# TC-C-subshell-real: a genuine bare-grep NOT inside a subshell-guard block STILL fires.
+# Ensures the `^(` skip rule is not over-broad (only skips subshell-opened lines).
+cat > "$TEMPDIR/scripts/hooks/pipefail-subshell-real-grep.sh" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+trap 'exit 0' ERR
+LOG="$PROJECT_DIR/log.txt"
+RESULT=$(grep -E "Severity (critical|high)" "$LOG")
+echo "$RESULT"
+EOF
+
+# === S322 NEW TCs — Check 4 (L-S43b-9) awk-context printf calibration (dual-property) ===
+# TC-S43b9-awk-fp: printf inside awk script (awk-context) should NOT fire L-S43b-9.
+# The `{printf "- ..."` pattern is AWK's builtin printf, not shell's; no `--` sentinel needed.
+cat > "$TEMPDIR/scripts/hooks/awk-printf-dash.sh" <<'EOF'
+#!/usr/bin/env bash
+set -u
+ROWS="foo\tbar\tbaz"
+printf '%s\n' "$ROWS" | awk -F'\t' '{printf "- `%s` (age=%sh)\n", $1, $2}'
+printf '%s\n' "$ROWS" | awk -F'\t' '{printf "- %s (count=%s)\n", $1, $2}'
+EOF
+
+# TC-S43b9-shell-real: shell printf with format starting with `-` and NO `--` SHOULD fire L-S43b-9.
+cat > "$TEMPDIR/scripts/hooks/shell-printf-dash-no-sentinel.sh" <<'EOF'
+#!/usr/bin/env bash
+set -u
+printf '----- separator -----\n'
+EOF
+
 # === TC-clean: clean hook NOT flagged for any check ===
 cat > "$TEMPDIR/scripts/hooks/clean-hook.sh" <<'EOF'
 #!/usr/bin/env bash
@@ -690,8 +735,8 @@ assert_NOT_flagged_path "TC-D-IDENTITY-denial"   "D-IDENTITY-AUTONOMOUS-REGRESSI
 assert_NOT_flagged_path "TC-D-IDENTITY-negation" "D-IDENTITY-AUTONOMOUS-REGRESSION" "agent-workspace/constitution/d-identity-tc-negation.md"
 assert_NOT_flagged_path "TC-D-IDENTITY-self-ref" "D-IDENTITY-AUTONOMOUS-REGRESSION" "agent-workspace/constitution/d-identity-tc-self-ref.md"
 
-# TC-clean — no violations on clean-hook.sh for ANY check (now includes L-S80-2)
-if grep -qE "(M-S51-1|L-S48m-1|L-S48d-1|L-S53-2|L-S68-2|L-S80-2).*clean-hook" "$LOG"; then
+# TC-clean — no violations on clean-hook.sh for ANY check (now includes L-S43b-9 + L-S80-2)
+if grep -qE "(M-S51-1|L-S48m-1|L-S48d-1|L-S53-2|L-S68-2|L-S80-2|L-S43b-9).*clean-hook" "$LOG"; then
   echo "FAIL [TC-clean] false-positive on clean-hook.sh"
   grep "clean-hook" "$LOG" || true
   FAIL=$((FAIL+1))
@@ -737,6 +782,18 @@ assert_NOT_flagged "TC-C-backslash-guarded" "L-S48d-1-PIPEFAIL-BARE-GREP" "pipef
 # echo "a#b" has a "#" inside a string; the real grep on the NEXT line must NOT be suppressed.
 # This was the blind spot: S319b heuristic saw "#" position < grep position → wrongly skipped.
 assert_flagged "TC-C-hash-in-string" "L-S48d-1-PIPEFAIL-BARE-GREP" "pipefail-hash-in-string-grep"
+
+# === S322 NEW assertions — Check 7 (L-S48d-1) subshell-guard calibration ===
+# grep inside ( ... ) || true subshell should NOT trigger L-S48d-1
+assert_NOT_flagged "TC-C-subshell-guard" "L-S48d-1-PIPEFAIL-BARE-GREP" "pipefail-subshell-guard-grep"
+# genuine bare-grep outside subshell STILL triggers L-S48d-1
+assert_flagged     "TC-C-subshell-real"  "L-S48d-1-PIPEFAIL-BARE-GREP" "pipefail-subshell-real-grep"
+
+# === S322 NEW assertions — Check 4 (L-S43b-9) awk-context printf calibration ===
+# awk-context printf should NOT trigger L-S43b-9 (FP suppressed by \{printf filter)
+assert_NOT_flagged "TC-S43b9-awk-fp"      "L-S43b-9-PRINTF-DASH" "awk-printf-dash"
+# genuine shell printf "-..." without sentinel should STILL trigger L-S43b-9
+assert_flagged     "TC-S43b9-shell-real"  "L-S43b-9-PRINTF-DASH" "shell-printf-dash-no-sentinel"
 
 echo ""
 printf '=== TOTAL: PASS=%d FAIL=%d ===\n' "$PASS" "$FAIL"

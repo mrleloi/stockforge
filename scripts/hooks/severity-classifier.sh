@@ -209,10 +209,10 @@ fi
 mv -f "$TMP" "$STATE_FILE" 2>/dev/null || { rm -f "$TMP"; exit 0; }
 
 # Summary log
-CRIT_N=$(grep "^CRITICAL" "$STATE_FILE" 2>/dev/null | wc -l | tr -d ' \n')
-HIGH_N=$(grep "^HIGH" "$STATE_FILE" 2>/dev/null | wc -l | tr -d ' \n')
-MED_N=$(grep "^MEDIUM" "$STATE_FILE" 2>/dev/null | wc -l | tr -d ' \n')
-LOW_N=$(grep "^LOW" "$STATE_FILE" 2>/dev/null | wc -l | tr -d ' \n')
+CRIT_N=$( { grep "^CRITICAL" "$STATE_FILE" 2>/dev/null || true; } | wc -l | tr -d ' \n')
+HIGH_N=$( { grep "^HIGH" "$STATE_FILE" 2>/dev/null || true; } | wc -l | tr -d ' \n')
+MED_N=$( { grep "^MEDIUM" "$STATE_FILE" 2>/dev/null || true; } | wc -l | tr -d ' \n')
+LOW_N=$( { grep "^LOW" "$STATE_FILE" 2>/dev/null || true; } | wc -l | tr -d ' \n')
 [ -z "$CRIT_N" ] && CRIT_N=0
 [ -z "$HIGH_N" ] && HIGH_N=0
 [ -z "$MED_N" ] && MED_N=0
