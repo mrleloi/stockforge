@@ -12,6 +12,7 @@ Markers: unit (all mocked; no live network/LLM)
 
 from __future__ import annotations
 
+import random as random_module
 from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
 
@@ -151,3 +152,40 @@ class TestCaptureSentimentSnapshotOrchestration:
         saved_snapshot = mock_repo.save.call_args[0][0]
         assert saved_snapshot.ticker == "VND"
         assert saved_snapshot.mention_count == 2
+
+    def test_snapshot_sample_ids_deterministic_when_rng_seeded(self) -> None:
+        """Seeded RNG produces reproducible source_posts_sample tuples.
+
+        D-059 R2 fix: random.sample() on main production path replaced with
+        self.rng.sample() where rng is a constructor-injected random.Random instance.
+        Same seed → identical sample; different seed → different sample.
+        """
+        # Build 25 posts so random.sample actually has selection work (_MAX_SAMPLE_POSTS=20)
+        posts = [_make_raw_post(f"p{i}") for i in range(25)]
+        classified = [_make_classified_post(f"p{i}", Sentiment.BULLISH) for i in range(25)]
+
+        # First run with seed 42
+        uc1, _ = self._build_use_case(posts, classified, coord_score=0.1)
+        uc1.rng = random_module.Random(42)
+        snap1 = uc1.execute("VND", Window.ONE_HOUR)
+
+        # Second run with same seed 42 — must produce identical sample
+        uc2, _ = self._build_use_case(posts, classified, coord_score=0.1)
+        uc2.rng = random_module.Random(42)
+        snap2 = uc2.execute("VND", Window.ONE_HOUR)
+
+        assert snap1.source_posts_sample == snap2.source_posts_sample, (
+            "R2 fix (D-059): same seed must produce identical source_posts_sample"
+        )
+        assert len(snap1.source_posts_sample) == 20, (
+            "source_posts_sample should be capped at _MAX_SAMPLE_POSTS=20"
+        )
+
+        # Different seed → different sample (anti-hardcoded sanity check)
+        uc3, _ = self._build_use_case(posts, classified, coord_score=0.1)
+        uc3.rng = random_module.Random(99)
+        snap3 = uc3.execute("VND", Window.ONE_HOUR)
+
+        assert snap1.source_posts_sample != snap3.source_posts_sample, (
+            "R2 fix (D-059): different seeds must produce different source_posts_sample"
+        )

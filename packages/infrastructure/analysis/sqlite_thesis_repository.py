@@ -23,7 +23,7 @@ import logging
 import sqlite3
 from contextlib import closing
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from pathlib import Path
 
@@ -203,7 +203,7 @@ def _rebuild_thesis(d: dict[str, object]) -> Thesis:
     created_at = (
         datetime.fromisoformat(str(created_raw))
         if isinstance(created_raw, str)
-        else datetime.now()
+        else datetime.now(UTC)  # D-059 R1 fix: fallback must be tz-aware UTC
     )
 
     rec_raw = d.get("final_recommendation")

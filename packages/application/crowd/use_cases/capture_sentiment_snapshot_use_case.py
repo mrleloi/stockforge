@@ -113,6 +113,9 @@ class CaptureSentimentSnapshotUseCase:
     clock: Callable[[], datetime] = field(
         default_factory=lambda: lambda: datetime.now(UTC)
     )
+    rng: random.Random = field(
+        default_factory=random.Random  # D-059 R2 fix: unseeded by default; tests inject seeded instance
+    )
 
     def execute(self, ticker: str, window: Window) -> SentimentSnapshot:
         """Capture sentiment snapshot for `ticker` over `window` duration.
@@ -177,7 +180,7 @@ class CaptureSentimentSnapshotUseCase:
         top_terms = self._extract_top_terms(classified)
 
         # source_posts_sample: max 20 IDs for debugging (BR-3)
-        sample_ids = [p.post_id for p in random.sample(classified, min(_MAX_SAMPLE_POSTS, len(classified)))]
+        sample_ids = [p.post_id for p in self.rng.sample(classified, min(_MAX_SAMPLE_POSTS, len(classified)))]
 
         # Step 5: construct aggregate
         snapshot_id = self._make_snapshot_id(ticker, now)

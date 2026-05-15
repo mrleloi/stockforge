@@ -10,6 +10,9 @@ Source: 006-S41-track-F-impl-sub-plan.md deliverable 25.
 from __future__ import annotations
 
 import asyncio
+import json
+import sqlite3
+from contextlib import closing
 from datetime import UTC, date, datetime
 from decimal import Decimal
 from pathlib import Path
@@ -196,3 +199,38 @@ def test_incomplete_thesis_roundtrip(repo: SqliteThesisRepository) -> None:
     assert retrieved.status == ThesisStatus.INCOMPLETE
     assert retrieved.synthesis is None
     assert retrieved.final_recommendation is None
+
+
+def test_rebuild_thesis_fallback_uses_utc_aware_datetime(repo: SqliteThesisRepository) -> None:
+    """When persisted created_at is malformed (non-string), fallback default must be UTC-aware.
+
+    D-059 R1 fix: the else-branch in _rebuild_thesis (sqlite_thesis_repository.py line 206)
+    previously returned a tz-naive datetime (no UTC). After the fix it returns a
+    tz-aware UTC datetime via datetime.now(UTC). This test pins that behavior.
+    """
+    thesis = _make_thesis("fallback-001")
+    asyncio.run(repo.save(thesis))
+
+    # Force malformed payload: set created_at to None to trigger the else-branch
+    with closing(sqlite3.connect(repo.db_path)) as conn:
+        cur = conn.execute(
+            "SELECT payload_json FROM theses WHERE thesis_id=?", ("fallback-001",)
+        )
+        row = cur.fetchone()
+        assert row is not None
+        payload = json.loads(row[0])
+        payload["created_at"] = None  # non-string sentinel → forces line-206 else-branch
+        conn.execute(
+            "UPDATE theses SET payload_json=? WHERE thesis_id=?",
+            (json.dumps(payload), "fallback-001"),
+        )
+        conn.commit()
+
+    retrieved = asyncio.run(repo.get_by_id("fallback-001"))
+    assert retrieved is not None
+    assert retrieved.created_at.tzinfo is not None, (
+        "R1 fix (D-059): fallback datetime must be tz-aware, got naive datetime"
+    )
+    assert retrieved.created_at.tzinfo == UTC, (
+        "R1 fix (D-059): fallback datetime must be UTC specifically"
+    )
