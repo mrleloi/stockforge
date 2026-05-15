@@ -1,86 +1,77 @@
-# Checkpoint — S250-close (Phase 3.5 CLOSED + Cluster Minimum E E.3+E.4 SHIPPED)
+# Checkpoint — S325 CLOSE (Wave-1 Phase A synthesis SHIPPED; D-061 PROPOSED; S326 = human ratification gate)
 
-**Created**: 2026-05-12 ~01:00+07:00 (S250 main-session: 4-Q AskUserQuestion + multi-track FOCUSED_IMPL)
-**Mode**: AUTONOMOUS (full)
-**Predecessor**: S249 (D-052 ghost-greening + 4-ADR cluster CRITICAL; BLOCKED on user pick)
-**Successor**: S251 — UNBLOCKED; PRIORITY 1 = Phase 4 master-plan dispatch
+**Updated**: 2026-05-15 ~13:35 SEAST
+**Mode**: AUTONOMOUS (full) — user `continue` honored; one-turn S324 + S325 dispatch chain
+**Predecessor checkpoint**: `checkpoints/2026-05-15-S322-close.md` (archived this turn)
+**Successor**: S326 = HUMAN RATIFICATION GATE (out-of-band; awaits user reply to Q-INT-2026-05-bis)
 
-## S250 deliverable summary (CLOSE state)
+## S325 outcome (FINAL)
 
-### AskUserQuestion 4-Q bundle answered
-- Q1 D-052 cluster path = **Minimum E** (E.2 done + E.3 hook + E.4 charter amendment; defer E.1 code shipping)
-- Q2 Phase 3.5 close-or-continue = **Close Phase 3.5 now** (T5+T8 → DEFERRED-DOCUMENTATION)
-- Q3 Sync DECISION_ROUTING = **Hold + strengthen** (extend FCV requirement to CHARTER tier; codified in E.4 proposal)
-- Q4 Sync LANGUAGE = **Hold as-is** (VN-chat / EN-code mixing correct)
+- ✅ **Phase A Wave 1 synthesis SHIPPED**:
+  - `agent-workspace/research/INTEGRATION_PROPOSAL_2026-05-15.md` (919 LOC; 15-repo per-section synthesis + license matrix + summary table)
+  - `agent-workspace/research/INTEGRATION_PROPOSAL_SUPPLEMENT_2026-05-15.md` (603 LOC; Theme F..N cross-repo + refined Wave-1 allocation)
+- ✅ **D-061 ADR PROPOSED**: `agent-workspace/memory/decisions/061-wave-1-integration-ratification.md` (425 LOC; level IMPL; 19 source_evidence cites; supersedes LOST D-058; depends_on D-059 + D-060)
+- ✅ **Q-INT-2026-05-bis bundle**: `human-workspace/q-and-a/pending/qa-2026-05-15-wave-1-bis.md` (223 LOC; SCOPE; SLA 2026-05-17T07:00Z; 4 questions Q-INT-2026-05-5..8 with lettered A-E + "(Recommended)" per user mega-bundle rule)
+- ✅ **Material demotions captured + ratified-via-D-061-pending-Q-INT-bis**:
+  - FinceptTerminal MED→LOW (AGPL+commercial; Theme K dropped from Wave 1)
+  - MediaCrawler HIGH→MED-LOW (non-OSI license; removed from Theme L IMPL slot)
+  - Scrapling Cloudflare-solver+patchright HARD REJECT (I-S34 ToS-conflict)
+  - Theme H winner INVERTED to debate-style (TradingAgents) over isolated-then-aggregate
+  - Theme G I-S1-1 CONFIRMED genuine-new (NOT redundant with I-S1)
+- ✅ **Net-new findings**:
+  - Theme N (Vibe-Trading `agent/backtest/validation.py` MC + Bootstrap + Walk-Forward) → candidate for Charter Month-12 backtest goal; deferred past Wave 1
+  - Vibe-Trading path-safety quad is actually 5-invariant (UNC-reject as cross-cutting fifth)
+- ✅ **Revised Wave-1 envelope**: 15-20 sessions / ~2840-4180K tokens (-1 session, -160-320K vs master-plan)
 
-### E.3 hook SHIPPED + wired
-- `scripts/hooks/adr-empirical-close-verify-spot-check.sh` — Stop hook; random-samples ACCEPTED ADRs with `empirical_close_verify` field; uses longest-alpha-token probe heuristic (extracts longest unbroken ≥5-char alphabetic substring from claim regex; fixed-string grep on packages/+apps/ excluding tests); flags divergence on "= 0 hits"-style claims
-- Firing-test `firing-tests/adr-empirical-close-verify-spot-check-fire-test.sh` 5/5 PASS (TC1 empty / TC2 clean / TC3 divergence / TC4 PASS-only-skip / TC5 PROPOSED-skip)
-- Wired into `.claude/settings.json` Stop chain after charter-coherence-spot.sh; JSON re-validation PASS
-- Production smoke: 4 fires picked D-052 (filter = ADRs with empirical_close_verify field); emitted WARN + system-reminder JSON with probe_token=anthropic actual_hits=24 vs. claimed "0 hits". Hook empirically catches D-052 ghost-greening at the exact pattern from M-S249-1.
+## Next action — S326 HUMAN RATIFICATION GATE (out-of-band; agent BLOCKED until reply)
 
-### E.4 charter amendment PROPOSAL
-- `agent-workspace/proposals/E4-fresh-context-verifier-arch-charter-tier.md` written following Charter Revision Protocol format
-- Rule text: ARCH+/CHARTER ADRs MUST receive empirical close-verify by fresh-context sandwich-verifier (distinct session-id from architect+dev) before status → ACCEPTED
-- Target file (post-cool-down): `agent-workspace/constitution/decision-discipline.md` § new sub-section
-- Cool-down: 48hr per Charter Revision Protocol; starts 2026-05-12T~21Z; apply window ≥2026-05-14T~21Z
-- Counter-factuals 3 considered + rejected (hook-only, all-tiers, charter-only)
-- Ratification path: post-cool-down author canonical D-055 + edit decision-discipline.md + run E.3 hook baseline + close E.4 in current-execution
+User picks A/B/C/D/E per Q-INT-2026-05-5..8 in `human-workspace/q-and-a/pending/qa-2026-05-15-wave-1-bis.md`.
 
-### Phase 3.5 close
-- `agent-workspace/memory/project.md` updated: current phase row CLOSED 2026-05-12 + Phase Goals Tracker T1+T2+T3+T4 + T6 + T7 SHIPPED; T5+T8 DEFERRED-DOCUMENTATION; Phase 4 NEXT ENTRY
-- Phase-close observation written at `agent-workspace/memory/observations/2026-05-12-S250-phase-3.5-close.md` (track-by-track ledger + DEFERRED-DOCUMENTATION rationale + cluster Minimum E carryover summary + entry-vs-exit conditions table)
-- Q&A bundle `2026-05-07-001-phase-3.5-T5-T6-T8-charter-gate.md` frontmatter status → answered-2026-05-12-via-AskUserQuestion-S250 + answers_summary block added (auto-mv hook will move to answered/)
+Auto-mv hook (HH-E.2 / D-031) transitions pending → answered on `status: answered-*` frontmatter signal. Until then, S327+ does NOT execute. Agent's `continue` on a still-pending bundle MUST first re-read the bundle to check for inline answers + frontmatter status update.
 
-### Sync-state housekeeping
-- `agent-workspace/memory/sync-state.md` last_check 2026-05-07 → 2026-05-12 + last_check_session S170→S250 + updated_at 2026-05-07→2026-05-12 + new S250 narrative entry prepended above S83 historical
-- `sync-tracker/state.tsv`: DECISION_ROUTING 48 → 48.4 (sample 39→43); LANGUAGE 51.4 → 51.5 (sample 31→32); SCOPE 61.9 → 62.2 (sample 86→87)
-- `sync-tracker/events.tsv`: +5 S250 rows (4 q_and_a_resolution + 1 decision_correctness on Phase 3.5 close pick)
+## 3 outlook scenarios (per S325 subagent report)
 
-## Empirical close-verify (main-session)
+1. **Blanket-A on all 4** → D-061 PROPOSED → ACCEPTED; S328 Phase B launches (W0-2.1 PLAN session per master plan § 6.2).
+2. **Q-INT-5=B (revert to isolated)** → no Phase F-prime IMPL rework; debate-style mitigations archived; token-cost savings note in supplement R.4 evaporates.
+3. **Q-INT-7=B or C (Theme N into Wave 1)** → envelope expands ~50-350K; S327 RECOVERY session updates master plan + adds Theme N slot before Phase F-prime; critical-path L→I→H→J→K unchanged.
 
-- E.3 firing-test 5/5 PASS ✓
-- E.3 production smoke 4 fires → 1 DIVERGENCE WARN/fire on D-052 with probe_token=anthropic actual_hits=24 ✓
-- `.claude/settings.json` JSON re-validation PASS via `python -c "import json; json.load(open(...))"` ✓
-- `bash -n` parse OK for both new scripts ✓
-- All 13 file mods + 4 new files written without error ✓
+Q-INT-6 (Theme G path) and Q-INT-8 (Theme L adapter) diverging picks → S327 RECOVERY adjusts constitution-write path OR Theme L adapter strategy.
 
-## Combined verdict (S250)
+## Pending after S326 returns (S327+)
 
-- E.3 hook OPERATIONAL — first Stop fire post-S250 will exercise it on a random ACCEPTED ADR with empirical_close_verify field
-- E.4 charter PROPOSAL queued for ratification ≥2026-05-14T~21Z
-- Phase 3.5 CLOSED; Phase 4 entry unblocked
-- 0 git commits (CLAUDE.md hard rule)
-- 0 charter file edits (E.4 lives in proposals/ during cool-down)
-- 0 constitution writes
-- 1 new hook + 1 firing-test added
-- ALL hard locks honored
+- **S327 (conditional)**: RECOVERY if any Q-INT-bis answer diverges from "Recommended"; revises master plan + theme allocation.
+- **S328 PLAN**: W0-2.1 sub-plan (fix 2 pre-existing Python-determinism violations) per master plan § 6.2.
+- **S329 FOCUSED_IMPL**: execute W0-2.1.
+- **S330 VERIFY**: adversarial review of S329 (sandwich-verifier; fresh-context).
+- **S331 PLAN**: W0-3 + W0-4 + W0-5 bundle (TradingAgents atomic write + HTML-comment separator + Vibe-Trading path-safety quad-now-quint).
+- **S332+**: Phase D-K Wave-1 IMPL per ratified theme order L→I→H→J→K.
 
-## S251 NEXT ACTION priority
+## Post-S325-close addendum (P-LOW-1 shipped this turn while Q-INT-bis gate waits)
 
-1. **PRIORITY 1**: Phase 4 master-plan dispatch (sandwich-architect subagent → `session-plans/pending/0NN-phase-4-multi-perspective-master-plan.md`). Scope: BC-7 sentiment/pump (D-032) + Track I Bayesian calibration + BC-9 outer-loop + adversarial multi-perspective agent maturation. Plan should ABSORB T5+T8 DEFERRED-DOCUMENTATION as a housekeeping sub-track.
-2. **PRIORITY 2** (≥2026-05-14T~21Z post-cool-down): E.4 charter ratification — author canonical D-055 + edit `agent-workspace/constitution/decision-discipline.md`. Dedicated CHARTER-tier session.
-3. **PRIORITY 3 (passive)**: E.3 hook in-the-wild — track `.adr-empirical-spot-check.log` accumulation; periodic review for new divergence findings.
-4. **PRIORITY 4 (deferred SCOPE)**: E.1 anthropic SDK removal code shipping. Requires dedicated FOCUSED_IMPL + fresh-context sandwich-verifier per E.4 (once charter ratified). Touches `packages/infrastructure/analysis/claude_llm_perspective_adapter.py` + `claude_llm_extractor.py` + `pyproject.toml:11`. Surface as scheduled work item to user.
-5. **PRIORITY 5 (hygiene)**: D-053 frontmatter DUPLICATE label cleanup (S243 F-Hygiene-1; single file edit).
+- ✅ **L-S322-1 SHIPPED-IN-S325**: severity-classifier.sh:182-186 parallel `level:` short-circuit (RESOLVED|ANSWERED|CLOSED incl. lowercase) before body-grep fallback. TC6 added to firing-test (6/6 PASS); bash-hook-lint clean. agent-notes + mistake-log annotated. M-S322-1 prevention is now hook-enforced; `level: RESOLVED` in-place edit alone deprioritizes — no mv-to-archived/ required.
+- ✅ **L-S322-2 SHIPPED-IN-S326** (this turn — addendum during Q-INT-bis gate): `post-dev-dispatch-attestation-check.sh` scope-filter at :106-128 — presence-only check on `bc6_pytest_passed` / `bc7_pytest_passed` / `tests_passed` frontmatter fields; if NONE present → `SKIP-OUT-OF-SCOPE` row in attestation-log + marker + exit 0 (no pytest run). Empirical FP justification: attestation-log rows 26-28 (S237-A2-promote / S320-S319b / S322b-plan016) all 0/322/322/BLOCK — out-of-BC-scope harness work measured against ambient 322 BC tests. Companion firing-test: TC9 (out-of-scope → SKIP-OUT-OF-SCOPE) + TC9b regression-guard (`tests_passed: 0` is legitimate BC claim, NOT skipped). 10/10 TCs PASS; bash-hook-lint RC=0; full firing-test suite **103/103 PASS** (343s elapsed). L-S322-2 → SHIPPED-IN-S326 in agent-notes.
+- ✅ **§ 18 phantom-typo carryover RETIRED**: `grep "Wave-Trading"` on both research files = 0 matches; § 18 = "Compliance Attestation" — no typo to fix. Carryover bullet was a hallucinated claim from S325 close.
+- ✅ **Plan 015 Batch E carryover RETIRED**: shipped at commit `49fe2ca` per `git log` (S322 close); the carryover bullet was stale from S321's perspective.
 
-## Hard locks active (S250 close)
+## Lower-priority harness backlog (carryover after P-LOW-1 ship)
+
+- ~~**P-LOW-2**: post-dev-dispatch-attestation-check.sh scope-filter (L-S322-2 promote-to-hook)~~ — **SHIPPED-IN-S326 addendum** (this turn): scope-filter inserted at post-dev-dispatch-attestation-check.sh:106-128 (presence-only check on bc6/bc7/tests_passed; SKIP-OUT-OF-SCOPE row + exit 0); TC9 + TC9b added to firing-test (10/10 PASS); full suite 103/103 PASS; bash-hook-lint RC=0. L-S322-2 → SHIPPED-IN-S326 in agent-notes
+- **P-LOW-3**: HH-6 dispatch-pending rotation hook — stale=3 (2 pre-existing cross-session orphans `9adeeefc` (6) + `dc34b04e` (2) + this session's S324 closeable entry); per-dispatch close = busy-work (catch-rate 0 = AP-23 ritual-demotion red flag), rotation hook is structural fix
+- **Plan 015 Batch E**: ALREADY SHIPPED at commit `49fe2ca` (S322); the bullet was a stale carryover from S321 — verified via `git log` headline "S322 Batch E: bash-hook-lint 6 → 0 (parent plan 015 final batch)"
+- ~~**Cosmetic**: `INTEGRATION_PROPOSAL_2026-05-15.md` § 18 has "(Wave-Trading)" → should be "(Vibe-Trading)"~~ — **VERIFIED PHANTOM** (this turn): `grep "Wave-Trading"` against both INTEGRATION_PROPOSAL_2026-05-15.md and INTEGRATION_PROPOSAL_SUPPLEMENT_2026-05-15.md returned 0 matches. § 18 = "Compliance Attestation" — no typo present. Carryover bullet was hallucinated; no action needed
+
+## Hard locks active (S325 close)
 
 - Charter v1.1 + Principle 11 BINDING
-- D-050/D-051/D-052/D-053/D-054 BINDING
-- AP-1 + AP-7 + AP-23-deferred-to-hook BINDING
-- L-S247-1 / L-S240-5 / L-S227-1 BINDING (L-S227-1 functionally unhonored until E.1 ships)
-- E.4 charter rule PROPOSED-COOL-DOWN until ≥2026-05-14T~21Z
-- HH-8 baseline FRESH (`.charter-md5-baseline = 03d03cf6...`)
-- Working-memory budget: ~14-15KB / 20480B ceiling ✓
-- NO git commits this turn (CLAUDE.md hard rule); changes staged
+- BEHAVIORAL HOLD (S310) — substantive criteria MET; HOLD effectively LIFTED on S323 Phase A entry (per S322 close)
+- destructive-command-guard R1 + project-integrity-watchdog R2 + daily-backup R3 ACTIVE
+- D-060: 0 agent commits this session; 0 pushes
+- 0 charter edits / 0 constitution writes this session
+- SYNC-GRILLING not fired (sync-tracker `must_grill_remaining = 0` across all 5 categories; S325 subagent verified)
 
-## Backgrounds CURRENT
+## Mistakes (S325 final)
 
-None.
+- **No mistakes this session.** Explicit per session-end-checklist-linter.sh requirement.
+- M-S321-1 + M-S322-1 carry-forward (per S322-close): both LOW-severity historical; no new escalation.
 
-## Mistakes this session
-
-NONE per AP-23 — clean multi-track FOCUSED_IMPL execution following user-ratified Minimum E + Phase 3.5 close path. M-S249-1 + M-S249-2 carryover remain BINDING until E.1 code shipping closes L-S227-1 violation.
-
-End of S250 close checkpoint.
+End of S325-close checkpoint. S326 awaits user.

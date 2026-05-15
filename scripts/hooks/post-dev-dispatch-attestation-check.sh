@@ -103,6 +103,29 @@ if [ -n "${SESSION_ID:-}" ]; then
   fi
 fi
 
+# L-S322-2 scope-filter (SHIPPED-IN-S326): out-of-scope obs (harness/lint/hook dev
+# work declaring NO BC pytest coverage) MUST NOT be measured against ambient BC
+# pytest count. Historical FPs at attestation-log rows S237-A2-promote / S320-
+# plan015-S319b-batch-L / S322b-plan016-batch-e-lint-zero — all 0/322/322/BLOCK.
+# Detection: ANY of bc6_pytest_passed / bc7_pytest_passed / tests_passed PRESENT
+# in frontmatter (presence-only — value 0 is a legitimate claim of "0 passing").
+HAS_BC6_FIELD="$(printf '%s' "$FRONTMATTER" | awk '/^bc6_pytest_passed:/{print 1;exit}' || true)"
+HAS_BC7_FIELD="$(printf '%s' "$FRONTMATTER" | awk '/^bc7_pytest_passed:/{print 1;exit}' || true)"
+HAS_TESTS_FIELD="$(printf '%s' "$FRONTMATTER" | awk '/^tests_passed:/{print 1;exit}' || true)"
+
+if [ -z "${HAS_BC6_FIELD:-}" ] && [ -z "${HAS_BC7_FIELD:-}" ] && [ -z "${HAS_TESTS_FIELD:-}" ]; then
+  TS_SCOPE="$(date -u +%FT%T.%3NZ 2>/dev/null || date -u +%FT%TZ 2>/dev/null || true)"
+  if [ ! -f "$ATTEST_LOG" ]; then
+    mkdir -p "$(dirname "$ATTEST_LOG")"
+    printf 'ts\tdispatch_id\tobservation_passed\tempirical_passed\tdivergence\tverdict\n' > "$ATTEST_LOG"
+  fi
+  printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "$TS_SCOPE" "$DISPATCH_ID" "SKIP-OUT-OF-SCOPE" "SKIP" "SKIP" "SKIP-OUT-OF-SCOPE" >> "$ATTEST_LOG"
+  touch "$MARKER_FILE"
+  printf 'INFO: observation %s declares no BC pytest scope (no bc6_pytest_passed/bc7_pytest_passed/tests_passed) — skipping attestation (L-S322-2 scope-filter)\n' "$OBS_BASENAME" >&2
+  exit 0
+fi
+
 # Parse claimed test counts using awk (no grep exit-1 risk)
 # Try bc6_pytest_passed + bc7_pytest_passed first; fall back to tests_passed
 CLAIMED_PASSED="$(printf '%s' "$FRONTMATTER" | awk '

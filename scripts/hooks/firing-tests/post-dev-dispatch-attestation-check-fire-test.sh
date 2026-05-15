@@ -304,6 +304,59 @@ else
   FAIL=$((FAIL+1))
 fi
 
+# -----------------------------------------------------------------------
+# TC9 — L-S322-2 scope-filter: out-of-scope obs (no bc6/bc7/tests_passed fields)
+# Harness/lint/hook dev work declaring NO BC pytest coverage → SKIP-OUT-OF-SCOPE
+# row in attestation-log, exit 0, no pytest run. Reproduces the 3 historical FP
+# class: S237-A2-promote / S320-plan015-S319b-batch-L / S322b-plan016-batch-e-lint-zero.
+# -----------------------------------------------------------------------
+clean_obs
+cat > "$OBS_DIR/sandwich-dev-S322-harness-scope.md" <<'EOF'
+---
+observation_id: sandwich-dev-S322-harness-scope
+agent: sandwich-dev
+session: S322
+scope: harness lint fix (no BC code touched)
+files_created: 0
+files_modified: 3
+verdict: READY-FOR-MAIN-VERIFY
+---
+
+Harness lint remediation; no BC tests claimed.
+EOF
+
+run_hook "$SUBAGENT_STOP_PAYLOAD"
+
+if [ "$HOOK_RC" -eq 0 ] \
+   && [ -f "$ATTEST_LOG" ] \
+   && grep -q "sandwich-dev-S322-harness-scope" "$ATTEST_LOG" \
+   && grep "sandwich-dev-S322-harness-scope" "$ATTEST_LOG" | grep -q "SKIP-OUT-OF-SCOPE"; then
+  echo "PASS TC9: out-of-scope obs (no BC pytest claim) → SKIP-OUT-OF-SCOPE row + exit 0"
+  PASS=$((PASS+1))
+else
+  echo "FAIL TC9: expected SKIP-OUT-OF-SCOPE; rc=$HOOK_RC"
+  grep "sandwich-dev-S322-harness-scope" "$ATTEST_LOG" 2>/dev/null || echo "(no log row)"
+  FAIL=$((FAIL+1))
+fi
+
+# TC9b — regression guard: tests_passed: 0 (legitimate BC scope claiming 0 passing)
+# MUST NOT be skipped — it's a real claim, just zero. Should run pytest path.
+clean_obs
+make_obs "sandwich-dev-S99-tc9b" 0 0 0 0
+run_hook "$SUBAGENT_STOP_PAYLOAD"
+
+if [ "$HOOK_RC" -eq 0 ] \
+   && [ -f "$ATTEST_LOG" ] \
+   && grep -q "sandwich-dev-S99-tc9b" "$ATTEST_LOG" \
+   && ! grep "sandwich-dev-S99-tc9b" "$ATTEST_LOG" | grep -q "SKIP-OUT-OF-SCOPE"; then
+  echo "PASS TC9b: tests_passed:0 is a legitimate BC claim (not skipped by scope-filter)"
+  PASS=$((PASS+1))
+else
+  echo "FAIL TC9b: tests_passed:0 should NOT trigger SKIP-OUT-OF-SCOPE; rc=$HOOK_RC"
+  grep "sandwich-dev-S99-tc9b" "$ATTEST_LOG" 2>/dev/null || echo "(no log row)"
+  FAIL=$((FAIL+1))
+fi
+
 echo ""
-echo "=== Results: PASS=$PASS FAIL=$FAIL (8 TCs) ==="
+echo "=== Results: PASS=$PASS FAIL=$FAIL (10 TCs) ==="
 [ "$FAIL" -eq 0 ] && exit 0 || exit 1
