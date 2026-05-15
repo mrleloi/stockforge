@@ -9,31 +9,9 @@
 
 ---
 
-## 🚨 INCIDENT + RECOVERY — 2026-05-14 mass-deletion (RESOLVED 12:31 SEAST)
+## 🚨 INCIDENT + RECOVERY — 2026-05-14 mass-deletion (RESOLVED — archived)
 
-**What happened**: ~2688 files destroyed by a recency-based mass deletion (every file NOT touched in the S310 session died — including `.git/HEAD`, `PROJECT_CHARTER.md`, 82 hook scripts, root dirs). Correlated with S316 sandwich-verifier execution window 10:57-11:16. Exact command unrecoverable (Claude Code subagent transcripts are 0-byte by design).
-
-**Recovery**: COMPLETE. `git clone` from remote (`https://github.com/mrleloi/stockforge.git`, last commit 378adad) + `git checkout HEAD --` restored 2688 tracked files. Dangling-blob mining of `.git-corrupt-20260514/objects/` recovered 0 additional (all 20 dangling blobs were already-surviving session work). Forensic backups preserved at `C:/htdocs/{stockforge-rescue-20260514, stockforge-fresh-20260514}` + `./.git-corrupt-20260514/`.
-
-**Permanent losses** (never committed nor staged → unrecoverable): `agent-workspace/research/INTEGRATION_PROPOSAL{,_SUPPLEMENT}_2026-05-13.md` + 7 `general-purpose-S259-deepdive-*.md` observation files. Findings preserved in D-058 + Q-INT bundle. `20260513_01.txt` user-prompt RECONSTRUCTED → `agent-workspace/research/RECOVERED-20260513_01-user-prompt.txt` (human must copy back to `user_prompt/`).
-
-**Prevention SHIPPED** (commits 770c101 + 39e4c75):
-- ✅ **R1** `destructive-command-guard.sh` — PreToolUse hook (FIRST in chain), blocks `rm -rf`/`find -delete`/`git reset --hard`/`git checkout -- .`/`git clean`/`git stash`/`git worktree remove`/etc. for ALL agents+subagents. 39/39 firing-test. Override: `STOCKFORGE_ALLOW_DESTRUCTIVE=1`.
-- ✅ **R2** `project-integrity-watchdog.sh` — Stop hook, verifies 7 canonical files + 5 dirs; missing → instant `.autonomous-BLOCKED`. 7/7 firing-test.
-- ✅ **R3** `daily-backup.sh` — Stop hook, daily out-of-tree tar.gz to `../stockforge-backups/`, 14-day retention. 6/6 firing-test. Live-verified 30MB archive.
-- ⏸ **R4** remove broad `Bash(rm:*)` from settings allow (pending — R1 covers the risk class)
-- ⏸ **R5** git destructive deny (mostly covered by R1; settings.json deny-list addition pending)
-- ⏸ **R6** `transcript-archive.sh` SubagentStop hook (pending — forensic trail for future incidents)
-
-**Post-mortem**: `agent-workspace/post-mortems/2026-05-14-mass-deletion-recovery.md` (full RCA + R1-R6).
-
-**State**: hooks RE-ENABLED. Full regression 102/102 firing-tests + 58/58 pytest PASS. 2 commits made (no push — human pushes manual). Repo healthy: 3628 files, git working.
-
-**NEXT STEPS** (resume point for next session):
-1. (optional) R4/R5/R6 follow-up prevention — lower priority, R1 covers the risk class
-2. **Resume Wave 0 substrate**: W0-2 verified PASS-WITH-CONCERNS (S316) → author W0-2.1 follow-up plan (fixes D-IMPORTANT-1 grep comment-filter bug + D-IMPORTANT-2 `next(iter())` miss) → then W0-3 (TradingAgents atomic temp-file-replace) / W0-4 / W0-5
-3. Plan 014 (W0-2) still in `pending/` — move to `completed/` (W0-2 shipped + verified)
-4. With R1 destructive-command-guard active, subagent dispatches are now SAFE to resume
+~2688 files destroyed by a recency-based mass deletion (S316 verifier window); recovery COMPLETE via `git clone` + `git checkout HEAD --`. Prevention R1/R2/R3 SHIPPED (commits 770c101 + 39e4c75): `destructive-command-guard.sh` (PreToolUse) + `project-integrity-watchdog.sh` (Stop) + `daily-backup.sh` (Stop). R4/R5/R6 follow-up = low-priority (R1 covers the risk class). **Full RCA + detail: `agent-workspace/post-mortems/2026-05-14-mass-deletion-recovery.md`.** Permanent losses (uncommitted research files) preserved in D-058 + Q-INT bundle. Carry-forward: Wave 0 W0-2.1 follow-up plan + W0-3/4/5 (behind the S310 BEHAVIORAL HOLD harness-first sequencing); plan 014 (W0-2) move `pending/`→`completed/`.
 
 ---
 
@@ -150,49 +128,41 @@
 
 ---
 
-## S309 — SYNC-GRILLING cadence DUE post-S308 (S306→S309 3-session cadence; 18th in lineage S257/S260/S263/S266/S270/S273/S276/S279/S282/S285/S288/S291/S294/S297/S300/S303/S306/S309): User `continue` at 2026-05-14T08:50:~ local (01:50:~Z); per `autonomous_continue_no_self_pause` + `dont_self_pause_at_session_boundary` + S308 close NEXT-ACTION PRIORITY 1 sync-grilling DUE: execute auto-tier SCOPE charter_match per established lineage; zero NEW SCOPE-tier divergence outside pending Q-INT mega-bundle sustained user-blocked; S307 + S308 intervening sessions both pure-idle non-SCOPE; invoked `sync-grilling-call.sh SCOPE charter_match sync-grilling-S309` → events.tsv +1 row at 01:50:31Z; sync-tracker state SCOPE 67.0→67.2 (+0.2 sample 111→112 tier MED sustained; threshold MED→HIGH at 75 still 7.8 points away); DECISION_ROUTING 49.4 unchanged sample 52 tier MED-LOW (no q_and_a_resolution event this session); sync-state.md last_check_session=S306→S309 auto-updated by wrapper + outcome narrative prepended with S309 entry preserving S306 verbatim per L-S43f-3 + L-S256-1; sync-tracker-render RC=0 _index.md refreshed; **HH-H.4 marker absence 18th-cycle SUSTAINED** (S292-S309 entries; pattern firmly entrenched well beyond AP-23 3rd-cycle promotion-eligibility threshold; downgrade-execution still DEFERRED to consolidated promote-rule cycle); Q-INT mega-bundle 14262B unchanged at May 13 16:47 sustained user-blocked; latest user_prompt 20260513_01.txt unchanged; D-055 cool-down ~12h54m remaining (deadline ≥2026-05-14T~14:45Z); L-S283-1 PATTERN-VALIDATION sustained from S289 (4-event post-resolution lineage); harness GREEN per S290 atomic-noclobber fix sustained; M-S309-NONE [0 commits/charter-edits/constitution-writes/production-code-edits]
+## S318 + S320 — archived 2026-05-15 (LOC retention)
 
-**Pre-state**: S308 closed cleanly as ROUTINE-IDLE post-S307 at 2026-05-14T01:47Z (24th idle-tier close; HH-H.4 self-resolving 17th-cycle validated). S308 close prediction "S309 = SYNC-GRILLING DUE per cadence S306→S309; expected auto-tier SCOPE charter_match 18th in lineage" — empirically confirmed at S309 entry.
+Full session entries moved to `current-execution-archive-2026-05-15-S318-to-S320.md`. Summary: S318 = notification-spam GENERATION root fix (10 hooks → fixed-name idempotent; verifier PASS-WITH-CONCERNS; carry-forward = bash-hook-lint 33 violations + commit-boundary gap). S320 = Plan 015 bash-hook-lint 33-violation remediation (33→6 across S319a+S319b sub-dispatches; S319-verify PASS-WITH-CONCERNS + 2 IMPORTANT defects flagged; M-S320-1 = diff-context-comment-contradiction; 6 Batch E violations gated on human commit boundary).
 
-**Trigger**: User `continue` at 2026-05-14T08:50:~ local (01:50:~Z). Same conversation as S301-S308.
+---
 
-**Execution path (single turn, mechanical sync-grilling)**:
-1. Pre-flight delta-check at 01:50:15Z: state.tsv UNCHANGED (SCOPE 67.0 sample 111 last_updated 01:38:09Z); events.tsv last entry sync-grilling-S306 at 01:38:09Z; HH-H.4 marker absent 18th-cycle.
-2. Lineage-match SCOPE auto-tier: zero NEW SCOPE-tier divergence; anti-mixing rule honored.
-3. Invoke `bash scripts/hooks/sync-grilling-call.sh SCOPE charter_match sync-grilling-S309 ...` → RC=0; wrapper appended events.tsv row at 01:50:31Z + auto-updated sync-state.md last_check_session=S309.
-4. Verification: tail events.tsv shows sync-grilling-S306 (01:38:09Z) → sync-grilling-S309 (01:50:31Z); state.tsv SCOPE 67.2 sample 112.
-5. Prepend S309 outcome narrative to sync-state.md (preserving S306 entry verbatim per L-S43f-3 + L-S256-1). Edit succeeded first-try.
-6. Re-render `bash scripts/hooks/sync-tracker-render.sh` → RC=0; _index.md refreshed.
-7. Close S309 with archive S308 latest.md + S309 row prepended + session-309.md log + slim S309-close checkpoint.
+## S321 — Plan 015 remediation of S319-verify defects + first D-060 agent commit — 2026-05-15
 
-**Files this turn (S309)**:
-- M `agent-workspace/memory/sync-tracker/events.tsv` (sync-grilling-S309 row appended at 01:50:31Z; charter_match +0.2)
-- M `agent-workspace/memory/sync-tracker/state.tsv` (SCOPE 67.0→67.2 sample 111→112 last_updated_ts 01:50:31Z tier MED)
-- M `agent-workspace/memory/sync-state.md` (last_check_session S306→S309 auto-updated by wrapper; outcome narrative prepended with S309 entry preserving S306 verbatim per L-S43f-3 + L-S256-1)
-- M `agent-workspace/memory/sync-tracker/_index.md` (re-rendered via sync-tracker-render.sh RC=0)
-- A `agent-workspace/memory/checkpoints/2026-05-14-S308-close.md` (archive of S308 latest.md content)
-- M `agent-workspace/memory/current-execution.md` (this S309 row prepended; linter expected to trim oldest)
-- A `agent-workspace/memory/sessions/2026-05-14-session-309.md` (session log)
-- M `agent-workspace/memory/checkpoints/latest.md` (S308-close archived; slim S309-close written)
+User `continue` → S320-checkpoint P1. **S321 dev `aa060792c837dadb7` (still in-flight from a prior turn — NOT lost; M-S321-1) completed mid-turn**: fixed all 5 S320-verifier defects (2 IMPORTANT + 3 MINOR). IMPORTANT-1 `daily-backup.sh` SIGPIPE-safe `grep -c` subshell + TC7; IMPORTANT-2 `session-export-raw.sh` `clean_text` awk divergences (a)(b)(c) + TC8–12; MINOR-1/2/3 `bash-hook-lint.sh` Check 7 + Check 6b + backslash-carry TCs. Fire-tests 7/7 + 12/12 + 49/49; `run-all.sh` 103/103; lint 6 (Batch E only).
 
-**Mistakes this session (S309)**: M-S309-NONE — no execution errors. sync-grilling-call.sh RC=0 first-try; verification all succeeded; sync-tracker-render.sh RC=0 first-try; sync-state.md narrative Edit first-try success; close artifacts written first-try.
+**S321-verify `abeefe3f14a9d4814`** (fresh-context Opus, AP-1): **PASS-WITH-CONCERNS — MERGE-ELIGIBLE: YES**. Both IMPORTANT empirically confirmed closed (253-entry tarball reproduction); all 3 MINOR correct w/ dual-property coverage; `run-all.sh` 103/103 (no timeout artifact). 3 non-blocking MINOR (MINOR-A NEW cosmetic `daily-backup.sh:91` `0\n0` no-match capture, zero functional impact; MINOR-B pre-existing `clean_text` mismatched-tag divergence; carried Check 7 over-flag note). Verifier couldn't Write — main persisted `observations/sandwich-verifier-S321-plan015-remediation-verify.md`.
 
-**Candidate lessons (NEW S309)**: NONE NEW promotion candidates. HH-H.4 self-resolving classification 18th-cycle SUSTAINED — pattern firmly entrenched well beyond AP-23 3rd-cycle promotion-eligibility threshold. L-S283-1 continues sustained.
+**COMMIT `da02ad0`** — "S319+S321: bash-hook-lint 33→6 violation remediation (verified merge-eligible)", 24 files (3 hooks + 3 fire-tests + 18 S319-baseline hooks + 2 obs files). **First deliberate agent commit under D-060** (committed, NOT pushed). Surgical — only `scripts/hooks/` + `observations/` staged. `bash-hook-lint.sh` also carries S318 emit-section idempotent-notification change (verified S320 Concern 7). L-S320-1 + L-S321-1 promoted to agent-notes.
 
-**S310 NEXT-ACTION priority** (sync-grilling next at S312; S310/S311 likely pure-idle per sustained blocking conditions; all PRIORITY 1-13 still user-blocked / cool-down-pending / not-due / held):
-1. **PRIORITY 1** (post-cool-down ≥2026-05-14T~14:45Z; ~12h51m remaining at S309 close) — D-055 ratification + mandatory fresh-context sandwich-verifier.
-2. **PRIORITY 2** — Q-INT mega-bundle ratification still pending (user-blocked).
-3. **PRIORITY 3** — User review of S289-S290 harness fix (no commits per CLAUDE.md).
-4. **PRIORITY 4** — Backlog: fix 8 latent vulnerabilities Check 11 caught in production scripts.
-5. **PRIORITY 5** (post-D-055 + Q-INT-10=A) — Wave 0 substrate session (W0-1 nautilus FSM).
-6. **PRIORITY 6** (post-D-055) — G.1+G.2 anthropic SDK removal IMPL.
-7. **PRIORITY 7** (post-Q-INT) — Phase 4 master-plan 011-S251 amendment.
-8. **PRIORITY 8** — Sync-grilling next at S312 (3-session cadence S309→S312).
-9. **PRIORITY 9-11** — Consolidated promote-rule cycle candidates: HH-H.4 (18th-cycle) + L-S283-1 + L-S257-2 + L-S258-1 + L-S262-1 + L-S264-3 + alarm-fatigue tracker + L-S258-2 + L-S282-1.
-10. **PRIORITY 12** — sync-021/022/023 triage (defer).
-11. **PRIORITY 13** — L-S261-1 broader pattern HELD pending 3rd-instance.
+**S322 NEXT ACTION** — **Batch E untangle is a PLAN job** (sandwich-architect). State: 4 dirty Batch E hooks carry 140+/38- tangled S318 + unattributed work; `idle-state-advisory.sh` untracked; 25 unstaged `scripts/` files total (S318 idempotent-notification work never committed). S322 PLAN: (1) attribute the 25 unstaged files, (2) decide commit boundaries (likely: one S318-idempotent commit first), (3) then Batch E = clean-file lint fixes (6 violations → 0). D-060 unblocks Batch E (agent creates the commit boundary itself). Lower-priority carry-forward: MINOR-A cosmetic; HH-6 dispatch-pending rotation; Wave 0 W0-2.1 + W0-3/4/5. Plan 015 stays in `pending/` until Batch E completes.
 
-**Quality gates honored S309**: harness_priority_one ✓ / autonomous_continue_no_self_pause ✓ / dont_self_pause_at_session_boundary ✓ / verify_phase_before_next_phase ✓ (sync-grilling wrapper RC=0 verified; HH-H.4 marker-absence 18th-cycle empirically verified) / AP-1 ✓ / AP-7 ✓ / AP-8 ✓ / AP-23 ✓ (HH-H.4 firmly beyond 3rd-cycle but downgrade-execution deferred to consolidated cycle) / L-S43f-3 ✓ (sync-state.md S306 narrative preserved verbatim) / L-S65-2 ✓ / L-S69-1 ✓ / L-S139-1 ✓ / M-S98-1/M-S101-1 prevention ✓ (wrapper used) / M-S130-1 prevention ✓ / Charter Principle 11 ✓ / UP-06 ✓ / qa_bundle_all_pending ✓ / stop_offering_routing_branches ✓ / 0 commits ✓ / 0 charter edits ✓ / 0 constitution writes ✓ / 0 production-code edits ✓
+**Compliance attestation (S321 entry)**: harness_priority_one ✓ / verify_phase_before_next_phase ✓ (clean spot-check on stable tree + fresh-context re-verifier before commit) / AP-1 ✓ / dont_self_pause_at_session_boundary ✓ / autonomous_continue_no_self_pause ✓ / stop_offering_routing_branches ✓ / D-060 commit policy applied ✓ (1 commit `da02ad0`, 0 push) / SYNC-GRILLING not fired (S310 hold) / 0 charter / 0 constitution.
+
+---
+
+## S322 — Plan 015/016 close + Wave-1 master plan ratification + Phase A dispatch — 2026-05-15
+
+User `continue`. S322 closed clean: 5 commits shipped (`49fe2ca` S322 Batch E lint 6→0 + `5d9e5f2` S255 urgent-md-rotate + session-hooks-log-rotate + `40012ed` S317 block-mechanism + `9923c49` S318 notification-spam GENERATION root fix + `da02ad0` carryover); S322-verify PASS / MERGE-ELIGIBLE (fresh-context Opus `ab07b4b4f4c728a64`; 0 Critical / 0 Important / 1 Minor; lint=0; run-all.sh 103/103; per-hook fire-tests 91/91 PASS); Wave 1+ master plan ratified Q-INT-2026-05-1..4 = A/A/A/A (`agent-workspace/master-plans/2026-05-15-wave-1-research-integration.md` 821 LOC); Plans 015 + 016 moved pending→completed; 11 stale notifications archived; D-059 ratified ACCEPTED; L-S322-1/2 + M-S322-1 promoted. S322 close DISPATCHED **S323 Phase A Wave 1 INGEST** = 15 parallel general-purpose subagents per master plan § 6.1, each writes `observations/master-planner-A-<N>-deepdive-<repo>.md`. BEHAVIORAL HOLD substantive criteria MET → effectively LIFTS on S323 entry per master-plan-derived next-action rule. 0 charter / 0 constitution / D-060 5 agent commits + 0 pushes. M-S322-1 (low, notification-RESOLVED in-place edit deprioritize miss).
+
+---
+
+## S323-S325 — Phase A Wave-1 INGEST + Synthesis + D-061 ADR + Q-INT-bis bundle — 2026-05-15 (one autonomous turn covering 3 logical sessions)
+
+User `continue` → checkpoint S322 → S323 (15 deep-dive returns landed across turn) → S324 PLAN synthesis dispatched (`general-purpose` `a796379816526400d`, 245K tokens) → S325 PLAN ADR+bundle dispatched (`master-planner` `a5334432e51535123`, 155K tokens). **Outputs**: (a) 15× deep-dives at `observations/master-planner-A-{01..15}-deepdive-*.md` (~2100 LOC total; ratified by S324 synthesis); (b) `research/INTEGRATION_PROPOSAL_2026-05-15.md` (919 LOC; per-repo synthesis + license matrix) + `..._SUPPLEMENT_2026-05-15.md` (603 LOC; Theme F..N cross-repo + refined allocation); (c) `decisions/061-wave-1-integration-ratification.md` (425 LOC; PROPOSED; level IMPL; 19 source_evidence cites; supersedes LOST D-058; depends_on D-059 + D-060); (d) `human-workspace/q-and-a/pending/qa-2026-05-15-wave-1-bis.md` (223 LOC; SCOPE; SLA 2026-05-17T07:00Z; 4 questions Q-INT-2026-05-5..8 each with lettered A-E + first "(Recommended)" per user mega-bundle rule). **Material demotions** locked pending Q-INT-bis: FinceptTerminal MED→LOW (AGPL+commercial-license-required), MediaCrawler HIGH→MED-LOW (non-OSI Learning License 1.1), Scrapling Cloudflare-solver+patchright HARD REJECT (I-S34 ToS-conflict at `engines/_browsers/_stealth.py:107-181`), Theme H winner INVERTED master-plan-default→debate-style (TradingAgents `agents/utils/agent_states.py:7-43` empirically realizes I-S12 "disagreement surfaced not resolved"), Theme G I-S1-1 CONFIRMED genuine-new (NOT redundant with I-S1 per 3-framework empirical evidence). **Net-new**: Theme N (Vibe-Trading `agent/backtest/validation.py` MC+Bootstrap+Walk-Forward) for Charter Month-12 backtest goal — deferred past Wave 1; Vibe-Trading path-safety quad → 5-invariant (UNC reject cross-cutting). **Revised envelope**: 15-20 sessions / 2840-4180K (-1 session, -160-320K vs master-plan). **S326 NEXT ACTION** = HUMAN RATIFICATION GATE (out-of-band; user replies in `qa-2026-05-15-wave-1-bis.md`; auto-mv hook transitions pending→answered on `status: answered-*` frontmatter signal). Until then, S327+ does NOT execute. 3 outlook scenarios: blanket-A → S328 Phase B (W0-2.1 PLAN); Q-INT-5=B → no rework; Q-INT-7=B/C → S327 RECOVERY adds Theme N. **Compliance**: harness_priority_one ✓ / AP-1 ✓ (2× fresh-context subagent dispatch; main did NOT self-author) / dont_self_pause_at_session_boundary ✓ / autonomous_continue_no_self_pause ✓ / stop_offering_routing_branches ✓ / 0 commits (PLAN-tier; D-060) / 0 charter / 0 constitution / SYNC-GRILLING not fired (`must_grill_remaining=0` all 5 categories — S325 subagent verified). No mistakes this session (M-S321-1 + M-S322-1 LOW carry-forward only). **POST-CLOSE ADDENDUM same turn (per harness_priority_one + dont_self_pause while Q-INT-bis gate waits)**: L-S322-1 SHIPPED-IN-S325 — severity-classifier.sh:182-186 parallel `level:` short-circuit (RESOLVED|ANSWERED|CLOSED incl. lowercase) before body-grep fallback; companion firing-test TC6 added; 6/6 PASS; bash-hook-lint clean; M-S322-1 prevention is now hook-enforced. Author guidance: `level: RESOLVED` in-place edit alone deprioritizes — mv-to-archived/ no longer required. Carryover backlog: P-LOW-2 + P-LOW-3 (HH-6 stale=3) + W0-2.1 + Plan 015 Batch E + cosmetic § 18 typo. Predecessor checkpoint `2026-05-15-S322-close.md` archived; `latest.md` rewritten as S325-close + post-close addendum.
+
+---
+
+## S326 — Q-INT-bis ratified + L-S326-2 SHIPPED + S328 PLAN dispatched — 2026-05-15
+
+User chat 2026-05-15T15:30+07:00 "approved all your recommendation for all pendings item and blocking items. continue" → blanket-A on Q-INT-2026-05-5/6/7/8. D-061 PROPOSED → **ACCEPTED** + approval_chain entry; master plan `pending-ratification` → `ratified`; Q-INT-bis frontmatter `status: pending` → `answered-2026-05-15-via-chat-blanket-A` (auto-mv on next Stop). Commits: `2e77b1f` L-S326-2 (dispatch-jsonl-recorder sidecar close-the-loop; HH-6 root-cause companion to L-S326-1; firing-test 12/12 + lint clean + run-all 104/104) and `27967fb` S326-close ratification chain (Phase A synthesis 3 files / 1480 LOC, never-committed PLAN-tier work now persisted as audit anchor). **S327 RECOVERY SKIPPED** (blanket-A = no master-plan rework). **S328 PLAN dispatched** (`sandwich-architect` `ad236ac4f690e243b`, background) → output target `session-plans/pending/017-S329-wave-0-W0-2.1-python-determinism-fixes.md` per master plan § 6.2 (50-80K envelope; W0-2.1 = 2 pre-existing R1+R2 violations in `sqlite_thesis_repository.py` + `capture_sentiment_snapshot_use_case.py`). Coordination: main session avoids those 2 .py files + their tests + `python-determinism-warn.md` until plan returns. **Compliance**: harness_priority_one ✓ / AP-1 ✓ / dont_self_pause_at_session_boundary ✓ (dispatched S328 in-turn, did not idle on gate-resolve) / D-060 commits ✓ (2 commits, 0 push) / 0 charter / 0 constitution / no mistakes this session.
 
 ---
 

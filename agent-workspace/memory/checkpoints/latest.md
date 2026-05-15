@@ -1,9 +1,9 @@
-# Checkpoint — S325 CLOSE (Wave-1 Phase A synthesis SHIPPED; D-061 PROPOSED; S326 = human ratification gate)
+# Checkpoint — S326 CLOSE (Q-INT-bis RATIFIED blanket-A; D-061 ACCEPTED; S329 = next IMPL)
 
-**Updated**: 2026-05-15 ~13:35 SEAST
-**Mode**: AUTONOMOUS (full) — user `continue` honored; one-turn S324 + S325 dispatch chain
-**Predecessor checkpoint**: `checkpoints/2026-05-15-S322-close.md` (archived this turn)
-**Successor**: S326 = HUMAN RATIFICATION GATE (out-of-band; awaits user reply to Q-INT-2026-05-bis)
+**Updated**: 2026-05-15 ~15:50 SEAST (auto-reboot transition handoff per D-004 cliff at 233K)
+**Mode**: AUTONOMOUS (full) — user `approved all your recommendation...continue` resolved S326 gate
+**Predecessor checkpoint**: S325 CLOSE inline above (this update preserved the S326 addendum section + appended S326 CLOSE FINAL section below; predecessor not archived this turn — single-file checkpoint maintained)
+**Successor**: S327 (fresh-context after auto-reboot; first action = dispatch S329 sandwich-dev per S326 CLOSE FINAL § Next action below)
 
 ## S325 outcome (FINAL)
 
@@ -23,11 +23,43 @@
   - Vibe-Trading path-safety quad is actually 5-invariant (UNC-reject as cross-cutting fifth)
 - ✅ **Revised Wave-1 envelope**: 15-20 sessions / ~2840-4180K tokens (-1 session, -160-320K vs master-plan)
 
-## Next action — S326 HUMAN RATIFICATION GATE (out-of-band; agent BLOCKED until reply)
+## S326 GATE RESOLVED — Q-INT-bis blanket-A landed 2026-05-15T15:30+07:00
 
-User picks A/B/C/D/E per Q-INT-2026-05-5..8 in `human-workspace/q-and-a/pending/qa-2026-05-15-wave-1-bis.md`.
+User chat: "approved all your recommendation for all pendings item and blocking items. continue". Interpreted as A/A/A/A on Q-INT-2026-05-5/6/7/8 per each "(Recommended)" pick (SCOPE-tier explicit-letter-pick satisfied via the convention).
 
-Auto-mv hook (HH-E.2 / D-031) transitions pending → answered on `status: answered-*` frontmatter signal. Until then, S327+ does NOT execute. Agent's `continue` on a still-pending bundle MUST first re-read the bundle to check for inline answers + frontmatter status update.
+Picks:
+- Q-INT-5 = A — Theme H debate-style with 4 mitigations (first-speaker randomization / 4-round token-cap / AP-1 fresh-context judge / BAN entry_price+price_target LLM-emit)
+- Q-INT-6 = A — Theme G constitution-write in `financial-data-protocol.md`; Phase C (S333 PLAN + S334 human-approve gate)
+- Q-INT-7 = A — Theme N defer to Wave 2+; ADR-first PLAN post-Wave-1
+- Q-INT-8 = A — Theme L dual-adapter hybrid crawl4ai + Scrapling-core (drop CDP/login-walled)
+
+State changes shipped this turn:
+- D-061 PROPOSED → **ACCEPTED** + approval_chain entry
+- Master plan `pending-ratification` → **ratified**
+- Q-INT-bis frontmatter `status: pending` → `status: answered-2026-05-15-via-chat-blanket-A` (Stop hook auto-mv will move pending → answered)
+- Commit `27967fb` — S326-close ratification chain (3 files / 1480 LOC; first-time persist of Phase A synthesis)
+
+S327 RECOVERY **SKIPPED** (blanket-A = no master-plan rework).
+
+## S328 PLAN landed — W0-2.1 sub-plan ready for S329 IMPL
+
+S328 sandwich-architect (`ad236ac4f690e243b`; 132K tokens; 388s; 31 tools) returned with `agent-workspace/session-plans/pending/017-S329-wave-0-W0-2.1-python-determinism-fixes.md` (509 LOC; 13 DoD + STOP-IF-AMBIGUOUS + 8 risks/mitigations + pre-authored test sketches). Budget estimate 90-135K within § 6.2 envelope 100-150K.
+
+Architect findings (S326 read these before dispatching S329):
+- **R1** `packages/infrastructure/analysis/sqlite_thesis_repository.py:206` — `datetime.now()` lives in a defensive `else` fallback for malformed persisted `created_at`. Zero test coverage of the line-206 path. Fix: `datetime.now(timezone.utc)`. Surgical (1 occurrence).
+- **R2** `packages/application/crowd/use_cases/capture_sentiment_snapshot_use_case.py:180` — `random.sample(...)` is on the MAIN PRODUCTION PATH (every snapshot capture; persisted in `SentimentSnapshot.source_posts_sample`). Fix approach chosen: **constructor-injected `rng: random.Random` dataclass field** (parallel to existing `clock: Callable[[], datetime]` injection at lines 113-115; matches D-059 § "Allowed Contexts" line 154; architecturally consistent). Rejected `__main__` guard as semantic miscomprehension (violation is in method body, not module-level script). Surgical (1 occurrence). Detector regex `random|randint|choice|shuffle|sample` at python-determinism-check.sh:172-179 is safe against `random.Random` (capital R class name not in alternation).
+
+## Next action — S327 (fresh-context after auto-reboot): dispatch S329 sandwich-dev
+
+**S327 FIRST ACTION**: dispatch sandwich-dev background per plan 017 (target observation `observations/sandwich-dev-S329-wave-0-W0-2.1.md`). Per L-S320-1: this session at 233K crossed D-004 cliff (220K), MUST NOT dispatch S329 dev from over-budget; auto-reboot transition will give S327 fresh context to handle dispatch safely.
+
+**Coordination rule (S329 active)**: main session avoids `packages/infrastructure/analysis/sqlite_thesis_repository.py`, `packages/application/crowd/use_cases/capture_sentiment_snapshot_use_case.py`, their tests (`tests/**/test_sqlite_thesis_repository*` + `tests/**/test_capture_sentiment_snapshot*`), and the observation target file.
+
+**Pending after S329 returns** (per master plan § 6.2):
+- S330 sandwich-verifier (AP-1 fresh-context; adversarial review of S329 IMPL; PASS → plan 017 moves pending → completed)
+- S331 PLAN sandwich-architect bundling W0-3 + W0-4 + W0-5 (TradingAgents atomic temp-file-replace + HTML-comment separator + Vibe-Trading path-safety quint)
+- S332+ FOCUSED_IMPL / VERIFY execution
+- Phase D-K = Theme L → I → H → J → K per master plan § 6.4 (Wave-1 IMPL by Phase ordering)
 
 ## 3 outlook scenarios (per S325 subagent report)
 
