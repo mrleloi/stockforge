@@ -156,7 +156,9 @@ class NDHAdapter(CrawlerAdapter):
         """
         from bs4 import BeautifulSoup
 
-        html = self._fetch_with_optional_chain(self._absolute(listing_path))
+        html = self._fetch_with_optional_chain(
+            self._absolute(listing_path), store_raw=False
+        )
         soup = BeautifulSoup(html, "html.parser")
         urls: list[str] = []
         seen: set[str] = set()
@@ -301,11 +303,19 @@ class NDHAdapter(CrawlerAdapter):
     # Private helpers
     # ------------------------------------------------------------------
 
-    def _fetch_with_optional_chain(self, url: str) -> str:
+    def _fetch_with_optional_chain(self, url: str, *, store_raw: bool = True) -> str:
         """Fetch with rate-limit + robots-check + raw-html-sink chain (all optional).
 
         Pattern mirrors CafeFAdapter._fetch_with_optional_chain shape at
         cafef_adapter.py:112-146 (rl_fetcher path).
+
+        Args:
+            url: Absolute URL to fetch.
+            store_raw: When True (default; article-fetch path), persist HTML via
+                raw_html_sink if provided. When False (discover/listing path),
+                skip the sink — listing-page HTML is not the unit of reprocessing
+                and would pollute the article preservation dataset. F2 fix per
+                S345 sandwich-verifier (data contamination defect).
         """
         rl = self.rate_limiter
         if rl is not None and hasattr(rl, "wait_if_needed"):
@@ -323,21 +333,22 @@ class NDHAdapter(CrawlerAdapter):
         if rl is not None and hasattr(rl, "report_response"):
             rl.report_response(url, 200)  # type: ignore[union-attr]
 
-        rhs = self.raw_html_sink
-        if rhs is not None and hasattr(rhs, "write"):
-            try:
-                rhs.write(  # type: ignore[union-attr]
-                    source_id=self.source_id,
-                    url=url,
-                    html=html,
-                    fetched_at=self.clock(),
-                )
-            except Exception as exc:
-                _log.warning(
-                    "ndh_adapter: raw_html_sink.write failed for url=%r: %s",
-                    url,
-                    exc,
-                )
+        if store_raw:
+            rhs = self.raw_html_sink
+            if rhs is not None and hasattr(rhs, "write"):
+                try:
+                    rhs.write(  # type: ignore[union-attr]
+                        source_id=self.source_id,
+                        url=url,
+                        html=html,
+                        fetched_at=self.clock(),
+                    )
+                except Exception as exc:
+                    _log.warning(
+                        "ndh_adapter: raw_html_sink.write failed for url=%r: %s",
+                        url,
+                        exc,
+                    )
 
         return html
 

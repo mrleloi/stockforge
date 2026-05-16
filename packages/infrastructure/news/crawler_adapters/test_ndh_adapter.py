@@ -439,8 +439,29 @@ def test_adapter_default_no_injections_still_works() -> None:
     assert isinstance(result, ScrapedArticle)
 
 
+def test_discover_does_not_persist_listing_html_to_sink() -> None:
+    """Test 21 -- F2 regression guard (S345 sandwich-verifier).
+
+    discover() fetches the listing page through the same chain as fetch_and_parse
+    but MUST NOT persist its HTML via RawHtmlSink. Listing pages have different
+    licensing surface and are not the unit of reprocessing. Confirms store_raw=False
+    propagates to the sink-guard.
+    """
+    mock_sink = MagicMock()
+    mock_sink.write = MagicMock()
+    adapter = _make_adapter(
+        fetcher=lambda _: _SYNTHETIC_NDH_LISTING_HTML,
+        raw_html_sink=mock_sink,
+    )
+    urls = adapter.discover("/thi-truong-chung-khoan")
+    # discover succeeded (returned URLs from synthetic fixture)
+    assert len(urls) > 0
+    # sink.write was NOT called for the listing-page fetch (F2 fix)
+    mock_sink.write.assert_not_called()
+
+
 # ---------------------------------------------------------------------------
-# Test 20: CrawlerAdapter ABC contract enforcement
+# Test 20 (renumbered as test 22 in narrative): CrawlerAdapter ABC enforcement
 # ---------------------------------------------------------------------------
 
 
