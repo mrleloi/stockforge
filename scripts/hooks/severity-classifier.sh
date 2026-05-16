@@ -43,9 +43,10 @@ trap 'rm -f "$TMP" 2>/dev/null || true' EXIT
 # Header
 {
   printf '# severity-state.tsv — generated %s by severity-classifier.sh\n' "$TS"
-  printf '# columns: severity\\tartifact_path\\tage_hours\\tnext_action\\tclassified_at\n'
+  printf '# columns: severity\\tartifact_path\\tage_hours\\tnext_action\\tclassified_at\\tblock_tier\n'
+  printf '# block_tier: HARD | PENDING | SOFT  (NEW S348 — drives escalation-engine routing per ADR D-068)\n'
   printf '# severity: CRITICAL | HIGH | MEDIUM | LOW\n'
-  printf '# next_action: BLOCK | ESCALATE-ASKUSERQUESTION | DIGEST | LOG-ONLY\n'
+  printf '# next_action: BLOCK | BLOCK-PENDING | ESCALATE-ASKUSERQUESTION | DIGEST | LOG-ONLY\n'
 } > "$TMP"
 
 # Helper: age in hours from file mtime
@@ -57,8 +58,8 @@ age_hours() {
 }
 
 emit_row() {
-  local sev="$1" path="$2" age="$3" action="$4"
-  printf '%s\t%s\t%s\t%s\t%s\n' "$sev" "$path" "$age" "$action" "$TS" >> "$TMP"
+  local sev="$1" path="$2" age="$3" action="$4" tier="${5:-SOFT}"
+  printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$sev" "$path" "$age" "$action" "$TS" "$tier" >> "$TMP"
 }
 
 # === Layer 1: CRITICAL — stale-checkpoint marker, charter violation markers ===
@@ -76,8 +77,16 @@ for m in "${CRIT_MARKERS[@]}"; do
   [ -f "$m" ] || continue
   rel="${m#$PROJECT_DIR/}"
   age=$(age_hours "$m")
-  emit_row "CRITICAL" "$rel" "$age" "BLOCK"
+  emit_row "CRITICAL" "$rel" "$age" "BLOCK-PENDING" "PENDING"
 done
+
+# === HARD-tier reservation (NEW S348 per ADR D-068) ===
+# severity-classifier emits NO HARD-tier rows in the current 5-trigger taxonomy
+# (per Q-RD3 ratification — HARD stays DISTRIBUTED across destructive-command-guard.sh
+# PreToolUse + project-integrity-watchdog.sh Stop). This comment block reserves the
+# tier-emission path; future severity-classifier callers MAY emit HARD by passing
+# "HARD" as the 5th arg to emit_row. escalation-engine.sh handles HARD identically
+# to old-school CRITICAL → .autonomous-BLOCKED flag + immediate Telegram.
 
 # === Layer 2: Q&A pending bundles → HIGH at 6h pending, CRITICAL at 96h ===
 if [ -d "$QA_DIR" ]; then
@@ -92,7 +101,7 @@ if [ -d "$QA_DIR" ]; then
     rel="${f#$PROJECT_DIR/}"
     age=$(age_hours "$f")
     if [ "$age" -ge 96 ]; then
-      emit_row "CRITICAL" "$rel" "$age" "BLOCK"
+      emit_row "CRITICAL" "$rel" "$age" "BLOCK-PENDING" "PENDING"
     elif [ "$age" -ge 6 ]; then
       emit_row "HIGH" "$rel" "$age" "ESCALATE-ASKUSERQUESTION"
     else
@@ -138,7 +147,9 @@ if [ -d "$DECISIONS_DIR" ]; then
       action="ESCALATE-ASKUSERQUESTION"
       [ "$sev_if_expired" = "MEDIUM" ] && action="DIGEST"
       [ "$sev_if_expired" = "LOW" ] && action="LOG-ONLY"
-      emit_row "$sev_if_expired" "$rel" "$age" "$action"
+      tier="SOFT"
+      [ "$sev_if_expired" = "HIGH" ] && tier="PENDING"
+      emit_row "$sev_if_expired" "$rel" "$age" "$action" "$tier"
     fi
   done < <(find "$DECISIONS_DIR" -maxdepth 1 -type f -name "*.md" 2>/dev/null | sort)
 fi
@@ -154,8 +165,8 @@ if [ -f "$MISTAKE_LOG" ]; then
     | head -5 \
     | while IFS= read -r line; do
         case "$line" in
-          *critical*) emit_row "CRITICAL" "agent-workspace/memory/mistake-log.md" "0" "BLOCK" ;;
-          *high*)     emit_row "HIGH"     "agent-workspace/memory/mistake-log.md" "0" "ESCALATE-ASKUSERQUESTION" ;;
+          *critical*) emit_row "CRITICAL" "agent-workspace/memory/mistake-log.md" "0" "BLOCK-PENDING" "PENDING" ;;
+          *high*)     emit_row "HIGH"     "agent-workspace/memory/mistake-log.md" "0" "ESCALATE-ASKUSERQUESTION" "SOFT" ;;
         esac
       done
   ) || true

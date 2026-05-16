@@ -221,6 +221,124 @@ process.stdin.on('end',()=>{ try { console.log(JSON.parse(s).prompt || JSON.pars
 }
 
 # ---------------------------------------------------------------------------
+# check-prompt-ack  (called internally from cmd_check_prompt path; also direct)
+# Scans user prompt for ack <slug> keywords and resolves PENDING rows.
+# NOTE: runs independently of gate-active state (user can ack PENDING rows
+# regardless of whether a HARD block is active).
+# ---------------------------------------------------------------------------
+cmd_check_prompt_ack() {
+  local payload user_prompt
+  payload="$(cat 2>/dev/null || true)"
+  user_prompt="$(printf '%s' "$payload" | node -e "
+let s=''; process.stdin.on('data',c=>s+=c);
+process.stdin.on('end',()=>{ try { console.log(JSON.parse(s).prompt || JSON.parse(s).user_message || ''); } catch { console.log(''); } });" 2>/dev/null || echo "")"
+  [ -z "$user_prompt" ] && user_prompt="${CLAUDE_USER_PROMPT:-}"
+  [ -z "$user_prompt" ] && return 0
+
+  # === ack <slug> detection (NEW S348 per ADR D-068) ===
+  # Match "ack <slug>" anywhere in prompt; multi-ack per prompt supported via grep -oE | while read
+  # DD-5: whitespace anchor + line anchor + slug-char-only suffix prevents false-match
+  ACK_RE='(^|[^a-zA-Z0-9_-])ack +([a-zA-Z0-9_-]+)([^a-zA-Z0-9_-]|$)'
+  if printf '%s' "$user_prompt" | grep -qiE "$ACK_RE" 2>/dev/null; then
+    # Extract all slugs after "ack " keyword
+    ACK_SLUGS=$(printf '%s' "$user_prompt" | grep -oiE "ack +[a-zA-Z0-9_-]+" 2>/dev/null | awk '{print $2}' | tr '\n' ' ' || true)
+    if [ -n "$ACK_SLUGS" ]; then
+      # shellcheck disable=SC2086
+      ACK_RESULT=$(cmd_ack $ACK_SLUGS 2>&1 || true)
+      log "check-prompt: ack-slug(s) detected: $ACK_SLUGS"
+      printf 'BLOCK-CONTROL: ack keyword(s) detected -- PENDING row(s) processed.\n%s\n' "$ACK_RESULT"
+      # NOTE: ack does NOT clear .autonomous-BLOCKED (that is HARD-tier only via approval keyword path above)
+    fi
+  fi
+  return 0
+}
+
+# ---------------------------------------------------------------------------
+# ack <slug> [<slug2> ...]
+# ---------------------------------------------------------------------------
+cmd_ack() {
+  local PENDING_QUEUE="$PROJECT_DIR/human-workspace/notifications/.pending-queue.tsv"
+  local ARCHIVE_DIR="$PROJECT_DIR/human-workspace/notifications/archive"
+  local slug result_count=0
+  [ -f "$PENDING_QUEUE" ] || { printf 'BLOCK-CONTROL: no .pending-queue.tsv to ack against\n'; return 0; }
+  mkdir -p "$ARCHIVE_DIR" 2>/dev/null || true
+
+  for slug in "$@"; do
+    [ -z "$slug" ] && continue
+    # Validate slug — alphanumeric + dash + underscore only (path-safety per D-064)
+    case "$slug" in
+      *[!a-zA-Z0-9_-]*) printf 'BLOCK-CONTROL: invalid slug "%s" (must match [a-zA-Z0-9_-])\n' "$slug"; continue ;;
+    esac
+
+    # Find matching rows — search for slug in both pending_id and artifact_path basename
+    # pending_id format is <slug>-<epoch>; basename of artifact_path may also match
+    local match_count
+    match_count=$(grep -v '^#' "$PENDING_QUEUE" 2>/dev/null | awk -F'\t' -v s="$slug" '
+      BEGIN { n=0 }
+      {
+        # Match if pending_id starts with slug or pending_id equals slug
+        if ($1 == s || index($1, s"-") == 1 || index($1, s) > 0) { n++ }
+        else {
+          # Match if artifact_path basename contains slug
+          n2 = split($4, a, "/"); bname = a[n2]
+          gsub(/[^a-zA-Z0-9_-]/, "", bname)
+          if (index(bname, s) > 0) { n++ }
+        }
+      }
+      END { print n }' 2>/dev/null || echo 0)
+    case "$match_count" in ''|*[!0-9]*) match_count=0 ;; esac
+
+    if [ "$match_count" -eq 0 ]; then
+      printf 'BLOCK-CONTROL: ack %s -- no matching PENDING row (already resolved?)\n' "$slug"
+      continue
+    fi
+
+    # Archive matched row(s) and remove from queue
+    local TMP_ACK="$PENDING_QUEUE.tmp.$$"
+    trap 'rm -f "$TMP_ACK" 2>/dev/null || true' EXIT
+    grep '^#' "$PENDING_QUEUE" > "$TMP_ACK" 2>/dev/null || true
+    while IFS=$'\t' read -r pending_id block_tier severity artifact_path detected_at escalate_at telegram_pushed archived_at resolve_reason; do
+      [ -z "$pending_id" ] && continue
+      case "$pending_id" in '#'*) continue ;; esac
+      # Check if this row matches the slug:
+      # 1. pending_id equals slug exactly
+      # 2. pending_id starts with slug- (format: <slug>-<epoch>)
+      # 3. artifact_path basename contains slug (for paths like .auto-reboot-PRE-BLOCKED-stale-checkpoint)
+      local row_slug row_match=0
+      row_slug=$(basename "$artifact_path" 2>/dev/null | tr -dc 'a-zA-Z0-9-_' | head -c 60 || echo "")
+      [ "$pending_id" = "$slug" ] && row_match=1
+      case "$pending_id" in "${slug}-"*) row_match=1 ;; esac
+      case "$row_slug" in *"${slug}"*) row_match=1 ;; esac
+      if [ "$row_match" -eq 1 ]; then
+        # Archive
+        local ARCHIVE_FILE="$ARCHIVE_DIR/$(date +%Y%m%d-%H%M%S 2>/dev/null)-PENDING-${slug}.md"
+        {
+          printf '# PENDING resolved (ack-by-user-prompt) %s\n' "$TS"
+          printf 'pending_id: %s\n' "$pending_id"
+          printf 'block_tier: %s\n' "$block_tier"
+          printf 'severity: %s\n' "$severity"
+          printf 'artifact_path: %s\n' "$artifact_path"
+          printf 'detected_at: %s\n' "$detected_at"
+          printf 'archived_at: %s\n' "$TS"
+          printf 'resolve_reason: ack-by-user-prompt\n'
+        } > "$ARCHIVE_FILE" 2>/dev/null || true
+        result_count=$((result_count+1))
+        continue  # Skip writing to TMP (effectively delete)
+      fi
+      # Keep row
+      printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+        "$pending_id" "$block_tier" "$severity" "$artifact_path" "$detected_at" \
+        "$escalate_at" "$telegram_pushed" "$archived_at" "$resolve_reason" >> "$TMP_ACK"
+    done < <(grep -v '^#' "$PENDING_QUEUE" 2>/dev/null)
+    mv -f "$TMP_ACK" "$PENDING_QUEUE" 2>/dev/null || { rm -f "$TMP_ACK"; }
+  done
+
+  log "ack subcommand resolved $result_count row(s)"
+  printf 'BLOCK-CONTROL: ack resolved %s PENDING row(s)\n' "$result_count"
+  return 0
+}
+
+# ---------------------------------------------------------------------------
 # dispatch
 # ---------------------------------------------------------------------------
 case "$SUBCMD" in
@@ -236,11 +354,23 @@ case "$SUBCMD" in
     cmd_status
     ;;
   check-prompt)
+    # Read stdin once into a temp variable; pass to both ack scanner and gate-clear function.
+    # Ack scanning runs UNCONDITIONALLY (even when no HARD gate active).
+    # Gate-clear only fires when .autonomous-BLOCKED is active.
+    _PROMPT_PAYLOAD="$(cat 2>/dev/null || true)"
+    # Run ack detection (subshell via pipe; file modifications propagate to filesystem)
+    printf '%s' "$_PROMPT_PAYLOAD" | cmd_check_prompt_ack
+    # Run gate-clear detection (use CLAUDE_USER_PROMPT env so cmd_check_prompt can read it)
+    export CLAUDE_USER_PROMPT="$_PROMPT_PAYLOAD"
     cmd_check_prompt
     ;;
+  ack)
+    shift 2>/dev/null || true
+    cmd_ack "$@"
+    ;;
   *)
-    printf 'block-control.sh — unknown subcommand: %s\n' "$SUBCMD" >&2
-    printf 'usage: block-control.sh {raise <severity> <slug> -- <reason> | clear [actor] [reason] | status | check-prompt}\n' >&2
+    printf 'block-control.sh -- unknown subcommand: %s\n' "$SUBCMD" >&2
+    printf 'usage: block-control.sh {raise <severity> <slug> -- <reason> | clear [actor] [reason] | status | check-prompt | ack <slug> [<slug2> ...]}\n' >&2
     ;;
 esac
 

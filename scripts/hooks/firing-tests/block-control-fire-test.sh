@@ -135,6 +135,89 @@ printf 'stale marker\n' > "$MEM/.auto-reboot-PRE-BLOCKED-stale-checkpoint"
 run_bc clear >/dev/null 2>&1
 if [ ! -f "$MEM/.auto-reboot-PRE-BLOCKED-stale-checkpoint" ]; then note_pass; else note_fail "TC11: clear did not remove .auto-reboot-PRE-BLOCKED-* marker"; fi
 
+# === D4 TCs: ack subcommand + check-prompt ack extension ===
+
+write_queue() {
+  local queue_dir="$TMP/human-workspace/notifications"
+  mkdir -p "$queue_dir/archive"
+  {
+    printf '# .pending-queue.tsv test fixture\n'
+    printf '# columns: pending_id\tblock_tier\tseverity\tartifact_path\tdetected_at\tescalate_at\ttelegram_pushed\tarchived_at\tresolve_reason\n'
+    printf 'stale-checkpoint-1\tPENDING\tCRITICAL\tagent-workspace/memory/.auto-reboot-PRE-BLOCKED-stale-checkpoint\t2026-05-16T00:00:00Z\t9999999999\tfalse\t-\t-\n'
+    printf 'charter-violation-1\tPENDING\tCRITICAL\tagent-workspace/memory/.charter-violation-detected\t2026-05-16T00:00:00Z\t9999999999\tfalse\t-\t-\n'
+    printf 'ghost-greening-1\tPENDING\tCRITICAL\tagent-workspace/memory/.ghost-greening-confirmed\t2026-05-16T00:00:00Z\t9999999999\tfalse\t-\t-\n'
+  } > "$queue_dir/.pending-queue.tsv"
+}
+
+# === TC-D4-1: ack <slug> subcommand archives matching row; removes from queue ===
+setup_tmp
+write_queue
+run_bc ack stale-checkpoint >/dev/null 2>&1
+QUEUE="$TMP/human-workspace/notifications/.pending-queue.tsv"
+ARCHIVE_DIR="$TMP/human-workspace/notifications/archive"
+REMAINING=$(grep -v '^#' "$QUEUE" 2>/dev/null | grep 'stale-checkpoint' | wc -l | tr -d ' ')
+ARCHIVED=$(ls "$ARCHIVE_DIR" 2>/dev/null | wc -l | tr -d ' ')
+OTHERS=$(grep -v '^#' "$QUEUE" 2>/dev/null | grep -v 'stale-checkpoint' | grep -c . 2>/dev/null || echo 0)
+if [ "${REMAINING:-0}" -eq 0 ] && [ "${ARCHIVED:-0}" -ge 1 ] && [ "${OTHERS:-0}" -ge 2 ]; then
+  note_pass
+else
+  note_fail "TC-D4-1: ack stale-checkpoint should remove from queue (remaining=$REMAINING) and archive (archived=$ARCHIVED); other rows preserved (others=$OTHERS)"
+fi
+
+# === TC-D4-2: ack <invalid-slug> invalid chars rejected with error message ===
+setup_tmp
+write_queue
+OUT=$(run_bc ack 'bad/slug' 2>/dev/null || true)
+if echo "$OUT" | grep -q "invalid slug\|must match"; then note_pass; else note_fail "TC-D4-2: invalid slug should emit error, got: ${OUT:0:80}"; fi
+
+# === TC-D4-3: ack <no-match-slug> reports "no matching PENDING row" ===
+setup_tmp
+write_queue
+OUT=$(run_bc ack nonexistent-slug 2>/dev/null || true)
+if echo "$OUT" | grep -q "no matching"; then note_pass; else note_fail "TC-D4-3: no-match slug should report 'no matching PENDING row', got: ${OUT:0:80}"; fi
+
+# === TC-D4-4: check-prompt with "ack stale-checkpoint" auto-runs ack subcommand ===
+setup_tmp
+write_queue
+OUT=$(echo '{"prompt":"please ack stale-checkpoint to dismiss it"}' | run_bc check-prompt 2>/dev/null || true)
+QUEUE="$TMP/human-workspace/notifications/.pending-queue.tsv"
+REMAINING=$(grep -v '^#' "$QUEUE" 2>/dev/null | grep 'stale-checkpoint' | wc -l | tr -d ' ')
+if echo "$OUT" | grep -q "ack keyword\|PENDING row\|resolved" && [ "${REMAINING:-1}" -eq 0 ]; then
+  note_pass
+else
+  note_fail "TC-D4-4: check-prompt 'ack stale-checkpoint' should auto-ack (out=${OUT:0:80}) and remove row (remaining=$REMAINING)"
+fi
+
+# === TC-D4-5: check-prompt with "hackathon project" does NOT false-match ===
+setup_tmp
+write_queue
+OUT=$(echo '{"prompt":"hackathon project review and ack-ack ack nowledgement"}' | run_bc check-prompt 2>/dev/null || true)
+QUEUE="$TMP/human-workspace/notifications/.pending-queue.tsv"
+ROWS_BEFORE=3
+ROWS_AFTER=$(grep -v '^#' "$QUEUE" 2>/dev/null | grep -c . 2>/dev/null || echo 0)
+# Should NOT have removed any rows (hackathon doesn't match "ack <slug>")
+# Note: "ack-ack" should not match (no word boundary after "ack" followed by space + slug)
+if [ "${ROWS_AFTER:-0}" -ge 3 ]; then
+  note_pass
+else
+  note_fail "TC-D4-5: 'hackathon' text should NOT trigger ack (rows_before=$ROWS_BEFORE rows_after=$ROWS_AFTER) - potential false-match"
+fi
+
+# === TC-D4-6: check-prompt with "ack charter-violation ack ghost-greening" matches BOTH slugs (multi-ack) ===
+setup_tmp
+write_queue
+OUT=$(echo '{"prompt":"ack charter-violation ack ghost-greening thanks"}' | run_bc check-prompt 2>/dev/null || true)
+QUEUE="$TMP/human-workspace/notifications/.pending-queue.tsv"
+# Expect both charter-violation and ghost-greening removed; stale-checkpoint remains
+REMAINING_CHARTER=$(grep -v '^#' "$QUEUE" 2>/dev/null | grep 'charter-violation' | wc -l | tr -d ' ')
+REMAINING_GHOST=$(grep -v '^#' "$QUEUE" 2>/dev/null | grep 'ghost-greening' | wc -l | tr -d ' ')
+REMAINING_STALE=$(grep -v '^#' "$QUEUE" 2>/dev/null | grep 'stale-checkpoint' | wc -l | tr -d ' ')
+if [ "${REMAINING_CHARTER:-1}" -eq 0 ] && [ "${REMAINING_GHOST:-1}" -eq 0 ] && [ "${REMAINING_STALE:-0}" -ge 1 ]; then
+  note_pass
+else
+  note_fail "TC-D4-6: multi-ack should remove both slugs (charter=$REMAINING_CHARTER ghost=$REMAINING_GHOST stale=$REMAINING_STALE)"
+fi
+
 # Summary
 TOTAL=$((PASS+FAIL))
 echo "block-control-fire-test: $PASS/$TOTAL PASS"

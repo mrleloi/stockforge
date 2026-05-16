@@ -73,6 +73,28 @@ CRIT_N=$([ -z "$CRIT_ROWS" ] && echo 0 || printf '%s\n' "$CRIT_ROWS" | wc -l | t
 HIGH_N=$([ -z "$HIGH_ROWS" ] && echo 0 || printf '%s\n' "$HIGH_ROWS" | wc -l | tr -d '[:space:]')
 MED_N=$([ -z "$MED_ROWS" ] && echo 0 || printf '%s\n' "$MED_ROWS" | wc -l | tr -d '[:space:]')
 
+# === MIGRATION SHIM — S348 D5 ===
+# Legacy .severity-state.tsv rows (pre-D1) have 5 cols (no block_tier column).
+# Per D5 (30-day window): treat legacy CRITICAL rows as PENDING tier (back-compat default).
+# This preserves the LESS-aggressive behavior (no flag write) during rollout.
+# REMOVAL TARGET: 2026-06-15 (30 days post-deploy of S348). After removal, $6=="" branch
+# in the awk split below should be deleted, and any remaining 5-col rows will be IGNORED
+# by the tier-split logic (silent fail-safe).
+# Concrete removal step: in the awk at $6=="PENDING" || $6==""
+# delete the `|| $6==""` clause + this comment block + the test cases TC-D5-* below.
+# Tracking: queue this in agent-workspace/memory/checkpoints/latest.md § PROMOTED-CANDIDATES
+# with target removal session = S380-ish (30d).
+
+# Split CRIT_ROWS by block_tier (col6, default PENDING per D5 migration shim window)
+HARD_ROWS=$(printf '%s\n' "$CRIT_ROWS" | awk -F'\t' '$6=="HARD" {print}' 2>/dev/null || true)
+PENDING_ROWS=$(printf '%s\n' "$CRIT_ROWS" | awk -F'\t' '$6=="PENDING" || $6=="" {print}' 2>/dev/null || true)
+# Note: $6=="" branch catches legacy rows during 30-day migration shim window (D5)
+# After 2026-06-15 (30 days post-deploy), the $6=="" clause SHOULD be removed; comment with removal date
+HARD_N=$([ -z "$HARD_ROWS" ] && echo 0 || printf '%s\n' "$HARD_ROWS" | grep -c . 2>/dev/null | tr -d '[:space:]')
+PENDING_N=$([ -z "$PENDING_ROWS" ] && echo 0 || printf '%s\n' "$PENDING_ROWS" | grep -c . 2>/dev/null | tr -d '[:space:]')
+case "$HARD_N" in ''|*[!0-9]*) HARD_N=0 ;; esac
+case "$PENDING_N" in ''|*[!0-9]*) PENDING_N=0 ;; esac
+
 # HIGH rows that are genuine Q&A bundles (severity-classifier Layer 2). Only these
 # warrant the "MUST fire AskUserQuestion" demand — L-S310-1 rule 3 is explicitly
 # scoped to a "SCOPE+CHARTER bundle pending >6h". HIGH rows from Layer 5
@@ -83,16 +105,16 @@ MED_N=$([ -z "$MED_ROWS" ] && echo 0 || printf '%s\n' "$MED_ROWS" | wc -l | tr -
 HIGH_QA_ROWS=$(printf '%s\n' "$HIGH_ROWS" | grep 'q-and-a/pending/' 2>/dev/null || true)
 HIGH_QA_N=$([ -z "$HIGH_QA_ROWS" ] && echo 0 || printf '%s\n' "$HIGH_QA_ROWS" | wc -l | tr -d '[:space:]')
 
-# === CRITICAL handling — write block flag (idempotent via flag presence check) ===
+# === HARD handling — write block flag (unchanged from legacy CRITICAL logic) ===
 # Suppressed while .block-grace is active (a human just cleared the gate) — see the
 # Block-grace block above + block-control.sh.
-if [ "$CRIT_N" -gt 0 ]; then
+if [ "$HARD_N" -gt 0 ]; then
   if [ ! -f "$BLOCK_FLAG" ] && [ "$GRACE_ACTIVE" -eq 0 ]; then
     {
-      printf 'BLOCKED at %s by escalation-engine.sh (event=%s)\n' "$TS" "$EVENT"
-      printf 'CRITICAL_COUNT=%s\n' "$CRIT_N"
+      printf 'BLOCKED at %s by escalation-engine.sh (event=%s tier=HARD)\n' "$TS" "$EVENT"
+      printf 'HARD_COUNT=%s\n' "$HARD_N"
       printf 'Affected artifacts:\n'
-      printf '%s\n' "$CRIT_ROWS" | awk -F'\t' '{printf "  - %s (age=%sh, next=%s)\n", $2, $3, $4}'
+      printf '%s\n' "$HARD_ROWS" | awk -F'\t' '{printf "  - %s (age=%sh, next=%s)\n", $2, $3, $4}'
       printf '\nTO RESUME (simplest first):\n'
       printf '  1. Reply to the agent with: "approved" / "unblock" / "run autonomous" / "tiep tuc".\n'
       printf '     block-control.sh check-prompt (UserPromptSubmit hook) auto-clears the gate. No file delete needed.\n'
@@ -100,10 +122,35 @@ if [ "$CRIT_N" -gt 0 ]; then
       printf '  3. Review/resolve the affected artifact(s) above so they do not re-trigger after the grace window.\n'
       printf '  4. Emergency bypass: set env STOCKFORGE_FORCE_AUTONOMOUS=1 (will log warning to mistake-log).\n'
     } > "$BLOCK_FLAG"
-    echo "escalation-engine: $CRIT_N CRITICAL items detected; .autonomous-BLOCKED flag written" >&2
+    echo "escalation-engine: $HARD_N HARD items detected; .autonomous-BLOCKED flag written" >&2
   elif [ "$GRACE_ACTIVE" -eq 1 ]; then
-    printf '[%s] escalation-engine: %s CRITICAL but .block-grace active — auto-raise suppressed\n' "$TS" "$CRIT_N" >> "$LOG"
+    printf '[%s] escalation-engine: %s HARD but .block-grace active — auto-raise suppressed\n' "$TS" "$HARD_N" >> "$LOG"
   fi
+fi
+
+# === PENDING handling — append to .pending-queue.tsv with escalate_at = now + 6h ===
+# Per ADR D-068; agent continues working; pending-queue-escalator.sh handles 6h Telegram + 24h auto-archive
+if [ "$PENDING_N" -gt 0 ]; then
+  PENDING_QUEUE="$PROJECT_DIR/human-workspace/notifications/.pending-queue.tsv"
+  mkdir -p "$(dirname "$PENDING_QUEUE")" 2>/dev/null || true
+  ESCALATE_EPOCH=$(( $(date +%s 2>/dev/null || echo 0) + 21600 ))  # +6h
+  # Ensure header exists (idempotent)
+  if [ ! -f "$PENDING_QUEUE" ]; then
+    {
+      printf '# .pending-queue.tsv — generated by escalation-engine.sh per ADR D-068 (S348)\n'
+      printf '# columns: pending_id\tblock_tier\tseverity\tartifact_path\tdetected_at\tescalate_at\ttelegram_pushed\tarchived_at\tresolve_reason\n'
+    } > "$PENDING_QUEUE"
+  fi
+  while IFS=$'\t' read -r sev path age action ts tier _rest; do
+    [ -z "$sev" ] && continue
+    # Skip rows already in queue (idempotent — check by artifact_path)
+    SLUG="$(basename "$path" 2>/dev/null | tr -dc 'a-zA-Z0-9-_' | head -c 40 || echo unknown)"
+    PENDING_ID="${SLUG}-$(date +%s 2>/dev/null || echo 0)"
+    if ! grep -F -q $'\t'"$path"$'\t' "$PENDING_QUEUE" 2>/dev/null; then
+      printf '%s\t%s\t%s\t%s\t%s\t%s\tfalse\t-\t-\n' "$PENDING_ID" "PENDING" "$sev" "$path" "$TS" "$ESCALATE_EPOCH" >> "$PENDING_QUEUE"
+    fi
+  done < <(printf '%s\n' "$PENDING_ROWS" 2>/dev/null)
+  printf '[%s] escalation-engine: %s PENDING items appended to .pending-queue.tsv\n' "$TS" "$PENDING_N" >> "$LOG"
 fi
 
 # === Idempotency: most actions per hour-bucket; CRITICAL flag always re-checked ===
@@ -157,10 +204,11 @@ fi
 
 # === UserPromptSubmit cadence: inject additionalContext via JSON stdout ===
 # Claude Code reads UserPromptSubmit hook stdout as additionalContext. We emit a brief
-# system-reminder when CRITICAL or HIGH+age>6h items exist, instructing LLM to act.
+# system-reminder when HARD or HIGH+age>6h items exist, instructing LLM to act.
+# PENDING rows are SILENT on UPS per ADR D-068 + DD-10 (queue handles escalation; UPS noise just for HARD)
 if [ "$EVENT" = "UserPromptSubmit" ]; then
-  if [ "$CRIT_N" -gt 0 ]; then
-    printf 'SEVERITY-ESCALATION CRITICAL: %d item(s) require human resolution. .autonomous-BLOCKED flag is ACTIVE. Agent should: respond with one-paragraph status of blocking artifacts (see %s), then await human action. Tools other than Read/Glob/Grep are blocked by autonomous-block-enforcer.sh.\n' "$CRIT_N" "$BLOCK_FLAG"
+  if [ "$HARD_N" -gt 0 ]; then
+    printf 'SEVERITY-ESCALATION HARD: %d item(s) require human resolution. .autonomous-BLOCKED flag is ACTIVE. Agent should: respond with one-paragraph status of blocking artifacts (see %s), then await human action. Tools other than Read/Glob/Grep are blocked by autonomous-block-enforcer.sh.\n' "$HARD_N" "$BLOCK_FLAG"
   elif [ "$HIGH_QA_N" -gt 0 ]; then
     printf 'SEVERITY-ESCALATION HIGH: %d Q&A bundle(s) age >6h require AskUserQuestion. Agent MUST fire AskUserQuestion this turn for the pending bundles before resuming other work. See `%s` for the row list.\n' "$HIGH_QA_N" "$STATE_FILE"
   elif [ "$HIGH_N" -gt 0 ]; then
@@ -168,15 +216,17 @@ if [ "$EVENT" = "UserPromptSubmit" ]; then
   fi
 fi
 
-# === Telegram push for CRITICAL/HIGH (best-effort) ===
-if [ -x "$TELEGRAM_HOOK" ] && { [ "$CRIT_N" -gt 0 ] || [ "$HIGH_N" -gt 0 ]; }; then
+# === Telegram push for HARD/HIGH (best-effort) ===
+# HARD: immediate Telegram push (no 6h grace — this is the "truly stop now" tier)
+# PENDING: NOT pushed here; pending-queue-escalator.sh handles 6h-delayed push per ADR D-068
+if [ -x "$TELEGRAM_HOOK" ] && { [ "$HARD_N" -gt 0 ] || [ "$HIGH_N" -gt 0 ]; }; then
   TG_SEV="HIGH"
-  [ "$CRIT_N" -gt 0 ] && TG_SEV="CRITICAL"
-  TG_MSG="StockForge $EVENT: $CRIT_N CRITICAL + $HIGH_N HIGH items pending. See urgent.md."
+  [ "$HARD_N" -gt 0 ] && TG_SEV="CRITICAL"
+  TG_MSG="StockForge $EVENT: $HARD_N HARD + $HIGH_N HIGH items pending. See urgent.md."
   bash "$TELEGRAM_HOOK" "$TG_SEV" "$TG_MSG" 2>/dev/null || true
 fi
 
 echo "fired" > "$MARKER"
-printf '[%s] escalation-engine event=%s CRIT=%s HIGH=%s MED=%s\n' "$TS" "$EVENT" "$CRIT_N" "$HIGH_N" "$MED_N" >> "$LOG"
+printf '[%s] escalation-engine event=%s CRIT=%s HARD=%s PENDING=%s HIGH=%s MED=%s\n' "$TS" "$EVENT" "$CRIT_N" "$HARD_N" "$PENDING_N" "$HIGH_N" "$MED_N" >> "$LOG"
 
 exit 0
