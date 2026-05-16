@@ -271,6 +271,7 @@ Backtest engine validates inputs present before running. Output stored immutable
 | News lag | Rule 8 | `acting_lag` in queries |
 | KOL recommendation context | Rule 9 | Conditions + timeframe required |
 | Backtest reproducibility | I-S53, Rule 10 | Auto-record metadata |
+| LLM emitting numeric field | I-S1-1, Rule 16 | EchoValidator + schema-discriminator hook |
 
 ---
 
@@ -353,5 +354,124 @@ VN equities priced VND. Cross-currency comparisons (e.g., regional comparable PE
 
 Codified now to anchor S27-S28 entity design (Bar.sàn field, Position.opened_at semantics, FX placeholder structure) so Phase 2 enforcement layers slot into existing types without retrofitting. Matches Charter "When in doubt, simplify" + "Ship thin slices".
 
+
+## Rule 16 — Numeric-Field Discipline (I-S1-1) (ACCEPTED 2026-05-16 via Q-INT-2026-05-6 ratification + S336 user pick; ratified D-065)
+
+### The Problem
+
+Charter Principle 9 ("No LLM math") + I-S1 ("No LLM Math") + I-S7 ("Confidence ≠ Hit
+Rate") together forbid the LLM from generating numbers, but operate at the prose / output
+layer. They do not constrain the **schema** layer: a Pydantic / dataclass field declared
+`confidence: float` or `price_target: float | None` is itself an invitation for the LLM
+to emit a numeric value, and downstream code that consumes that field will treat the
+LLM-emitted number as data.
+
+Phase A's 15 deep-dive observations (Wave-1 research integration, S323-S324) found this
+pattern in 3 candidate repos: ai-hedge-fund (`src/agents/warren_buffett.py:13-16` —
+`confidence: int 0-100`), TradingAgents (`tradingagents/agents/schemas.py:127, :199` —
+`entry_price` + `price_target` Optional[float]), and TradingAgents-CN
+(`tradingagents/agents/trader/trader.py:68-80` — explicit "🚨 强制要求提供具体数値"
+mandating LLM-emitted confidence + risk score). Each is a violation of the rule this
+Rule 16 codifies. Two counter-examples (FinceptTerminal `NotifLevel` bounded enum at
+`services/notifications/NotificationService.h:15` + Vibe-Trading deterministic
+`confidence=low` enforcement at `SKILL.md:138-139`) show the correct shape.
+
+### The Rule
+
+**An LLM never emits a numeric value as the source-of-truth for an output field.** This
+applies to **every** dataclass / Pydantic / TypedDict / event schema field whose type is
+`int`, `float`, `Decimal`, `complex`, `numpy.number`, or any container parameterized on a
+numeric scalar (e.g. `list[float]`, `dict[str, int]`, `tuple[float, ...]`) — and to any
+free-text output that, when parsed, would yield a numeric scalar of these types.
+
+A field whose type is numeric, and whose value originates in or transits through an LLM
+call, MUST satisfy at least one of:
+
+1. **Categorical surrogate**: The field is replaced with an `Enum` or `Literal[...]`
+   bounded categorical (per the FinceptTerminal `NotifLevel` and Vibe-Trading
+   `confidence=low` patterns above; per existing `financial-data-protocol.md` Rule 7
+   `STRONGLY_BULLISH | BULLISH | NEUTRAL | BEARISH | STRONGLY_BEARISH`). The LLM picks a
+   category; deterministic code converts to a number downstream if/when needed.
+
+2. **Deterministic-pipeline echo**: The field's value is computed by deterministic code
+   (a non-LLM Python function operating on verified inputs per Rule 6 LLM Output
+   Provenance, Rule 4 Source Attribution, and the source_evidence chain of the calling
+   use case). The LLM is permitted only to **echo** that computed value back inside its
+   structured output. Echo validation is mandatory: the post-LLM step asserts the
+   LLM-echoed value equals (or matches within tolerance) the upstream computed value.
+   Mismatch is a HARD ERROR (raise + abort; never silently coerce).
+
+3. **Calibration-database lookup**: For confidence-like fields specifically, the value
+   is sourced from `agent-workspace/calibration/` keyed on (`extractor_version`,
+   `signal_type`) tuple. The lookup is a deterministic dictionary access on calibration
+   data captured per Charter Principle 8 ("Calibration over confidence"). The LLM never
+   computes nor estimates this value.
+
+4. **NULL / unknown surrogate**: For fields where neither a categorical nor a
+   deterministic pipeline value exists, the field MUST be `Optional[T]` AND the LLM-
+   produced output sets it to `None`. Downstream consumers treat `None` as
+   "uncomputed", never as "zero" or "unknown-but-implied-low".
+
+### The Enforcement
+
+**At schema definition time** (mypy --strict + ruff custom rule, planned IMPL hook):
+- Any new dataclass / TypedDict / Pydantic field with a numeric type, declared in a path
+  that participates in an LLM call site (initial scope: `packages/contracts/events/**`,
+  `packages/domain/**`, BC-6 + BC-8 schema modules), MUST have one of: (a) a sibling
+  `*_source: Literal["categorical", "deterministic", "calibration", "null"]` discriminator
+  field; (b) a module-level docstring asserting "no LLM call paths populate this field";
+  (c) an explicit `# I-S1-1: deterministic echo of <fn>(...)` inline comment naming the
+  upstream computation.
+- A dedicated hook at `scripts/hooks/numeric-field-discipline-check.sh` (planned; not
+  authored by this proposal) lints these constraints.
+
+**At runtime** (validator + verifier agent):
+- Application-layer use cases that invoke an LLM and consume a numeric output field
+  validate the LLM-echoed value against the upstream deterministic-pipeline computation.
+  The validator is `EchoValidator.validate(llm_value, deterministic_value,
+  tolerance=...)`.
+- The verifier agent randomly samples 5% of new event records where a numeric field
+  participates in an LLM call site, for human review queue (parallels Rule 6's existing
+  5%-sampling enforcement).
+
+**At amendment time**:
+- Adding a new numeric field to any schema in scope (above) requires the change-author
+  to specify which of the 4 satisfaction modes (categorical, deterministic-echo,
+  calibration, null) applies, recorded in the field docstring. A constitution
+  amendment for this Rule 16 is required to introduce a new satisfaction mode.
+
+### Fields explicitly subject to this rule (initial inventory, non-exhaustive)
+
+- `packages/contracts/events/kol_recommendation_extracted.py`
+  `KolRecommendationExtracted.confidence_extracted: float` (existing per
+  `agent-workspace/constitution/architecture.md:300`) — satisfies via mode 3 (calibration
+  lookup) once BC-6 KOL extractor wires to `agent-workspace/calibration/` per Rule 9 +
+  I-S20.
+- Future BC-8 output schemas to be created by Phase F-prime (Theme H IMPL per Wave-1
+  master plan § 6.4.3): the equivalent of `ResearchPlan` / `TraderProposal` /
+  `PortfolioDecision` (TradingAgents source schemas at `tradingagents/agents/schemas.py`)
+  — schemas MUST ban `entry_price` + `price_target` LLM-emit per
+  `INTEGRATION_PROPOSAL_SUPPLEMENT_2026-05-15.md § H.3` mitigation #4, or substitute mode
+  2 (deterministic-pipeline echo) via BC-2 DCF / multiple-derivation pipeline once that
+  pipeline lands.
+
+### Cross-references
+
+- Charter Principle 9 ("No LLM math") — parent principle this rule operationalizes.
+- Charter Principle 8 ("Calibration over confidence") — provides the calibration-database
+  satisfaction mode (#3 above).
+- I-S1 ("No LLM Math") — sibling general-form invariant in
+  `invariants-stockforge.md`.
+- I-S7 ("Confidence ≠ Hit Rate") — sibling semantic invariant; Rule 16 enforces I-S7 at
+  the schema layer.
+- Rule 6 ("LLM Output Provenance") — sibling rule in this same file; Rule 16 extends
+  Rule 6 to numeric-field semantics specifically.
+- Rule 7 ("Sentiment Score Calibration") — precedent for categorical surrogate
+  pattern (mode #1).
+- Rule 9 ("KOL Recommendation Provenance") — already requires
+  `extraction_confidence` field semantically; Rule 16 enforces the deterministic
+  source for that confidence.
+
 Last modified: 2026-04-23 (v1.0 initial — stock-specific data integrity)
 Amended 2026-05-04: Rule 11 (D-019 hook portability), Rules 12-15 (D-021 Vietnam-domain)
+Amended 2026-05-16: Rule 16 (D-065 I-S1-1 numeric-field discipline; Phase C of Wave-1 research integration; source D-061 § Decision item 6).

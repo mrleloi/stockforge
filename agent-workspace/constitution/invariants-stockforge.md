@@ -26,6 +26,14 @@ Tool result: 17.83%
 LLM output: "ROE is 17.83% (computed from FY2024 financials)."
 ```
 
+### I-S1-1: Numeric-Field Discipline (sub-rule of I-S1; D-065-RATIFIED)
+Numeric-typed schema fields (`int`, `float`, `Decimal`, `numpy.number`, or numeric-parameterized
+containers) consumed by LLM call sites must satisfy one of: (1) categorical surrogate via
+`Enum`/`Literal`, (2) deterministic-pipeline echo with `EchoValidator`, (3) calibration-database
+lookup keyed on (`extractor_version`, `signal_type`), or (4) `Optional[T] = None` surrogate.
+LLM-emitted numeric values without satisfaction mode are CRITICAL violations.
+Enforcement: `financial-data-protocol.md` Rule 16 (full text) + mypy/ruff/hook (planned).
+
 ### I-S2: Point-in-Time Integrity for Fundamentals
 Every fundamental query for backtest must filter `WHERE filing_date <= as_of_date`. Live queries can use latest. Look-ahead bias is bug-class.
 Enforcement: Repository pattern enforces filter in `get_as_of()` method + linter rule banning `latest_filing` in backtest paths.

@@ -251,6 +251,7 @@ This ADR ratifies (pending Q-INT-2026-05-bis answers) the following Wave-1 integ
    (path B per master plan Q-INT-2026-05-3 option B) — faster than charter v1.1 → v1.2 amendment;
    requires explicit human-approve gate per CLAUDE.md hard rule; AP-23 promote trigger satisfied.
    **Pending user-ratify Q-INT-2026-05-6**.
+   **Ratification follow-through: D-065 ACCEPTED 2026-05-16 via S336 user Path B pick; Rule 16 landed in `financial-data-protocol.md`.**
 
 7. **Theme N net-new disposition = DEFER to Wave 2+** with ADR-first PLAN session post-Wave-1.
    Pairs with Theme M-3 (nautilus backtest skeleton) — Theme N is statistical layer; M-3 is
