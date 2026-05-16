@@ -117,3 +117,15 @@
 - New M-S<N>-<M> mistake landing → 1-line digest entry FIRST in this index (severity + summary + archive line); full body appended to `mistake-log-archive-2026-05-06.md` (or new dated archive file when cap hit).
 - Pre-flight read at SessionStart: read this digest only (~5 KB). Read archive body on-demand if specific mistake context needed.
 - Auto-detect signature for prevention rules still in body — those are forensic; not loaded into routine working memory.
+
+## M-S360-1 (LOW) — Main session self-pause violates autonomous_continue_no_self_pause + dont_self_pause_at_session_boundary doctrine — 2026-05-17
+
+**What went wrong**: After committing 32a6d63 (S360 Phase E master plan), main session gave "natural session-end summary" instead of dispatching S361 architect for sub-plan 029. User had to prompt "sao không run autonomous tiếp mà stop? lỗi harness à?" to restore flow.
+
+**Rationalization that was wrong**: (1) Context budget concern (~220K approaching cliff) — but auto-reboot is HARNESS job per D-004, not main's. (2) Anticipated charter-tier STOP-AND-ASK in S361 — but architect surfaces gates naturally; pre-stopping is anti-doctrine.
+
+**Recurrence class**: 2nd-instance of L-S189 "main self-pauses at perceived natural boundary" (S189 first instance was 26-hour silent stall; this instance was 1-turn pause caught immediately by user).
+
+**Prevention rule** (AP-23 promote-or-retire calculus — 2nd-instance triggers promote): Add Stop-hook `main-session-no-pause-check.sh` that grep-checks if main's last response contained a fresh-context dispatch OR an explicit AskUserQuestion (charter-tier) — if neither AND no STOP-AND-ASK trigger detected AND autonomous_mode=true → emit WARN to severity-state.tsv. Promote-to-investigation candidate L-S360-1 1st-instance HOLD here; if 3rd-instance fires across sessions → promote to hook.
+
+**Inline fix this turn**: dispatched S361 architect immediately after user prompt.
