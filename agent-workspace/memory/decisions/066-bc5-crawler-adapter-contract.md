@@ -294,6 +294,7 @@ Ports and adapters use existing W0-substrate hooks automatically:
 9. Async migration → Phase 3 (concurrent multi-source ingestion)
 10. CrawlerHub filesystem auto-discovery → REJECTED (global-state anti-pattern per DD-5)
 11. CafeFScraper + CafeFAdapter consolidation → Phase D-N (RM12)
+12. SelectorChain wiring into CafeFAdapter → deferred to Phase D-N consolidation (RM12). Strategy B (WRAP) preserves CafeFScraper's BeautifulSoup parse path untouched; SelectorChain ships as foundation primitive for NDH/Vietstock/VietnamBiz follow-on adapters + the eventual CafeFScraper consolidation. Per S339 F2 finding (sandwich-verifier 2026-05-16).
 
 ## Risks & Mitigations
 

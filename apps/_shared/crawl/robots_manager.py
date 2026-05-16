@@ -1,5 +1,5 @@
 # Portions adapted from Scrapling (https://github.com/D4Vinci/Scrapling),
-# BSD-3-Clause by Karim Shoair; see NOTICE at repo root for full text.
+# BSD-3-Clause by Karim shoair; see NOTICE at repo root for full text.
 # Source: scrapling/spiders/robotstxt.py:10-60 (RobotsTxtManager)
 """Per-domain robots.txt cache + can_fetch check (synchronous).
 
