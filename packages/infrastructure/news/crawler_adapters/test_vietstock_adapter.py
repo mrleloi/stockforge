@@ -33,6 +33,7 @@ Covers:
 20. Adapter works WITHOUT any optional injections
 21. meta og:title used as headline when h1 missing (2nd SelectorChain fallback)
 22. _parse_published_at handles span.datenew Vietstock-specific format
+23. fetch_and_parse falls back to div.article-content when vst_detail absent
 """
 
 from __future__ import annotations
