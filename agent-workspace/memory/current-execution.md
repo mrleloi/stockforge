@@ -182,3 +182,19 @@
 
 ---
 
+## S354 — Phase D Vietstock Adapter IMPL DONE (plan-026; sandwich-dev S354) — 2026-05-16
+
+**S354 sandwich-dev RETURN** (Sonnet 4.6 FOCUSED_IMPL, fresh-context AP-1 per plan-026). All 5 sub-tracks D1-D5 COMPLETE. Baseline 990 → 1013 tests (+23; 0 regressions). 23/23 new tests PASS. STEP 0 all 4 STOP-AND-ASK triggers CLEAR.
+
+**STEP 0 verdicts**: vietstock.vn status=200 (canonical); finance.vietstock.vn also 200 (separate financial-tools subdomain). robots.txt 200; Allow: /; Disallow: /*.js /*.css /manager /export /cache; no Crawl-delay → 2.0s default applies. ToS: no explicit automated-access prohibition found. JS-rendering: PASS (static HTML). Article URL pattern: `/YYYY/MM/<slug>-<cat_id>-<article_id>.htm`. Selectors: `h1.article-title` (headline primary) + `div#vst_detail[itemprop=articleBody]` (body primary) + `meta[article:published_time]` (date primary).
+
+**D1+D2 (adapter impl + selector authoring)**: `packages/infrastructure/news/crawler_adapters/vietstock_adapter.py` 476 LOC. Strategy A direct-subclass; 2 SelectorChain[T] instances; fmt-string chain for date. DD-7 F2-aware `store_raw=False` in discover() architected from day 1.
+
+**D3 (unit tests)**: `packages/infrastructure/news/crawler_adapters/test_vietstock_adapter.py` 540 LOC; 23 test cases. Tests 7+19 (DD-7 F2-aware regression guard) PASS.
+
+**D4 (registry + CLI)**: `apps/cli/ingest_news_vietstock.py` 370 LOC. CLI smoke: 2 articles scraped + written. Raw HTML at `data/raw/news/vietstock/2026-05-16/`. No listing-page HTML persisted.
+
+**D5 (ADR REV-2)**: D-066 § Amendments REV-2 added. Session log + observation written.
+
+**Next**: dispatch S355 sandwich-verifier (AP-1, fresh-context) for plan-026 verification.
+

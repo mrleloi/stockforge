@@ -339,3 +339,34 @@ Ports and adapters use existing W0-substrate hooks automatically:
   - Canonical host verified: nhipsongkinhdoanh.vn (2026-05-16 STEP 0.1; nhipsongdoanhnghiep.vn
     redirects; ndh.vn DNS-failed -- source_id "ndh" retained per plan-022 DD-1 brand initialism)
 - **No D-067 needed**: Path B (new ADR) contingency not triggered; SelectorChain contract clean
+
+### REV-2 (2026-05-16) — Vietstock adapter shipped as 2nd Strategy A consumer; SelectorChain[T] contract maturity 1 -> 2 consumers
+
+- **Trigger**: plan-026 S354 ships VietstockAdapter as second greenfield Strategy A direct-subclass
+  + second SelectorChain[T] consumer (after NDH at S344); DD-7 F2-aware `store_raw` parameter
+  architected from day 1 (promoted from S345 verifier F2 lesson)
+- **Authorization**: plan-026 § L (architect-proposed) + S355 verifier acceptance (pending)
+- **Source artifacts**:
+  - `agent-workspace/session-plans/completed/026-S353-phase-d-vietstock-adapter.md` § DD-4 + § D1
+  - `packages/infrastructure/news/crawler_adapters/vietstock_adapter.py` (NEW; uses 2 SelectorChain[T]
+    instances for headline + body fields; fmt-string chain for date; DD-7 F2-aware `store_raw` from day 1)
+  - `packages/infrastructure/news/crawler_adapters/test_vietstock_adapter.py` (NEW; 23 test cases
+    including SelectorChain fallback coverage AND DD-7 F2-aware tests 7 + 19)
+  - `apps/cli/ingest_news_vietstock.py` (NEW; CLI dispatch via fresh CrawlerRegistry + VietstockAdapter
+    registration; DD-5 rate 2.0s)
+- **Summary of changes**:
+  - CrawlerAdapter ABC contract validated across 2 distinct greenfield consumers (NDH + Vietstock);
+    contract maturity strengthens -- no contract gap surfaced (subject to verifier S355 re-confirmation)
+  - SelectorChain[T] contract validated across 2 distinct VN financial sites (nhipsongkinhdoanh.vn +
+    vietstock.vn); primitive proven production-ready at n=2
+  - DD-7 F2-aware design `_fetch_with_optional_chain(*, store_raw)` shipped from day 1 in Vietstock
+    vs NDH post-S345 retrofit; pattern promotion candidate L-S345-3 for VietnamBiz (plan-027) adoption
+  - Canonical host verified: vietstock.vn (2026-05-16 STEP 0.1; finance.vietstock.vn is separate
+    financial-tools subdomain; article-news content on vietstock.vn)
+  - robots.txt verified: Allow: /; no Crawl-delay; 2.0s default rate-limit applies (DD-5)
+  - Article URL pattern verified: /YYYY/MM/<slug>-<cat_id>-<article_id>.htm
+  - Body selector: div#vst_detail[itemprop=articleBody] (primary) -> div.article-content (fallback)
+- **Verifier impact**: S355 spot-checks VietstockAdapter's SelectorChain usage + DD-7 F2-aware design
+  empirically (grep `store_raw=False` in discover() body; CLI smoke verifies no listing-page HTML)
+- **Next consumer**: VietnamBiz adapter (plan-027 S356) -- 3rd of 4 priority sources; rate-limit
+  bumped to 3.0s per plan-020 § E matrix line 354

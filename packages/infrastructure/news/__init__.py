@@ -2,7 +2,7 @@
 
 from .cafef_scraper import CafeFScraper, ScrapedArticle
 from .claude_llm_extractor import ClaudeLlmExtractor
-from .crawler_adapters import CafeFAdapter, NDHAdapter
+from .crawler_adapters import CafeFAdapter, NDHAdapter, VietstockAdapter
 from .sqlite_news_repository import SqliteClaimRepository, SqliteNewsRepository
 
 __all__ = [
@@ -10,6 +10,7 @@ __all__ = [
     "CafeFScraper",
     "ClaudeLlmExtractor",
     "NDHAdapter",
+    "VietstockAdapter",
     "ScrapedArticle",
     "SqliteClaimRepository",
     "SqliteNewsRepository",
