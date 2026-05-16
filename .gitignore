@@ -46,6 +46,9 @@ credentials.json
 *.parquet
 *.feather
 
+# Temp files (local scratch — STEP 0 HTML samples, etc.)
+/tmp/
+
 # Obsidian
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json

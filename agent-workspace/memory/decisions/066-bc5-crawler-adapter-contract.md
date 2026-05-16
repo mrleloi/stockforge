@@ -294,7 +294,7 @@ Ports and adapters use existing W0-substrate hooks automatically:
 9. Async migration → Phase 3 (concurrent multi-source ingestion)
 10. CrawlerHub filesystem auto-discovery → REJECTED (global-state anti-pattern per DD-5)
 11. CafeFScraper + CafeFAdapter consolidation → Phase D-N (RM12)
-12. SelectorChain wiring into CafeFAdapter → deferred to Phase D-N consolidation (RM12). Strategy B (WRAP) preserves CafeFScraper's BeautifulSoup parse path untouched; SelectorChain ships as foundation primitive for NDH/Vietstock/VietnamBiz follow-on adapters + the eventual CafeFScraper consolidation. Per S339 F2 finding (sandwich-verifier 2026-05-16).
+12. SelectorChain wiring into CafeFAdapter → deferred to Phase D-N consolidation (RM12). Strategy B (WRAP) preserves CafeFScraper's BeautifulSoup parse path untouched; SelectorChain ships as foundation primitive for NDH/Vietstock/VietnamBiz follow-on adapters + the eventual CafeFScraper consolidation. Per S339 F2 finding (sandwich-verifier 2026-05-16). **STATUS UPDATED REV-1 (2026-05-16)**: PENDING-CONSUMER → ANSWERED. First consumer = NDHAdapter (S344 IMPL, plan-022 DD-4). See § Amendments below.
 
 ## Risks & Mitigations
 
@@ -310,3 +310,32 @@ Ports and adapters use existing W0-substrate hooks automatically:
 - **2026-05-16**: PROPOSED by Claude Sonnet 4.6 (sandwich-dev S338) executing plan-020 from
   architect S337 (background subagent `aeb7f20e57d53b29c`)
 - **Pending**: ACCEPTED by verifier S339 (AP-1 fresh-context sandwich-verifier)
+- **2026-05-16**: REV-1 amendment added by Claude Sonnet 4.6 (sandwich-dev S344) per plan-022 D5 Path A
+
+## Amendments
+
+### REV-1 (2026-05-16) — SelectorChain[T] consumption confirmed; Out-of-scope item 12 CLOSED
+
+- **Trigger**: plan-022 S344 ships NDHAdapter as first greenfield Strategy A direct-subclass +
+  first SelectorChain[T] consumer (closes the PENDING-CONSUMER status on item 12)
+- **Authorization**: plan-022 S343 architect Path A REV-1 (default expected outcome per AQ-8
+  pre-answer); S345 verifier review pending (AP-1 mandate)
+- **Source artifacts**:
+  - `agent-workspace/session-plans/completed/022-S343-phase-d-ndh-adapter.md` DD-4 + D1
+  - `packages/infrastructure/news/crawler_adapters/ndh_adapter.py` (NEW; uses 3 SelectorChain[T]
+    instances: ndh_headline, ndh_body_container; fmt-string chain in _parse_published_at)
+  - `packages/infrastructure/news/crawler_adapters/test_ndh_adapter.py` (NEW; 21 test cases
+    including SelectorChain fallback coverage: test 8 headline fallback, test 9 body fallback,
+    test 9b all-strategies-fail warning)
+- **Summary of changes**:
+  - Out-of-scope item 12 status updated: PENDING-CONSUMER -> ANSWERED (first consumer = NDHAdapter)
+  - SelectorChain[T] contract validated by production usage:
+    - Contract is well-formed for BS4 + lambda/soup.find zero-arg closure pattern (DD-4 verified)
+    - No contract gap detected (architect verdict confirmed; subject to verifier S345 re-confirmation)
+    - Three SelectorChain instances per fetch_and_parse call (closure-over-soup; cheap ~10ns each)
+    - T = bs4.Tag for headline + body chains; str result extracted via .get_text or .get("content")
+  - SelectorChain[T] wiring into CafeFAdapter remains DEFERRED to CafeFScraper consolidation
+    (RM12); this item's "shipped un-consumed infra" status (S339 verifier F2) is now obsolete
+  - Canonical host verified: nhipsongkinhdoanh.vn (2026-05-16 STEP 0.1; nhipsongdoanhnghiep.vn
+    redirects; ndh.vn DNS-failed -- source_id "ndh" retained per plan-022 DD-1 brand initialism)
+- **No D-067 needed**: Path B (new ADR) contingency not triggered; SelectorChain contract clean
