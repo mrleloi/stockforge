@@ -324,6 +324,43 @@ fi
 rm -rf "$TC12_SANDBOX"
 
 # ============================================================
+# TC13 — S341 D1: content-hash dedup: level:WARN frontmatter + mtime unchanged on 2nd run
+# ============================================================
+reset_state
+TC13_FILE="$MEM_DIR/observations/large-multi-entry.md"
+{
+  make_large_entry "Entry One"
+  printf '\n'
+  make_large_entry "Entry Two"
+  printf '\n'
+  make_large_entry "Entry Three"
+} > "$TC13_FILE"
+
+run_hook_on_file "$TC13_FILE"
+NOTIF="$SANDBOX/human-workspace/notifications/html-separator-warn.md"
+# Verify level:WARN frontmatter
+LVL="$(head -10 "$NOTIF" 2>/dev/null | grep -m1 '^level:' | sed 's/^level:[[:space:]]*//' | tr -d '[:space:]' || true)"
+if [ "$LVL" = "WARN" ]; then
+  pass_tc "TC13a: level:WARN frontmatter present in html-separator-warn.md"
+else
+  fail_tc "TC13a" "expected level:WARN in html-separator-warn.md, got '$LVL'"
+fi
+# Verify mtime unchanged on 2nd run (content-hash dedup)
+if [ -f "$NOTIF" ]; then
+  MTIME1="$(stat -c %Y "$NOTIF" 2>/dev/null || echo 0)"
+  sleep 1
+  run_hook_on_file "$TC13_FILE"
+  MTIME2="$(stat -c %Y "$NOTIF" 2>/dev/null || echo 0)"
+  if [ "$MTIME1" = "$MTIME2" ]; then
+    pass_tc "TC13b: mtime unchanged on 2nd run (content-hash dedup fired)"
+  else
+    fail_tc "TC13b" "mtime changed on 2nd run with identical html-sep content: mtime1=$MTIME1 mtime2=$MTIME2"
+  fi
+else
+  fail_tc "TC13b" "notification not found for mtime check"
+fi
+
+# ============================================================
 # Results
 # ============================================================
 TOTAL=$(( PASS + FAIL ))

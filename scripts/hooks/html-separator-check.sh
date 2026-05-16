@@ -227,10 +227,11 @@ if [ "$VIOLATIONS" -gt 0 ]; then
   printf '[%s] html-separator-check: %d violation(s) (HS-R1/R2/R3)\n%s' \
     "$TS" "$VIOLATIONS" "$VIOLATION_LIST" >> "$LOG"
 
+  # S341 D1: content-hash dedup — only write if content changed (preserves mtime → prevents per-cycle escalation-engine re-emit).
   mkdir -p "$NOTIF_DIR" 2>/dev/null || true
   NOTIF_FILE="$NOTIF_DIR/html-separator-warn.md"
-  {
-    printf '%s\n' '---' 'status: pending' '---' ''
+  NEW_CONTENT="$(
+    printf '%s\n' '---' 'level: WARN' 'status: pending' '---' ''
     printf '# html-separator-check %s\n\n' '— ALERT'
     printf 'HTML separator violations detected: %d\n\n' "$VIOLATIONS"
     printf '%s' "$VIOLATION_LIST"
@@ -242,7 +243,12 @@ if [ "$VIOLATIONS" -gt 0 ]; then
     printf '\nSee ADR: agent-workspace/memory/decisions/063-html-comment-separator-doctrine.md\n'
     printf '\nRationale: HTML comments are forgery-proof (LLM prose cannot emit them) and\n'
     printf 'invisible to markdown renderers. Source: TradingAgents memory.py:13-14.\n'
-  } > "$NOTIF_FILE" 2>/dev/null || true
+  )"
+  NEW_HASH="$(printf '%s' "$NEW_CONTENT" | sha256sum 2>/dev/null | cut -d' ' -f1 || true)"
+  OLD_HASH="$(sha256sum "$NOTIF_FILE" 2>/dev/null | cut -d' ' -f1 || true)"
+  if [ "$NEW_HASH" != "$OLD_HASH" ]; then
+    printf '%s\n' "$NEW_CONTENT" > "$NOTIF_FILE" 2>/dev/null || true
+  fi
 else
   printf '[%s] html-separator-check: OK (0 violations across %d file(s))\n' \
     "$TS" "${#SCAN_FILES[@]}" >> "$LOG"

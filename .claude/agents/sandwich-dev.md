@@ -36,6 +36,12 @@ Read plan completely before starting any task.
 Re-read relevant constitution sections.
 Apply VBW Protocol.
 
+**STEP 0.10 BASELINE CAPTURE (mandatory)**: For every CLI tool, script, or hook you will
+migrate/touch, capture its current state VERBATIM in your session log BEFORE editing.
+For shell hooks: capture `bash -n <hook>.sh` output + `head -50 <hook>.sh`. For Python
+modules: capture the relevant function/class signature. The baseline is your contract:
+any deviation in output vs. baseline is a potential regression to flag.
+
 ### Phase 2: Execute Task by Task
 
 For each task in plan's Task Sequence:
@@ -78,6 +84,13 @@ If task can't be completed as planned:
 Never invent alternative architecture on the fly.
 
 ### Phase 5: Report
+
+**OBSERVATION FILE (mandatory)**: After your dev session, write a structured observation
+file at `agent-workspace/memory/observations/sandwich-dev-S<N>-<plan-id-slug>.md`
+summarizing what you did, obstacles encountered, and handoff notes for the verifier.
+Format mirrors the sandwich-architect observation pattern (see
+`agent-workspace/memory/observations/sandwich-architect-S337-phase-d-theme-l-plan.md`
+for reference). Session log alone is INSUFFICIENT (per S339 F5 finding).
 
 After all tasks done (or session ends):
 

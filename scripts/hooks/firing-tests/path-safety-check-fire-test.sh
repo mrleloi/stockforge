@@ -379,6 +379,39 @@ fi
 rm -rf "$TC18_SANDBOX"
 
 # ============================================================
+# TC19 — S341 D1: content-hash dedup: level:WARN frontmatter + mtime unchanged on 2nd run
+# ============================================================
+reset_state
+cat > "$INFRA/tc19_traversal.py" << 'PYEOF'
+import os
+def load(p):
+    return open(os.path.join("../etc", p)).read()
+PYEOF
+run_hook_on_file "$INFRA/tc19_traversal.py"
+NOTIF="$SANDBOX/human-workspace/notifications/path-safety-warn.md"
+# Verify level:WARN frontmatter
+LVL="$(head -10 "$NOTIF" 2>/dev/null | grep -m1 '^level:' | sed 's/^level:[[:space:]]*//' | tr -d '[:space:]' || true)"
+if [ "$LVL" = "WARN" ]; then
+  pass_tc "TC19a: level:WARN frontmatter present in path-safety-warn.md"
+else
+  fail_tc "TC19a" "expected level:WARN in path-safety-warn.md, got '$LVL'"
+fi
+# Verify mtime unchanged on 2nd run (content-hash dedup)
+if [ -f "$NOTIF" ]; then
+  MTIME1="$(stat -c %Y "$NOTIF" 2>/dev/null || echo 0)"
+  sleep 1
+  run_hook_on_file "$INFRA/tc19_traversal.py"
+  MTIME2="$(stat -c %Y "$NOTIF" 2>/dev/null || echo 0)"
+  if [ "$MTIME1" = "$MTIME2" ]; then
+    pass_tc "TC19b: mtime unchanged on 2nd run (content-hash dedup fired)"
+  else
+    fail_tc "TC19b" "mtime changed on 2nd run with identical path-safety content: mtime1=$MTIME1 mtime2=$MTIME2"
+  fi
+else
+  fail_tc "TC19b" "notification not found for mtime check"
+fi
+
+# ============================================================
 # Results
 # ============================================================
 TOTAL=$(( PASS + FAIL ))

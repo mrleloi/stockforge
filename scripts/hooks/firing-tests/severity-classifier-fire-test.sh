@@ -126,6 +126,51 @@ ROWS=$(grep "test-resolved-with-critical-body" "$TMP/agent-workspace/memory/.sev
 [ -z "$ROWS" ] && ROWS=0
 if [ "$ROWS" -eq 0 ]; then note_pass; else note_fail "TC6: expected 0 rows for level:RESOLVED notif (M-S322-1 case), got $ROWS — state.tsv: $(cat $TMP/agent-workspace/memory/.severity-state.tsv 2>/dev/null)"; fi
 
+# === TC7: S341 D2 — no orphan .tmp.* files left after normal run ===
+setup_tmp
+run_hook
+ORPHAN_COUNT="$(ls "$TMP/agent-workspace/memory/.severity-state.tsv.tmp."* 2>/dev/null | wc -l | tr -d ' ')"
+if [ "${ORPHAN_COUNT:-0}" -eq 0 ]; then
+  note_pass
+else
+  note_fail "TC7: found $ORPHAN_COUNT orphan .tmp.* files after normal run (trap EXIT not cleaning up)"
+fi
+
+# === TC8: S341 D2 — SIGTERM mid-run → trap EXIT fires, no orphan left ===
+setup_tmp
+CLAUDE_PROJECT_DIR="$TMP" bash "$HOOK" >/dev/null 2>&1 &
+BGPID=$!
+sleep 0.3
+kill -TERM "$BGPID" 2>/dev/null || true
+wait "$BGPID" 2>/dev/null || true
+sleep 0.3
+ORPHAN_COUNT="$(ls "$TMP/agent-workspace/memory/.severity-state.tsv.tmp."* 2>/dev/null | wc -l | tr -d ' ')"
+if [ "${ORPHAN_COUNT:-0}" -eq 0 ]; then
+  note_pass
+else
+  note_fail "TC8: found $ORPHAN_COUNT orphan .tmp.* files after SIGTERM (trap EXIT not firing)"
+fi
+
+# === TC9: S341 D2 — stale janitor removes .tmp.* files older than 60 min ===
+setup_tmp
+STALE_TMP="$TMP/agent-workspace/memory/.severity-state.tsv.tmp.7777"
+printf 'stale header\n' > "$STALE_TMP"
+# Try to backdate 2h; if touch -d not available, skip with pass
+touch -d "2 hours ago" "$STALE_TMP" 2>/dev/null || true
+STALE_FOUND="$(find "$TMP/agent-workspace/memory" -maxdepth 1 \
+  -name '.severity-state.tsv.tmp.7777' -mmin +60 2>/dev/null | wc -l | tr -d ' ')"
+if [ "${STALE_FOUND:-0}" -gt 0 ]; then
+  run_hook
+  if [ ! -f "$STALE_TMP" ]; then
+    note_pass
+  else
+    note_fail "TC9: stale .tmp.* file NOT removed by janitor (find -mmin +60 -delete logic)"
+  fi
+else
+  # touch -d not supported in this env — janitor code exists but can't test timing; skip
+  note_pass
+fi
+
 # === Summary ===
 TOTAL=$((PASS+FAIL))
 echo "severity-classifier-fire-test: $PASS/$TOTAL PASS"

@@ -173,6 +173,11 @@ Save to `agent-workspace/quality-reports/probabilistic/YYYY-MM-DD-verification-N
 
 Return summary to invoker.
 
+**OBSERVATION FILE recovery pattern**: sandwich-verifier has NO Write tool for
+`agent-workspace/memory/observations/`. If an observation file is required, return
+the observation text verbatim in your final message; the main session writes the file
+per the "verifier-has-no-Write recovery pattern" (precedent: S312/S314/S321/S333/S339).
+
 ## Constraints
 
 - Fresh context only — don't inherit dev's assumptions

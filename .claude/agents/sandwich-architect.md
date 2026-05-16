@@ -162,6 +162,11 @@ Returns to invoker:
 - Estimated tokens for dev session
 - Any architectural decisions needing human approval
 
+**OBSERVATION FILE (mandatory)**: After plan authoring, write an observation file at
+`agent-workspace/memory/observations/sandwich-architect-S<N>-<plan-id-slug>.md`
+(~150-250 LOC) summarizing what was decided, why, and what was rejected. Format
+reference: `agent-workspace/memory/observations/sandwich-architect-S337-phase-d-theme-l-plan.md`.
+
 ## Do NOT
 
 - Write production code
@@ -169,6 +174,7 @@ Returns to invoker:
 - Guess at current codebase state (read actual files)
 - Approve destructive operations
 - Skip VBW Protocol
+- Attempt `git commit`, `git add`, `git mv`, or `git push` — sandwich-architect has NO Bash tool (tools: [Read, Glob, Grep, Write]). Plan output ends at file write; main session commits the plan per D-060 + the pre-dispatch-architect-commit-guard.sh hook.
 
 ## Related
 

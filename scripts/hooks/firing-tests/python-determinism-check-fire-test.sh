@@ -298,6 +298,39 @@ else
 fi
 
 # ============================================================
+# TC13: S341 D1 — content-hash dedup: level:WARN frontmatter present + mtime unchanged on 2nd run
+# ============================================================
+setup_tmp
+cat > "$TMP/packages/domain/market_data/model.py" <<'EOF'
+from datetime import datetime
+def ts():
+    return datetime.now()
+EOF
+run_hook_stop
+NOTIF="$TMP/human-workspace/notifications/python-determinism-warn.md"
+# Verify level: WARN frontmatter
+LVL="$(head -10 "$NOTIF" 2>/dev/null | grep -m1 '^level:' | sed 's/^level:[[:space:]]*//' | tr -d '[:space:]' || true)"
+if [ "$LVL" = "WARN" ]; then
+  note_pass
+else
+  note_fail "TC13a: expected level:WARN frontmatter in python-determinism-warn.md, got '$LVL'"
+fi
+# Verify mtime unchanged on 2nd run (content-hash dedup)
+if [ -f "$NOTIF" ]; then
+  MTIME1="$(stat -c %Y "$NOTIF" 2>/dev/null || echo 0)"
+  sleep 1
+  run_hook_stop
+  MTIME2="$(stat -c %Y "$NOTIF" 2>/dev/null || echo 0)"
+  if [ "$MTIME1" = "$MTIME2" ]; then
+    note_pass
+  else
+    note_fail "TC13b: mtime changed on 2nd run with identical content (dedup did not fire): mtime1=$MTIME1 mtime2=$MTIME2"
+  fi
+else
+  note_fail "TC13b: notification not found for mtime check"
+fi
+
+# ============================================================
 # Summary
 # ============================================================
 TOTAL=$(( PASS + FAIL ))

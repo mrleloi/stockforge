@@ -1,7 +1,14 @@
-# severity-state.tsv — generated 2026-05-15T15:52:57+07:00 by severity-classifier.sh
+# severity-state.tsv — generated 2026-05-16T13:36:09+07:00 by severity-classifier.sh
 # columns: severity\tartifact_path\tage_hours\tnext_action\tclassified_at
 # severity: CRITICAL | HIGH | MEDIUM | LOW
 # next_action: BLOCK | ESCALATE-ASKUSERQUESTION | DIGEST | LOG-ONLY
-LOW	human-workspace/q-and-a/pending/qa-2026-05-15-wave-1-bis.md	0	LOG-ONLY	2026-05-15T15:52:57+07:00
-LOW	human-workspace/notifications/checkpoint-mentions-incomplete.md	0	LOG-ONLY	2026-05-15T15:52:57+07:00
-HIGH	human-workspace/notifications/python-determinism-warn.md	0	ESCALATE-ASKUSERQUESTION	2026-05-15T15:52:57+07:00
+LOW	agent-workspace/memory/decisions/062-atomic-write-doctrine.md	17	LOG-ONLY	2026-05-16T13:36:09+07:00
+LOW	agent-workspace/memory/decisions/063-html-comment-separator-doctrine.md	17	LOG-ONLY	2026-05-16T13:36:09+07:00
+LOW	agent-workspace/memory/decisions/064-path-safety-5-invariant-contract.md	19	LOG-ONLY	2026-05-16T13:36:09+07:00
+LOW	agent-workspace/memory/decisions/066-bc5-crawler-adapter-contract.md	0	LOG-ONLY	2026-05-16T13:36:09+07:00
+LOW	human-workspace/notifications/bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-16T13:36:09+07:00
+LOW	human-workspace/notifications/checkpoint-mentions-incomplete.md	0	LOG-ONLY	2026-05-16T13:36:09+07:00
+HIGH	human-workspace/notifications/html-separator-warn.md	0	ESCALATE-ASKUSERQUESTION	2026-05-16T13:36:09+07:00
+HIGH	human-workspace/notifications/path-safety-warn.md	0	ESCALATE-ASKUSERQUESTION	2026-05-16T13:36:09+07:00
+HIGH	human-workspace/notifications/python-determinism-warn.md	0	ESCALATE-ASKUSERQUESTION	2026-05-16T13:36:09+07:00
+LOW	human-workspace/notifications/tracking-retention-cap-breach.md	0	LOG-ONLY	2026-05-16T13:36:09+07:00

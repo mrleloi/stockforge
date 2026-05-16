@@ -21,6 +21,7 @@ Source: plan 020-S337-phase-d-theme-l-crawling-adapter.md § Sub-track D2
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from random import Random
 from time import monotonic, sleep
@@ -80,7 +81,7 @@ class RateLimiter:
     max_retries: int = 5
     states: dict[str, DomainState] = field(default_factory=dict)
     rng: Random = field(default_factory=lambda: Random(0))  # seeded; D-059 R2
-    _sleeper: object = field(default=sleep, repr=False)  # injectable for tests
+    _sleeper: Callable[[float], None] = field(default=sleep, repr=False)  # injectable for tests
 
     def _get_domain(self, domain_or_url: str) -> str:
         """Extract netloc if a full URL is passed; otherwise use as-is."""
@@ -116,7 +117,7 @@ class RateLimiter:
             _log.debug("rate_limiter: domain=%s sleeping=%.2fs", domain, wait_needed)
             sleeper = self._sleeper
             if callable(sleeper):
-                sleeper(wait_needed)  # type: ignore[operator]
+                sleeper(wait_needed)
         state.last_fetched_at = monotonic()
 
     def report_response(self, domain: str, status_code: int) -> bool:

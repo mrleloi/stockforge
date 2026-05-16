@@ -222,11 +222,13 @@ if [ "$VIOLATIONS" -gt 0 ]; then
   printf '[%s] python-determinism-check: %d violation(s) (R1/R2/R3/R4)\n%s' \
     "$TS" "$VIOLATIONS" "$VIOLATION_LIST" >> "$LOG"
 
-  # Write notification for severity-classifier to pick up as HIGH
+  # Write notification for severity-classifier to pick up as MEDIUM (WARN tier).
   # S318: fixed-name idempotent notification (per-fire timestamps caused notifications/ spam). No auto-clear: dual-mode (PostToolUse single-file + Stop full-tree) + hour-bucket marker make VIOLATIONS==0 ambiguous.
+  # S341 D1: content-hash dedup — only write if content changed (preserves mtime → prevents per-cycle escalation-engine re-emit).
   mkdir -p "$NOTIF_DIR" 2>/dev/null || true
   NOTIF_FILE="$NOTIF_DIR/python-determinism-warn.md"
-  {
+  NEW_CONTENT="$(
+    printf '%s\n' '---' 'level: WARN' 'status: pending' '---' ''
     printf '# python-determinism-check — ALERT\n\n'
     printf 'Determinism violations detected: %d\n\n' "$VIOLATIONS"
     printf '%s' "$VIOLATION_LIST"
@@ -236,7 +238,12 @@ if [ "$VIOLATIONS" -gt 0 ]; then
     printf -- '- R3: use `OrderedDict` if iteration order matters; avoid `list(d.keys())[N]` index patterns\n'
     printf -- '- R4: domain layer must be pure functions; remove `time.time()` from `packages/domain/**`\n'
     printf '\nSee ADR: agent-workspace/memory/decisions/059-python-determinism-contract.md\n'
-  } > "$NOTIF_FILE" 2>/dev/null || true
+  )"
+  NEW_HASH="$(printf '%s' "$NEW_CONTENT" | sha256sum 2>/dev/null | cut -d' ' -f1 || true)"
+  OLD_HASH="$(sha256sum "$NOTIF_FILE" 2>/dev/null | cut -d' ' -f1 || true)"
+  if [ "$NEW_HASH" != "$OLD_HASH" ]; then
+    printf '%s\n' "$NEW_CONTENT" > "$NOTIF_FILE" 2>/dev/null || true
+  fi
 else
   printf '[%s] python-determinism-check: OK (0 violations across %d file(s))\n' \
     "$TS" "${#SCAN_FILES[@]}" >> "$LOG"

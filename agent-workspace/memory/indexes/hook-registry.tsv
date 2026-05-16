@@ -1,5 +1,6 @@
 hook_name	wired_events	status	linked_lessons	firing_test_path	last_modified
 adr-empirical-close-verify-spot-check.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/adr-empirical-close-verify-spot-check-fire-test.sh	see-fs
+atomic-write-check.sh	Stop,PostToolUse	ACTIVE	none	scripts/hooks/firing-tests/atomic-write-check-fire-test.sh	see-fs
 attach-portability-smoke.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/attach-portability-smoke-fire-test.sh	see-fs
 auto-reboot-handoff-verify.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/auto-reboot-handoff-verify-fire-test.sh	see-fs
 autonomous-block-enforcer.sh	UserPromptSubmit,PreToolUse	ACTIVE	none	scripts/hooks/firing-tests/autonomous-block-enforcer-fire-test.sh	see-fs
@@ -38,6 +39,7 @@ harness-health-self-scan.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/ho
 harness-recovery-dod-watchdog.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/harness-recovery-dod-watchdog-fire-test.sh	see-fs
 hook-firing-counter.sh	UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/hook-firing-counter-fire-test.sh	see-fs
 hook-log-path-canonical-detector.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/hook-log-path-canonical-detector-fire-test.sh	see-fs
+html-separator-check.sh	Stop,PostToolUse	ACTIVE	none	scripts/hooks/firing-tests/html-separator-check-fire-test.sh	see-fs
 idle-escape-detector.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/idle-escape-detector-fire-test.sh	see-fs
 idle-state-advisory.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/idle-state-advisory-fire-test.sh	see-fs
 in-flight-subagent-watcher.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/in-flight-subagent-watcher-fire-test.sh	see-fs
@@ -53,6 +55,7 @@ memory-routing-audit.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/memory-routi
 metric-failure-mode-rate.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/metric-failure-mode-rate-fire-test.sh	see-fs
 no-anthropic-sdk-d10.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/no-anthropic-sdk-d10-fire-test.sh	see-fs
 observation-orphan-detector.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/observation-orphan-detector-fire-test.sh	see-fs
+path-safety-check.sh	Stop,PostToolUse	ACTIVE	none	scripts/hooks/firing-tests/path-safety-check-fire-test.sh	see-fs
 phase-status-coherence.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/phase-status-coherence-fire-test.sh	see-fs
 post-dev-dispatch-attestation-check.sh	SubagentStop	ACTIVE	none	scripts/hooks/firing-tests/post-dev-dispatch-attestation-check-fire-test.sh	see-fs
 post-tool-citation-grep.sh	PostToolUse	ACTIVE	none	scripts/hooks/firing-tests/post-tool-citation-grep-fire-test.sh	see-fs

@@ -302,10 +302,11 @@ if [ "$VIOLATIONS" -gt 0 ]; then
   printf '[%s] path-safety-check: %d violation(s) (P1/P1b/P2P3/P4/P5)\n%s' \
     "$TS" "$VIOLATIONS" "$VIOLATION_LIST" >> "$LOG"
 
+  # S341 D1: content-hash dedup — only write if content changed (preserves mtime → prevents per-cycle escalation-engine re-emit).
   mkdir -p "$NOTIF_DIR" 2>/dev/null || true
   NOTIF_FILE="$NOTIF_DIR/path-safety-warn.md"
-  {
-    printf '%s\n' '---' 'status: pending' '---' ''
+  NEW_CONTENT="$(
+    printf '%s\n' '---' 'level: WARN' 'status: pending' '---' ''
     printf '# path-safety-check %s\n\n' '— ALERT'
     printf 'Path safety violations detected: %d\n\n' "$VIOLATIONS"
     printf '%s' "$VIOLATION_LIST"
@@ -317,7 +318,12 @@ if [ "$VIOLATIONS" -gt 0 ]; then
     printf '\nSee ADR: agent-workspace/memory/decisions/064-path-safety-5-invariant-contract.md\n'
     printf 'Helpers: packages/_shared/path_safety.py\n'
     printf 'Source: Vibe-Trading agent/src/tools/path_utils.py:1-213 (MIT 2026)\n'
-  } > "$NOTIF_FILE" 2>/dev/null || true
+  )"
+  NEW_HASH="$(printf '%s' "$NEW_CONTENT" | sha256sum 2>/dev/null | cut -d' ' -f1 || true)"
+  OLD_HASH="$(sha256sum "$NOTIF_FILE" 2>/dev/null | cut -d' ' -f1 || true)"
+  if [ "$NEW_HASH" != "$OLD_HASH" ]; then
+    printf '%s\n' "$NEW_CONTENT" > "$NOTIF_FILE" 2>/dev/null || true
+  fi
 else
   printf '[%s] path-safety-check: OK (0 violations across %d file(s))\n' \
     "$TS" "${#SCAN_FILES[@]}" >> "$LOG"

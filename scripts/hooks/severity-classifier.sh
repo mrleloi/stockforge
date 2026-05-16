@@ -29,8 +29,16 @@ NOW_EPOCH="$(date +%s 2>/dev/null || echo 0)"
 
 mkdir -p "$MEM_DIR" "$(dirname "$LOG")"
 
+# S341 D2: Janitor — remove stale .tmp.* orphans (>60 min old) before writing a new one.
+# Prevents accumulation of orphaned temp files from prior aborted runs (D-062 atomic-write-doctrine).
+find "$MEM_DIR" -maxdepth 1 -name '.severity-state.tsv.tmp.*' -mmin +60 -delete 2>/dev/null || true
+
 # Atomic state-file rewrite: write to temp + rename (NEVER append; classifier is full re-scan).
 TMP="$STATE_FILE.tmp.$$"
+# S341 D2: trap EXIT — ensure TMP is cleaned up even if script is killed mid-write.
+# Evaluates $TMP at signal time (late binding); TMP is set to "" initially, then $STATE_FILE.tmp.$$ above.
+# The trap fires whether exit is normal, ERR-caught, or SIGTERM/SIGINT.
+trap 'rm -f "$TMP" 2>/dev/null || true' EXIT
 
 # Header
 {
