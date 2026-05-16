@@ -1,7 +1,7 @@
 ---
 name: sandwich-dev
 description: Developer persona in sandwich pattern. Executes implementation per existing plan. Does NOT re-plan. Invoked when session type is FOCUSED_IMPL or MULTI_TASK_IMPL.
-model: sonnet
+model: opus
 tools: [Read, Glob, Grep, Write, Edit, Bash]
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: research-scanner
 description: Opensource repository surveyor with provenance. Reads README + recent commits of candidate repos and reports fit-for-stockforge with repo URL + commit SHA + as-of date for every claim. Use for agent-pick-1 dogfood (D-005 § 5.5d.3) and future opensource tool surveys.
-model: sonnet
+model: opus
 tools: [Read, Glob, Grep, WebFetch]
 ---
 

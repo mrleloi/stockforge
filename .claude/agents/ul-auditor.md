@@ -1,7 +1,7 @@
 ---
 name: ul-auditor
 description: Ubiquitous language auditor. Scans codebase for term drift against glossary. Fresh context required. Invoked by /ul-audit command.
-model: sonnet
+model: opus
 tools: [Read, Glob, Grep, Bash]
 ---
 
