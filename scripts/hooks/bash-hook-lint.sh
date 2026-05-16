@@ -28,6 +28,52 @@ mkdir -p "$(dirname "$LOG")" 2>/dev/null || true
 VIOLATIONS=0
 VIOLATION_LIST=""
 
+# === D3: Content-hash early-exit cache (S346 plan-023 DD-4 option-a).
+# Per-file SHA256 cache prevents re-running all 10 checks on unchanged hook files.
+# Cache file: $MEM_DIR/.bhl-cache-{sha256}.ok (empty sentinel; created when file passes all checks).
+# On file content change: old SHA → no cache hit → all 10 checks re-run → new cache written.
+# Cleanup: stale cache files older than 2h auto-deleted by the hoisted find below.
+# S346 plan-023: expected wall ~3-5s warm cache (most hooks unchanged session-to-session).
+# IMPORTANT: SHAs pre-computed ONCE at startup (stored in associative array) to avoid
+# re-running sha256sum × 10 checks × 108 files = 1080 subprocess calls per invocation.
+BHL_CACHE_DIR="$PROJECT_DIR/agent-workspace/memory"
+find "$BHL_CACHE_DIR" -maxdepth 1 -name '.bhl-cache-*.ok' -mmin +120 -delete 2>/dev/null || true
+
+# Pre-compute SHAs for all hook files in ONE pass (sha256sum batch).
+# Also pre-load existing cache keys into an in-memory set (avoids per-check filesystem stat).
+declare -A _BHL_SHA_MAP
+declare -A _BHL_CACHED_SET  # key = sha, value = "1" if .ok file exists
+if [ -d "$HOOKS_DIR" ]; then
+  while IFS=' ' read -r sha fpath; do
+    bn_key="${fpath##*/}"  # basename via parameter substitution — no subprocess
+    _BHL_SHA_MAP["$bn_key"]="$sha"
+  done < <(sha256sum "$HOOKS_DIR"/*.sh 2>/dev/null | grep -v 'bash-hook-lint.sh' || true)
+fi
+# Load existing cache SHAs in one glob scan (avoids per-check [ -f ] calls).
+for _ck in "${BHL_CACHE_DIR}"/.bhl-cache-*.ok; do
+  [ -f "$_ck" ] || continue
+  _csha="${_ck##*/.bhl-cache-}"
+  _csha="${_csha%.ok}"
+  _BHL_CACHED_SET["$_csha"]="1"
+done
+
+# Helper: check if a hook file has a valid content-hash cache entry (pure in-memory lookup).
+# Uses bash parameter substitution (no subprocess) for maximum speed on Windows MSYS2.
+bhl_is_cached() {
+  local f="$1"
+  local bn_key="${f##*/}"  # basename via parameter substitution — no subprocess
+  local sha="${_BHL_SHA_MAP[$bn_key]:-}"
+  [ -n "$sha" ] && [ "${_BHL_CACHED_SET[$sha]:-}" = "1" ]
+}
+
+# Helper: write cache entry for a file (call ONLY after all checks pass with 0 violations for that file).
+bhl_write_cache() {
+  local f="$1"
+  local bn_key="${f##*/}"  # basename via parameter substitution — no subprocess
+  local sha="${_BHL_SHA_MAP[$bn_key]:-}"
+  [ -n "$sha" ] && touch "${BHL_CACHE_DIR}/.bhl-cache-${sha}.ok" 2>/dev/null || true
+}
+
 emit() {
   local code="$1" file="$2" detail="$3"
   VIOLATIONS=$(( VIOLATIONS + 1 ))
@@ -44,9 +90,11 @@ emit() {
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
-    bn="$(basename "$f")"
+    bn="${f##*/}"
     # Skip self.
     [ "$bn" = "bash-hook-lint.sh" ] && continue
+    # D3: content-hash cache early-exit — skip if file unchanged since last clean run.
+    bhl_is_cached "$f" && continue
     # S319b lint-calibration: honour explicit skip-marker (ratified false-positive or Phase-1+).
     if grep -qE '^[[:space:]]*#[[:space:]]*bash-hook-lint:allow L-S11-1' "$f" 2>/dev/null; then continue; fi
     # Strip comments + heredocs roughly: scan only "executable" lines (not # comments).
@@ -70,8 +118,9 @@ fi
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
-    bn="$(basename "$f")"
+    bn="${f##*/}"
     [ "$bn" = "bash-hook-lint.sh" ] && continue
+    bhl_is_cached "$f" && continue
     BAD="$(grep -nE "printf[[:space:]]+['\"]-" "$f" 2>/dev/null | grep -vE "printf[[:space:]]+--" | grep -vE "\{printf" || true)"
     if [ -n "$BAD" ]; then
       emit "L-S43b-9-PRINTF-DASH" "$bn" "printf format starts with '-' without '--' sentinel — use 'printf -- ...'"
@@ -84,8 +133,9 @@ fi
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
-    bn="$(basename "$f")"
+    bn="${f##*/}"
     [ "$bn" = "bash-hook-lint.sh" ] && continue
+    bhl_is_cached "$f" && continue
     # Extract variable names matching *LOG*|*FILE*|*OUTPUT*|*PATH* pattern that get assigned a path-looking value.
     DECL_VARS="$(grep -oE '^[A-Z_]+(LOG|FILE|OUTPUT|PATH|DIR)[A-Z_]*=' "$f" 2>/dev/null | sed 's/=$//' | sort -u || true)"
     for v in $DECL_VARS; do
@@ -157,8 +207,9 @@ done
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
-    bn="$(basename "$f")"
+    bn="${f##*/}"
     [ "$bn" = "bash-hook-lint.sh" ] && continue
+    bhl_is_cached "$f" && continue
     BAD_A="$(grep -nE "(grep|sed|awk)[[:space:]].*Session N([^a-zA-Z0-9]|$)" "$f" 2>/dev/null | grep -vE "^[[:space:]]*[0-9]+:[[:space:]]*#" || true)"
     if [ -n "$BAD_A" ]; then
       emit "M-S51-1-IMAGINED-FORMAT" "$bn" "literal 'Session N' placeholder in grep/sed/awk pattern — verify against real current-execution.md format (L-S51-1)"
@@ -173,8 +224,9 @@ fi
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
-    bn="$(basename "$f")"
+    bn="${f##*/}"
     [ "$bn" = "bash-hook-lint.sh" ] && continue
+    bhl_is_cached "$f" && continue
     BAD_B="$(grep -nE "[\"]?\\.[a-zA-Z0-9_-]+(-fired|-marker|-ran|-flag)-\\\$\\{?CLAUDE_SESSION_ID" "$f" 2>/dev/null | grep -vE "^[[:space:]]*[0-9]+:[[:space:]]*#" || true)"
     if [ -n "$BAD_B" ]; then
       emit "L-S48m-1-CLAUDE-SESSION-ID-MARKER" "$bn" "marker filename uses \$CLAUDE_SESSION_ID (empty on Windows; silent skip — L-S48m-1)"
@@ -202,8 +254,9 @@ fi
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
-    bn="$(basename "$f")"
+    bn="${f##*/}"
     [ "$bn" = "bash-hook-lint.sh" ] && continue
+    bhl_is_cached "$f" && continue
     # (a) Suspicious assignment: ${CLAUDE_SESSION_ID:-WORD} where WORD is alphabetic
     HAS_FALLBACK="$(grep -nE '\$\{CLAUDE_SESSION_ID:-[a-zA-Z][a-zA-Z0-9_-]*\}' "$f" 2>/dev/null | grep -vE "^[[:space:]]*[0-9]+:[[:space:]]*#" || true)"
     if [ -n "$HAS_FALLBACK" ]; then
@@ -256,8 +309,9 @@ fi
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
-    bn="$(basename "$f")"
+    bn="${f##*/}"
     [ "$bn" = "bash-hook-lint.sh" ] && continue
+    bhl_is_cached "$f" && continue
     # Clean 0/1 (per L-S80-2: avoids "0\n0" multi-line from `grep -c ... || echo 0` race that breaks awk -v / [ test downstream)
     if grep -qE 'set [^#]*pipefail' "$f" 2>/dev/null; then HAS_PIPEFAIL=1; else HAS_PIPEFAIL=0; fi
     if grep -qE 'trap[[:space:]]+[^#]*ERR' "$f" 2>/dev/null; then HAS_ERR_TRAP=1; else HAS_ERR_TRAP=0; fi
@@ -344,8 +398,9 @@ fi
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
-    bn="$(basename "$f")"
+    bn="${f##*/}"
     [ "$bn" = "bash-hook-lint.sh" ] && continue
+    bhl_is_cached "$f" && continue
     # S319b lint-calibration: honour explicit skip-marker (ratified false-positive).
     if grep -qE '^[[:space:]]*#[[:space:]]*bash-hook-lint:allow L-S53-2' "$f" 2>/dev/null; then continue; fi
     BAD_D="$(grep -nE "grep[[:space:]]+(-[a-zA-Z][a-zA-Z0-9]*[[:space:]]+)*['\"][^'\"]*(S\[0-9\]\+|Track[[:space:]]+\[0-9|Session[[:space:]]+(N|\[0-9)|## S\[0-9)" "$f" 2>/dev/null \
@@ -382,8 +437,9 @@ fi
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
-    bn="$(basename "$f")"
+    bn="${f##*/}"
     [ "$bn" = "bash-hook-lint.sh" ] && continue
+    bhl_is_cached "$f" && continue
     # Clean 0/1 (per L-S80-2: avoids "0\n0" multi-line from `grep -c ... || echo 0` race that breaks awk -v / [ test downstream)
     if grep -qE 'set [^#]*pipefail' "$f" 2>/dev/null; then HAS_PIPEFAIL=1; else HAS_PIPEFAIL=0; fi
     if grep -qE 'trap[[:space:]]+[^#]*ERR' "$f" 2>/dev/null; then HAS_ERR_TRAP=1; else HAS_ERR_TRAP=0; fi
@@ -469,8 +525,9 @@ fi
 if [ -d "$HOOKS_DIR" ]; then
   for f in "$HOOKS_DIR"/*.sh; do
     [ ! -f "$f" ] && continue
-    bn="$(basename "$f")"
+    bn="${f##*/}"
     [ "$bn" = "bash-hook-lint.sh" ] && continue
+    bhl_is_cached "$f" && continue
     VIOLATION_LINE_F="$(awk '
 /^[[:space:]]*#/ { next }
 {
@@ -488,6 +545,22 @@ if [ -d "$HOOKS_DIR" ]; then
     if [ -n "$VIOLATION_LINE_F" ]; then
       emit "L-S80-2-GREP-C-OR-ECHO-CAPTURE-TRAP" "$bn" "VAR=\$(grep -c ... || echo N) produces multi-line \"0\\nN\" capture when grep finds 0 + exits 1 → breaks awk -v numeric coercion downstream (L-S80-2). Fix: if grep -qE ...; then VAR=1; else VAR=0; fi (clean integer)."
     fi
+  done
+fi
+
+# === D3: Write content-hash cache for hook files with 0 violations (S346 plan-023 DD-4 option-a).
+# Any file whose basename appears in VIOLATION_LIST is dirty → skip cache.
+# All other hook files get a cache entry so future runs skip them on warm-cache.
+if [ -d "$HOOKS_DIR" ]; then
+  for f in "$HOOKS_DIR"/*.sh; do
+    [ ! -f "$f" ] && continue
+    bn="${f##*/}"
+    [ "$bn" = "bash-hook-lint.sh" ] && continue
+    # Skip if already cached (bhl_is_cached avoids redundant SHA computation).
+    bhl_is_cached "$f" && continue
+    # Skip if this file appeared in any violation (VIOLATION_LIST contains "  - CODE: bn — ...")
+    if printf '%s' "$VIOLATION_LIST" | grep -qF ": $bn — " 2>/dev/null; then continue; fi
+    bhl_write_cache "$f"
   done
 fi
 

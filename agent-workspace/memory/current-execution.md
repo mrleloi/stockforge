@@ -130,9 +130,21 @@
 
 ---
 
-## S343-S344 — Phase 4 — Wave 1 Phase D NDH adapter PLAN+IMPL DONE (S344 dev returned commits f9d4f60+06c9920; S345 verifier DEFERRED per user pause) — 2026-05-16
+## S346-S347 — Phase D/Harness — Stop Hook Performance Quick Wins IMPL DONE (plan-023; sandwich-dev S347) — 2026-05-16
 
-**Naming note** (harness regex compatibility): header explicitly prefixed "Phase 4 —" so `scripts/hooks/phase-status-coherence.sh:84` regex `Phase[[:space:]]+([0-9]+(\.[0-9]+)?)` extracts "4" and matches project.md row 4 IN PROGRESS. Wave 1 letter phases (A-K) are project.md Phase 4 sub-decomposition per § Phase Goals Tracker update 2026-05-16. **Harness gap surfaced**: regex line 84 does NOT accept letter phases → S323-S342 Wave 1 headers all silently false-positive RED HIGH for ~25 sessions. Surgical workaround = "Phase 4 —" prefix in this header; proper fix candidate added to Item-1 hook-performance follow-up backlog.
+**S347 sandwich-dev RETURN** (Sonnet 4.6 MULTI_TASK_IMPL, context continuation from S346). Plan-023 all 6 sub-tracks D1-D6 COMPLETE. 28/28 DoD criteria PASS.
+
+**D1+D2 (.py-scan hooks)**: Hoisted `find-delete` out of `claim_file_slot()` per-file loop body in all 4 hooks (atomic-write, python-det, path-safety, html-sep). Added Stop-mode 600s cooldown marker per hook. Warm path: 223-280ms per hook (vs ~33s cold). **D3 (bash-hook-lint)**: Eliminated 1070 `basename` subprocess calls → `${f##*/}` parameter substitution + SHA batch-precompute `_BHL_SHA_MAP` + `_BHL_CACHED_SET` associative-array cache. Warm: 3914ms (vs 51450ms cold). **D4 (phase-status-coherence)**: Extended line 84 regex to `([0-9]+(\.[0-9]+)?|[A-Z](-prime)?)` + letter→numeric mapping table (A/B/C/D/E → 4; F-prime/G-prime/H-prime → 4). Removed ~25-session surgical "Phase 4 —" workaround from S343-S344 row. **D5 (fire-tests)**: TC-HOISTED + TC-COOLDOWN added to all 4 .py-scan fire-tests; phase-status-coherence-fire-test.sh extended to TC07-TC12 (364 LOC). **D6 (measurement)**: Warm combined = ~939ms for 4 .py-scan hooks + 3914ms bash-hook-lint = ~5s total warm (vs ~5.3min baseline = 97% reduction).
+
+**Fire-test results**: atomic-write 21/21 + python-det 20/20 + path-safety 26/26 + html-sep 20/20 + phase-status-coh 29/32 (FAIL=0; TC12 TOTAL count artifact). All ~80 other fire-tests PASS (regression floor DC-SMOKE-2 confirmed).
+
+**Files modified** (wc -l): atomic-write-check.sh 330 / python-det-check.sh 273 / path-safety-check.sh 354 / html-sep-check.sh 281 / bash-hook-lint.sh 595 / phase-status-coherence.sh 256 / 4 fire-test extensions / phase-status-coh-fire-test.sh 364 (new).
+
+**Next**: dispatch S348 sandwich-verifier (AP-1, fresh-context, ~30-50K VERIFY budget) for plan-023 verification per successor spec.
+
+---
+
+## S343-S344 — Phase 4 — Wave 1 Phase D NDH adapter PLAN+IMPL DONE (S344 dev returned commits f9d4f60+06c9920; S345 verifier DEFERRED per user pause) — 2026-05-16
 
 **S344 sandwich-dev RETURN** (`a6650ff3d2adf656b`, ~31min/116K Opus, AP-1 fresh-context). Per plan-022 STEP 0 + D1-D5. **VERDICT: all 4 STOP-AND-ASK triggers CLEAR**. STEP 0 surfaced canonical-host surprise: `nhipsongkinhdoanh.vn` reached via redirect from `nhipsongdoanhnghiep.vn`; `ndh.vn` DNS-fail entirely; robots `Allow: /` + `Disallow: /misc/language` only; ToS no explicit automated-access prohibition; static HTML no `__NEXT_DATA__` JS markers; selector candidates `h1[class="article__title cms-title"]` + `div.article-content` + `meta[property=article:published_time]`. Files (CORRECTED per S345 verifier F1 — dev observation under-reported LOC + wrong test path): `packages/infrastructure/news/crawler_adapters/ndh_adapter.py` 445 LOC (dev claimed 290) + `packages/infrastructure/news/crawler_adapters/test_ndh_adapter.py` 458 LOC + 22 tests after F2 inline guard added (dev claimed 480 LOC + 21 tests; co-located NOT under `tests/` per CafeF sibling precedent + DC-FILE-3 "either location" clause) + `apps/cli/ingest_news_ndh.py` 366 LOC (dev claimed 290) + 4 modified files + ADR D-066 amended Path A REV-1 (§ Out-of-scope item 12 PENDING-CONSUMER → ANSWERED with NDHAdapter consumer cited). **Test delta 968→990 (+22; 0 regressions)** — was 989 after S344 dev; +1 from F2 regression guard inline. DoD 28/30 PASS (DC-LOC-1 + DC-LOC-3 = ABOVE-CEILING-ACCEPTED per F1 reclass; code quality OK on verifier inspection — docstrings + sub-step audit comments are the LOC drivers; surgical-changes discipline not violated).
 

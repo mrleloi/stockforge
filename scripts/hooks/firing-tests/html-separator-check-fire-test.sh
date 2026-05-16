@@ -361,6 +361,91 @@ else
 fi
 
 # ============================================================
+# TC-HOISTED: D1 S346 plan-023 — find-delete NOT in claim_file_slot body
+# ============================================================
+reset_state
+export CLAUDE_PROJECT_DIR="$SANDBOX"
+
+# Assert 1: no non-comment 'find.*-delete' line inside claim_file_slot() body
+HOOK_SRC="$(cat "$HOOK" 2>/dev/null || true)"
+CLAIM_BODY="$(printf '%s\n' "$HOOK_SRC" | awk '/^claim_file_slot\(\)/,/^\}/' | grep -v '^[[:space:]]*#' | grep -v '^[[:space:]]*$' | grep -v 'claim_file_slot' | grep -v '^}' || true)"
+if printf '%s\n' "$CLAIM_BODY" | grep -q 'find.*-delete'; then
+  fail_tc "TC-HOISTED-1" "find-delete still found in claim_file_slot() non-comment body (D1 regression)"
+else
+  pass_tc "TC-HOISTED-1: find-delete NOT in claim_file_slot body (D1 applied)"
+fi
+
+# Assert 2: hoisted find-delete line exists in hook source (outside claim_file_slot)
+if printf '%s\n' "$HOOK_SRC" | grep -v '^[[:space:]]*#' | grep -q 'find.*\.htmlsep-marker.*-delete'; then
+  pass_tc "TC-HOISTED-2: hoisted 'find .htmlsep-marker* -delete' exists in hook source"
+else
+  fail_tc "TC-HOISTED-2" "hoisted 'find .htmlsep-marker* -delete' not found in hook source (D1 not applied)"
+fi
+
+# ============================================================
+# TC-COOLDOWN: D2 S346 plan-023 — Stop-mode cool-down behavior
+# ============================================================
+# html-separator threshold is >5 files (not >100); create 6 .md files in audited zones
+COOL_SANDBOX="$(mktemp -d)"
+COOL_MEM="$COOL_SANDBOX/agent-workspace/memory"
+mkdir -p "$COOL_MEM/observations" "$COOL_MEM/thesis-log" "$COOL_MEM/post-mortems"
+mkdir -p "$COOL_SANDBOX/human-workspace/notifications"
+export CLAUDE_PROJECT_DIR="$COOL_SANDBOX"
+
+# Create 6 .md files with correct separators so hook runs to completion without violations
+for i in $(seq 1 6); do
+  {
+    make_large_entry "Entry A${i}"
+    printf '\n\n<!-- ENTRY_END -->\n\n'
+    make_large_entry "Entry B${i}"
+    printf '\n\n<!-- ENTRY_END -->\n\n'
+  } > "$COOL_MEM/observations/cooldown_test_${i}.md"
+done
+
+COOL_MARKER="$COOL_MEM/.htmlsep-last-full-sweep"
+COOL_LOG="$COOL_MEM/.session-hooks.log"
+
+# Assert 3: First Stop run creates the cooldown marker (6 files > threshold of 5)
+bash "$HOOK" < /dev/null 2>/dev/null || true
+if [ -f "$COOL_MARKER" ]; then
+  pass_tc "TC-COOLDOWN-3: .htmlsep-last-full-sweep created after first run with >5 files"
+else
+  fail_tc "TC-COOLDOWN-3" ".htmlsep-last-full-sweep not created after first run with >5 files"
+fi
+
+# Assert 4: Second Stop run (within 600s) logs SKIP-COOLDOWN
+bash "$HOOK" < /dev/null 2>/dev/null || true
+if grep -q 'SKIP-COOLDOWN' "$COOL_LOG" 2>/dev/null; then
+  pass_tc "TC-COOLDOWN-4: SKIP-COOLDOWN logged on second Stop run within 600s"
+else
+  fail_tc "TC-COOLDOWN-4" "SKIP-COOLDOWN not logged on second Stop run within 600s"
+fi
+
+# Assert 5: After marker is expired (>600s old), full sweep runs (no SKIP-COOLDOWN)
+touch -d '700 seconds ago' "$COOL_MARKER" 2>/dev/null || true
+rm -f "$COOL_LOG"
+bash "$HOOK" < /dev/null 2>/dev/null || true
+if grep -q 'SKIP-COOLDOWN' "$COOL_LOG" 2>/dev/null; then
+  fail_tc "TC-COOLDOWN-5" "SKIP-COOLDOWN incorrectly logged after marker expired (>600s)"
+else
+  pass_tc "TC-COOLDOWN-5: no SKIP-COOLDOWN after marker expired (full sweep executed)"
+fi
+
+# Assert 6: PostToolUse JSON stdin (single file) bypasses cooldown
+touch "$COOL_MARKER" 2>/dev/null || true
+rm -f "$COOL_LOG"
+CLEAN_MD="$COOL_MEM/observations/cooldown_test_1.md"
+printf '%s' "{\"file_path\": \"${CLEAN_MD}\"}" | bash "$HOOK" 2>/dev/null || true
+if grep -q 'SKIP-COOLDOWN' "$COOL_LOG" 2>/dev/null; then
+  fail_tc "TC-COOLDOWN-6" "PostToolUse JSON stdin should NOT trigger SKIP-COOLDOWN"
+else
+  pass_tc "TC-COOLDOWN-6: PostToolUse JSON stdin bypasses cooldown correctly"
+fi
+
+rm -rf "$COOL_SANDBOX"
+export CLAUDE_PROJECT_DIR="$SANDBOX"
+
+# ============================================================
 # Results
 # ============================================================
 TOTAL=$(( PASS + FAIL ))

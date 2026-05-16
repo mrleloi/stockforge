@@ -331,6 +331,83 @@ else
 fi
 
 # ============================================================
+# TC-HOISTED: D1 S346 plan-023 — find-delete NOT in claim_file_slot body
+# ============================================================
+# Assert 1: no non-comment 'find.*-delete' line inside claim_file_slot() body
+HOOK_SRC="$(cat "$HOOK" 2>/dev/null || true)"
+CLAIM_BODY="$(printf '%s\n' "$HOOK_SRC" | awk '/^claim_file_slot\(\)/,/^\}/' | grep -v '^[[:space:]]*#' | grep -v '^[[:space:]]*$' | grep -v 'claim_file_slot' | grep -v '^}' || true)"
+if printf '%s\n' "$CLAIM_BODY" | grep -q 'find.*-delete'; then
+  note_fail "TC-HOISTED-1: find-delete still found in claim_file_slot() non-comment body (D1 regression)"
+else
+  note_pass
+fi
+
+# Assert 2: hoisted find-delete line exists in hook source (outside claim_file_slot)
+if printf '%s\n' "$HOOK_SRC" | grep -v '^[[:space:]]*#' | grep -q 'find.*\.pydet-marker.*-delete'; then
+  note_pass
+else
+  note_fail "TC-HOISTED-2: hoisted 'find .pydet-marker* -delete' not found in hook source (D1 not applied)"
+fi
+
+# ============================================================
+# TC-COOLDOWN: D2 S346 plan-023 — Stop-mode cool-down behavior
+# ============================================================
+# Setup: fresh sandbox with 105 .py files to exceed >100 SCAN_FILES threshold
+COOL_TMP="$(mktemp -d -t pydet-cooldown-XXXXXX 2>/dev/null || mktemp -d)"
+trap 'rm -rf "$COOL_TMP" "$TMP"' EXIT
+mkdir -p "$COOL_TMP/agent-workspace/memory"
+mkdir -p "$COOL_TMP/human-workspace/notifications"
+mkdir -p "$COOL_TMP/packages/domain/market_data"
+
+# Create 105 clean dummy .py files so SCAN_FILES > 100 and cooldown marker is written
+for i in $(seq 1 105); do
+  printf '# dummy %d\n' "$i" > "$COOL_TMP/packages/domain/market_data/dummy_${i}.py"
+done
+
+# Assert 3: First Stop run creates the cooldown marker
+COOL_MARKER="$COOL_TMP/agent-workspace/memory/.pydet-last-full-sweep"
+CLAUDE_PROJECT_DIR="$COOL_TMP" bash "$HOOK" </dev/null >/dev/null 2>&1 || true
+if [ -f "$COOL_MARKER" ]; then
+  note_pass
+else
+  note_fail "TC-COOLDOWN-3: .pydet-last-full-sweep not created after first run with >100 files"
+fi
+
+# Assert 4: Second Stop run (within 600s) logs SKIP-COOLDOWN
+COOL_LOG="$COOL_TMP/agent-workspace/memory/.session-hooks.log"
+CLAUDE_PROJECT_DIR="$COOL_TMP" bash "$HOOK" </dev/null >/dev/null 2>&1 || true
+if grep -q 'SKIP-COOLDOWN' "$COOL_LOG" 2>/dev/null; then
+  note_pass
+else
+  note_fail "TC-COOLDOWN-4: SKIP-COOLDOWN not logged on second Stop run within 600s"
+fi
+
+# Assert 5: After marker is expired (>600s old), full sweep runs (no SKIP-COOLDOWN on 3rd run)
+touch -d '700 seconds ago' "$COOL_MARKER" 2>/dev/null || true
+# Clear log to detect new SKIP-COOLDOWN entry
+rm -f "$COOL_LOG"
+CLAUDE_PROJECT_DIR="$COOL_TMP" bash "$HOOK" </dev/null >/dev/null 2>&1 || true
+if grep -q 'SKIP-COOLDOWN' "$COOL_LOG" 2>/dev/null; then
+  note_fail "TC-COOLDOWN-5: SKIP-COOLDOWN incorrectly logged after marker expired (>600s)"
+else
+  note_pass
+fi
+
+# Assert 6: PostToolUse JSON stdin bypasses cooldown (touch fresh marker first)
+touch "$COOL_MARKER" 2>/dev/null || true
+rm -f "$COOL_LOG"
+CLEAN_PY="$COOL_TMP/packages/domain/market_data/clean_probe.py"
+printf 'from datetime import datetime, timezone\ndef get_ts():\n    return datetime.now(timezone.utc)\n' > "$CLEAN_PY"
+# PostToolUse JSON payload — should bypass cooldown entirely
+printf '%s' "{\"file_path\": \"${CLEAN_PY}\"}" | CLAUDE_PROJECT_DIR="$COOL_TMP" bash "$HOOK" >/dev/null 2>&1 || true
+if grep -q 'SKIP-COOLDOWN' "$COOL_LOG" 2>/dev/null; then
+  note_fail "TC-COOLDOWN-6: PostToolUse JSON stdin should NOT trigger SKIP-COOLDOWN (bypass cooldown)"
+else
+  note_pass
+fi
+rm -rf "$COOL_TMP"
+
+# ============================================================
 # Summary
 # ============================================================
 TOTAL=$(( PASS + FAIL ))

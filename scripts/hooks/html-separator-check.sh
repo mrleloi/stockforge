@@ -83,7 +83,8 @@ file_marker_path() {
 
 claim_file_slot() {
   local marker="$1"
-  find "$MEM_DIR" -maxdepth 1 -name '.htmlsep-marker-*' -mmin +120 -delete 2>/dev/null || true
+  # D1 S346 plan-023: find-delete REMOVED from claim_file_slot() body.
+  # Hoisted to pre-scan block below (runs ONCE per hook invocation, not once per file).
   if ( set -o noclobber; printf '%s\n' "$TS" > "$marker" ) 2>/dev/null; then
     return 0
   else
@@ -127,6 +128,22 @@ if [ -n "$STDIN_PAYLOAD" ]; then
     if is_audited_zone "$EDITED_FILE"; then
       SCAN_FILES+=("$EDITED_FILE")
     fi
+  fi
+fi
+
+# === D1: Hoisted marker cleanup (S346 plan-023 P1) — runs ONCE per hook invocation.
+# Observation 2026-05-16: agent-workspace/memory/observations/2026-05-16-stop-hook-performance-audit.md
+find "$MEM_DIR" -maxdepth 1 -name '.htmlsep-marker-*' -mmin +120 -delete 2>/dev/null || true
+
+# === D2: Stop-mode cool-down (S346 plan-023 P2) — early-exit if last full sweep ≤ 600s ago.
+HTMLSEP_COOLDOWN_MARKER="$MEM_DIR/.htmlsep-last-full-sweep"
+HTMLSEP_COOLDOWN_S=600
+if [ -z "${EDITED_FILE:-}" ] && [ "${#SCAN_FILES[@]}" -eq 0 ] && [ -f "$HTMLSEP_COOLDOWN_MARKER" ]; then
+  _age_s=$(( $(date +%s) - $(stat -c %Y "$HTMLSEP_COOLDOWN_MARKER" 2>/dev/null || stat -f %m "$HTMLSEP_COOLDOWN_MARKER" 2>/dev/null || echo 0) ))
+  if [ "$_age_s" -lt "$HTMLSEP_COOLDOWN_S" ]; then
+    printf '[%s] html-separator-check: SKIP-COOLDOWN (last full sweep %ds ago, threshold %ds)\n' \
+      "$TS" "$_age_s" "$HTMLSEP_COOLDOWN_S" >> "$LOG"
+    exit 0
   fi
 fi
 
@@ -252,6 +269,13 @@ if [ "$VIOLATIONS" -gt 0 ]; then
 else
   printf '[%s] html-separator-check: OK (0 violations across %d file(s))\n' \
     "$TS" "${#SCAN_FILES[@]}" >> "$LOG"
+fi
+
+# === D2: Touch cool-down marker if this was a full-tree sweep.
+# html-separator-check scans .md files in audited zones; "full-tree" threshold = >5 files
+# (audited zones typically have 10-50 files; PostToolUse is a single edited file).
+if [ "${#SCAN_FILES[@]}" -gt 5 ]; then
+  touch "$HTMLSEP_COOLDOWN_MARKER" 2>/dev/null || true
 fi
 
 exit 0

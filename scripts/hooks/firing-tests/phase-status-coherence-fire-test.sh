@@ -195,6 +195,161 @@ TC6_HITS=$(grep -c "CACHE-HIT" "$TC6_LOG" 2>/dev/null || echo 0)
 assert "TC6: cache-hit on 2nd invocation" "$([ "$TC6_HITS" -ge 1 ] && echo 1 || echo 0)"
 rm -rf "$TC6_DIR" 2>/dev/null || true
 
+# === TC07: letter-phase D maps to numeric 4 (Wave 1 A-E → Phase 4) ===
+# D4 S346 plan-023: verifies that "Phase D" headers match project.md Phase 4 IN PROGRESS.
+# This is the ~25-session silent false-positive RED HIGH fix.
+echo "=== TC07: letter-phase D → resolved to 4 (D4 fix) ==="
+TC7_DIR=$(new_tempdir)
+cat > "$TC7_DIR/agent-workspace/memory/current-execution.md" <<'EOF'
+# Current Execution — Test fixture
+
+## S343 — Phase D NDH adapter PLAN dispatched — 2026-05-16
+
+Body of session S343.
+
+---
+EOF
+write_proj_with_row "$TC7_DIR/agent-workspace/memory/project.md" "4" "IN PROGRESS"
+TC7_CACHE="$TC7_DIR/agent-workspace/memory/.phase-coherence-cache-tc7"
+TC7_COH_LOG="$TC7_DIR/agent-workspace/memory/.phase-coherence.log"
+CLAUDE_PROJECT_DIR="$TC7_DIR" CLAUDE_SESSION_ID="tc7" CLAUDE_HOOK_EVENT="UserPromptSubmit" \
+  bash "$HOOK" </dev/null >/dev/null 2>&1 || true
+TC7_STATE=$(grep -oE 'state=[A-Z]+' "$TC7_CACHE" 2>/dev/null | head -1 | sed 's/state=//')
+TC7_MATCH=$(grep -oE 'match=[01]' "$TC7_CACHE" 2>/dev/null | head -1 | sed 's/match=//')
+TC7_FIRED=0
+[ -f "$TC7_COH_LOG" ] && grep -q "DRIFT-DETECTED" "$TC7_COH_LOG" 2>/dev/null && TC7_FIRED=1
+assert "TC07: state=GREEN (Phase D resolves to 4, matches IN PROGRESS)" "$([ "$TC7_STATE" = "GREEN" ] && echo 1 || echo 0)"
+assert "TC07: match=1 (D→4 mapping correct)" "$([ "$TC7_MATCH" = "1" ] && echo 1 || echo 0)"
+assert "TC07: no drift fired (D is valid Wave 1 letter)" "$([ "$TC7_FIRED" -eq 0 ] && echo 1 || echo 0)"
+rm -rf "$TC7_DIR" 2>/dev/null || true
+
+# === TC08: letter-phase F-prime maps to numeric 4 (Wave 1 -prime suffix) ===
+echo "=== TC08: letter-phase F-prime → resolved to 4 (D4 fix, -prime suffix) ==="
+TC8_DIR=$(new_tempdir)
+cat > "$TC8_DIR/agent-workspace/memory/current-execution.md" <<'EOF'
+# Current Execution — Test fixture
+
+## S400 — Phase F-prime — Theme placeholder — 2026-06-01
+
+Body of session S400.
+
+---
+EOF
+write_proj_with_row "$TC8_DIR/agent-workspace/memory/project.md" "4" "IN PROGRESS"
+TC8_CACHE="$TC8_DIR/agent-workspace/memory/.phase-coherence-cache-tc8"
+TC8_COH_LOG="$TC8_DIR/agent-workspace/memory/.phase-coherence.log"
+CLAUDE_PROJECT_DIR="$TC8_DIR" CLAUDE_SESSION_ID="tc8" CLAUDE_HOOK_EVENT="UserPromptSubmit" \
+  bash "$HOOK" </dev/null >/dev/null 2>&1 || true
+TC8_STATE=$(grep -oE 'state=[A-Z]+' "$TC8_CACHE" 2>/dev/null | head -1 | sed 's/state=//')
+TC8_MATCH=$(grep -oE 'match=[01]' "$TC8_CACHE" 2>/dev/null | head -1 | sed 's/match=//')
+TC8_FIRED=0
+[ -f "$TC8_COH_LOG" ] && grep -q "DRIFT-DETECTED" "$TC8_COH_LOG" 2>/dev/null && TC8_FIRED=1
+assert "TC08: state=GREEN (Phase F-prime resolves to 4)" "$([ "$TC8_STATE" = "GREEN" ] && echo 1 || echo 0)"
+assert "TC08: match=1 (F-prime→4 mapping correct)" "$([ "$TC8_MATCH" = "1" ] && echo 1 || echo 0)"
+assert "TC08: no drift fired (F-prime is valid Wave 1 letter)" "$([ "$TC8_FIRED" -eq 0 ] && echo 1 || echo 0)"
+rm -rf "$TC8_DIR" 2>/dev/null || true
+
+# === TC09: unknown letter Z defaults to pass-through (no match → RED) ===
+# The default branch in the case statement leaves LATEST_PHASE_RESOLVED=Z,
+# which won't match any numeric IN_PROGRESS row → RED HIGH as expected (anomaly signal).
+echo "=== TC09: unknown letter Z → pass-through default, RED if no Z row ==="
+TC9_DIR=$(new_tempdir)
+cat > "$TC9_DIR/agent-workspace/memory/current-execution.md" <<'EOF'
+# Current Execution — Test fixture
+
+## S500 — Phase Z — Future unknown phase — 2027-01-01
+
+Body of session S500.
+
+---
+EOF
+write_proj_with_row "$TC9_DIR/agent-workspace/memory/project.md" "4" "IN PROGRESS"
+TC9_CACHE="$TC9_DIR/agent-workspace/memory/.phase-coherence-cache-tc9"
+TC9_COH_LOG="$TC9_DIR/agent-workspace/memory/.phase-coherence.log"
+CLAUDE_PROJECT_DIR="$TC9_DIR" CLAUDE_SESSION_ID="tc9" CLAUDE_HOOK_EVENT="UserPromptSubmit" \
+  bash "$HOOK" </dev/null >/dev/null 2>&1 || true
+TC9_STATE=$(grep -oE 'state=[A-Z]+' "$TC9_CACHE" 2>/dev/null | head -1 | sed 's/state=//')
+TC9_MATCH=$(grep -oE 'match=[01]' "$TC9_CACHE" 2>/dev/null | head -1 | sed 's/match=//')
+assert "TC09: state=RED (unknown Z doesn't match Phase 4 IN PROGRESS)" "$([ "$TC9_STATE" = "RED" ] && echo 1 || echo 0)"
+assert "TC09: match=0 (Z has no mapping; anomaly correctly signalled)" "$([ "$TC9_MATCH" = "0" ] && echo 1 || echo 0)"
+rm -rf "$TC9_DIR" 2>/dev/null || true
+
+# === TC10: numeric phase 4 still works (regression — D4 must not break numeric path) ===
+echo "=== TC10: numeric phase 4 still works (regression test for D4 fix) ==="
+TC10_DIR=$(new_tempdir)
+write_ce "$TC10_DIR/agent-workspace/memory/current-execution.md" "S174" "4"
+write_proj_with_row "$TC10_DIR/agent-workspace/memory/project.md" "4" "IN PROGRESS"
+TC10_CACHE="$TC10_DIR/agent-workspace/memory/.phase-coherence-cache-tc10"
+CLAUDE_PROJECT_DIR="$TC10_DIR" CLAUDE_SESSION_ID="tc10" CLAUDE_HOOK_EVENT="UserPromptSubmit" \
+  bash "$HOOK" </dev/null >/dev/null 2>&1 || true
+TC10_STATE=$(grep -oE 'state=[A-Z]+' "$TC10_CACHE" 2>/dev/null | head -1 | sed 's/state=//')
+TC10_MATCH=$(grep -oE 'match=[01]' "$TC10_CACHE" 2>/dev/null | head -1 | sed 's/match=//')
+assert "TC10: state=GREEN (numeric phase 4 still works post-D4)" "$([ "$TC10_STATE" = "GREEN" ] && echo 1 || echo 0)"
+assert "TC10: match=1 (numeric 4 pass-through correct)" "$([ "$TC10_MATCH" = "1" ] && echo 1 || echo 0)"
+rm -rf "$TC10_DIR" 2>/dev/null || true
+
+# === TC11: S343-S344 format header (multi-session id) with "Phase 4" ===
+# Regression: the S343-S344 compound header (S[0-9]+-S[0-9]+) matches phase-status-coherence
+# grep only if the regex allows hyphen-numeric suffix. The hook grep at line 76 uses S[0-9]+[a-z]?
+# which does NOT match S343-S344 (fails on -S344 suffix). Verifies hook picks up next header.
+echo "=== TC11: S343-S344 compound header falls through to next header — regression ==="
+TC11_DIR=$(new_tempdir)
+cat > "$TC11_DIR/agent-workspace/memory/current-execution.md" <<'EOF'
+# Current Execution — Test fixture
+
+## S343-S344 — Phase 4 — Wave 1 Phase D NDH adapter PLAN+IMPL DONE — 2026-05-16
+
+Main row body.
+
+## S343 — Phase D NDH adapter PLAN dispatched — 2026-05-16 [SUPERSEDED]
+
+Secondary row body.
+
+---
+EOF
+write_proj_with_row "$TC11_DIR/agent-workspace/memory/project.md" "4" "IN PROGRESS"
+TC11_CACHE="$TC11_DIR/agent-workspace/memory/.phase-coherence-cache-tc11"
+CLAUDE_PROJECT_DIR="$TC11_DIR" CLAUDE_SESSION_ID="tc11" CLAUDE_HOOK_EVENT="UserPromptSubmit" \
+  bash "$HOOK" </dev/null >/dev/null 2>&1 || true
+TC11_STATE=$(grep -oE 'state=[A-Z]+' "$TC11_CACHE" 2>/dev/null | head -1 | sed 's/state=//')
+TC11_MATCH=$(grep -oE 'match=[01]' "$TC11_CACHE" 2>/dev/null | head -1 | sed 's/match=//')
+# With D4 fix: Phase D resolves to 4 → match=1 → GREEN.
+# Without D4 fix: Phase D couldn't match → RED. This TC is the regression sentinel.
+assert "TC11: state=GREEN (D4 fix: Phase D in SUPERSEDED header resolves via mapping)" "$([ "$TC11_STATE" = "GREEN" ] && echo 1 || echo 0)"
+assert "TC11: match=1 (Phase D → 4 via D4 mapping; Wave 1 S343 superseded row)" "$([ "$TC11_MATCH" = "1" ] && echo 1 || echo 0)"
+rm -rf "$TC11_DIR" 2>/dev/null || true
+
+# === TC12: all Wave 1 letters A,B,C,E also map to 4 ===
+echo "=== TC12: all Wave 1 letters A B C E map to 4 (spot-check) ==="
+TC12_PASS=0
+TC12_FAIL=0
+for letter in A B C E; do
+  TC12_DIR=$(new_tempdir)
+  cat > "$TC12_DIR/agent-workspace/memory/current-execution.md" <<EOF
+# Current Execution — Test fixture
+
+## S200 — Phase ${letter} — Wave 1 sub-phase — 2026-06-01
+
+Body.
+
+---
+EOF
+  write_proj_with_row "$TC12_DIR/agent-workspace/memory/project.md" "4" "IN PROGRESS"
+  TC12_CACHE="$TC12_DIR/agent-workspace/memory/.phase-coherence-cache-tc12${letter}"
+  CLAUDE_PROJECT_DIR="$TC12_DIR" CLAUDE_SESSION_ID="tc12${letter}" CLAUDE_HOOK_EVENT="UserPromptSubmit" \
+    bash "$HOOK" </dev/null >/dev/null 2>&1 || true
+  st=$(grep -oE 'state=[A-Z]+' "$TC12_CACHE" 2>/dev/null | head -1 | sed 's/state=//')
+  mt=$(grep -oE 'match=[01]' "$TC12_CACHE" 2>/dev/null | head -1 | sed 's/match=//')
+  if [ "$st" = "GREEN" ] && [ "$mt" = "1" ]; then
+    TC12_PASS=$((TC12_PASS + 1))
+  else
+    TC12_FAIL=$((TC12_FAIL + 1))
+  fi
+  rm -rf "$TC12_DIR" 2>/dev/null || true
+done
+assert "TC12: all 4 Wave 1 letters (A,B,C,E) map GREEN match=1" "$([ "$TC12_FAIL" -eq 0 ] && echo 1 || echo 0)"
+TOTAL=$((TOTAL + 3))  # TC07/08/09/10/11 already counted above; TC12 is single assert above
+
 # === Summary ===
 echo ""
 echo "=== Summary ==="

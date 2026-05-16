@@ -81,7 +81,24 @@ if [ -z "$LATEST_HEADER" ]; then
 fi
 
 LATEST_SID=$(echo "$LATEST_HEADER" | sed -E 's/^## (S[0-9]+[a-z]?).*/\1/')
-LATEST_PHASE=$(echo "$LATEST_HEADER" | sed -E 's/^## S[0-9]+[a-z]?[[:space:]]+—[[:space:]]+Phase[[:space:]]+([0-9]+(\.[0-9]+)?).*/\1/')
+# === D4: Extended regex — accepts numeric (4, 3.5) AND letter (D, F-prime) phase forms.
+# S346 plan-023 DD-5 fix: original regex captured only ([0-9]+(\.[0-9]+)?) causing silent
+# false-positive RED HIGH for ~25 sessions (S323-S342) on Wave 1 letter-phase headers.
+LATEST_PHASE=$(echo "$LATEST_HEADER" | sed -E 's/^## S[0-9]+[a-z]?[[:space:]]+—[[:space:]]+Phase[[:space:]]+([0-9]+(\.[0-9]+)?|[A-Z](-prime)?).*/\1/')
+
+# === D4: Letter-phase → numeric mapping (Wave 1 A/B/C/D/E/F-prime/G-prime/H-prime → Phase 4).
+# project.md Phase Goals Tracker is numeric; Wave 1 letter phases are sub-decomposition of
+# Phase 4 per current-execution.md narrative. Mapping resolves letter phases so the
+# IN_PROGRESS_PHASES grep at line 108 matches.
+# Maintenance: when Wave 2 introduces new letter phases (Phase X/Y/Z under Phase 5+),
+# extend this case statement OR consider a per-project.md letter-row schema.
+# S346 plan-023 DD-5. Source: current-execution.md:135 surgical-workaround note (now obsolete).
+LATEST_PHASE_RESOLVED="$LATEST_PHASE"
+case "$LATEST_PHASE" in
+  A|B|C|D|E)         LATEST_PHASE_RESOLVED=4 ;;
+  F-prime|G-prime|H-prime) LATEST_PHASE_RESOLVED=4 ;;
+  *)                  LATEST_PHASE_RESOLVED="$LATEST_PHASE" ;;  # numeric phases pass through
+esac
 
 # ============================================================================
 # Step 2: collect project.md IN PROGRESS Phase rows. Tracker rows look like:
@@ -104,8 +121,9 @@ fi
 # Step 3: Check (A) — latest session phase ∈ IN PROGRESS phase rows?
 # ============================================================================
 PHASE_MATCH=0
-if [ -n "$LATEST_PHASE" ] && [ -n "$IN_PROGRESS_PHASES" ]; then
-  if echo "$IN_PROGRESS_PHASES" | grep -qE "^${LATEST_PHASE}$"; then
+if [ -n "$LATEST_PHASE_RESOLVED" ] && [ -n "$IN_PROGRESS_PHASES" ]; then
+  # Use LATEST_PHASE_RESOLVED (letter phases resolved to numeric parent; numeric pass-through).
+  if echo "$IN_PROGRESS_PHASES" | grep -qE "^${LATEST_PHASE_RESOLVED}$"; then
     PHASE_MATCH=1
   fi
 fi
@@ -157,10 +175,10 @@ STATE="GREEN"
 SEVERITY="LOW"
 DETAILS=""
 
-if [ -n "$LATEST_PHASE" ] && [ "$IN_PROGRESS_COUNT" -gt 0 ] && [ "$PHASE_MATCH" -eq 0 ]; then
+if [ -n "$LATEST_PHASE_RESOLVED" ] && [ "$IN_PROGRESS_COUNT" -gt 0 ] && [ "$PHASE_MATCH" -eq 0 ]; then
   STATE="RED"
   SEVERITY="HIGH"
-  DETAILS="${DETAILS}phase-mismatch(ce=${LATEST_PHASE},in-progress=$(echo "$IN_PROGRESS_PHASES" | tr '\n' ',' | sed 's/,$//'));"
+  DETAILS="${DETAILS}phase-mismatch(ce=${LATEST_PHASE}[resolved=${LATEST_PHASE_RESOLVED}],in-progress=$(echo "$IN_PROGRESS_PHASES" | tr '\n' ',' | sed 's/,$//'));"
 fi
 
 if [ "$NEW_ADRS" -ge 3 ] && [ "$CE_PROJ_DELTA_HR" -gt 24 ]; then

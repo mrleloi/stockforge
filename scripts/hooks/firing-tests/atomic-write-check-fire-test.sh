@@ -371,6 +371,91 @@ fi
 rm -rf "$TC15_SANDBOX"
 
 # ============================================================
+# TC-HOISTED — D1 S346 plan-023: hoisted marker cleanup runs ONCE per invocation
+# (was per-file inside claim_file_slot; now before the scan loop)
+# ============================================================
+# Verify: find-delete NO LONGER appears inside claim_file_slot() body in the hook source
+# Use $HOOK (absolute path set at top of fire-test) — not CLAUDE_PROJECT_DIR (may be sandbox).
+HOOK_SRC="$(cat "$HOOK" 2>/dev/null)"
+CLAIM_BODY="$(printf '%s' "$HOOK_SRC" | awk '/^claim_file_slot\(\)/,/^\}/' 2>/dev/null)"
+# Check for EXECUTABLE find command (not comments) — grep for non-comment lines with find -delete
+if printf '%s' "$CLAIM_BODY" | grep -v '^[[:space:]]*#' | grep -q 'find.*-delete'; then
+  fail_tc "TC-HOISTED" "find-delete executable command should NOT be inside claim_file_slot() body (D1 hoist failed)"
+else
+  pass_tc "TC-HOISTED: find-delete is NOT inside claim_file_slot() body (D1 hoist verified)"
+fi
+
+# Verify: at least ONE find-delete appears at module level (hoisted location)
+if echo "$HOOK_SRC" | grep -q 'find.*aw-marker.*-delete'; then
+  pass_tc "TC-HOISTED: hoisted find-delete for .aw-marker-* found in hook source (D1)"
+else
+  fail_tc "TC-HOISTED" "hoisted find-delete for .aw-marker-* NOT found in hook source"
+fi
+
+# ============================================================
+# TC-COOLDOWN — D2 S346 plan-023: cool-down marker suppresses redundant Stop-mode sweeps
+# ============================================================
+COOLDOWN_SANDBOX="$(mktemp -d)"
+mkdir -p "$COOLDOWN_SANDBOX/agent-workspace/memory" "$COOLDOWN_SANDBOX/human-workspace/notifications"
+mkdir -p "$COOLDOWN_SANDBOX/packages/test_cooldown"
+
+# Create >100 dummy .py files so SCAN_FILES exceeds the >100 heuristic for marker write.
+# D2 cool-down marker only written when SCAN_FILES > 100 (Stop-mode full-tree sweep heuristic).
+for i in $(seq 1 105); do
+  printf 'def compute_%d(x): return x + %d\n' "$i" "$i" > "$COOLDOWN_SANDBOX/packages/test_cooldown/ok_${i}.py"
+done
+
+export CLAUDE_PROJECT_DIR="$COOLDOWN_SANDBOX"
+COOLDOWN_MARKER="$COOLDOWN_SANDBOX/agent-workspace/memory/.aw-last-full-sweep"
+COOLDOWN_LOG="$COOLDOWN_SANDBOX/agent-workspace/memory/.session-hooks.log"
+
+# Run once (full sweep, no cooldown marker) — should write cooldown marker
+rm -f "$COOLDOWN_MARKER"
+bash "$HOOK" < /dev/null > /dev/null 2>/dev/null || true
+if [ -f "$COOLDOWN_MARKER" ]; then
+  pass_tc "TC-COOLDOWN: cooldown marker created after first full sweep (D2)"
+else
+  fail_tc "TC-COOLDOWN" "cooldown marker NOT created after first full sweep"
+fi
+
+# Run again immediately — should SKIP-COOLDOWN
+bash "$HOOK" < /dev/null > /dev/null 2>/dev/null || true
+if grep -q "SKIP-COOLDOWN" "$COOLDOWN_LOG" 2>/dev/null; then
+  pass_tc "TC-COOLDOWN: SKIP-COOLDOWN logged on second immediate Stop-mode invocation (D2)"
+else
+  fail_tc "TC-COOLDOWN" "SKIP-COOLDOWN not logged on second invocation (cooldown not firing)"
+fi
+
+# Backdate marker to 700s ago — should NOT skip
+touch -d "700 seconds ago" "$COOLDOWN_MARKER" 2>/dev/null || \
+  touch -t "$(date -d '12 minutes ago' +%Y%m%d%H%M 2>/dev/null || echo '202505010000')" "$COOLDOWN_MARKER" 2>/dev/null || true
+rm -f "$COOLDOWN_LOG"
+bash "$HOOK" < /dev/null > /dev/null 2>/dev/null || true
+if grep -q "SKIP-COOLDOWN" "$COOLDOWN_LOG" 2>/dev/null; then
+  fail_tc "TC-COOLDOWN" "SKIP-COOLDOWN should NOT fire when marker is 700s old (exceeds 600s threshold)"
+else
+  pass_tc "TC-COOLDOWN: full sweep runs when cooldown marker is expired (D2 threshold correct)"
+fi
+
+# PostToolUse single-file audit bypasses cooldown (EDITED_FILE populated)
+touch "$COOLDOWN_MARKER" 2>/dev/null || true  # fresh cooldown
+rm -f "$COOLDOWN_LOG"
+FAKE_PY="$COOLDOWN_SANDBOX/packages/test_cooldown/edited.py"
+cat > "$FAKE_PY" << 'PYEOF'
+def func(): pass
+PYEOF
+POSIX_FILE="$(printf '%s' "$FAKE_PY" | sed 's|\\|/|g')"
+printf '{"file_path": "%s"}' "$POSIX_FILE" | bash "$HOOK" > /dev/null 2>/dev/null || true
+if grep -q "SKIP-COOLDOWN" "$COOLDOWN_LOG" 2>/dev/null; then
+  fail_tc "TC-COOLDOWN" "PostToolUse single-file audit should bypass cooldown"
+else
+  pass_tc "TC-COOLDOWN: PostToolUse single-file audit bypasses cooldown (D2 AQ-7 compliance)"
+fi
+
+export CLAUDE_PROJECT_DIR="$SANDBOX"
+rm -rf "$COOLDOWN_SANDBOX"
+
+# ============================================================
 # Results
 # ============================================================
 TOTAL=$(( PASS + FAIL ))
