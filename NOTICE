@@ -1,0 +1,35 @@
+StockForge
+
+This product includes software developed by third parties as listed below.
+
+================================================================================
+Crawl4AI
+================================================================================
+This product includes software developed by UncleCode (https://x.com/unclecode)
+as part of the Crawl4AI project (https://github.com/unclecode/crawl4ai).
+
+Licensed under the Apache License, Version 2.0 with custom Attribution Requirement.
+See https://github.com/unclecode/crawl4ai/blob/main/LICENSE for full text.
+
+The above attribution is reproduced verbatim from the Crawl4AI LICENSE file
+(lines 54-67) as required by the Attribution Requirement clause.
+
+Files in this repository that adopt patterns or port code from Crawl4AI:
+- apps/_shared/crawl/rate_limiter.py (pattern + LOC port of async_dispatcher.RateLimiter)
+- packages/application/news/ports/crawler_adapter.py (architectural shape — BaseCrawler ABC
+  + __init_subclass__ typecheck pattern from hub.py:24-35)
+
+================================================================================
+Scrapling
+================================================================================
+Portions of this product include software developed by Karim shoair
+(https://github.com/D4Vinci/Scrapling).
+
+Licensed under the BSD 3-Clause License.
+Copyright (c) 2024, Karim shoair.
+See https://github.com/D4Vinci/Scrapling/blob/main/LICENSE for full text.
+
+Files in this repository that adopt patterns or port code from Scrapling:
+- apps/_shared/crawl/robots_manager.py (pattern + LOC port of spiders/robotstxt.py)
+
+================================================================================

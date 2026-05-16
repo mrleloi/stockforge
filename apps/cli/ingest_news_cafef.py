@@ -26,6 +26,7 @@ from pathlib import Path
 
 import click
 
+from packages.application.news.ports import CrawlerAdapter, CrawlerRegistry
 from packages.contracts import (
     ExtractedClaimPublished,
     NewsArticleIngested,
@@ -38,11 +39,11 @@ from packages.domain.news import (
     NewsArticle,
 )
 from packages.infrastructure.news import (
-    CafeFScraper,
     ClaudeLlmExtractor,
     SqliteClaimRepository,
     SqliteNewsRepository,
 )
+from packages.infrastructure.news.crawler_adapters import CafeFAdapter
 
 
 def _ensure_utf8_stdout() -> None:
@@ -131,7 +132,12 @@ def main(
         f"max-articles={max_articles} output={output} skip-llm={skip_llm}"
     )
 
-    scraper = CafeFScraper(fetcher=_httpx_fetcher)
+    # CrawlerRegistry dispatch (Phase D Theme L — plan 020 § Sub-track D3)
+    # Strategy B: CafeFAdapter wraps CafeFScraper; CLI contract unchanged.
+    registry = CrawlerRegistry()
+    registry.register(CafeFAdapter(fetcher=_httpx_fetcher))
+    scraper = registry.get("cafef")
+
     news_repo = SqliteNewsRepository(db_path=output)
     claim_repo = SqliteClaimRepository(db_path=output)
 
@@ -188,7 +194,7 @@ def _resolve_universe(tickers_arg: str) -> Sequence[Ticker]:
 
 def _scrape_articles(
     *,
-    scraper: CafeFScraper,
+    scraper: CrawlerAdapter,
     listing: str,
     max_articles: int,
     universe: Sequence[Ticker],
@@ -215,7 +221,7 @@ def _scrape_articles(
             all_urls.append(url)
     out: list[NewsArticle] = []
     for url in all_urls:
-        scraped = scraper.fetch_article(url)
+        scraped = scraper.fetch_and_parse(url)
         if scraped is None:
             continue
         if since is not None and scraped.published_at < since:

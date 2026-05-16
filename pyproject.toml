@@ -40,6 +40,7 @@ dependencies = [
     "feedparser>=6.0.0",                # RSS
     "yt-dlp>=2024.10.0",                # YouTube
     "tenacity>=9.0.0",                  # retry/backoff for KOL adapters (BC-6 S46)
+    "protego>=0.3.1",                   # robots.txt parser (BC-5 RobotsTxtManager D2 plan-020)
 
     # --- Transcription ---
     "openai-whisper>=20240930",         # local Whisper
@@ -126,7 +127,10 @@ ignore = [
 minversion = "8.0"
 testpaths = ["packages", "apps", "tests"]
 python_files = ["test_*.py", "*_test.py"]
-addopts = "-ra --strict-markers --strict-config"
+# importmode=importlib avoids duplicate-module collision between packages/_shared
+# and apps/_shared (both named _shared under pytest's default prepend mode).
+# Required by plan 020 (S338) to include apps/_shared/crawl/ tests in the suite.
+addopts = "-ra --strict-markers --strict-config --import-mode=importlib"
 asyncio_mode = "auto"
 markers = [
     "unit: fast unit tests",
