@@ -16,6 +16,11 @@ authoring_agent: Claude Opus 4.7 (sandwich-architect subagent)
 executing_agent: sandwich-dev (background dispatch S338; fresh-context; AP-1 verifier in S339)
 status: pending-execution
 
+pre_flight_active:
+  - "R1 destructive-command-guard.sh PreToolUse (per current-execution.md § INCIDENT + RECOVERY)"
+  - "R2 project-integrity-watchdog.sh Stop hook (per current-execution.md § INCIDENT + RECOVERY)"
+  - "R3 daily-backup.sh Stop hook (per current-execution.md § INCIDENT + RECOVERY)"
+
 depends_on:
   - "D-061 (Wave-1 integration ratification — ACCEPTED 2026-05-15T15:30+07:00 blanket-A; § Decision item 3 enforces 'Theme L hybrid winner = crawl4ai (Apache-2.0 + NOTICE; ~800 LOC) + Scrapling-core (BSD-3; ~600 LOC)'; § Decision item 4 enforces 'Scrapling Cloudflare-solver HARD REJECT + patchright DO NOT IMPORT + StealthyFetcher excluded as a class')"
   - "D-065 (Theme G I-S1-1 ratification — ACCEPTED 2026-05-16; financial-data-protocol.md Rule 16 binding; any crawler-emitted numeric field this plan introduces or migrates MUST satisfy Rule 16 mode #1/#2/#3/#4)"
@@ -63,7 +68,7 @@ hard_rules_acknowledged:
 ## Goal
 
 Ship the abstract **CrawlerAdapter port** for stockforge BC-5 News Stream, the first concrete
-**Crawl4aiBaseAdapter** (PATTERN-ADOPT from `crawl4ai` `BaseCrawler` + `CrawlerHub` shape;
+**CafeFAdapter** (PATTERN-ADOPT from `crawl4ai` `BaseCrawler` + `CrawlerHub` shape;
 ~150-200 LOC; Apache-2.0 + NOTICE attribution), and migrate the existing
 `packages/infrastructure/news/cafef_scraper.py` (S36 Track D legacy; 213 LOC; preserved as
 adapter implementation) onto the new port. The migration MUST preserve the
@@ -291,6 +296,79 @@ phase-d-theme-l-step0-ALERT.md`. Do NOT write any module in a divergent state.
 
 ---
 
+## Charter + invariant compliance map (Section C — explicit grid per S337 brief)
+
+This table maps every adopted component to (a) source repo file:line, (b) license +
+attribution duty, (c) which I-S<N> invariant satisfied or stress-tested, (d) confirmation
+that the EXCLUDED-stealth-tech list per I-S34 HARD REJECT is honored, (e) Rule 16
+numeric-field discipline disposition. Verifier S339 spot-checks rows.
+
+| Component | Source repo file:line | License + attribution duty | Invariant satisfied / stress-tested | Stealth-tech EXCLUDED check (I-S34 HARD REJECT) | Rule 16 mode |
+|---|---|---|---|---|---|
+| `CrawlerAdapter` ABC + `__init_subclass__` typecheck | `C:/htdocs/research/crawl4ai/crawl4ai/hub.py:24-35` | Apache-2.0 + Attribution clause; NOTICE root + per-file header on `crawler_adapter.py` per DD-8 template | I-S2 (source_url preserved through ScrapedArticle → NewsArticle); I-S22 (data lineage via `source_id` ClassVar) | N/A — pure shape adoption; no fetcher/browser code | N/A — no numeric fields on adapter signature |
+| `CrawlerHub`/`CrawlerRegistry` (refactored instance-scoped) | `C:/htdocs/research/crawl4ai/crawl4ai/hub.py:37-69` (REFACTORED per A-02 § 7 anti-pattern fix) | Apache-2.0 + Attribution; SHAPE adoption — instance refactor counts as fresh-derived; header optional per DD-8 boundary rule | I-S2 + I-S22; isolates test surface (no global mutable state per A-02 § 7) | N/A | N/A |
+| `RateLimiter` + `DomainState` (per-domain exp-backoff + jitter) | `C:/htdocs/research/crawl4ai/crawl4ai/async_dispatcher.py:28-85` | Apache-2.0 + Attribution; **per-file header REQUIRED** on `rate_limiter.py` (LOC port) | I-S34 (≥2s/domain default; backoff on 429/503); D-059 R2 (seeded RNG `Random(0)` for deterministic tests) | N/A — pure timing state; no UA-spoofing, no stealth headers | N/A — internal `float` timing state; NOT a schema field on a domain/event |
+| `RobotsTxtManager` (Protego wrapper + per-domain cache) | `C:/htdocs/research/Scrapling/scrapling/spiders/robotstxt.py:10-60` | BSD-3-Clause; **per-file header REQUIRED** on `robots_manager.py` (LOC port); copyright "(c) 2026 Karim Shoair" verbatim | I-S34 (robots.txt honored at fetcher boundary; can_fetch + crawl_delay extracted); I-S2 | N/A — parses robots, does not bypass | N/A — Crawl-delay is `float` but internal helper, not LLM-emit schema |
+| `SelectorChain` (fallback-chain helper) | FRESH; pattern from `.claude/skills/crawler-reliability/SKILL.md § Selector Robustness` | NO header (pure stockforge fresh code per DD-8 boundary rule) | I-S34 (graceful degrade per skill); I-S22 (records label + strategies tried for shape-metrics emit) | N/A | N/A — `int` strategy-count is internal counter |
+| `RawHtmlSink` (atomic raw-HTML preservation) | FRESH; per DD-6 + D-062 (atomic write) + D-064 (path-safety 5-invariant) | NO header (pure stockforge fresh code) | I-S22 (raw HTML preserved for reprocessing); D-062 atomic + D-064 path-safety | N/A — saves what was fetched; no spoof | N/A — no schema fields |
+| `CafeFAdapter` (first concrete subclass) | WRAPS existing `packages/infrastructure/news/cafef_scraper.py` (213 LOC; S36 Track D legacy) per Strategy B WRAP recommendation | Stockforge-original (no upstream port) → NO header; CafeFScraper provenance already in its own docstring `cafef_scraper.py:1-16` | I-S2 + I-S22 + I-S34 (UA at `cafef_scraper.py:35-37`; ≥2s rate-limit at `:33`); preserves L-S28-1 vendor-drift doctrine | N/A — uses httpx fetcher with real UA; NO Playwright/Selenium/CDP/stealth | N/A — ScrapedArticle dataclass has only `str` + `datetime` fields per `cafef_scraper.py:40-52` |
+| `NOTICE` file at repo root | NEW; combines crawl4ai LICENSE:54-67 + Scrapling LICENSE:1-28 | Apache-2.0 + Attribution clause + BSD-3 copyright (both verbatim) | Charter "When in doubt, simplify" — cheapest legal posture; AOM-aligned | N/A | N/A |
+
+**Stealth-tech EXCLUDED registry (negative-list audit — verifier grep at AQ-1)**:
+
+The following technologies are HARD REJECTED across `apps/_shared/crawl/**` +
+`packages/infrastructure/news/crawler_adapters/**` (per D-061 § Decision item 4 +
+A-02 § 7 + A-12 § 7 #1 + I-S34):
+
+| Tech | Source repo / module | Reason for HARD REJECT |
+|---|---|---|
+| `patchright` | Scrapling `pyproject.toml:75` | Community Playwright fork patched for anti-detection (removes `webdriver` property, spoofs `navigator.plugins`); intent-to-evade per A-12 § 7 #1+#2 |
+| `playwright-stealth` | crawl4ai `pyproject.toml:29` | Same intent class as patchright; transitive default in crawl4ai we'd have to explicitly disable |
+| `fake-useragent` | crawl4ai `pyproject.toml:42` | UA rotation = ToS-grey per A-02 § 7 |
+| `UndetectedAdapter` | Scrapling (mentioned in stealth integration; A-12 § 7) | Anti-detection class |
+| `StealthyFetcher` | Scrapling `engines/_browsers/_stealth.py:107-181` | Mouse-click-on-Turnstile Cloudflare-solver per A-12 § 7 #1 |
+| `_cloudflare_solver` | Scrapling `engines/_browsers/_stealth.py:107-181, 382-460` | Captcha-coordinate computation + automated `page.mouse.click(captcha_x, captcha_y)` |
+| MediaCrawler CDP-bypass (auto-confirm mode `_launch_browser`) | MediaCrawler `tools/cdp_browser.py:250-286` | Headless Chrome auto-confirm = legal-grey path per A-05 § 5 |
+| MediaCrawler `libs/stealth.min.js` + `libs/douyin.js` + `libs/zhihu.js` | MediaCrawler `libs/*` | Fingerprint-spoof + JS-reverse fragments per A-05 § 7 |
+| MediaCrawler `xhs_sign.py` / `playwright_sign.py` / Tieba `PC_SIGN_SECRET` MD5 | MediaCrawler `media_platform/*/sign.py` + `media_platform/tieba/client.py:39` | Reverse-engineered platform signing keys per A-05 § 7 |
+
+**PERMITTED (per I-S34 + charter)**:
+- Real stable user-agent strings (e.g. `stockforge-research-bot/0.0.1 (+contact: ...)`)
+- Honored `robots.txt` via Protego
+- Per-domain conservative rate limits (≥2s default; matches `cafef_scraper.py:33`)
+- httpx + curl_cffi for TLS — TLS-fingerprinting via curl_cffi `impersonate="chrome"` is
+  **borderline**; for THIS bundle, **NOT adopted** (stay with httpx + real UA); revisit
+  only if a VN source explicitly blocks plain httpx during dogfood and the user agrees.
+
+---
+
+## Per-VN-source assignment matrix (Section E — full upfront table per S337 brief)
+
+Per master plan § 5.7 sub-themes + INTEGRATION_PROPOSAL_SUPPLEMENT § L.3 final paragraph:
+
+| Source | Domain (verify at STEP 0) | Static-vs-SPA | Adapter | Reason | robots.txt URL | Rate-limit (≥2s default) | UA template | ToS-verification status | THIS-BUNDLE scope |
+|---|---|---|---|---|---|---|---|---|---|
+| **CafeF** | `cafef.vn` (verified `cafef_scraper.py:34` `_DEFAULT_BASE_URL`) | Static HTML; section landing + `.chn` article URL convention | **A (crawl4ai-pattern via CafeFAdapter)** | Existing 213-LOC scraper; recorded fixtures; lightest path | `https://cafef.vn/robots.txt` (STEP 0.5 verifies live) | 2.0s/domain (`cafef_scraper.py:33` `_RATE_LIMIT_SECONDS`) | `stockforge-research-bot/0.0.1 (+contact: nathanleewindy@gmail.com)` (`cafef_scraper.py:35-37`) | VERIFIED 2026-05 (per skill § Anti-Patterns — CafeF more lenient than VietnamBiz; existing 2.0s in production) | **IN-SCOPE — D3 migration** |
+| **NDH** | Likely `nhipsongdoanhnghiep.vn` OR `ndh.vn` — **STEP 0 of the per-source D-N session verifies live** | Static HTML (hypothesis; verify) | A (crawl4ai-pattern; subclass `CrawlerAdapter` like CafeFAdapter) | Mainstream financial news; static HTML hypothesis | TBD per STEP 0 of per-source session | 2.0s default | Same UA as CafeF | **NOT YET VERIFIED** — first dogfood session of NDH adapter MUST hit `/robots.txt` + read ToS + record in session log per skill § VBW | **OUT-OF-SCOPE — Phase D-N follow-up session** |
+| **VietstockFinance** | `vietstock.vn` (verify; sometimes `finance.vietstock.vn`) | Static HTML for article pages; AJAX for some report listings (hypothesis; verify) | A primary + B (Scrapling adaptive fallback) candidate if listing AJAX | Static-page hypothesis matches A-02 § 6 BC-5 fit | TBD per STEP 0 | 2.0s default | Same UA | NOT YET VERIFIED | **OUT-OF-SCOPE — Phase D-N follow-up session** |
+| **VietnamBiz** | `vietnambiz.vn` (verify) | Static HTML hypothesis | A | Mainstream news | TBD per STEP 0 | **3.0s default** — skill § Rate Limiting flags VietnamBiz as less lenient than CafeF; conservative bump | Same UA | NOT YET VERIFIED | **OUT-OF-SCOPE — Phase D-N follow-up session** |
+| **YouTube transcripts (KOL channels)** | `youtube.com` (Data API v3) + `yt-dlp` subprocess for transcript | Neither (official API + ffmpeg-grade tool) | **NEITHER A NOR B — `yt-dlp` subprocess** per master plan § 5.7 + L.3: "official Data API v3 + yt-dlp canonical; no crawler needed" | yt-dlp is the canonical-tool; bypassing into a custom crawler = wheel-reinvention + ToS risk | `https://www.youtube.com/robots.txt` (Data API ToS governs API path) | API quota-limited (10K units/day default); yt-dlp transcript page: 1 req per 60s polite | Data API uses OAuth/API key; yt-dlp uses its own UA defaults | API key + ToS read at BC-6 KOL channel onboarding (separate path) | **OUT-OF-SCOPE — BC-6 work via `apps/cli/ingest_kol_channels.py` (already exists; not CrawlerAdapter-shaped)** |
+| **Facebook public fanpages** | `facebook.com` / `m.facebook.com` (public-page subset only) | SPA (heavy JS; login-walled even for "public" content as of 2026) | **NEITHER A NOR B in THIS BUNDLE** — future CDP-consented mode (MediaCrawler pattern, clean-room re-derive) per master plan § 5.7 + L.3 | I-S34 charter rule: "Facebook/Zalo private content NEVER scraped (only public pages/groups)"; even public scraping is FB-ToS-grey and consent-mode is the only compliant path | `https://www.facebook.com/robots.txt` (heavily disallows scraping) | N/A this bundle | N/A this bundle | **NOT VERIFIED** — defer until user provides FB fanpage list + explicit consent for CDP-mode | **OUT-OF-SCOPE — Phase 4+ candidate; needs separate plan + consent UX** |
+
+**Defaults that bind every adapter** (codify in CrawlerAdapter base class docstring +
+ADR D-066):
+1. UA string MUST be the stockforge research-bot identity (no UA spoofing).
+2. `robots.txt` MUST be honored via `RobotsTxtManager.can_fetch(url)` BEFORE every fetch
+   if the optional manager is injected; un-injected = log-only warning + fetch (Phase 1
+   thin slice; D-067 candidate to make injection mandatory by Phase 3).
+3. Per-domain rate-limit default ≥ 2s (RateLimiter `base_delay = 2.0`); per-source bump
+   per the matrix above.
+4. ToS verification status (URL + date) MUST be recorded in the per-source ADR (NOT in
+   this plan's ADR D-066 — D-066 covers the SHAPE; each source's ADR covers its specific
+   ToS attestation).
+
+---
+
 ## Design decisions (architect's analysis — read before authoring code)
 
 ### DD-1: CrawlerAdapter port location — application layer
@@ -371,8 +449,7 @@ auto-discovery). Acceptable middle ground; rejected only because instance-scoped
 generalises better — tests can construct fresh registries per case without monkey-patching
 module state.
 
-### DD-6: Storage layer — raw HTML to `data/raw/news/<source>/<date>/<url-hash>.html` +
-parsed `NewsArticle` to existing `SqliteNewsRepository`
+### DD-6: Storage layer — raw HTML to `data/raw/news/<source>/<date>/<url-hash>.html` + parsed `NewsArticle` to existing `SqliteNewsRepository`
 
 **Decision**: introduce optional raw-HTML preservation hook on `CrawlerAdapter` (a
 `raw_html_sink: RawHtmlSink | None = None` constructor arg; if set, adapter saves verbatim
@@ -912,7 +989,7 @@ guide; verify exact wording.
 **Path**: `agent-workspace/memory/decisions/066-bc5-crawler-adapter-contract.md` (NEW;
 IMPL tier).
 
-**Required source_evidence cites** (target ≥7):
+**Required source_evidence cites** (target ≥7; architect supplies 14):
 
 1. `observations/master-planner-A-02-deepdive-crawl4ai.md § 2 + § 3 C1/C2/C4/C5/C7/C8 +
    § 5 + § 6 + § 7` (PRIMARY pattern source + license + risk flags).
@@ -1037,6 +1114,25 @@ Aggregated across all 4 sub-tracks; verifier S339 confirms each empirically:
 
 ---
 
+## 5-source-evidence chain per adopted component (Section I — mandatory grid per S337 brief)
+
+Per L-S333-1 hook-sourced-empirical-quote discipline applied to architecture decisions —
+each adopted component MUST cite **5 sources**: (1) source repo file:line, (2) deep-dive
+observation file + §, (3) integration-proposal cross-reference, (4) charter invariant
+served, (5) stockforge codebase precedent (or "NEW" if first-of-kind).
+
+| Adopted component | (1) Source repo file:line | (2) Deep-dive obs + § | (3) Integration proposal X-ref | (4) Charter invariant served | (5) Stockforge precedent |
+|---|---|---|---|---|---|
+| **`BaseCrawler` ABC + `__init_subclass__` typecheck** | `C:/htdocs/research/crawl4ai/crawl4ai/hub.py:24-35` | `master-planner-A-02-deepdive-crawl4ai.md § 2 pattern 6 + § 3 C8` | `INTEGRATION_PROPOSAL_2026-05-15.md § 0 row 2 + § (per-repo) crawl4ai bullet + INTEGRATION_PROPOSAL_SUPPLEMENT_2026-05-15.md § L.3 final paragraph "Port to apps/_shared/crawl/"` | I-S2 + I-S22 (source_id ClassVar + per-source ACL) | NEW — first ABC port in stockforge; `LlmExtractorProtocol` at `packages/application/news/ports/llm_extractor_port.py` is a Protocol (DD-3 documents the deliberate exception) |
+| **`CrawlerHub` registry pattern (refactored instance-scoped)** | `C:/htdocs/research/crawl4ai/crawl4ai/hub.py:37-69` (REFACTORED per A-02 § 7 anti-pattern "Hub auto-discovery is global mutable state") | `master-planner-A-02-deepdive-crawl4ai.md § 2 pattern 6 + § 7 antipattern flag` | `INTEGRATION_PROPOSAL_SUPPLEMENT_2026-05-15.md § L.3 "BaseCrawler(ABC) + CrawlerHub registry SHAPE — refactored to instance-scoped with explicit register() call (per A-02 § 7)"` | I-S2 + test-isolation (no cross-test pollution) | NEW |
+| **`RateLimiter` + `DomainState` (per-domain exp-backoff + jitter)** | `C:/htdocs/research/crawl4ai/crawl4ai/async_dispatcher.py:28-85` | `master-planner-A-02-deepdive-crawl4ai.md § 2 pattern 3 + § 3 C2` | `INTEGRATION_PROPOSAL_2026-05-15.md § 0 + INTEGRATION_PROPOSAL_SUPPLEMENT_2026-05-15.md § L.3 "RateLimiter + DomainState (~60 LOC verbatim with attribution)"` | I-S34 (ToS compliance; ≥2s/domain default; 429/503 backoff) | PRECEDENT — existing `cafef_scraper.py:33` `_RATE_LIMIT_SECONDS = 2.0` + `:162-169` ad-hoc rate logic that this RateLimiter formalises (D3 migration step 4) |
+| **`RobotsTxtManager` (Protego wrapper)** | `C:/htdocs/research/Scrapling/scrapling/spiders/robotstxt.py:10-60` | `master-planner-A-12-deepdive-Scrapling.md § 2 pattern 5 + § 3 C5` | `INTEGRATION_PROPOSAL_2026-05-15.md § 0 row 12 + INTEGRATION_PROPOSAL_SUPPLEMENT_2026-05-15.md § L.3 "RobotsTxtManager (~70 LOC; layered with SQLite for long-running daemons)"` | I-S34 (robots.txt MUST be honored before fetch — charter line 110 "News scrapers respect robots.txt") | NEW — no current robots.txt-aware fetcher in stockforge; existing `cafef_scraper.py` doesn't consult robots.txt (gap closed by this plan) |
+| **`SelectorChain` (fallback-chain helper)** | FRESH (no upstream port) — pattern from `.claude/skills/crawler-reliability/SKILL.md § Selector Robustness` (≥line 32-35: "Prefer ... data-testid / aria-label / itemprop > nearby-text + relationship locator > class selector > nth-child positional. Positional selectors break on DOM reshuffle"; line 35: "Fallback chain pattern: try multiple strategies, return first non-empty result, log warning if all fail and return None.") | N/A — fresh; pattern source = SKILL, not deep-dive | `INTEGRATION_PROPOSAL_SUPPLEMENT_2026-05-15.md § L.5 Charter-Compliance Check "Adaptive selector ... Treat selector failures as real failures requiring human inspection"` | I-S34 (graceful degrade); skill § Selector Robustness | PRECEDENT — `cafef_scraper.py:117-120` already implements this manually (`soup.find(...) or soup.find(...) or soup.find(...)`); SelectorChain formalises |
+| **`RawHtmlSink` (atomic raw-HTML preservation)** | FRESH (no upstream port) — pattern from `.claude/skills/crawler-reliability/SKILL.md § Storage` (line 78-79: "Raw HTML → Cloudflare R2 at `raw-crawl/<domain>/<date>/<sha256(url)>.html` with metadata: `url`, `fetched_at`, `status_code`. Parsed structure → Postgres. Raw preserved for reprocessing when extraction logic improves.") | N/A — fresh; pattern source = SKILL | N/A | I-S22 (data lineage — raw preserved for re-extraction) + D-062 atomic-write + D-064 path-safety | PRECEDENT — `packages/_shared/path_safety.py` W0-5 helpers; `cafef_scraper.py:212` sha256 truncation pattern |
+| **NOTICE root file** | `C:/htdocs/research/crawl4ai/LICENSE:54-67` (Attribution Requirement clause verbatim) + `C:/htdocs/research/Scrapling/LICENSE:1-28` (BSD-3 copyright verbatim) | `master-planner-A-02-deepdive-crawl4ai.md § 6` + `master-planner-A-12-deepdive-Scrapling.md § 6` | `INTEGRATION_PROPOSAL_2026-05-15.md § 0 HARD-FILTER outcomes "BSD-3 / MIT / Apache-2.0 ... LOC-port permitted with attribution"` + `D-061 § Decision item 1 "LOC port permitted with attribution (per-file header + NOTICE root for Apache-2.0+Attribution-clause repos like crawl4ai)"` | Charter "When in doubt, simplify" + AOM legal posture | NEW — no NOTICE file currently in stockforge repo root |
+
+---
+
 ## Coordination rules during dev (S338 active)
 
 **Main session AVOIDS** during S338 IMPL window (cross-session edit conflict prevention):
@@ -1088,23 +1184,27 @@ or incrementally (Option B). Do NOT push.
 
 ---
 
-## Risk + Mitigation
+## Risk + Mitigation (Section J — Theme-L-specific risks per S337 brief)
 
-| # | Risk | Likelihood | Mitigation |
-|---|------|-----------|------------|
-| RM1 | **Selector breakage** — CafeF redesigns site between plan-authoring and dev IMPL; recorded HTML fixtures no longer match live HTML | Low (fixtures decoupled from live) | Existing `cafef_scraper.py` test surface uses recorded fixtures (per `cafef_scraper.py:8-11` docstring) — fixture-based tests immune to live redesign. Live smoke test is OUT-OF-SCOPE for CI (only manual verification at deploy time per skill § Monitoring). If STEP 0.10 fixture replay diverges → STOP and revisit before D3 migration. |
-| RM2 | **Rate-limit violations against cafef.vn** — accidentally hitting live URL during dev/test (e.g., test that bypasses `fetcher` injection) | Low (injection pattern proven; existing tests don't hit live) | Audit all new tests for absence of bare `httpx.get` / `requests.get` / `urllib` calls outside injected fetcher; bash-hook-lint or grep before commit. RateLimiter port itself does NOT touch network — pure timing state. RobotsTxtManager port uses injected fetcher (per D2 spec). |
-| RM3 | **LLM-output sneaks past Rule 16** — a new schema field (e.g., on RawHtmlSink metadata, or in selector-chain telemetry) added in the heat of IMPL without Rule 16 satisfaction-mode declaration | Low (audit + STEP 0.5 anchor) | § Schema discipline empirically confirms ZERO new LLM-numeric fields; STEP 0.5 re-confirms at IMPL time. Any new numeric field MUST add satisfaction-mode docstring per Rule 16 § "At amendment time"; DC-AGG-9 verifier check is the final gate. If dev encounters need for new field → STOP-AND-ESCALATE per § STEP 0 STOP-IF-AMBIGUOUS. |
-| RM4 | **Budget overrun** — bundling all 4 sub-tracks (D1+D2+D3+D4) + 4 source crawlers' migrations would breach budget; dev mistakenly attempts NDH/Vietstock/VietnamBiz migration in this session | Low (plan explicitly scopes to CafeF only) | Plan title + Goal + § Context decision 1 + § Out-of-scope item 4 EXPLICITLY scope to CafeF only. NDH/Vietstock/VietnamBiz migrations are EXPLICITLY out-of-scope; if dev mistakenly attempts → STOP-AND-SPLIT: revert NDH/Vietstock/VietnamBiz work; queue follow-up plan 021 for those sources; bundle ships at CafeF-only DoD. |
-| RM5 | **crawl4ai upstream changes break adapter contract** — if dev pulls fresh-shot crawl4ai code in dev environment (rather than pattern-port), upstream commits since 2026-05-15 could ship adapter-incompatible APIs | N/A — no pip-install | Plan explicitly REJECTS pip-install crawl4ai (per § Context decision 2). Ports are pattern-LOC adaptation at fixed source citations; once ported, upstream movement does NOT affect stockforge. STEP 0.2 + 0.3 re-verifies source-file:line citations one time before authoring; after that, the port is frozen. |
-| RM6 | **`protego` dependency not present in `pyproject.toml`** | Med | STEP 0.8 verifies presence; DC-D2-9 documents the add. ONE coherent dep-edit at IMPL close per S332 precedent. If `protego` install fails (e.g., upstream removed) → fall back to a fresh `RobotsTxt` parser using stdlib `urllib.robotparser` (≥Python 3.10 stdlib; ~30 LOC adapter to keep RobotsTxtManager interface). |
-| RM7 | **CLI behavioral drift** — Strategy A (REPLACE) accidentally breaks one of the click flags or summary output | Low (Strategy B WRAP recommended) | Architect recommends Strategy B (WRAP) per § "Two migration strategies"; bytes-identical output is provable via STEP 0.10 baseline + post-IMPL diff per DC-AGG-11. If dev picks Strategy A, MUST capture pre-migration `python apps/cli/ingest_news_cafef.py --help` + smoke output verbatim and diff post-IMPL. |
-| RM8 | **License-attribution drift** — NOTICE template above uses architect-proposed wording; actual Crawl4AI LICENSE:54-67 may have slightly different text → attribution incomplete | Low (STEP 0.2 + 0.8 enforce verbatim verification) | STEP 0.2 + STEP 0.8 mandate reading actual LICENSE files; dev refines NOTICE text after read; per-file headers per DD-8 templates are stable. DC-AGG-10 verifies. |
-| RM9 | **`__init_subclass__` hook in ABC pollutes test surface** — subclass enforcement at class-creation time can complicate test scenarios (e.g., dynamically-created test adapter classes) | Low | Test design at DC-D1-4 anticipates: tests 2/3 explicitly construct invalid subclasses and assert TypeError; tests 4 onward construct valid subclasses. Pytest fixtures can use `type(...)` to dynamically construct classes — this works as expected because `__init_subclass__` fires on dynamic construction too. |
-| RM10 | **AP-23 second-rule-about-rule trigger** — introducing D-066 on top of D-061 + D-062 + D-063 + D-064 + D-065 may trip CLAUDE.md AP-23 red flag ("Refinement-of-rule lesson-about-lesson") | Low (D-066 is a first-instance product-substrate doctrine, NOT a refinement of any prior ADR) | D-066 is the BC-5 CrawlerAdapter contract — a first-instance architectural doctrine for product substrate, NOT a refinement of any prior rule. D-062/063/064 are harness substrate hook doctrines; D-066 is product substrate. D-061 is a meta-ratification ADR; D-065 ratifies a constitution amendment. D-066 references but does not refine any of them. Architect verdict: NOT an AP-23 trigger; verify by reading D-066's framing — if it reads "Extending D-XXX with..." or "Refinement of D-YYY for...", flag for promote-or-retire; the proposed shape is standalone. |
-| RM11 | **`raw_html` writes accidentally bypass safe_run_dir** — dev forgets to wire path-safety helpers per W0-5 D-064 binding | Low (DC-D2-7 + DC-AGG-8 catch) | Plan explicitly cites `packages/_shared/path_safety.py` in DD-6 + D2 RawHtmlSink spec; DC-D2-7 verifies; DC-AGG-8 second check via path-safety-check.sh hook. If hook fires on new module → STOP and fix before commit. |
-| RM12 | **Strategy B (WRAP) creates dead code on long-term** — `CafeFScraper` class wraps `CafeFAdapter` indefinitely; no consolidation path | Med | Documented in D-066 § "Strategy choice" + recorded in session log; carry-forward note "consolidate CafeFScraper into CafeFAdapter in follow-up D-N session" added to `agent-workspace/memory/agent-notes.md` per CLAUDE.md § Session Protocol "End" step 4 IF Strategy B chosen. |
-| RM13 | **Async-leak temptation** — dev sees crawl4ai is async-first and adds `async def` somewhere on the path | Low (plan explicit + DD-2 + ADR D-066 § "Async deferred") | Plan § Context decision 3 + DD-2 + ADR D-066 § "Async deferred to Phase 3" + CLI is sync = strong scaffolding. If dev mistakenly adds async signature → STOP via mypy (sync caller fails type-check) + pytest red. |
+| # | Risk | Likelihood | Impact | Mitigation |
+|---|------|-----------|--------|------------|
+| RM1 | **Selector breakage** — CafeF redesigns site between plan-authoring and dev IMPL; recorded HTML fixtures no longer match live HTML | Low (fixtures decoupled from live) | Medium | Existing `cafef_scraper.py` test surface uses recorded fixtures (per `cafef_scraper.py:8-11` docstring) — fixture-based tests immune to live redesign. Live smoke test is OUT-OF-SCOPE for CI (only manual verification at deploy time per skill § Monitoring). If STEP 0.10 fixture replay diverges → STOP and revisit before D3 migration. |
+| RM2 | **Rate-limit violations against cafef.vn** — accidentally hitting live URL during dev/test (e.g., test that bypasses `fetcher` injection) | Low (injection pattern proven; existing tests don't hit live) | High (ToS + ban risk) | Audit all new tests for absence of bare `httpx.get` / `requests.get` / `urllib` calls outside injected fetcher; bash-hook-lint or grep before commit. RateLimiter port itself does NOT touch network — pure timing state. RobotsTxtManager port uses injected fetcher (per D2 spec). |
+| RM3 | **LLM-output sneaks past Rule 16** — a new schema field (e.g., on RawHtmlSink metadata, or in selector-chain telemetry) added in the heat of IMPL without Rule 16 satisfaction-mode declaration | Low (audit + STEP 0.5 anchor) | High (charter Principle 9 violation) | § Schema discipline empirically confirms ZERO new LLM-numeric fields; STEP 0.5 re-confirms at IMPL time. Any new numeric field MUST add satisfaction-mode docstring per Rule 16 § "At amendment time"; DC-AGG-9 verifier check is the final gate. If dev encounters need for new field → STOP-AND-ESCALATE per § STEP 0 STOP-IF-AMBIGUOUS. |
+| RM4 | **Budget overrun** — bundling all 4 sub-tracks (D1+D2+D3+D4) + 4 source crawlers' migrations would breach budget; dev mistakenly attempts NDH/Vietstock/VietnamBiz migration in this session | Low (plan explicitly scopes to CafeF only) | High (S4 catastrophic-mix failure pattern recurrence) | Plan title + Goal + § Context decision 1 + § Out-of-scope item 4 EXPLICITLY scope to CafeF only. NDH/Vietstock/VietnamBiz migrations are EXPLICITLY out-of-scope; if dev mistakenly attempts → STOP-AND-SPLIT: revert NDH/Vietstock/VietnamBiz work; queue follow-up plan 021 for those sources; bundle ships at CafeF-only DoD. |
+| RM5 | **crawl4ai upstream changes break adapter contract** — if dev pulls fresh-shot crawl4ai code in dev environment (rather than pattern-port), upstream commits since 2026-05-15 could ship adapter-incompatible APIs | N/A — no pip-install | Low | Plan explicitly REJECTS pip-install crawl4ai (per § Context decision 2). Ports are pattern-LOC adaptation at fixed source citations; once ported, upstream movement does NOT affect stockforge. STEP 0.2 + 0.3 re-verifies source-file:line citations one time before authoring; after that, the port is frozen. |
+| RM6 | **`protego` dependency not present in `pyproject.toml`** | Med | Low | STEP 0.8 verifies presence; DC-D2-9 documents the add. ONE coherent dep-edit at IMPL close per S332 precedent. If `protego` install fails (e.g., upstream removed) → fall back to a fresh `RobotsTxt` parser using stdlib `urllib.robotparser` (≥Python 3.10 stdlib; ~30 LOC adapter to keep RobotsTxtManager interface). |
+| RM7 | **CLI behavioral drift** — Strategy A (REPLACE) accidentally breaks one of the click flags or summary output | Low (Strategy B WRAP recommended) | High (dogfood CLI is M3 success criterion) | Architect recommends Strategy B (WRAP) per § "Two migration strategies"; bytes-identical output is provable via STEP 0.10 baseline + post-IMPL diff per DC-AGG-11. If dev picks Strategy A, MUST capture pre-migration `python apps/cli/ingest_news_cafef.py --help` + smoke output verbatim and diff post-IMPL. |
+| RM8 | **License-attribution drift** — NOTICE template above uses architect-proposed wording; actual Crawl4AI LICENSE:54-67 may have slightly different text → attribution incomplete | Low (STEP 0.2 + 0.8 enforce verbatim verification) | Medium (Apache-2.0 + custom Attribution clause = strict re-verbatim) | STEP 0.2 + STEP 0.8 mandate reading actual LICENSE files; dev refines NOTICE text after read; per-file headers per DD-8 templates are stable. DC-AGG-10 verifies. |
+| RM9 | **`__init_subclass__` hook in ABC pollutes test surface** — subclass enforcement at class-creation time can complicate test scenarios (e.g., dynamically-created test adapter classes) | Low | Low | Test design at DC-D1-4 anticipates: tests 2/3 explicitly construct invalid subclasses and assert TypeError; tests 4 onward construct valid subclasses. Pytest fixtures can use `type(...)` to dynamically construct classes — this works as expected because `__init_subclass__` fires on dynamic construction too. |
+| RM10 | **AP-23 second-rule-about-rule trigger** — introducing D-066 on top of D-061 + D-062 + D-063 + D-064 + D-065 may trip CLAUDE.md AP-23 red flag ("Refinement-of-rule lesson-about-lesson") | Low (D-066 is a first-instance product-substrate doctrine, NOT a refinement of any prior ADR) | Medium (would force AP-23 promote-or-retire) | D-066 is the BC-5 CrawlerAdapter contract — a first-instance architectural doctrine for product substrate, NOT a refinement of any prior rule. D-062/063/064 are harness substrate hook doctrines; D-066 is product substrate. D-061 is a meta-ratification ADR; D-065 ratifies a constitution amendment. D-066 references but does not refine any of them. Architect verdict: NOT an AP-23 trigger; verify by reading D-066's framing — if it reads "Extending D-XXX with..." or "Refinement of D-YYY for...", flag for promote-or-retire; the proposed shape is standalone. |
+| RM11 | **`raw_html` writes accidentally bypass safe_run_dir** — dev forgets to wire path-safety helpers per W0-5 D-064 binding | Low (DC-D2-7 + DC-AGG-8 catch) | High (W0-5 invariant violation = D-064 charter-tier failure) | Plan explicitly cites `packages/_shared/path_safety.py` in DD-6 + D2 RawHtmlSink spec; DC-D2-7 verifies; DC-AGG-8 second check via path-safety-check.sh hook. If hook fires on new module → STOP and fix before commit. |
+| RM12 | **Strategy B (WRAP) creates dead code on long-term** — `CafeFScraper` class wraps `CafeFAdapter` indefinitely; no consolidation path | Med | Low | Documented in D-066 § "Strategy choice" + recorded in session log; carry-forward note "consolidate CafeFScraper into CafeFAdapter in follow-up D-N session" added to `agent-workspace/memory/agent-notes.md` per CLAUDE.md § Session Protocol "End" step 4 IF Strategy B chosen. |
+| RM13 | **Async-leak temptation** — dev sees crawl4ai is async-first and adds `async def` somewhere on the path | Low (plan explicit + DD-2 + ADR D-066 § "Async deferred") | Medium (async-leak refactor cost) | Plan § Context decision 3 + DD-2 + ADR D-066 § "Async deferred to Phase 3" + CLI is sync = strong scaffolding. If dev mistakenly adds async signature → STOP via mypy (sync caller fails type-check) + pytest red. |
+| RM14 | **VN-source robots.txt absence** — CafeF / NDH / VietstockFinance / VietnamBiz may not publish `/robots.txt` at all; Protego on 404 = no rules = allow-all (semantically correct, but verifier should explicit-check) | Med (some VN sites historically don't publish robots.txt) | Low (allow-all on 404 is the conservative correct behavior; rate-limit + UA identification still applied) | RobotsTxtManager port at D2 explicitly handles 404 → cache as "no rules" → can_fetch returns True. Test case in DC-D2-3 robots manager spec list #1 covers this. Skill § Anti-Patterns ALSO documents that absent robots.txt is NOT a green light for unlimited fetching — rate-limit + UA still apply. |
+| RM15 | **CafeF anti-scraping evolution mid-2026** — CafeF rotates article-URL convention (e.g., `.chn` → `.html`) or adds JS-required gating | Low-Med | Med | Adaptive-selector (Scrapling `Selector.relocate`) is the long-term defense but DEFERRED per DD-7 / Out-of-scope item 1. Short-term: SelectorChain fallback handles URL-pattern degradation gracefully (returns None + logs); skill § Monitoring shape-metrics will flag (Phase 3 promotion). If CafeF goes fully JS-gated → need Playwright variant (separate plan). |
+| RM16 | **Scrapling vendored Parsel translator license** — Scrapling's `core/translator.py` is "adapted from Parsel" (per Scrapling README:543-546 + A-12 § 6). We're NOT porting that file — only `robotstxt.py` — but verifier should attest no transitive Parsel-licensed code sneaks in | Low (we port one file from Scrapling, not the whole package) | Low | This bundle ports ONLY `scrapling/spiders/robotstxt.py:10-60` (Protego-wrapper). Parsel-derived code lives in `scrapling/core/translator.py` (selector translation) and is NOT in scope. Verifier V4 cross-checks per-file attribution and confirms no `# adapted from Parsel` headers exist in stockforge ports. |
+| RM17 | **License-attribution rot** — NOTICE file gets stale as upstreams rev versions (e.g., crawl4ai 0.8.6 → 0.9.0 might tweak Attribution clause wording) | Low | Low | Quarterly re-verify cycle (note in `agent-workspace/memory/agent-notes.md` post-S338); promote to a Stop-hook `license-attribution-rot.sh` if 2nd-instance staleness surfaces (AP-23 promote-trigger pattern). Not in scope this bundle; capture as carry-forward note. |
 
 ---
 
@@ -1163,6 +1263,136 @@ These items are explicitly OUT of this bundle's scope:
     glossary.md`** → suggested follow-up but NOT required by DoD; if dev has spare cycles
     in session, append a "CrawlerAdapter / CrawlerRegistry / source_id" entry per UL
     convention.
+
+---
+
+## Acceptance criteria (AQ-1 through AQ-N — Section H per S337 brief; verifier S339 runs each)
+
+Each AQ is a single bash command, grep pattern, or numeric threshold — empirically falsifiable.
+
+- **AQ-1: I-S34 stealth-tech-absence (HARD REJECT verification)**
+  ```bash
+  grep -rEn "patchright|playwright_stealth|playwright-stealth|fake[-_]useragent|UndetectedAdapter|StealthyFetcher|_cloudflare_solver|CDP_CONNECT_EXISTING.*=.*False" \
+    apps/_shared/crawl/ packages/infrastructure/news/crawler_adapters/ NOTICE \
+    2>/dev/null
+  ```
+  Expected: ZERO matches. ANY match = HARD FAIL.
+
+- **AQ-2: License attribution present (NOTICE root + per-file headers)**
+  ```bash
+  [ -f NOTICE ] && grep -q "Crawl4AI" NOTICE && grep -q "Scrapling" NOTICE && \
+    grep -q "Apache" NOTICE && grep -q "BSD" NOTICE && echo "NOTICE OK"
+  grep -l "Portions adapted from Crawl4AI" apps/_shared/crawl/rate_limiter.py
+  grep -l "Portions adapted from Scrapling" apps/_shared/crawl/robots_manager.py
+  ```
+  Expected: 3 commands return 0; "NOTICE OK" prints; both grep find their files.
+
+- **AQ-3: All firing-tests + pytest pass (regression floor)**
+  ```bash
+  bash scripts/hooks/firing-tests/run-all.sh ; echo $?     # expect 0
+  python -m pytest packages/ apps/ -q ; echo $?            # expect 0; count ≥ baseline + 42
+  ```
+
+- **AQ-4: All W0-substrate hooks clean on new modules**
+  ```bash
+  for hook in python-determinism-check atomic-write-check html-separator-check path-safety-check; do
+    bash "scripts/hooks/${hook}.sh" </dev/null ; echo "${hook}: $?"
+  done
+  bash scripts/hooks/bash-hook-lint.sh ; echo "bash-hook-lint: $?"
+  ```
+  Expected: all RC=0; 0 new violations vs STEP 0.9 baseline.
+
+- **AQ-5: Robots.txt honored at live smoke (manual or test-driven)**
+  ```bash
+  # Manual: hit cafef.vn robots.txt once, parse with Protego, assert can_fetch on
+  # listing URL. Test version: stub fetcher returns recorded robots.txt content.
+  python -c "
+  import httpx
+  from apps._shared.crawl.robots_manager import RobotsTxtManager
+  body = httpx.get('https://cafef.vn/robots.txt', timeout=10.0).text
+  m = RobotsTxtManager(fetcher=lambda u: body, user_agent='stockforge-research-bot/0.0.1')
+  print('can_fetch listing:', m.can_fetch('https://cafef.vn/thi-truong-chung-khoan.chn'))
+  "
+  ```
+  Expected: prints `can_fetch listing: True` (CafeF doesn't ban our UA on listings).
+  If False → revisit ToS attestation in per-source ADR before any production use.
+
+- **AQ-6: CLI contract preservation (bytes-identical user-visible output)**
+  ```bash
+  python apps/cli/ingest_news_cafef.py --help > /tmp/help-post.txt
+  diff /tmp/help-pre.txt /tmp/help-post.txt   # /tmp/help-pre.txt captured at STEP 0.10
+  ```
+  Expected: zero lines of diff.
+
+- **AQ-7: Rule 16 audit (Schema discipline — zero new LLM-numeric fields)**
+  ```bash
+  # New schema fields with numeric types in adapter code paths:
+  grep -rEn ":\s*(int|float|Decimal|complex)\b" \
+    packages/application/news/ports/crawler_adapter.py \
+    packages/application/news/ports/crawler_registry.py \
+    packages/infrastructure/news/crawler_adapters/cafef_adapter.py \
+    apps/_shared/crawl/raw_html_sink.py \
+    apps/_shared/crawl/selector_chain.py
+  ```
+  Expected: every match is EITHER (a) internal timing/counter state (RateLimiter
+  `current_delay`, SelectorChain counter), OR (b) preserved-existing
+  `confidence_extracted` (un-touched). NO new LLM-call-site schema fields with numeric
+  types.
+
+- **AQ-8: Per-file header presence + DD-8 template match**
+  ```bash
+  head -3 apps/_shared/crawl/rate_limiter.py
+  # Expected: 3 lines = "# Portions adapted from Crawl4AI ..."
+  head -3 apps/_shared/crawl/robots_manager.py
+  # Expected: 3 lines = "# Portions adapted from Scrapling ..."
+  ```
+
+- **AQ-9: ADR D-066 well-formed + ≥7 source_evidence cites**
+  ```bash
+  grep -c "^- path:" agent-workspace/memory/decisions/066-bc5-crawler-adapter-contract.md
+  # Expected: ≥7
+  grep -E "^(id|title|date|status|level|chosen|chosen_rationale|approval_chain):" \
+    agent-workspace/memory/decisions/066-bc5-crawler-adapter-contract.md | head -10
+  # Expected: 8 frontmatter keys present (12-field schema compliance)
+  ```
+
+- **AQ-10: Charter + constitution untouched (zero edits)**
+  ```bash
+  git diff HEAD~5..HEAD -- PROJECT_CHARTER.md ; echo "$?"     # expect empty diff
+  git diff HEAD~5..HEAD -- agent-workspace/constitution/ ; echo "$?"  # expect empty
+  ```
+
+---
+
+## AskUserQuestion gate (Section K per S337 brief)
+
+**Result of architect's gate analysis**: **NO charter-tier or scope-tier question is raised
+by this PLAN.** All decisions are IMPL-tier:
+
+- Theme L hybrid winner = D-061 § Decision item 3 (ratified 2026-05-15T15:30+07:00; binding)
+- Scrapling Cloudflare-solver HARD REJECT = D-061 § Decision item 4 + I-S34 (binding)
+- Rule 16 numeric-field discipline = D-065 (ratified 2026-05-16 via S336; binding)
+- Strategy A vs B (WRAP vs REPLACE) for CafeF migration = IMPL-tier judgment for S338 dev
+  (architect recommends B; dev picks per § "Two migration strategies")
+- ABC vs Protocol = architect's call per DD-3; documented in ADR D-066
+- Per-VN-source assignment matrix = architect's call per § E table; documented in ADR D-066
+- NDH/Vietstock/VietnamBiz deferral = scope-CONFIRMED by D-061 § Decision item 3 +
+  master plan § 6.4.1 "1 PLAN + 1-2 IMPL + 1 VERIFY; ~3-4 sessions"
+- Facebook fanpage CDP path = scope-CONFIRMED deferred per I-S34 charter line 110 +
+  MediaCrawler license blocker per D-061 § Decision item 2
+
+**No gate required — main session may auto-pick on plan dispatch.**
+
+Per `full_autonomous_no_supervised` memory rule + `stop_offering_routing_branches`: main
+session dispatches S338 sandwich-dev directly on next user `continue` keyword (no
+AskUserQuestion fired by this plan). Per `dont_self_pause_at_session_boundary`: S337 ↦
+S338 ↦ S339 chain runs autonomously.
+
+**Out-of-band gate that DOES exist** (informational only): if at IMPL time S338 dev
+discovers a STEP 0 STOP-IF-AMBIGUOUS divergence (e.g., upstream license changed, VN
+source robots.txt 404, `protego` install failure with no stdlib fallback), THEN
+S338 dev escalates via observation file + notification per § STEP 0 rules. That
+escalation is not a pre-PLAN gate — it's a runtime safety stop.
 
 ---
 
@@ -1240,6 +1470,8 @@ Per AP-1 fresh-context; mirror plan 018's verifier checklist shape.
   templates EXACTLY.
 - [ ] V4.3 — No header missing on any port file; no header on pure-fresh files
   (`selector_chain.py`, `raw_html_sink.py`, `crawler_adapter.py`).
+- [ ] V4.4 — No Parsel-derived code (RM16 audit): `grep -rn "adapted from Parsel" apps/
+  packages/ NOTICE` returns ZERO matches (we ported `robotstxt.py`, not `core/translator.py`).
 
 ### V5 — Charter compliance
 
@@ -1251,6 +1483,9 @@ Per AP-1 fresh-context; mirror plan 018's verifier checklist shape.
   Charter Principle 7 ✓ / Charter Principle 11 N/A (no new hook) / D-060 (commit count +
   0 push) / 0 charter / 0 constitution / 0 human-workspace / AP-1 honored (S339
   fresh-context).
+- [ ] V5.4 — AQ-1 stealth-tech-absence audit verified: `grep` returns ZERO matches.
+- [ ] V5.5 — I-S34 ToS-compliance: ALL adapter code uses real UA + honors robots.txt; no
+  spoof; no signing-key reverse-engineering; no Cloudflare-bypass.
 
 ### V6 — Regression + integration smoke
 
@@ -1270,38 +1505,126 @@ Per AP-1 fresh-context; mirror plan 018's verifier checklist shape.
 
 ---
 
-## Compliance Attestation (this PLAN session — S337)
+## Compliance Attestation (this PLAN session — S337) — Section L per S337 brief
 
+**Charter principles**:
+- [x] **Principle 4 (Proprietary data moat)** — RawHtmlSink preserves verbatim HTML for
+  re-extraction; per skill § Storage compounds data over time
+- [x] **Principle 7 (Dogfood mandatory)** — CafeF migration ships behind unchanged CLI;
+  user can dogfood on commit
+- [x] **Principle 8 (Calibration over confidence)** — SelectorChain attempt-counter +
+  shape-metrics emit (logged this bundle; calibration TSV persisted Phase 3)
+- [x] **Principle 9 (NO LLM math)** — § Schema discipline confirms ZERO new LLM-numeric
+  schema fields; adapter is pure deterministic Python
+- [x] **Principle 11 (Harness self-verify firing)** — N/A this bundle (no new hook;
+  enforcement via existing W0-2/3/5 hooks + verifier S339 fresh-context)
+
+**Invariants** (file:line cite where binding):
+- [x] **I-S1 (NO LLM math)** — § Schema discipline + Rule 16 audit at DC-AGG-9
+- [x] **I-S2 (every claim sourced)** — every plan claim cites file:line (deep-dives +
+  financial-data-protocol + skill + existing code); 5-source grid at § "5-source-evidence chain"
+- [x] **I-S22 (data lineage)** — `source_id` ClassVar + ScrapedArticle.url preserved
+  through chain
+- [x] **I-S34 (public sources + ToS compliance)** — Scrapling Cloudflare-solver + patchright
+  + StealthyFetcher HARD REJECT registry at § "Charter + invariant compliance map" +
+  AQ-1 stealth-tech-absence grep; robots.txt honored via RobotsTxtManager
+- [x] **I-S35 (research-aid framing)** — adapter is data-ingestion substrate; output
+  framing is downstream concern (existing summary in CLI uses framing-neutral structure)
+
+**Rules** (financial-data-protocol.md):
+- [x] **Rule 6 (LLM Output Provenance)** — ScrapedArticle preserves verbatim body for LLM
+  to quote; ExtractorMetadata.confidence_extracted already mode #3 target
+- [x] **Rule 8 (Anti-Look-Ahead)** — published_at + ingested_at carried through unchanged
+  (no LLM stamping)
+- [x] **Rule 16 (D-065 Numeric-Field Discipline)** — § Schema discipline + AQ-7 + audit
+  in D-066
+
+**ADRs binding** (cited in frontmatter `depends_on`):
+- [x] **D-061** (Wave-1 integration ratification; Theme L hybrid winner + Cloudflare HARD REJECT)
+- [x] **D-065** (Rule 16 numeric-field discipline)
+- [x] **D-059** (Python determinism contract — R1/R2/R4 binding)
+- [x] **D-060** (commit-policy: agent MAY commit; MUST NOT push)
+- [x] **D-062** (atomic-write doctrine — binding for RawHtmlSink)
+- [x] **D-064** (path-safety 5-invariant — binding for RawHtmlSink)
+
+**Anti-patterns checked** (CLAUDE.md + patterns-discovered + agent-notes):
+- [x] **AP-1 (Same-agent self-review)** — S339 verifier dispatched fresh-context;
+  S338 dev fresh-context separate from this S337 PLAN architect
+- [x] **AP-2 (Self-track wind-down)** — N/A (architect subagent doesn't track its own tokens)
+- [x] **AP-5 (Charter-coherence defer overriding user-CRITICAL)** — re-read CLAUDE.md +
+  PROJECT_CHARTER.md at session entry; no USER-CRITICAL silently deferred
+- [x] **AP-7 (Performative SC ticking)** — DoD criteria are empirically verifiable
+  (commands + counts, not "looks done"); verifier S339 runs each
+- [x] **AP-8 (Pre-staged work causing checkpoint drift)** — `current-execution.md` row
+  update is DC-AGG-14, performed at IMPL close not pre-staged
+- [x] **AP-17 (Identity drift)** — stockforge AI-first VN advisory framing preserved;
+  this is BC-5 News Stream substrate not generic-web-crawler framework
+- [x] **AP-23 (Continuous LLM-Guardian / Refinement-of-rule lesson-about-lesson)** — RM10
+  empirical check: D-066 is first-instance product-substrate doctrine, NOT refinement of
+  D-061/62/63/64/65; no AP-23 trigger
+
+**Memory rules** (loaded from `C:\Users\PC\.ccs\instances\nathanleewindy\projects\C--htdocs-stockforge\memory\MEMORY.md`):
+- [x] `full_autonomous_no_supervised` — no SUPERVISED-mode AskUserQuestion gate this PLAN
+- [x] `qa_bundle_all_pending` — N/A (no Q&A bundle this PLAN; if main session needs to
+  fire one at S338 dispatch, mega-bundle all pending)
+- [x] `stop_offering_routing_branches` — no (a)/(b)/(c) routing branches at PLAN end;
+  S338 dispatched on next user `continue`
+- [x] `dont_self_pause_at_session_boundary` — S337 PLAN ↦ S338 IMPL ↦ S339 VERIFY chains
+  autonomously; no self-pause
+- [x] `autonomous_continue_no_self_pause` — same as above
+- [x] `harness_priority_one` — this plan is product work; no harness gap blocking;
+  L-S336-1 escalation-engine investigation remains queued as separate harness session
+- [x] `verify_phase_before_next_phase` — Phase B + C closure verified at STEP 0.1 before
+  authoring; STEP 0.4 verifies migration target shape live before any code change
+
+**Lessons from agent-notes.md applied**:
+- [x] **L-S176-1 (companion firing-test for every hook)** — N/A this bundle (no new hook;
+  Phase 3.5 Hard Rule #2 satisfied vacuously)
+- [x] **L-S312-1 (single-shot escalation pattern)** — N/A this bundle (no severity-state
+  emitters introduced)
+- [x] **L-S312-2 (plan-text/impl-behavior divergence)** — plan language uses HARD CONSTRAINT
+  for CLI contract preservation; STOP-IF-AMBIGUOUS for STEP 0 divergence; no soft "should"
+  ambiguity
+- [x] **L-S312-3 (age-proxy timestamps)** — N/A this bundle (no TSV schema emitters)
+- [x] **L-S333-1 (live-audit attestation hook-sourced discipline)** — applied to ADR
+  D-066 § "Live audit count" planning: if D-066 introduces empirical counts (e.g., "0
+  stealth-tech-imports found"), those counts MUST be sourced from running AQ-1 grep, NOT
+  hand-curated. D-066 § "Rule 16 audit" + § "Stealth-tech HARD-REJECT audit" both
+  follow this discipline.
+
+**Hard constraints honored**:
 - [x] no production code written (this is a PLAN session per CLAUDE.md § Session Types)
-- [x] no commits (no Bash tool granted to sandwich-architect)
+- [x] no commits in plan-authoring session by architect (no Bash tool); main session
+  commits the plan file + observation per § "Architect's commit boundary" below
 - [x] no charter edits
-- [x] no constitution writes (Rule 16 already landed via D-065 — this plan respects, does
-  NOT modify)
+- [x] no constitution writes (Rule 16 already landed via D-065 — this plan respects,
+  does NOT modify)
 - [x] no human-workspace writes
 - [x] no edits to `apps/cli/ingest_news_*.py` (migration targets — S338 dev's scope)
 - [x] no master-plan edits (D-061 already ratifies Theme L hybrid winner)
 - [x] every claim source-cited per I-S2 (deep-dives + financial-data-protocol + skill +
   existing code)
 - [x] I-S34 ToS compliance honored — Scrapling Cloudflare-solver + patchright +
-  StealthyFetcher HARD REJECT confirmed in every section
-- [x] I-S35 research-aid framing preserved — adapter is data-ingestion substrate; output
-  framing is downstream concern (existing summary in CLI uses framing-neutral structure)
+  StealthyFetcher HARD REJECT confirmed in every section; AQ-1 grep is the verification
+- [x] I-S35 research-aid framing preserved — adapter is data-ingestion substrate
 - [x] Rule 16 (D-065) audit performed — § Schema discipline confirms ZERO new LLM-numeric
-  fields introduced
+  fields introduced; AQ-7 is verification
 - [x] R-1 no-mix PLAN+IMPL honored (PLAN-only session; S338 is the IMPL session)
 - [x] R-2 split-if->10-tasks evaluated — bundle contains 4 sub-tracks × (2-4 tasks each)
   ≈ 14-15 tasks; budget envelope 100-150K target stays within MULTI_TASK_IMPL band per
-  session-budgets.md
-- [x] AP-1 fresh-context honored — S339 verifier dispatched fresh-context per § Verifier
-  checklist
-- [x] AP-23 not triggered (D-066 is first-instance product substrate, not refinement) —
-  RM10 documents the check
-- [x] VBW protocol applied — all upstream-repo claims grounded by Read tool on actual files
-  (`crawl4ai/hub.py:24-69`, `crawl4ai/async_dispatcher.py:28-85`,
+  session-budgets.md; if dev hits R-2 trigger mid-IMPL → split per § "Two migration
+  strategies" Strategy B (WRAP) which collapses D3 into 1-task migration
+- [x] VBW protocol applied — all upstream-repo claims grounded by Read tool on actual
+  files (`crawl4ai/hub.py:24-69`, `crawl4ai/async_dispatcher.py:28-85`,
   `Scrapling/spiders/robotstxt.py:10-60`, `crawl4ai/LICENSE:1-67`,
   `Scrapling/LICENSE:1-28`, etc.); existing-code claims grounded by Read tool on
   `cafef_scraper.py` (213 LOC), `ingest_news_cafef.py` (318 LOC),
   `news_article.py`, `extractor_metadata.py`, `crawler-reliability/SKILL.md`,
   `financial-data-protocol.md` Rule 16
+
+**Architect's commit boundary**: per D-060 architect MAY ship this PLAN as a single
+commit (`S337: Phase D Theme L plan-020 authored (sandwich-architect)` per house style
+of `8a5662b`). Main session decides whether to ship as part of S337-close consolidation
+or stand-alone. Do NOT push.
 
 End of plan 020-S337-phase-d-theme-l-crawling-adapter.md.
