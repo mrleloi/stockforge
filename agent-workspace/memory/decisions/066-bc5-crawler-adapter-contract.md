@@ -370,3 +370,45 @@ Ports and adapters use existing W0-substrate hooks automatically:
   empirically (grep `store_raw=False` in discover() body; CLI smoke verifies no listing-page HTML)
 - **Next consumer**: VietnamBiz adapter (plan-027 S356) -- 3rd of 4 priority sources; rate-limit
   bumped to 3.0s per plan-020 § E matrix line 354
+
+### REV-3 (2026-05-16) — VietnamBiz adapter shipped as 3rd + FINAL Strategy A consumer; SelectorChain[T] contract maturity 1 -> 2 -> 3 consumers; Phase D Theme L per-source rollout CLOSED
+
+- **Trigger**: plan-027 S357 ships VietnamBizAdapter as third + FINAL greenfield Strategy A direct-subclass
+  + third SelectorChain[T] consumer (after NDH at S344 + Vietstock at S354)
+- **Authorization**: plan-027 § L (architect-proposed) + S358 verifier acceptance (pending)
+- **Source artifacts**:
+  - `agent-workspace/session-plans/pending/027-S356-phase-d-vietnambiz-adapter.md` § DD-4 + § D1 + § H
+  - `packages/infrastructure/news/crawler_adapters/vietnambiz_adapter.py` (NEW; uses 2 SelectorChain[T]
+    instances for headline + body fields; fmt-string chain for date; DD-7 F2-aware `store_raw` from day 1)
+  - `packages/infrastructure/news/crawler_adapters/test_vietnambiz_adapter.py` (NEW; 21 test cases
+    including SelectorChain fallback coverage AND DD-7 F2-aware tests 7 + 19 + DD-5 rate-limit test 21)
+  - `apps/cli/ingest_news_vietnambiz.py` (NEW; CLI dispatch via fresh CrawlerRegistry + VietnamBizAdapter
+    registration; DD-5 rate 3.0s CONSERVATIVE per plan-020 § E matrix line 354)
+- **Summary of changes**:
+  - CrawlerAdapter ABC contract validated across 3 distinct greenfield consumers (NDH + Vietstock +
+    VietnamBiz); contract maturity strengthens to n=3 — no contract gap surfaced (subject to verifier
+    S358 re-confirmation per AQ-8)
+  - SelectorChain[T] contract validated across 3 distinct VN financial sites; primitive proven
+    production-ready at n=3 maturity threshold (AP-23 promotion threshold)
+  - DD-7 F2-aware design `_fetch_with_optional_chain(*, store_raw)` shipped from day 1 in VietnamBiz
+    — n=2 day-one ship (Vietstock 1st day-one; VietnamBiz 2nd day-one); n=3 store_raw presence overall
+    — L-S345-3 PROMOTE-NOW TRIGGER FIRES per § L if S358 confirms quintuple-guard ALL GREEN
+  - DD-5 conservative 3.0s rate-limit posture established per plan-020 § E matrix line 354 + skill
+    `crawler-reliability/SKILL.md` § Rate Limiting "VietnamBiz less lenient"; FIRST per-source rate-bump
+    in BC-5 adapter suite (CafeF/NDH/Vietstock all 2.0s)
+  - Canonical host verified: vietnambiz.vn (2026-05-16 STEP 0.1; status=200;
+    plan-020 § E matrix line 354 typo "vietstockfinance.vn" CORRECTED)
+  - robots.txt verified: User-agent: * Allow: /; no Crawl-delay; 3.0s default per DD-5
+  - Article URL pattern verified: /<slug>-<15+digit-timestamp-id>.htm
+  - Body selector: div.vnbcb-content (primary) -> div.post-body-content -> article
+  - Headline selector: h1.vnbcb-title (primary) -> h1 -> meta[og:title]
+- **Phase D Theme L per-source rollout CLOSED**: all 4 priority VN financial-news sources shipped
+  (CafeF Strategy B WRAP + NDH/Vietstock/VietnamBiz Strategy A direct-subclass). Master plan § 5.7
+  + § 6.4.1 closure milestone achieved. Phase E Theme I Vietnamese NLP entry unblocked.
+- **Verifier impact**: S358 spot-checks VietnamBizAdapter's SelectorChain usage + DD-7 F2-aware design
+  empirically (grep `store_raw=False` in discover() body; CLI smoke verifies no listing-page HTML in
+  data/raw/; rate-limit-3.0s test 21 confirms DD-5 binding; DC-IMPL-7/8/9 sextuple-guard ALL GREEN)
+- **Next consumer**: NONE for Strategy A direct-subclass pattern. Future Phase D-N consolidation
+  candidates (RM12 carry-forward): CafeFAdapter Strategy B → Strategy A migration + ScrapedArticle
+  promotion to packages/contracts/ + L-S354-1 Protocol-typed injection refactor. Phase E entry
+  (Vietnamese NLP plan-028) takes priority.

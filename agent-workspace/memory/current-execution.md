@@ -198,3 +198,27 @@
 
 **Next**: dispatch S355 sandwich-verifier (AP-1, fresh-context) for plan-026 verification.
 
+---
+
+## S357 — Phase D Theme L FINAL VietnamBiz Adapter IMPL DONE (plan-027; sandwich-dev S357) — 2026-05-16
+
+**S357 sandwich-dev RETURN** (Sonnet 4.6 FOCUSED_IMPL, fresh-context AP-1 per plan-027). All 5 sub-tracks D1-D5 COMPLETE. Baseline 1013 → 1034 tests (+21; 0 regressions). 21/21 new tests PASS. STEP 0 all 4 STOP-AND-ASK triggers CLEAR.
+
+**STEP 0 verdicts**: vietnambiz.vn status=200 (canonical apex; www. redirects to apex). robots.txt 200; Allow: /; no Crawl-delay → 3.0s applies per DD-5 skill flag. ToS: no automated-access prohibition. JS-rendering: PASS (static HTML). Article URL pattern: `/<slug>-<15+digit-timestamp-id>.htm` (root-level, no subdirectory). Selectors: `h1.vnbcb-title` (headline primary) + `div.vnbcb-content` (body primary) + `meta[article:published_time]` (date; **NO timezone offset** → UTC+7 required; M-S357-1 inline-resolved).
+
+**M-S357-1 IMPORTANT (inline-resolved)**: VietnamBiz `meta[article:published_time]` emits Vietnam local time with no timezone suffix (unlike Vietstock which had `+07:00`). Naive UTC would violate Rule 8 (published_at > ingested_at). Fix: `_TZ_VN = timezone(timedelta(hours=7))` throughout `_parse_published_at`. CLI smoke confirmed correct behavior.
+
+**D1+D2 (adapter impl + selector authoring)**: `packages/infrastructure/news/crawler_adapters/vietnambiz_adapter.py` 501 LOC. Strategy A direct-subclass; 2 SelectorChain[T] instances; 3rd + FINAL SelectorChain[T] consumer. DD-7 F2-aware `store_raw=False` in discover() architected from day 1. DD-5 `_DEFAULT_RATE_LIMIT_SECONDS = 3.0` (first per-source rate-bump in BC-5 suite).
+
+**D3 (unit tests)**: `packages/infrastructure/news/crawler_adapters/test_vietnambiz_adapter.py` 490 LOC; 21 test cases. Tests 7+19+21 (DD-7 sextuple-guard items 4+5 + DD-5 rate-limit) PASS. **DD-7 F2 SEXTUPLE-GUARD: ALL 6 GREEN** — L-S345-3 PROMOTE-NOW trigger condition met (pending S358 verifier confirmation).
+
+**D4 (registry + CLI)**: `apps/cli/ingest_news_vietnambiz.py` 373 LOC; `RateLimiter(base_delay=3.0)`. CLI smoke: 1 article scraped + written. `data/raw/news/vietnambiz/2026-05-16/e6a209b91f159f73.html` (1 file; no listing HTML = DC-SMOKE-4 PASS).
+
+**D5 (ADR REV-3)**: D-066 § Amendments REV-3 added. Phase D Theme L per-source rollout CLOSED. Session log + observation written.
+
+**Phase D Theme L status**: CafeF (Strategy B WRAP) + NDH (S344) + Vietstock (S354) + **VietnamBiz (S357) = FINAL** — ALL 4 adapters SHIPPED. Theme L CLOSED pending S358 verifier acceptance.
+
+**5 handoff risks for S358**: (1) UTC+7 fix — confirm published_at values are correct; (2) URL regex anchoring — may miss category-prefixed URLs; (3) LOC 501 vs 400 plan ceiling — same accepted leeway as Vietstock 476; (4) mypy 4 unused-ignore L-S354-1 HOLD pattern; (5) CLI default `--listing /chung-khoan.htm` needs no leading slash on Windows.
+
+**Next**: dispatch S358 sandwich-verifier (AP-1, fresh-context, ~30-50K VERIFY budget) for plan-027 verification. On S358 PASS → Phase E Theme I Vietnamese NLP UNBLOCKED. If sextuple-guard confirmed GREEN → main writes `.claude/skills/crawler-reliability/SKILL.md` L-S345-3 promotion update.
+
