@@ -142,6 +142,23 @@ After all tasks done (or session ends):
 - No Pydantic/FastAPI in domain layer (architecture rule)
 - No LLM math — never let LLM output numbers without tool call grounding
 
+## Parallelism Discipline
+
+If plan declares `parallel_with: [D2, D3]` for sub-track D1, main session (orchestrator) MAY dispatch up to
+3 dev subagents in single Agent-tool message (parallel background).
+
+**Rules** (per DD-3 + DD-4 + DD-5):
+- Each dev gets a NARROWED plan slice: only its own sub-track + shared context (Charter, constitution, target spec)
+- Each dev's `coordination_paths_exclusive` list is enforced: violation = STOP-AND-FLAG, do NOT silently widen scope
+- Devs do NOT cross-coordinate; main session integrates returns
+- If any parallel dev fails → main session preserves successes + queues sequential retry for failed slice
+
+**Max ceiling**: 3 parallel dev subagents per plan (per DD-5; raise to 4 only after 10+ successful 3-parallel runs
+without rate-limit / file-collision incident — see ADR D-069 § Empirical-Tuning-Window).
+
+**Self-check for dev**: before any file write, confirm target path is IN your sub-track's
+`coordination_paths_exclusive` list. If NOT, STOP-AND-FLAG — escalate to main session per Escalate When section.
+
 ## Do NOT
 
 - Add features not in plan

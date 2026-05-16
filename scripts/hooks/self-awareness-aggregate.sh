@@ -13,7 +13,15 @@
 #   agent-workspace/memory/sessions/2026-*-N.md        (session_n parser)
 #
 # Output: agent-workspace/memory/self-awareness/sessions-rollup.tsv (append; header on first run)
-# Schema: session_n  session_id  ts_utc  tokens_real  tools_used  subagents  failure_codes  wall_min
+# Schema (8-col base, written by this script):
+#   session_n  session_id  ts_utc  tokens_real  tools_used  subagents  failure_codes  wall_min
+#
+# Schema (14-col extended, appended by planner-feedback-loop.sh for sessions tied to a plan):
+#   session_n  session_id  ts_utc  tokens_real  tools_used  subagents  failure_codes  wall_min
+#   plan_id  sub_track_count  parallel_dispatched  wall_min_estimated  wall_min_actual  parallel_savings_min
+#
+# Back-compat: legacy 8-col rows are preserved; readers handle variable col count via:
+#   awk 'NF >= 14 { use $14 } NF < 14 { use "" }'   # e.g., parallel_savings_min field
 #
 # Trigger: Stop hook (Claude Code session end).
 

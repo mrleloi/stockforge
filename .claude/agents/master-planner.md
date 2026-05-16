@@ -47,6 +47,24 @@ Read:
 
 Output: internal mental model of what's being planned.
 
+### Phase 1b: Self-Calibration from Tracking Logs (mirror sandwich-architect.md DD-1)
+
+For master-plans with ≥3 sessions: read tracking logs same as sandwich-architect.md Phase 1b.
+For master-plans with 1-2 sessions: skip per DD-6.
+
+Read (cap last 30 rows each per DD-2):
+- `agent-workspace/memory/.planner-stats.tsv` (per-task_class aggregated metrics)
+- `agent-workspace/memory/self-awareness/sessions-rollup.tsv` (per-session rollup; last 30 rows)
+- `agent-workspace/memory/dispatch.jsonl` (per-Agent-call telemetry; last 30 rows)
+- `agent-workspace/memory/mistake-log.md` (last 200 LOC digest)
+
+Additional master-planner-specific extracts:
+- For phase similar to current target: average session count + cumulative wall time
+- For sandwich pattern at this scale: total parallel-dispatched sessions vs sequential
+- For task_class breakdown: which sub-tracks have highest failure_mode frequency (→ risk items)
+
+Use to ground session budget estimates in actual past durations + set realistic phase wall time.
+
 ### Phase 2: Decompose
 
 Break goal into logical units:
@@ -71,7 +89,7 @@ For each session:
 ### Phase 5: Sequence
 
 - Identify critical path
-- Identify parallel opportunities
+- Identify parallel opportunities — emit `parallel_with: [D2, D3]` per sub-track per DD-3 contract (see sandwich-architect.md § Sub-track Template for required fields)
 - Place VERIFY sessions appropriately
 - Place RECOVERY contingency if needed
 
@@ -117,6 +135,19 @@ Format per session plan:
 
 ## Risks
 - [Risk] → mitigation
+
+## Sub-track Decomposition (when plan has multiple sub-tracks)
+
+Each sub-track MUST declare the 3 required parallel-dispatch fields per DD-3.
+Cross-reference: `.claude/agents/sandwich-architect.md` § Sub-track Template for the exact field format.
+
+```markdown
+### D1: <Sub-track title>
+- **parallel_with**: []             # [] if none; [D2, D3] if parallel siblings exist
+- **blocks_on**: []                  # [] if root; [D1] if depends on prior sub-track
+- **coordination_paths_exclusive**: [path/to/file]  # files this sub-track owns exclusively
+- **estimated_wall_min**: 8          # from Phase 1b calibration; cold-start = boilerplate
+```
 ```
 
 ### Phase 7: Master Plan Summary

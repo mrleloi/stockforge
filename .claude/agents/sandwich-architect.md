@@ -39,6 +39,31 @@ Read:
 
 Apply VBW Protocol — verify source against memory.
 
+### Phase 1b: Self-Calibration from Tracking Logs
+
+**MANDATORY** if plan has ≥3 sub-tracks. **SKIPPABLE** for 1-2 sub-track FOCUSED_IMPL.
+Skip-decision MUST be explicit in plan output § Calibration summary line.
+
+Read (cap last 30 rows each per DD-2 — use Read tool with offset+limit):
+- `agent-workspace/memory/.planner-stats.tsv` (per-task_class aggregated metrics maintained by planner-feedback-loop.sh)
+- `agent-workspace/memory/self-awareness/sessions-rollup.tsv` (per-session rollup; tokens_real/wall_min/failure_codes — last 30 rows)
+- `agent-workspace/memory/dispatch.jsonl` (per-Agent-call telemetry; agent_type/duration_ms/outcome/tokens_used — last 30 rows)
+- `agent-workspace/memory/mistake-log.md` (last 200 LOC digest; failure pattern lookup)
+
+Extract (keyed on current task_class similarity):
+- For task_class similar to current target: average duration_ms + outcome distribution + failure_mode frequency
+- For model+effort similar to current dispatch context: average tokens_real vs estimated
+- For coordination-rule pattern similar: any file-collision incidents recorded
+- For sandwich pattern: was there parallel dispatch? Did it succeed?
+
+Use to:
+- Set REALISTIC budget per sub-track (not boilerplate; ground in actual durations)
+- Flag sub-tracks with historically-high failure_mode → add specific RM entry
+- Identify safe parallelization opportunities → mark sub-tracks `parallel_with: [D2, D3]`
+
+Cold-start (per AQ-5): if `.planner-stats.tsv` sample_size<3 for current task_class, Phase 1b gracefully degrades
+to default 100-150K budget; flag in calibration summary as "cold-start". Do NOT block plan authoring on cold-start.
+
 ### Phase 2: Architecture Decisions
 
 For this implementation:
@@ -81,6 +106,23 @@ Dependencies:
 Add: ThesisCreatedEvent, ThesisSubmittedEvent, ThesisPostMortemed
 Size change: +30 LOC
 ```
+
+### Sub-track Template (REQUIRED 3 fields per sub-track per DD-3)
+
+Each sub-track in § D Sub-track decomposition MUST declare:
+
+```markdown
+### DN: <Sub-track title>
+- **parallel_with**: [D2, D3]    # list of sibling sub-track IDs that may run in parallel; [] if none
+- **blocks_on**: [D1]              # list of sub-track IDs that MUST complete before this one starts; [] if root
+- **coordination_paths_exclusive**: [path/to/file1, path/to/file2]   # per-sub-track file scope; lint validates disjointness across parallel_with siblings
+- **estimated_wall_min**: 12       # per Phase 1b calibration; cold-start = boilerplate estimate
+```
+
+**Lint contract** (enforced at dispatch-time per DD-4):
+- `coordination_paths_exclusive` sets MUST be disjoint across all sub-tracks listed in `parallel_with`
+- Total `parallel_with` cardinality MUST NOT exceed 3 per dispatch wave (per DD-5; raise to 4 trigger documented in ADR D-069)
+- `blocks_on` MUST form a cycle-free DAG with `parallel_with`
 
 ### Phase 4: Task Breakdown
 
@@ -166,6 +208,32 @@ Returns to invoker:
 `agent-workspace/memory/observations/sandwich-architect-S<N>-<plan-id-slug>.md`
 (~150-250 LOC) summarizing what was decided, why, and what was rejected. Format
 reference: `agent-workspace/memory/observations/sandwich-architect-S337-phase-d-theme-l-plan.md`.
+
+## Calibration Summary (Phase 1b — MANDATORY in plan output)
+
+Plan output MUST include a `### Calibration summary (Phase 1b)` sub-section near the end of § B
+(Predecessor + invocation context) reading either:
+
+**CONSUMED variant** (≥3 sub-tracks):
+```
+### Calibration summary (Phase 1b)
+Source: agent-workspace/memory/.planner-stats.tsv (last_updated=<TS>)
+- task_class: <X>
+- sample_size: <N> (window: last 30 days, age-decayed per DD-10)
+- avg_wall_min observed: <M>
+- parallel_hit_rate: <P>%
+- parallel_savings_avg: <S> min
+- Adjustment to default budget: <±X K based on observed tokens_real>
+- Cold-start? <YES/NO>
+```
+
+**SKIPPED variant** (1-2 sub-track FOCUSED_IMPL):
+```
+### Calibration summary (Phase 1b)
+Phase 1b SKIPPED per DD-6: 1-2 sub-track FOCUSED_IMPL; budget=<X> estimated from boilerplate.
+```
+
+Empty-skip (silent omission) is REFUSED — lint exits 1.
 
 ## Do NOT
 

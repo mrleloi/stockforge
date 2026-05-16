@@ -84,6 +84,10 @@ For each task, identify VBW pre-check:
 ## Plan Reference
 [Path to session plan]
 
+**Parallelism awareness**: if session plan declares sub-tracks with non-empty `parallel_with`, action-guide
+MUST partition its file-load list per sub-track + recommend main session dispatch parallel devs per
+`.claude/agents/sandwich-dev.md` § Parallelism Discipline.
+
 ## Execution Sequence
 
 ### Pre-flight (load context)

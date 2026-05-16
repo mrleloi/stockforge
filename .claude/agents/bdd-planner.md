@@ -72,6 +72,10 @@ With this feature's additions, what's new shape?
 
 ### Phase 5: Output Test Plan
 
+**Parallel sub-track awareness**: if implementation plan declares parallel sub-tracks, test plan MAY scope test
+files per sub-track to preserve `coordination_paths_exclusive` discipline (e.g., D1 test file in `tests/x/`,
+D3 test file in `tests/y/`, no cross-import).
+
 ```markdown
 # Test Plan: [Feature]
 
