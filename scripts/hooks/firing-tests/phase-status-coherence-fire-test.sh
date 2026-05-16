@@ -348,7 +348,8 @@ EOF
   rm -rf "$TC12_DIR" 2>/dev/null || true
 done
 assert "TC12: all 4 Wave 1 letters (A,B,C,E) map GREEN match=1" "$([ "$TC12_FAIL" -eq 0 ] && echo 1 || echo 0)"
-TOTAL=$((TOTAL + 3))  # TC07/08/09/10/11 already counted above; TC12 is single assert above
+# S350 verifier F2 inline fix: was TOTAL += 3 (mathematically inconsistent: PASS 29 / FAIL 0 / TOTAL 32).
+# TC12 is single assert; assert() helper already incremented TOTAL by 1. Removed the spurious +3.
 
 # === Summary ===
 echo ""

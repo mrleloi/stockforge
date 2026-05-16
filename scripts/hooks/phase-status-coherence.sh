@@ -73,18 +73,25 @@ set +o pipefail
 # Step 1: extract latest session Phase claim from current-execution.md.
 # Headers look like:  ## S174 — Phase 3.5 — FOCUSED_IMPL-DONE: ...
 # ============================================================================
-LATEST_HEADER=$(grep -m 1 -E '^## S[0-9]+[a-z]?[[:space:]]+—[[:space:]]+Phase' "$CE" 2>/dev/null)
+LATEST_HEADER=$(grep -m 1 -E '^## S[0-9]+(-S[0-9]+)?[a-z]?[[:space:]]+—[[:space:]]+Phase' "$CE" 2>/dev/null)
 if [ -z "$LATEST_HEADER" ]; then
   touch "$MARKER" 2>/dev/null || true
   echo "session=$SID ts=$TS state=NO-HEADER detail=cannot-parse-current-execution" > "$CACHE" 2>/dev/null || true
   exit 0
 fi
 
-LATEST_SID=$(echo "$LATEST_HEADER" | sed -E 's/^## (S[0-9]+[a-z]?).*/\1/')
+# S350 verifier F1 inline fix: STEP 1 grep + SID extract + Phase extract all accept
+# optional compound-session-range suffix `-S<N>` (e.g. `## S346-S347 — Phase D — ...`).
+# Pre-fix bug: D4 letter-phase mapping was inert in production because STEP 1 grep
+# rejected compound headers; live current-execution.md:133 used `S346-S347` and hook
+# bailed at NO-HEADER before reaching D4 mapping code. Sed extracts also extended.
+LATEST_SID=$(echo "$LATEST_HEADER" | sed -E 's/^## (S[0-9]+(-S[0-9]+)?[a-z]?).*/\1/')
 # === D4: Extended regex — accepts numeric (4, 3.5) AND letter (D, F-prime) phase forms.
 # S346 plan-023 DD-5 fix: original regex captured only ([0-9]+(\.[0-9]+)?) causing silent
 # false-positive RED HIGH for ~25 sessions (S323-S342) on Wave 1 letter-phase headers.
-LATEST_PHASE=$(echo "$LATEST_HEADER" | sed -E 's/^## S[0-9]+[a-z]?[[:space:]]+—[[:space:]]+Phase[[:space:]]+([0-9]+(\.[0-9]+)?|[A-Z](-prime)?).*/\1/')
+# S350 verifier F1: added `(-S[0-9]+)?` after `S[0-9]+` for compound-header support.
+# Capture group renumber: phase now \2 (was \1) because compound-session is new \1.
+LATEST_PHASE=$(echo "$LATEST_HEADER" | sed -E 's/^## S[0-9]+(-S[0-9]+)?[a-z]?[[:space:]]+—[[:space:]]+Phase[[:space:]]+([0-9]+(\.[0-9]+)?|[A-Z](-prime)?).*/\2/')
 
 # === D4: Letter-phase → numeric mapping (Wave 1 A/B/C/D/E/F-prime/G-prime/H-prime → Phase 4).
 # project.md Phase Goals Tracker is numeric; Wave 1 letter phases are sub-decomposition of

@@ -182,24 +182,3 @@
 
 ---
 
-## S343 — Phase D NDH adapter PLAN dispatched (architect background) — 2026-05-16 [SUPERSEDED by S343-S344 row above]
-
-User `continue` after S342 close. Per S342 next-turn options + `stop_offering_routing_branches` + `harness_priority_one` (LOW since all queued anomalies are 1st-instance AP-23 HOLD), main picked option (a) — Phase D continuation NDH adapter PLAN. Pre-dispatch hygiene: removed stale `.charter-violation-detected` fixture at repo root (leftover from S342 verifier V1.5 — M-S342-1 root cause); `.severity-state.tsv` confirmed clean (header-only); `.autonomous-BLOCKED` absent. Pre-dispatch dependency verification: all 6 plan-020 primitives present (CrawlerAdapter ABC 127 LOC + CrawlerRegistry + RateLimiter 169 + RobotsTxtManager 151 + RawHtmlSink 121 + SelectorChain 105 [UNCONSUMED — plan-022 makes NDH adapter its first consumer; closes plan-020 F2 carry-forward + D-066 § Out-of-scope item 12]) + ADR D-066 312 LOC + crawler-reliability skill 102 LOC + cafef_adapter.py 238 LOC (Strategy B reference for comparison only).
-
-**S343 sandwich-architect** dispatched (`af2939216b11c8554`, background Opus PLAN, ~50-80K budget). Brief: Phase D continuation; FIRST greenfield Strategy A adapter per plan-020 § E matrix line 352; NDH URL TBD between `ndh.vn` and `nhipsongdoanhnghiep.vn` (STEP 0 VBW verifies live). Required plan structure per architect prompt: STEP 0 BLOCKING live verification (URL + robots.txt + ToS + 1 sample article HTML) + DD-1..DD-10 (adapter name, package path, Strategy A, SelectorChain[T] shape, rate-limit profile 2.0s, robots integration, RawHtmlSink usage, UA string, error handling, test fixture strategy) + D1..D5 sub-tracks (adapter impl + parser + tests + registry-wire-CLI-smoke + ADR D-066 amendment OR new D-067) + DoD ≥30 + AQ-1..AQ-10 pre-answered + 5-source-evidence chain + RM1..RM8 (incl. URL-both-404 STOP-AND-ASK, JS-rendered DEFER per I-S34, SelectorChain contract refinement gate, scope-creep STOP-AND-SPLIT, rate-insufficient fallback to 3.0s, protego lazy-import, no-robots.txt = 404 allow-all, fixture HTML licensing). 0 charter / 0 constitution / 0 production code (architect-only). D-060: architect may commit own plan; MUST NOT push.
-
-**Coordination paths (main session avoids during S343 architect + S344 dev windows)**:
-- `agent-workspace/session-plans/pending/022-S343-phase-d-ndh-adapter.md` (architect writes)
-- `agent-workspace/memory/observations/sandwich-architect-S343-ndh-adapter-plan.md` (architect writes)
-- `packages/infrastructure/news/crawler_adapters/ndh_adapter.py` (dev creates)
-- `tests/infrastructure/news/crawler_adapters/test_ndh_adapter.py` (dev creates)
-- `apps/cli/ingest_news_ndh.py` (dev may create)
-- `agent-workspace/memory/decisions/067-*.md` (if architect proposes new ADR OR amends D-066)
-- `agent-workspace/memory/sessions/session-343.md` + `session-344.md`
-
-**SYNC-GRILLING NOT fired** despite SessionStart 14-sessions-elapsed warning — BEHAVIORAL HOLD § (1) suspends cadence per L-S310-1; `full_autonomous_no_supervised` reserves AskUserQuestion for SCOPE/CHARTER tier only.
-
-**Next**: await S343 architect return → main spot-checks plan output → dispatch S344 sandwich-dev (fresh-context Sonnet MULTI_TASK_IMPL or FOCUSED_IMPL per architect's budget recommendation) → S345 sandwich-verifier → close.
-
----
-

@@ -293,9 +293,12 @@ cmd_ack() {
       continue
     fi
 
-    # Archive matched row(s) and remove from queue
+    # Archive matched row(s) and remove from queue.
+    # S351 verifier F1 inline fix: use `${TMP_ACK:-}` in trap to prevent
+    # "unbound variable" stderr noise when trap fires AFTER function scope ends
+    # (local var goes out of scope; set -u flags bare $TMP_ACK in trap body).
     local TMP_ACK="$PENDING_QUEUE.tmp.$$"
-    trap 'rm -f "$TMP_ACK" 2>/dev/null || true' EXIT
+    trap 'rm -f "${TMP_ACK:-}" 2>/dev/null || true' EXIT
     grep '^#' "$PENDING_QUEUE" > "$TMP_ACK" 2>/dev/null || true
     while IFS=$'\t' read -r pending_id block_tier severity artifact_path detected_at escalate_at telegram_pushed archived_at resolve_reason; do
       [ -z "$pending_id" ] && continue
