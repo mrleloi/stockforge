@@ -300,6 +300,14 @@ def test_fetch_and_parse_happy_path() -> None:
     assert result.published_at.year == 2026
     assert result.published_at.month == 5
     assert result.published_at.tzinfo is not None
+    # S358 verifier F1 inline-fix: discriminating UTC+7 assertion per M-S357-1
+    # prevention rule. Without this anchor, a regression reverting _TZ_VN to UTC
+    # would pass year/month/tzinfo-not-None checks silently.
+    from datetime import timedelta
+    assert result.published_at.utcoffset() == timedelta(hours=7), (
+        f"published_at must be UTC+7 (Vietnam local) per M-S357-1; "
+        f"got {result.published_at.utcoffset()}"
+    )
 
 
 def test_fetch_and_parse_returns_none_on_missing_title() -> None:
