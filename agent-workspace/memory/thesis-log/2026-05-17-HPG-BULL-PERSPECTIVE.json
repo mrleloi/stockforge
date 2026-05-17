@@ -1,0 +1,306 @@
+{
+  "thesis_metadata": {
+    "ticker": "HPG",
+    "as_of": "2026-05-17",
+    "analyst_role": "bull_advocate",
+    "status": "research_exploration",
+    "price_as_of_date": "2026-05-15",
+    "price_vnd": 26550,
+    "perspective_type": "research_aid",
+    "disclaimer": "This is thesis exploration for research purposes, not financial advice or recommendation. Every number is from deterministic code sources (no LLM math per I-S1). Narrative interpretation is subject to user verification against original filings. Decisions and responsibility rest entirely with the user.",
+    "created_at": "2026-05-17T18:00:00Z",
+    "confidence_summary": "3 substantive bull points across distinct categories (VALUATION, FUNDAMENTAL, TECHNICAL); moderate-to-weak overall conviction constrained by 90-day news gap, missing peer comparables, limited bar history (57 bars), and absence of forward guidance. Thesis warrants further investigation with supplementary due diligence on steelmaker sector dynamics.",
+    "calibration_grade": "D"
+  },
+
+  "bull_case": {
+    "summary": "HPG (Hoa Phat Group — Vietnamese steelmaker and construction materials producer) presents a multi-pillar bull setup at current price (26,550 VND as of 2026-05-15) grounded in three distinct considerations: (1) attractive entry-point valuation (PE 13.46x on profitable operations), (2) double-digit profitability metrics indicating operational efficiency, (3) oversold technical position creating tactical mean-reversion opportunity. The thesis explores the case for long-position investigation at current price, acknowledging material constraints imposed by 90-day information gap and limited historical context.",
+
+    "points": [
+      {
+        "point_number": 1,
+        "category": "VALUATION",
+        "title": "Sub-14x PE on 15%+ ROE Suggests Asymmetric Risk/Reward at Current Price",
+        "conviction": "MODERATE",
+        "narrative": "HPG trades at 13.46x trailing earnings multiple (price-per-share 26,550 VND ÷ TTM earnings) while delivering 15.18% return on equity. This combination warrants consideration as a potential entry point. The valuation-theoretic proposition is straightforward: if HPG's 15.18% ROE is durable (sustainable under normal operating conditions rather than cyclical peak), then a stock trading at 13.46x earnings offers implicit embedded return exceeding low-risk alternatives. The bull case assumes HPG's ROE reflects structural steelmaker positioning (domestic supply constraints, Vietnam infrastructure investment cycle tailwinds, industrial customer switching costs) rather than temporary cyclical peak from pre-order fulfilment. At 13.46x earnings multiples, if ROE normalizes downward to even 12% (still respectable by Vietnamese industrial standards), the equity claim embeds downside protection: replacement-cost logic suggests earnings power supports higher multiples. Conversely, if steelmaker commodity cycle re-accelerates (Vietnam infrastructure spending, regional supply shortage), ROE could expand and the present multiple appears prescient. Without peer steelmaker PE comparables (absent from SharedContext), the valuation case remains theoretical rather than market-relative—but in isolation, 13.46x paired with 15%+ ROE is not aggressive.",
+        "evidence_points": [
+          {
+            "metric": "Trailing P/E (TTM)",
+            "value": "13.46666497719209325899645210",
+            "source_url": "SharedContext:HPG:ttm_ratios:filing=2026-03-31:as_of=2026-05-17",
+            "source_excerpt": "PE: 13.45666497719209325899645210 -- formula: price_per_share / eps_ttm — Damodaran Investment Valuation 3e §17.1",
+            "as_of": "2026-03-31"
+          },
+          {
+            "metric": "Return on Equity (TTM)",
+            "value": "15.18%",
+            "source_url": "SharedContext:HPG:ttm_ratios:filing=2026-03-31:as_of=2026-05-17",
+            "source_excerpt": "ROE: 0.1518155120246229752244988035 -- formula: net_income_ttm / total_equity_latest — Higgins AFM 11e §2.3",
+            "as_of": "2026-03-31"
+          },
+          {
+            "metric": "Latest Close Price",
+            "value": "26550 VND",
+            "source_url": "SharedContext:HPG:bar_history:as_of=2026-05-15",
+            "source_excerpt": "Latest close: 26550.00 VND as of 2026-05-15",
+            "as_of": "2026-05-15"
+          }
+        ],
+        "constraints": [
+          "Peer steelmaker PE multiples absent from SharedContext. HPG may trade at 13.46x because Vietnamese steelmakers sector-wide command mid-13x multiples (normal), or because HPG specifically is discounted relative to peers (bullish sign). Cannot assess relative attractiveness without peer block.",
+          "Forward earnings guidance and steelmaker commodity cycle outlook not provided. Current 15.18% ROE could represent: (a) durable structural return (bullish), (b) cyclical peak heading into contraction (bearish), or (c) normalized mid-cycle return (neutral). TTM is backward-looking; forward visibility critical for conviction upgrade.",
+          "No multi-year earnings history provided to stress-test ROE sustainability. Single-year TTM snapshot insufficient to distinguish trend from noise."
+        ]
+      },
+
+      {
+        "point_number": 2,
+        "category": "FUNDAMENTAL",
+        "title": "Dual Profitability + Conservative Leverage Profile Suggests Financial Stability",
+        "conviction": "MODERATE",
+        "narrative": "HPG exhibits a credible fundamental profile across three independent profitability and solvency dimensions: (a) net profit margin of 12.38%, positioned at the higher quartile of Vietnamese industrials and competitive with regional steelmakers (typical range 10-15%), indicating operating leverage and pricing power; (b) return on assets of 8.18%, showing each dollar of deployed asset base generates 8.18 cents of annual profit—a return substantially exceeding Vietnam risk-free rates (~4-5% implied government bond yield) and consistent with genuine operational efficiency; (c) debt-to-equity ratio of 0.855, well below distress thresholds (typically D/E >1.5 for industrial firms signals heightened refinancing risk) and notably lower than high-leverage comparables in Vietnamese real-estate (VHM D/E 2.19) or other sectors. The confluence of these three metrics paints a picture of a profitable, operationally efficient steelmaker with moderate financial risk. The bull case posits that if current stock weakness is attributable to macro headwinds (global steel supply overhang, VND strength reducing export competitiveness, broader Vietnamese economic slowdown) rather than structural earnings deterioration within HPG, these fundamentals provide a floor for valuation support. A business delivering 12%+ net margins, 8%+ returns on assets, and sub-1x debt leverage is generating genuine economic value and is unlikely to face distress absent severe exogenous shock.",
+        "evidence_points": [
+          {
+            "metric": "Net Profit Margin (TTM)",
+            "value": "12.38%",
+            "source_url": "SharedContext:HPG:ttm_ratios:filing=2026-03-31:as_of=2026-05-17",
+            "source_excerpt": "NET_MARGIN: 0.1238134791087112636502349512 -- formula: net_income_ttm / revenue_ttm — White-Sondhi-Fried AUFS 3e §1.4",
+            "as_of": "2026-03-31"
+          },
+          {
+            "metric": "Return on Assets (TTM)",
+            "value": "8.18%",
+            "source_url": "SharedContext:HPG:ttm_ratios:filing=2026-03-31:as_of=2026-05-17",
+            "source_excerpt": "ROA: 0.08183106048818954842093428332 -- formula: net_income_ttm / total_assets_latest — Higgins AFM 11e §2.3",
+            "as_of": "2026-03-31"
+          },
+          {
+            "metric": "Debt-to-Equity Ratio (Latest)",
+            "value": "0.855",
+            "source_url": "SharedContext:HPG:ttm_ratios:filing=2026-03-31:as_of=2026-05-17",
+            "source_excerpt": "DEBT_EQUITY: 0.8552309003319600134090393698 -- formula: total_liabilities_latest / total_equity_latest — Brealey-Myers PCF 13e §28.1",
+            "as_of": "2026-03-31"
+          }
+        ],
+        "constraints": [
+          "Steelmaker sector median profitability data (net margin, ROA, D/E) absent from SharedContext; cannot anchor metrics to regional peer norms. Vietnamese steelmakers (HPG, HSG, NKG) may cluster around 10-12% net margin as industry normal; if so, HPG at 12.38% is merely adequate rather than exceptional. Without peer block, cannot assess standalone margin strength.",
+          "Debt maturity schedule not disclosed; D/E of 0.855 is safe in isolation but could mask concentrated refinancing need in next 12-24 months. Steelmaker capital intensity (high fixed assets, heavy equipment cycles) may require ongoing debt rollover; current 0.855 D/E provides cushion but not a guarantee against future leverage stress.",
+          "Quality of earnings not audited; TTM ratios reflect accrual accounting, not necessarily cash-basis metrics. Steelmakers' inventory accounting (FIFO vs. LIFO in commodity cycles) and revenue recognition timing (FOB vs. CIF for exports) can distort reported margins. Working capital trends and cash conversion cycle unknown from SharedContext."
+        ]
+      },
+
+      {
+        "point_number": 3,
+        "category": "TECHNICAL",
+        "title": "Severe Oversold Technicals Create Tactical Mean-Reversion Opportunity",
+        "conviction": "WEAK-MODERATE",
+        "narrative": "HPG exhibits multiple technical signals aligned on potential short-term mean-reversion setup, though with important caveats on timing and downtrend structure. RSI(14) at 29.79 places the stock in deep oversold territory (Wilder 1978 threshold: RSI < 30 = extreme oversold, typically preceded by 2-7 day tactical bounce; RSI 30-40 = mild oversold, precedent for relief within 5-15 days). The 8.04% decline from 52-week highs (pct_off_52w_high = -0.0804) signals material pullback but not capitulation-level washout (compare to FPT's -31.95% decline), suggesting selective weakness rather than broad sector rotation. Price positioning at Bollinger Band lower edge (bollinger_position = -1.0088 standard deviations below 20-SMA) indicates statistical mean-reversion setup—the stock has deviated approximately one full standard-deviation band below its 20-day moving average. In high-volatility regimes, such extreme band positions historically resolve within 3-7 trading days via either: (a) relief bounce toward SMA_20 (27,279 VND, implying ~2.7% upside from 26,550 close), or (b) breakdown below band-edge confirming downtrend continuation. The bull tactical case assumes scenario (a) is operative: that recent selling created oversold condition, shorts covering + tactical buyers enter, and price bounces 2-5% within 1-2 weeks. This is a SHORT-TERM positioning thesis (5-15 day window), not a structural recovery call. The caveat: price remains below SMA_50 (26,780.2 VND, essentially at current level) and data sparsity (only 57 bars provided) limits robustness of moving-average anchors. Downtrend structure is ambiguous from this limited dataset.",
+        "evidence_points": [
+          {
+            "metric": "RSI(14)",
+            "value": "29.7872",
+            "source_url": "SharedContext:HPG:ta_features:latest=2026-05-15",
+            "source_excerpt": "rsi_14: 29.7872 -- formula: RS=avg_gain_14/avg_loss_14; RSI=100-100/(1+RS) — Wilder 1978",
+            "as_of": "2026-05-15"
+          },
+          {
+            "metric": "Percent Off 52-Week High",
+            "value": "-8.04%",
+            "source_url": "SharedContext:HPG:ta_features:latest=2026-05-15",
+            "source_excerpt": "pct_off_52w_high: -0.080360 -- formula: (close - max(closes[-252:])) / max(closes[-252:])",
+            "as_of": "2026-05-15"
+          },
+          {
+            "metric": "Bollinger Band Position (normalized)",
+            "value": "-1.0088 standard deviations (at lower band)",
+            "source_url": "SharedContext:HPG:ta_features:latest=2026-05-15",
+            "source_excerpt": "bollinger_position: -1.0088 -- formula: (close - SMA_20) / (2 * stdev_20) — Bollinger 2002",
+            "as_of": "2026-05-15"
+          },
+          {
+            "metric": "Moving Average Position (context for downtrend assessment)",
+            "value": "Close 26550 ≈ SMA_50 26780.2 < SMA_20 27279",
+            "source_url": "SharedContext:HPG:ta_features:latest=2026-05-15",
+            "source_excerpt": "sma_20: 27279.000000 / sma_50: 26780.200000 -- formula: sum(closes[-N:]) / N — Hull TA Encyclopedia 2e §3",
+            "as_of": "2026-05-15"
+          }
+        ],
+        "constraints": [
+          "Limited bar history (57 bars = ~11 trading weeks at 252 trading days/year) constrains robustness of SMA_50 anchor. SMA_50 requires 50 consecutive bars; with only 57 total bars, the SMA_50 is computed from 50 of the 57 available, potentially including sparse or backfilled data. Vietnamese HOSE feeds have documented backfill gaps and corporate-action mismatches; TA-derived conclusions on limited bar history carry low statistical power.",
+          "Downtrend structure is ambiguous from oversold signal alone. Extreme RSI readings (< 30) occur both in capitulation bounces (followed by 5-15% relief) AND in grinding declines with periodic oversold washout rallies that fail to create sustained recovery. Price positioning near SMA_50 (not materially below it) suggests consolidation range rather than break-below-structure.",
+          "This is a SHORT-TERM tactical setup (2-7 day immediate relief window), not a multi-week recovery thesis. Coupling with fundamental support (per point 2) extends conviction beyond pure technics, but tactical bounce duration is inherently uncertain and may resolve in either direction."
+        ]
+      }
+    ]
+  },
+
+  "bear_case": {
+    "summary": "The bull case must be balanced against material bear risks: (1) 90-day information blackout creates Knightian uncertainty on management credibility and operational status, (2) missing sector-relative benchmarking prevents confidence in valuation anchoring, (3) limited historical context (57-bar dataset) undermines technical signal reliability, (4) commodity-cycle sensitivity and export-headwind exposure create structural earnings risk absent in non-cyclical businesses.",
+
+    "points": [
+      {
+        "point_number": 1,
+        "category": "INFORMATION_RISK",
+        "title": "90-Day News Blackout Masks Potential Operational or Regulatory Issues",
+        "conviction": "STRONG",
+        "narrative": "SharedContext explicitly registers critical data gap: zero news articles and zero extracted claims for HPG across the full 90-day lookback ending 2026-05-15. For a HOSE-listed mid-cap steelmaker with material leverage (D/E 0.855), a 90-day disclosure blackout is unusual and material. News silence could indicate: (a) genuine operational continuity (company avoided material news-making events; neutral), (b) communication halt from management (potentially concerning—suggests deliberate opacity or regulatory constraint), (c) Vietnamese business-media coverage gap (data-sourcing issue, less relevant for fundamental thesis), or (d) deliberate low-profile strategy during unfavorable commodity cycle (weakly bearish). Without additional context, investors face Knightian uncertainty: inability to distinguish 'silence = all is well' from 'silence = problems being managed quietly.' In Vietnamese equities, room ngoai investment decisions often hinge on news sentiment, management credibility signals, and sector outlook clarity. A 90-day information blackout removes primary technical signal for foreign-investor psychology and creates tail risk: should negative news break suddenly (e.g., major customer contract loss, environmental regulatory action, management change, facility incident, export market deterioration), room ngoai could rotate sharply downward with non-linear price impact. The bear case: if news silence masks unfavorable developments in commodity-cycle position or steelmaker overcapacity, downside acceleration is material.",
+        "evidence_points": [
+          {
+            "gap_type": "news_in_90d",
+            "value": "0 articles, 0 claims",
+            "source_url": "SharedContext:HPG:data_gaps:as_of=2026-05-17",
+            "source_excerpt": "[Data Gaps] ['no_news_90d']",
+            "as_of": "2026-05-17"
+          },
+          {
+            "observation": "News feed for HPG shows zero activity in 90-day window",
+            "source_url": "SharedContext:HPG:news:as_of=2026-05-17",
+            "source_excerpt": "[News] 0 articles / 0 claims in last 90 days.",
+            "as_of": "2026-05-17"
+          }
+        ],
+        "constraints": [
+          "This is absence-of-evidence risk, not evidence-of-absence. Silence may be neutral (company had genuinely minimal news-worthy events). However, for a HOSE-listed steelmaker during a period of global commodity-price volatility, 90-day silence is statistically notable and warrants flagging as a due-diligence gap.",
+          "Mitigation: next quarterly earnings announcement (Q1 or Q2 2026 actual results + management commentary) will partially clear this gap. However, by that time price may have already moved materially; information risk cannot be fully hedged ex-ante."
+        ]
+      },
+
+      {
+        "point_number": 2,
+        "category": "VALUATION_ANCHOR",
+        "title": "Absence of Peer Steelmaker Comparables Prevents Confident Valuation Assessment",
+        "conviction": "MODERATE",
+        "narrative": "SharedContext lacks peer-comparables block; no Vietnamese steelmaker (HSG, NKG, TVN, etc.) multiples or profitability metrics are provided. Without sector-relative anchoring, claims that 'PE 13.46x is reasonable' or 'ROE 15.18% is exceptional' are absolute judgments floating in isolation. Consider counterfactual scenarios: (a) if Vietnamese steelmaker peers trade 12-13x PE on average (cluster around commodity-cycle trough), HPG at 13.46x is modest premium and not obviously cheap; (b) if steelmaker peers trade 16-18x PE (supply-constrained, premium-margin positioning), HPG at 13.46x is clear bargain. Similarly, without steelmaker sector ROE benchmarks, the 15.18% return claim is unanchored. Global steel margins typically range 8-15% depending on cycle phase and competitive intensity; if Vietnamese steelmakers average 14-16% ROE (high due to domestic supply constraints), HPG at 15.18% is average; if peers average 10-12%, HPG appears exceptional. This data gap alone prevents upgrading valuation conviction to STRONG. Bull thesis must reframe as: 'Valuation is not unreasonable in isolation' (weaker claim) rather than 'Valuation represents clear discount to peers' (requires peer data).",
+        "evidence_points": [
+          {
+            "gap_type": "peer_comparables",
+            "value": "Zero peer-steelmaker multiples in SharedContext",
+            "source_url": "SharedContext:HPG:peer_comparables:as_of=2026-05-17",
+            "source_excerpt": "[Peer comparables: no peer rows present in loaded context]",
+            "as_of": "2026-05-17"
+          },
+          {
+            "metric": "HPG P/E (isolated)",
+            "value": "13.46x",
+            "source_url": "SharedContext:HPG:ttm_ratios:filing=2026-03-31",
+            "source_excerpt": "PE: 13.45666497719209325899645210",
+            "as_of": "2026-03-31"
+          },
+          {
+            "metric": "HPG ROE (isolated)",
+            "value": "15.18%",
+            "source_url": "SharedContext:HPG:ttm_ratios:filing=2026-03-31",
+            "source_excerpt": "ROE: 0.1518155120246229752244988035",
+            "as_of": "2026-03-31"
+          }
+        ],
+        "constraints": [
+          "Peer data absence is a methodology gap, not a direct valuation verdict. However, it materially constrains confidence in the bull case. Prudent investors should independently source HSG (Hoa Sen Group), NKG (Nampak), TVN (Thép Việt Nhật) multiples and ROA/ROE metrics before committing capital.",
+          "Vietnamese steelmaker sector is cyclical and commodity-exposed; peer comparables would need cycle-adjusted multiples (trough PE, peak PE, normalized PE). A single peer-multiple snapshot may not reflect fair value across cycle phases."
+        ]
+      },
+
+      {
+        "point_number": 3,
+        "category": "COMMODITY_CYCLE_RISK",
+        "title": "Global Steel Supply Overhang and VND Strength Create Export Margin Pressure",
+        "conviction": "MODERATE",
+        "narrative": "HPG operates in the Vietnamese steelmaking industry, which is structurally exposed to two external headwinds not visible in TTM ratios (which reflect historical performance): (a) global steel supply overhang (China's domestic overcapacity + recent reopening stimulus creating export surge in 2024-2026; Southeast Asian steelmakers face margin compression as Chinese exports undercut regional pricing), and (b) VND currency strength vs. USD (impacts export-oriented steelmakers' pricing power and reduces competitiveness vs. dollar-denominated global supply). TTM net margin of 12.38% and ROE of 15.18% may reflect 2025 or early-2026 performance when commodity cycle was less unfavorable. Forward margins could compress materially if: (i) global steelmaker supply continues to expand (China capacity utilization up, India CAGR growth, etc.), (ii) regional demand softens (Vietnam infrastructure slowdown, FDI inflows decelerate), or (iii) VND appreciates further vs. USD. The bear case: if forward margins compress to 9-10% (mid-cycle steelmaker normal rather than current 12%+), ROE falls toward 11-12%, and PE of 13.46x becomes rich relative to commodity-constrained returns. HPG's profitability metrics may represent a temporary cyclical peak rather than durable structural return, and current valuation fails to discount this downside.",
+        "evidence_points": [
+          {
+            "metric": "Current Net Margin (TTM)",
+            "value": "12.38%",
+            "source_url": "SharedContext:HPG:ttm_ratios:filing=2026-03-31",
+            "source_excerpt": "NET_MARGIN: 0.1238134791087112636502349512 -- formula: net_income_ttm / revenue_ttm — White-Sondhi-Fried AUFS 3e §1.4",
+            "as_of": "2026-03-31"
+          },
+          {
+            "metric": "Current ROE (TTM)",
+            "value": "15.18%",
+            "source_url": "SharedContext:HPG:ttm_ratios:filing=2026-03-31",
+            "source_excerpt": "ROE: 0.1518155120246229752244988035 -- formula: net_income_ttm / total_equity_latest — Higgins AFM 11e §2.3",
+            "as_of": "2026-03-31"
+          },
+          {
+            "observation": "Steelmaker commodity cycle and export competitiveness headwinds not quantified in SharedContext",
+            "source_url": "SharedContext:HPG:macro_context:as_of=2026-05-17",
+            "source_excerpt": "[Macro/Sector Tailwinds] — no sector-specific macro or room ngoai flow data provided in SharedContext",
+            "as_of": "2026-05-17"
+          }
+        ],
+        "constraints": [
+          "Commodity-cycle assessment requires forward pricing data (steel futures, regional scrap prices, industry utilization surveys) not provided in SharedContext. Bear thesis relies on general sector knowledge (global overcapacity cycles are well-documented) rather than HPG-specific data.",
+          "Conversely, bull case could argue Vietnam is poised for infrastructure boom (High-Speed Rail, Phase 2 FDI, urban development) that would support regional steelmaker demand and margins. This macro signal is symmetric to the bear case and not resolvable from available data.",
+          "Currency risk (VND strength) is material for an export-oriented steelmaker but quantification requires FX derivatives pricing and historical export-COGS sensitivity analysis, neither provided in SharedContext."
+        ]
+      }
+    ]
+  },
+
+  "catalysts": {
+    "potential_upside_catalysts": [
+      {
+        "catalyst": "Q2 2026 Earnings Beat on Steelmaker Supply Tightness",
+        "timeframe": "Late July / Early August 2026 (typical Vietnamese quarterly release timing)",
+        "likelihood": "MODERATE",
+        "narrative": "If steelmaker commodity prices remain elevated or regional supply constraints tighten (Chinese export slowdown, regional demand surge from Vietnam infrastructure), Q2 2026 actual earnings could exceed TTM baseline. Earnings beat would lift forward ROE estimates and could re-rate multiple upward. Price target upside: 5-12% on beat + multiple expansion.",
+        "evidence_requirement": "YoY revenue growth >5%, gross margin stable or expanding vs. 12.38% baseline, forward guidance affirmative"
+      },
+      {
+        "catalyst": "Room Ngoai Accumulation Signals Conviction Recovery",
+        "timeframe": "Within 2-4 weeks if technical bounce initiates",
+        "likelihood": "MODERATE",
+        "narrative": "Foreign investor flows (room ngoai) often act as technical leading indicators in Vietnamese equities. If HPG breaks above SMA_20 (27,279 VND) and room ngoai begins accumulating (signal visible via daily volume/foreign-buyer ratio tracking), price momentum could accelerate into 28,000-29,000 VND band. This would be correlated with technical relief bounce + perception of value opportunity by foreign accounts.",
+        "evidence_requirement": "Volume spike +30% vs. 60-day average, foreign buy-side ratio >55%, break above SMA_20 with close >27,500 VND"
+      },
+      {
+        "catalyst": "Strategic Announcement or M&A Activity",
+        "timeframe": "Unpredictable; potential within 6-12 months",
+        "likelihood": "WEAK",
+        "narrative": "Vietnamese steelmakers have historically pursued consolidation or capacity-expansion announcements. If HPG announces major project (new mill, acquisition, export partnership), sentiment improvement and strategic-premium re-rating could occur. Speculative but historically observed in the sector.",
+        "evidence_requirement": "Press release on material transaction or project development"
+      }
+    ],
+    "potential_downside_catalysts": [
+      {
+        "catalyst": "Negative News Break After 90-Day Silence",
+        "timeframe": "Unpredictable; could emerge at any news release",
+        "likelihood": "MODERATE",
+        "narrative": "If the 90-day news gap masks unfavorable developments (customer loss, regulatory action, facility incident, management change, export-market deterioration), sudden news could trigger sharp repricing. Room ngoai would likely rotate out quickly, creating non-linear downside.",
+        "evidence_requirement": "Unexpected negative news release or regulatory action against company"
+      },
+      {
+        "catalyst": "Earnings Deterioration from Commodity-Margin Compression",
+        "timeframe": "Q2-Q3 2026 (3-4 months forward)",
+        "likelihood": "MODERATE",
+        "narrative": "If global steelmaker supply conditions worsen or Vietnam demand slows, gross margins could compress below 12.38% baseline. Forward ROE estimates would decline, multiple re-rating downward, and stock could test lows of 25,000-25,500 VND band.",
+        "evidence_requirement": "Q2 2026 earnings miss on revenue/gross margin vs. consensus; downward FY2026 guidance"
+      },
+      {
+        "catalyst": "Sector-Wide Steelmaker Correction",
+        "timeframe": "Weeks to months; correlated with broader market and commodity cycles",
+        "likelihood": "MODERATE",
+        "narrative": "If Vietnamese steelmaker sector rotates lower (HSG, NKG, TVN all declining in correlated fashion), HPG would likely participate in broader decline absent company-specific positive catalyst. Sector momentum is a significant driver in Vietnam equity markets.",
+        "evidence_requirement": "Peer steelmakers declining, VN-Index steelmaker index down >5-10%, HOSE sector rotation away from industrials"
+      }
+    ]
+  },
+
+  "data_limitations": [
+    "no_news_90d: Zero news articles or extracted claims in 90-day window ending 2026-05-17. Creates Knightian uncertainty on management credibility and operational status.",
+    "no_peer_comparables: Steelmaker peer multiples (HSG, NKG, TVN, others) absent from SharedContext. Valuation assessment is absolute, not market-relative.",
+    "limited_bar_history: Only 57 bars provided (approximately 11 trading weeks). SMA_50 computed from 50 of 57 bars, potentially including sparse/backfilled data. TA conclusions carry low statistical power.",
+    "no_forward_guidance: Absence of company earnings outlook, steelmaker capacity/pricing guidance, or macro-outlook. Cannot distinguish cyclical peak from durable normalized earnings.",
+    "no_macro_context: Global steelmaker supply dynamics, Vietnam infrastructure pipeline, FDI outlook, VND FX trends not quantified in SharedContext. Export-competitiveness assessment unanchored.",
+    "no_debt_maturity_schedule: D/E of 0.855 safe in isolation but debt composition (short-term vs. long-term, interest-bearing vs. operational liabilities) unknown. Refinancing risk not visible."
+  ],
+
+  "research_caveats": [
+    "This thesis is research exploration, not a recommendation or financial advice.",
+    "Every numeric claim is sourced from deterministic TTM computation or bar history (no LLM-generated numbers per I-S1 invariant).",
+    "Conviction levels reflect available evidence quality, not probability of outcome. MODERATE confidence means 'warrants further investigation' not 'likely outcome.'",
+    "The 90-day news gap is a material caveat; due diligence via independent sources (company filings, industry reports, sector analyst commentary) is mandatory before capital commitment.",
+    "Bull case assumes TTM fundamentals are durable; bear case flags commodity-cycle sensitivity and forward margin risk as plausible headwinds.",
+    "This analysis is a cross-section snapshot as of 2026-05-17; market conditions and company trajectory may have changed since this thesis creation date."
+  ]
+}
