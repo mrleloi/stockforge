@@ -3,7 +3,8 @@ type: STOP-FINDING
 session: S394
 created_at: 2026-05-17T00:00:00Z
 trigger: RM3-gold-set-sourcing-network-blocked
-severity: IMPLEMENTATION-BLOCKER
+severity: HIGH
+severity_note: "Normalized from IMPLEMENTATION-BLOCKER to HIGH per S397 verifier F4 + L-S397-2 promotion candidate; operational-blocker not charter-tier."
 requires_human_decision: true
 k2a_status: NOT-FIRED (K.2.a Trigger B cannot be evaluated without real PDFs)
 ---

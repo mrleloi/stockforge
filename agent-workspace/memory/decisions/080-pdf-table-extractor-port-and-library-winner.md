@@ -1,10 +1,13 @@
 ---
 id: D-080
 title: "PdfTableExtractorPort ABC contract + G.1 empirical library bake-off winner"
-status: PROPOSED
+status: ACCEPTED
 severity: MEDIUM
 date: 2026-05-17
 session: S394
+proposed_at: 2026-05-17T13:30:00Z
+accepted_at: 2026-05-17T15:35:00Z
+acceptance_basis: "S397 sandwich-verifier PASS / merge-eligible verdict (agent ac54d2608aedad015; 0 CRITICAL / 4 IMPORTANT / 3 MINOR); IMPL-tier auto-ratifies per severity-schema. Winner field remains PENDING-real-pdf-required per RM3 STOP-FINDING-S394."
 authored_by: sandwich-dev (IMPL-tier; S394 plan-041 D5)
 plan: agent-workspace/session-plans/pending/041-S392-phase-gprime-g1-pdf-library-bakeoff-and-port-abc.md
 supersedes: NONE

@@ -18,6 +18,17 @@
 
 ---
 
+### M-S397-1
+**Date**: 2026-05-17
+**Session**: S397 (caught by main on close-bundling)
+**Severity**: low
+**What happened**: Sandwich-verifier (agent `ac54d2608aedad015`, dispatched S395-close turn) returned full V1-V10 report + PASS verdict via task-notification result text but did NOT execute `Write` to `agent-workspace/memory/observations/sandwich-verifier-S397-plan-041-g1-verify.md` (per dispatch brief step 7) OR `agent-workspace/memory/sessions/2026-05-17-session-397.md` (per dispatch brief step 9). Verifier's own self-attestation in result text said "Verifier-side: clean session — no verifier mistakes" — but the missing observation+session files ARE the mistakes (file-write step skipped). Detected by main session via `ls agent-workspace/memory/observations/*S397*` returning No-such-file-or-directory. Resolved inline this turn: main session persisted both files to disk from the task-notification result text (verbatim content preservation; no main-session synthesis or re-articulation; AP-1 audit-trail integrity preserved because the source content IS the verifier's words from its own context).
+**Root cause**: Sandwich-verifier persona's internal close-loop discipline did not include file-existence verification before composing return summary. The verifier composed an excellent report inline but treated "I have written this report" as equivalent to "the file exists on disk" — bash-Write conflation. Pattern class: "agent-self-attestation-vs-empirical-state divergence" — same family as M-S388-2 (DC-IMPL-20 self-attestation contradiction) + M-S388-1 (dev self-dogfood STEP 5.4 violation).
+**Prevention rule L-S397-3** (1st instance LOW; AP-23 HELD-FOR-PROMOTION on 2nd recurrence within 5 sessions): main-session sandwich-* dispatch briefs MUST include a close-loop step "verify observation+session-log files exist on disk via Read before composing return summary"; OR add deterministic post-verifier-return file-existence check in main session that auto-persists from task-notification result text if missing (which is what was done this turn — promote that to a reusable helper). Carry-forward: at next sandwich-* (verifier or dev) skip-write recurrence, promote to either (a) close-loop step in template OR (b) auto-persist hook in main session post-Agent-return code-path.
+**Where applied**: Inline-this-turn: main session wrote both files from task-notification result text + ADR D-080 status flip PROPOSED → ACCEPTED + attestation-log row appended + STOP-FINDING-S394 severity vocab normalization F4 fix + this mistake-log entry + commit. Severity LOW: no production impact; content fully preserved verbatim from verifier's own output; audit trail intact; pattern documented for promotion-on-recurrence per AP-23.
+
+---
+
 ### M-S395-1 (compound)
 **Date**: 2026-05-17
 **Session**: S395
