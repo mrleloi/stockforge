@@ -18,6 +18,22 @@
 
 ---
 
+### M-S408-NONE + M-S407-1 + M-S407-2 (Phase G-prime ROADMAP CLOSE)
+**Date**: 2026-05-17
+**Session**: S408 (verifier; caught dev-side mistakes from S407)
+**Severity**: medium (compound)
+**What happened**: S408 sandwich-verifier (`a6a53e1826fb7a16b`, ~2min Opus VERIFY) returned VERDICT: PASS-WITH-CONCERNS / merge-eligible for plan-044 G.4 IMPL. **3 IMPORTANT findings surfaced 2 dev-side mistakes from S407**:
+
+**M-S407-1 MEDIUM (L-S389-1 2nd-instance — TRIGGERS PROMOTE-NOW per AP-23)**: S407 dev cited LOC integers in observation that did NOT match `wc -l` actuals. Dev cited 58/191/280/215 for `_vnd_money_parser.py`/`_pdf_cell_mapper.py`/`ingest_pdf_fundamentals.py`/`test_ingest_pdf_fundamentals_smoke.py`; actuals were 64/190/431/365. 4 of 6 LOC citations wrong (only thesis-log 136 + ADR 185 correct). Most extreme: ingest_pdf_fundamentals.py +54% over dev's claim (280 vs 431); tests file +70% over (215 vs 365). Main session inline-persisted incorrect LOC into commit message + project tracking (per M-S397-1 inline-pattern; cascading damage). **Root cause**: dev composed observation from memory + cited approximate/round-number LOC instead of running `wc -l` per L-S389-1 close-loop discipline. dogfood-the-promotion.sh hook (shipped same sweep at S403) did NOT trigger because pattern doesn't match: hook scans for "STEP X.Y promoted" + "~[0-9]" co-occurrence; this drift is wrong-integers (not ~prefix). **Prevention rule PC-1 (PROMOTE-NOW per S408 verifier)**: dedicated `dev-close-loop-loc-attestor.sh` hook mirroring dogfood-the-promotion pattern — scans dev observation file:line cites against `wc -l` empirical; emits WARN on mismatch >5%. Queue for harness sweep N+3 architect.
+
+**M-S407-2 LOW (L-S397-1 ceiling breach undeclared)**: Plan-044 § G.1 ceilings core ≤500/tests ≤200/total ≤1050. S407 actuals: core=688 (+38% over), tests=367 (+84% over), total=1376 (+31% over). Dev cited "1067 within 1050; 17 LOC overage" — actual is +326 (19x larger than claimed). Karpathy P3 surgical discipline at risk; verifier rec: accept overage with ADR amendment OR trim defensive code. Promote candidate PC-3 for per-category LOC ceiling calibration for integration-test sub-plans (1st-instance HOLD; current 200 LOC too tight for integration tests with helpers + docstrings; consider 400-500 ceiling at 2nd-instance recurrence).
+
+**M-S408-NONE**: clean verify session per D4.A persona override compliance (no .md files written by verifier; main inline-persisted per M-S397-1 canonical pattern; META-TEST PASS at 2nd application of D4.A discipline at scale).
+
+**Phase G-prime ROADMAP status**: 3/4 sub-plans SHIPPED+VERIFIED (G.1+G.3+G.4 ACCEPTED via D-080+D-082+D-083); G.2 (042) BLOCKED on RM3 PDF user-provision carry-forward. ADR D-083 status flip PROPOSED-AT-IMPL → ACCEPTED per IMPL-tier auto-ratify (severity LOW; verifier PASS-WITH-CONCERNS acceptable per parent plan-040 § DD-8).
+
+**Promotion queue post-S408**: PC-1 (PROMOTE-NOW per L-S389-1 2nd-instance) + PC-2 plan-template STEP 0.x semantics (HOLD 1st-instance) + PC-3 LOC ceiling calibration (HOLD 1st-instance) + carryover PCG-V404-1 pytest scope (HOLD) + L-S405-1 architect output cap (HOLD; M-S406 NONE shows prevention worked) = 5 active candidates. Under 8 HARD-BLOCK; harness sweep N+3 architect dispatch eligible when scheduled.
+
 ### M-S406-NONE
 **Date**: 2026-05-17
 **Session**: S406

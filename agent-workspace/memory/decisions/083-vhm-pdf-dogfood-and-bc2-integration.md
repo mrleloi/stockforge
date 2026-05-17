@@ -1,10 +1,13 @@
 ---
 id: D-083
 title: "VHM PDF Dogfood + BC-2 SqliteFundamentalRepository Integration (Phase G.4)"
-status: PROPOSED-AT-IMPL
+status: ACCEPTED
 severity: LOW
 date: 2026-05-17
 phase: G-prime
+proposed_at: 2026-05-17T22:00:00+07:00
+accepted_at: 2026-05-17T23:55:00+07:00
+acceptance_basis: "S408 sandwich-verifier PASS-WITH-CONCERNS / merge-eligible (agent a6a53e1826fb7a16b; 0 CRITICAL / 3 IMPORTANT / 5 MINOR; concerns are process-discipline not architecture); IMPL-tier auto-ratifies per parent plan-040 § DD-8 + severity-schema. pytest 1185/1 EXACT match + mypy --strict + ruff CLEAN + ZERO import anthropic empirically verified. K.2.c NOT-FIRED confirmed (ADDITIVE-ONLY-DEFAULT preserved; ZERO schema mods to financial_statement.py + sqlite_fundamental_repository.py)."
 sub_track: "G.4 — VHM annual-report dogfood + BC-2 integration smoke"
 session: S407
 authored_by: "sandwich-dev S407 (Claude Opus 4.7; MULTI_TASK_IMPL; plan-044 IMPL)"

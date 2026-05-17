@@ -31,3 +31,4 @@ ts	dispatch_id	observation_passed	empirical_passed	divergence	verdict
 2026-05-17T12:26:39Z	sandwich-verifier-S400-plan-043-g3-verify	NA	NA	NA	PASS
 2026-05-17T19:35:00Z	sandwich-verifier-S401-plan-045-data-corpus-verify	NA	NA	NA	PASS
 2026-05-17T22:25:00+07:00	sandwich-verifier-S404-plan-046-harness-sweep-N2-verify	NA	NA	NA	PASS
+2026-05-17T23:50:00+07:00	sandwich-verifier-S408-plan-044-g4-verify	NA	NA	NA	PASS-WITH-CONCERNS
