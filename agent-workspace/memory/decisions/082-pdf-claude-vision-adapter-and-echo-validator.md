@@ -1,9 +1,12 @@
 ---
 id: D-082
 title: "PdfTableExtractorPort Claude vision adapter + EchoValidator Rule 16 mode #2 gate"
-status: PROPOSED
+status: ACCEPTED
 severity: MEDIUM
 date: 2026-05-17
+proposed_at: 2026-05-17T19:13:00Z
+accepted_at: 2026-05-17T19:30:00Z
+acceptance_basis: "S400 sandwich-verifier PASS / merge-eligible verdict (agent a18214d3d72b99c53; 0 CRITICAL / 0 IMPORTANT / 3 MINOR); IMPL-tier auto-ratifies per severity-schema. K.2.b NOT-FIRED (Resolution B: @<absolute_path> in user_message enables Claude CLI direct PDF read). pytest 1178/1 + mypy --strict CLEAN + ruff CLEAN + ZERO import anthropic empirically verified."
 phase: G-prime
 sub_track: G.3 ClaudeVisionPdfTableExtractor + EchoValidator
 session: S399 (sandwich-dev FOCUSED_IMPL; plan-043)
