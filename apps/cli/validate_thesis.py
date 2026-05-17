@@ -94,6 +94,13 @@ _DISCLAIMER_MD = (
     help="LLM substrate when --no-mock-llm: 'anthropic' (SDK; needs API key) or "
     "'subagent' (claude CLI subprocess; uses subscription, no key required; S43b)",
 )
+@click.option(
+    "--run-mode",
+    type=click.Choice(["smoke", "dogfood"], case_sensitive=False),
+    default="smoke",
+    show_default=True,
+    help="Provenance mode: smoke (default) or dogfood (adds session metadata to frontmatter; DD-7)",
+)
 def main(
     ticker: str,
     as_of: datetime | None,
@@ -102,6 +109,7 @@ def main(
     max_cost_usd: str,
     mock_llm: bool,
     transport: str,
+    run_mode: str,
 ) -> None:
     """Validate a thesis for TICKER and write markdown to OUTPUT_DIR."""
     _ensure_utf8()
@@ -112,7 +120,8 @@ def main(
 
     click.echo(
         f"[validate_thesis] ticker={ticker_upper} as_of={effective_as_of} "
-        f"mock_llm={mock_llm} transport={transport} db={db} max_cost=${max_cost}"
+        f"mock_llm={mock_llm} transport={transport} run_mode={run_mode} "
+        f"db={db} max_cost=${max_cost}"
     )
 
     from apps._shared.use_case_builder import BuildError, build_use_case  # noqa: PLC0415
@@ -149,7 +158,7 @@ def main(
     # Write thesis to markdown
     output_dir.mkdir(parents=True, exist_ok=True)
     out_path = output_dir / f"{effective_as_of}-{ticker_upper}.md"
-    md = _render_thesis_md(thesis)
+    md = _render_thesis_md(thesis, run_mode=run_mode)
     out_path.write_text(md, encoding="utf-8")
 
     click.echo(f"[validate_thesis] thesis written: {out_path}")
@@ -189,8 +198,16 @@ def main(
 # ---------------------------------------------------------------------------
 
 
-def _render_thesis_md(thesis: object) -> str:  # noqa: PLR0912
-    """Render a Thesis to the thesis-log markdown format per _template.md schema."""
+def _render_thesis_md(thesis: object, *, run_mode: str = "smoke") -> str:  # noqa: PLR0912
+    """Render a Thesis to the thesis-log markdown format per _template.md schema.
+
+    D1 (F.5 plan-038): extended from V0=3 (BEAR/BULL/QUANT) to V0=6 (adds
+    BUFFETT/GRAHAM/TALEB sections). Backward-compat with N=3 thesis preserved
+    (persona sections skipped cleanly if perspective not present).
+
+    D2 (F.5 plan-038): run_mode='dogfood' adds 3 extra frontmatter fields for
+    provenance tracking (DD-7). Default 'smoke' = existing behaviour unchanged.
+    """
     from packages.domain.analysis.models.thesis import Thesis, ThesisStatus  # noqa: PLC0415
 
     assert isinstance(thesis, Thesis)
@@ -215,6 +232,17 @@ def _render_thesis_md(thesis: object) -> str:  # noqa: PLR0912
         f"gaps: {list(thesis.gaps)}",
         "real_thesis: false",
         "disclaimer_present: true",
+    ]
+
+    # D2: dogfood provenance metadata (DD-7; smoke mode = no extra fields)
+    if run_mode.lower() == "dogfood":
+        lines += [
+            "dogfood: true",
+            "dogfood_session: S384",
+            'dogfood_ticker_rationale: "VHM (Vinhomes; VN30 blue chip; per master plan DD-11)"',
+        ]
+
+    lines += [
         "---",
         "",
         f"# {thesis.ticker.symbol} — as of {thesis.as_of.isoformat()}",
@@ -270,6 +298,48 @@ def _render_thesis_md(thesis: object) -> str:  # noqa: PLR0912
         lines.append("")
     else:
         lines.append("_No quant perspective available._\n")
+
+    # V0=6 persona sections (D1 F.5 plan-038): BUFFETT/GRAHAM/TALEB
+    # Additive after BEAR/BULL/QUANT; backward-compat with N=3 thesis (sections
+    # skipped cleanly when perspective not present). Mirrors BEAR section pattern.
+    buffett = _find_persp(thesis, "buffett")
+    lines += ["## Buffett Case (Value · Quality · Moat)", ""]
+    if buffett:
+        for i, pt in enumerate(buffett.key_points, 1):
+            lines.append(
+                f"{i}. **{pt.text}** — source: [{pt.source_url}]({pt.source_url}), "
+                f"as-of: {pt.as_of}, conviction: {pt.conviction}"
+            )
+            lines.append(f"   > {pt.source_excerpt}")
+            lines.append("")
+    else:
+        lines.append("_No Buffett perspective available._\n")
+
+    graham = _find_persp(thesis, "graham")
+    lines += ["## Graham Case (Deep Value · Margin of Safety)", ""]
+    if graham:
+        for i, pt in enumerate(graham.key_points, 1):
+            lines.append(
+                f"{i}. **{pt.text}** — source: [{pt.source_url}]({pt.source_url}), "
+                f"as-of: {pt.as_of}, conviction: {pt.conviction}"
+            )
+            lines.append(f"   > {pt.source_excerpt}")
+            lines.append("")
+    else:
+        lines.append("_No Graham perspective available._\n")
+
+    taleb = _find_persp(thesis, "taleb")
+    lines += ["## Taleb Case (Antifragility · Tail Risk · Convexity)", ""]
+    if taleb:
+        for i, pt in enumerate(taleb.key_points, 1):
+            lines.append(
+                f"{i}. **{pt.text}** — source: [{pt.source_url}]({pt.source_url}), "
+                f"as-of: {pt.as_of}, conviction: {pt.conviction}"
+            )
+            lines.append(f"   > {pt.source_excerpt}")
+            lines.append("")
+    else:
+        lines.append("_No Taleb perspective available._\n")
 
     # Trade-off matrix
     if thesis.synthesis:

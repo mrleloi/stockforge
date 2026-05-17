@@ -508,3 +508,202 @@ def test_t7_no_mock_llm_without_api_key_exits_4(
     assert "ANTHROPIC_API_KEY" in combined_output, (
         f"Expected 'ANTHROPIC_API_KEY' in error output; got:\n{combined_output}"
     )
+
+
+# ---------------------------------------------------------------------------
+# V0=6 Markdown rendering tests (D4 — F.5 plan-038)
+# TC-RENDER-V6-1 through TC-RENDER-V6-8
+# Tests for _render_thesis_md V0=6 extension (BUFFETT/GRAHAM/TALEB sections)
+# and --run-mode dogfood frontmatter (DD-7).
+# ---------------------------------------------------------------------------
+
+
+def _good_buffett() -> PerspectiveAnalysis:
+    return _pa(
+        PerspectiveRole.BUFFETT,
+        (_pt("Moat point", "MOAT"), _pt("ROIC point", "ROIC"), _pt("Valuation margin", "VALUATION")),
+    )
+
+
+def _good_graham() -> PerspectiveAnalysis:
+    return _pa(
+        PerspectiveRole.GRAHAM,
+        (_pt("Net-net asset", "BALANCE_SHEET"), _pt("MoS price", "VALUATION"), _pt("Current ratio", "FUNDAMENTAL")),
+    )
+
+
+def _good_taleb() -> PerspectiveAnalysis:
+    return _pa(
+        PerspectiveRole.TALEB,
+        (_pt("Tail risk", "RISK"), _pt("Antifragility", "MACRO"), _pt("Kurtosis", "RISK")),
+    )
+
+
+def _build_v6_thesis() -> object:
+    """Build a SUBMITTED V0=6 Thesis with all 6 perspectives for render tests."""
+    from datetime import UTC, datetime  # noqa: PLC0415
+
+    from packages.domain.analysis.models.thesis import Thesis, ThesisStatus  # noqa: PLC0415
+    from packages.domain.analysis.value_objects.confidence_level import (
+        ConfidenceLevel,  # noqa: PLC0415
+    )
+    from packages.domain.analysis.value_objects.recommendation import (
+        Recommendation,  # noqa: PLC0415
+    )
+
+    return Thesis(
+        thesis_id="deadbeef" * 8,
+        ticker=__import__("packages.contracts.types", fromlist=["Ticker"]).Ticker("VHM"),
+        as_of=date(2026, 5, 17),
+        created_at=datetime(2026, 5, 17, 12, 0, 0, tzinfo=UTC),
+        status=ThesisStatus.SUBMITTED,
+        perspectives=(
+            _good_bear(),
+            _good_bull(),
+            _good_quant(),
+            _good_buffett(),
+            _good_graham(),
+            _good_taleb(),
+        ),
+        synthesis=_synthesis(),
+        final_recommendation=Recommendation.WATCH,
+        confidence_level=ConfidenceLevel.MEDIUM,
+        cost_usd=Decimal("1.50"),
+    )
+
+
+def test_render_v6_includes_buffett_section() -> None:
+    """TC-RENDER-V6-1: V0=6 thesis render includes Buffett Case section header."""
+    from apps.cli.validate_thesis import _render_thesis_md  # noqa: PLC0415
+
+    thesis = _build_v6_thesis()
+    md = _render_thesis_md(thesis)
+    assert "## Buffett Case" in md, f"Expected '## Buffett Case' in rendered markdown; got:\n{md[:500]}"
+
+
+def test_render_v6_includes_graham_section() -> None:
+    """TC-RENDER-V6-2: V0=6 thesis render includes Graham Case section header."""
+    from apps.cli.validate_thesis import _render_thesis_md  # noqa: PLC0415
+
+    thesis = _build_v6_thesis()
+    md = _render_thesis_md(thesis)
+    assert "## Graham Case" in md, f"Expected '## Graham Case' in rendered markdown; got:\n{md[:500]}"
+
+
+def test_render_v6_includes_taleb_section() -> None:
+    """TC-RENDER-V6-3: V0=6 thesis render includes Taleb Case section header."""
+    from apps.cli.validate_thesis import _render_thesis_md  # noqa: PLC0415
+
+    thesis = _build_v6_thesis()
+    md = _render_thesis_md(thesis)
+    assert "## Taleb Case" in md, f"Expected '## Taleb Case' in rendered markdown; got:\n{md[:500]}"
+
+
+def test_render_v6_preserves_is35_disclaimer_footer() -> None:
+    """TC-RENDER-V6-4: V0=6 thesis render preserves I-S35 disclaimer footer (research aid)."""
+    from apps.cli.validate_thesis import _render_thesis_md  # noqa: PLC0415
+
+    thesis = _build_v6_thesis()
+    md = _render_thesis_md(thesis)
+    assert "research aid" in md.lower(), (
+        "Expected I-S35 disclaimer footer with 'research aid' in rendered markdown"
+    )
+    assert "not financial advice" in md.lower(), (
+        "Expected 'not financial advice' in I-S35 disclaimer footer"
+    )
+    assert "Calibration grade" in md, (
+        "Expected 'Calibration grade' in I-S35 disclaimer footer"
+    )
+
+
+def test_render_v6_recommendation_is_enum_not_prose() -> None:
+    """TC-RENDER-V6-5: V0=6 thesis render uses Recommendation enum; no 'buy'/'sell' prose (I-S35)."""
+    from apps.cli.validate_thesis import _render_thesis_md  # noqa: PLC0415
+
+    thesis = _build_v6_thesis()
+    md = _render_thesis_md(thesis)
+    # I-S35 check: no 'buy' or 'sell' raw prose in frontmatter recommendation field
+    for line in md.splitlines():
+        if line.startswith("recommendation:"):
+            rec_val = line.split(":", 1)[1].strip().lower()
+            assert rec_val not in ("buy", "sell"), (
+                f"I-S35 violation: recommendation frontmatter is '{rec_val}'; "
+                "must be enum value (investigate/watch/pass/thesis_candidate), not 'buy'/'sell'"
+            )
+            break
+    # Enum values are valid
+    assert "watch" in md or "investigate" in md or "pass" in md or "thesis_candidate" in md
+
+
+def test_render_v6_run_mode_dogfood_adds_metadata() -> None:
+    """TC-RENDER-V6-6: dogfood run_mode adds 'dogfood: true' frontmatter (DD-7)."""
+    from apps.cli.validate_thesis import _render_thesis_md  # noqa: PLC0415
+
+    thesis = _build_v6_thesis()
+    md = _render_thesis_md(thesis, run_mode="dogfood")
+    assert "dogfood: true" in md, (
+        "Expected 'dogfood: true' frontmatter in dogfood mode render"
+    )
+    assert "dogfood_session: S384" in md, (
+        "Expected 'dogfood_session: S384' frontmatter in dogfood mode render"
+    )
+
+
+def test_render_v6_run_mode_smoke_default_no_metadata() -> None:
+    """TC-RENDER-V6-7: smoke (default) run_mode does NOT add dogfood frontmatter (DD-7)."""
+    from apps.cli.validate_thesis import _render_thesis_md  # noqa: PLC0415
+
+    thesis = _build_v6_thesis()
+    # Explicit smoke
+    md_smoke = _render_thesis_md(thesis, run_mode="smoke")
+    assert "dogfood: true" not in md_smoke, (
+        "Expected 'dogfood: true' NOT present in smoke mode render"
+    )
+    # Default (no kwarg)
+    md_default = _render_thesis_md(thesis)
+    assert "dogfood: true" not in md_default, (
+        "Expected 'dogfood: true' NOT present in default (smoke) mode render"
+    )
+
+
+def test_render_v3_backward_compat_still_works() -> None:
+    """TC-RENDER-V6-8: N=3 thesis renders BEAR/BULL/QUANT; BUFFETT/GRAHAM/TALEB skipped cleanly."""
+    from datetime import UTC, datetime  # noqa: PLC0415
+
+    from apps.cli.validate_thesis import _render_thesis_md  # noqa: PLC0415
+    from packages.domain.analysis.models.thesis import Thesis, ThesisStatus  # noqa: PLC0415
+    from packages.domain.analysis.value_objects.confidence_level import (
+        ConfidenceLevel,  # noqa: PLC0415
+    )
+    from packages.domain.analysis.value_objects.recommendation import (
+        Recommendation,  # noqa: PLC0415
+    )
+
+    v3_thesis = Thesis(
+        thesis_id="v3thesis" + "a" * 56,
+        ticker=__import__("packages.contracts.types", fromlist=["Ticker"]).Ticker("HPG"),
+        as_of=date(2026, 4, 29),
+        created_at=datetime(2026, 4, 29, 10, 0, 0, tzinfo=UTC),
+        status=ThesisStatus.SUBMITTED,
+        perspectives=(
+            _good_bear(),
+            _good_bull(),
+            _good_quant(),
+            # NO BUFFETT/GRAHAM/TALEB → backward-compat test
+        ),
+        synthesis=_synthesis(),
+        final_recommendation=Recommendation.INVESTIGATE,
+        confidence_level=ConfidenceLevel.LOW,
+        cost_usd=Decimal("0.30"),
+    )
+    md = _render_thesis_md(v3_thesis)
+    # Existing sections present
+    assert "## Bear Case" in md
+    assert "## Bull Case" in md
+    assert "## Quant Summary" in md
+    # V0=6 sections show the stub (not present)
+    assert "_No Buffett perspective available._" in md
+    assert "_No Graham perspective available._" in md
+    assert "_No Taleb perspective available._" in md
+    # I-S35 disclaimer still present
+    assert "research aid" in md.lower()
