@@ -31,6 +31,24 @@
 **Severity**: LOW (1st-instance; Karpathy P2 explicitly prohibits)
 **AP-23 outcome**: RETIRED (not promoted; documented here per AP-23 RETIRE artifact discipline)
 
+## 2026-05-17 (S403): HOLD decisions from plan-046 harness sweep N+2 (DC-IMPL-18)
+
+### HOLD-AP23-1ST-INSTANCE: L-S389-2 (ADR/DC-IMPL cap-attestation discipline)
+**Context**: plan-046 § D candidate 2 — "DC-IMPL-N cap vs actual attestation discipline"
+**Rule (HELD)**: If dev marks DC-IMPL-N cap attestation as PASS when net delta exceeds the named cap, a deterministic linter should compare attestation text vs actual delta.
+**HOLD rationale**: M-S388-2 actual substance is "OVER-BUDGET-DOCUMENTED attestation when DC-IMPL-N cap exceeded" — distinct from the brief's paraphrase "≥12-field floor". ADR ≥12-field floor is empirically enforced already (D-079..D-082 all ≥12 fields). Deterministic linter comparing attestation-row text vs numeric delta requires parsing arbitrary plan + commit text — speculative abstraction per Karpathy P2. Existing mistake-log entry carries the rule at 1st-instance.
+**AP-7 revisit trigger**: if 2nd DC-IMPL cap breach fires where dev marks FLAT PASS with documented overage (not acknowledged), promote to deterministic post-write linter.
+**Severity**: LOW (1st-instance; existing M-S388-2 in mistake-log is the live artifact)
+**AP-23 outcome**: HOLD (not promoted; not silently skipped; documented here per AP-23 HOLD-artifact discipline)
+
+### HOLD-AP23-1ST-INSTANCE: L-S396-1 (architectural-cap empirical-recalibration)
+**Context**: plan-046 § D candidate 5 — "any hard cost/resource cap must be empirically re-validated after persona-count or model-tier changes"
+**Rule (HELD)**: Hard cost/resource caps (STOCKFORGE_HOOK_BUDGET_USD, BR-N caps, plan LOC ceilings) must be re-validated when persona count or model tier changes.
+**HOLD rationale**: ADR D-081 ACCEPTED already captures the lesson with explicit § Promotion Candidate note. Promoting to deterministic hook requires enumerating all caps + cross-correlating with persona/model changes — speculative abstraction per Karpathy P2. D-081 IS the leverage point at 1st-instance.
+**AP-7 revisit trigger**: if 2nd cap-set-without-empirical-evidence fires (D-081 § Promotion Candidate text names this trigger explicitly), promote to mandatory architect STEP 0 cap-recalibrate check in sandwich-architect.md.
+**Severity**: LOW (1st-instance; D-081 carries the rule)
+**AP-23 outcome**: HOLD (not promoted; documented here per AP-23 HOLD-artifact discipline)
+
 ## Rule Format
 
 Use this template:

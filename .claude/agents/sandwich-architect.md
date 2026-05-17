@@ -76,6 +76,48 @@ For this implementation:
 
 Document decisions explicitly.
 
+### STEP 2.X — Dispatch-Brief Path Verification (L-S392-1 promoted; plan-046 D3)
+
+When reading the dispatch brief that opened this session, for EVERY file path
+mention (`packages/**`, `apps/**`, `scripts/**`, `agent-workspace/**`,
+`human-workspace/**`):
+1. Run Glob or `Read <path>` to verify path exists
+2. If path does NOT exist: DO NOT cite that path in plan; instead grep the
+   actual correct path from mistake-log / observation evidence (parent plan or ADR)
+3. Cite parent plan/spec verbatim with file:line reference instead of
+   paraphrasing path text
+4. If brief contains paraphrased text that deviates from primary source, USE
+   primary source + document deviation in plan § C STEP 0 audit
+
+Anti-example: S392 dispatch brief cited `packages/_shared/pdf/pdf_table_
+extractor_port.py` (does not exist); architect VBW found canonical at
+`packages/application/fundamental/pdf_table_extractor_port.py`. S402 dispatch
+brief paraphrased L-S389-2 as "≥12-field floor" when mistake-log M-S388-2
+describes OVER-BUDGET-DOCUMENTED attestation discipline.
+
+### STEP 2.Y — Operational-Track Full-Pipeline Cold-Probe (L-S395-1 promoted; plan-046 D3)
+
+When authoring OPERATIONAL plans (data ingestion / cost-bearing pipeline /
+multi-ticker batch), STEP 0 MUST include a FULL-pipeline cold-probe (NOT just
+wire-probe) BEFORE bulk operational work commits resources:
+
+1. Single-ticker dry-run of the entire pipeline end-to-end
+2. Assert cost ≤ BR-N cap (cite specific BR rule by ID + current cap value)
+3. Assert quality threshold (e.g. ≥N articles per ticker for sentiment;
+   ≥N statements per ticker for fundamentals)
+4. Surface any architectural blocker (cap-too-tight, quality-floor-unreachable,
+   schema-mismatch) AT PLAN time, not at IMPL time
+5. If cold-probe surfaces blocker: STOP-AND-ASK via STOP-FINDING in
+   human-workspace/notifications/ + STOP-AND-ASK gate in plan § D STEP 0.5
+
+Anti-example: plan-045 architect STEP 0 cold-probed wire only (corpus-read OK);
+S395 dev IMPL hit TWO architectural blockers (BR-6 $3 cap empirically unreachable
+at V0=6; DD-3 ≥30 articles floor empirically unreachable with single-page
+CafeFScraper) — compound mistake M-S395-1.
+
+Scope: applies to operational-track plans only (data corpus, multi-run batches,
+cost-bearing pipelines). Code-only plans use existing STEP 0 5-trigger evaluation.
+
 ### Phase Closure Attestation Vocabulary (L-S385-2 promoted; plan-039 D7.A)
 
 When authoring plans that span CODE + DATA substrates (e.g. Phase F-prime + future
@@ -125,6 +167,24 @@ Dependencies:
 Add: ThesisCreatedEvent, ThesisSubmittedEvent, ThesisPostMortemed
 Size change: +30 LOC
 ```
+
+### Phase 3 File-Level Planning — Per-Category LOC Distinction (L-S397-1 promoted; plan-046 D3)
+
+When citing per-file LOC in § F "Files to Create" or § G LOC ceilings, MUST
+distinguish per-category:
+
+| File | Core code LOC | Docstring/comment LOC | Test LOC | Fixture LOC | Total LOC |
+|---|---|---|---|---|---|
+
+- "Core code LOC" = executable lines (functions, classes, statements);
+  exclude blank lines + comment-only lines + docstring-only lines
+- "Total LOC" = wc -l output (the integer that has been the historical citation basis)
+- LOC ceiling overage triage uses CORE CODE LOC as the budget; total LOC is
+  reported but doc-heavy / test-heavy overage is acceptable up to 2x core code ceiling
+
+Anti-example: plan-041 dev cited 7 files OVER ceiling at S397 verifier review,
+all of which were doc-heavy or test-heavy where core code fit ceiling (F3 finding
+`:67`); plan-043 hit same pattern at S400 (PCG-V400-1 = 2nd-instance trigger).
 
 ### Sub-track Template (REQUIRED 3 fields per sub-track per DD-3)
 
@@ -214,6 +274,21 @@ What tests needed:
 Save to `agent-workspace/session-plans/pending/NNN-<feature>-implementation.md`.
 
 Plan must be executable by sandwich-dev without re-planning.
+
+### STEP 7.X — Close-Loop File-Existence Verify (L-S397-3 promoted; plan-046 D3)
+
+At end of architect session, BEFORE composing return summary:
+1. Run `wc -l agent-workspace/session-plans/pending/<plan-id>-*.md
+   agent-workspace/memory/observations/sandwich-architect-S<N>-*.md`
+2. Verify BOTH files exist on disk
+3. Cite EXACT integers from wc -l output in return summary (no `~` prefix)
+4. If either file missing: re-Write before return summary composition
+5. If file integer differs from in-context expectation: re-Read + reconcile
+
+Anti-example: M-S397-1 (S397 sandwich-verifier composed full report inline +
+treated "I have written this report" as equivalent to "file exists on disk";
+main caught via `ls` returning No-such-file). S401 verifier same pattern at
+2nd-instance.
 
 ## Output
 

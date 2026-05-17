@@ -118,6 +118,19 @@ with: anchor string + session ID + agent ID + rationale + source corpus.
 Anti-example: S366 F1 inline-fix added "lai_co_phieu" with no provenance log.
 I-S22 data-lineage invariant requires audit trail for cultural-anchor decisions.
 
+**STEP 5.6 — Close-Loop File-Existence Verify (L-S397-3 promoted; plan-046 D3)**:
+
+Mirror of sandwich-architect STEP 7.X. At end of dev session, BEFORE composing
+return summary:
+1. Run `wc -l agent-workspace/memory/observations/sandwich-dev-S<N>-*.md
+   agent-workspace/memory/sessions/<YYYY-MM-DD>-session-<N>.md`
+2. Verify BOTH files exist on disk
+3. Cite EXACT integers in return summary (no `~` prefix per STEP 5.4)
+4. If either file missing: re-Write before return summary composition
+
+Anti-example: M-S397-1 main inline-persisted from result text after sandwich-
+verifier skip; codify the pattern so future sandwich-dev pre-empts the gap.
+
 **OBSERVATION FILE (mandatory)**: After your dev session, write a structured observation
 file at `agent-workspace/memory/observations/sandwich-dev-S<N>-<plan-id-slug>.md`
 summarizing what you did, obstacles encountered, and handoff notes for the verifier.
