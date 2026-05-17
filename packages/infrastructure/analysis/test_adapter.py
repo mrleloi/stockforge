@@ -138,3 +138,78 @@ def test_role_override_with_unknown_role_fallback() -> None:
     )
     _, _, bear_model, _ = _run(adapter.call_llm("sys", _CtxStub(), PerspectiveRole.BEAR))
     assert bear_model == "claude-sonnet-4-6"
+
+
+# ---------------------------------------------------------------------------
+# plan-034 D4 regression additions: D-052 § Implementation step 1 closure
+# validates transport-flip + import anthropic removal + _default_transport removal
+# ---------------------------------------------------------------------------
+
+
+def test_default_transport_is_claude_cli_transport_post_d052_step1_closure() -> None:
+    """plan-034 D4 TC-1: No-arg adapter uses claude_cli_transport (DD-5 transport-flip).
+
+    Validates D-052 § Implementation step 1 final closure: transport default
+    flipped from _default_transport to claude_cli_transport per plan-034 D3.
+    """
+    from packages.infrastructure.analysis.subagent_transport import claude_cli_transport
+
+    adapter = ClaudeLLMPerspectiveAdapter()
+    assert adapter.transport is claude_cli_transport, (
+        f"Expected transport == claude_cli_transport after D-052 step 1 closure, "
+        f"got {adapter.transport!r}"
+    )
+
+
+def test_no_anthropic_import_in_module_source() -> None:
+    """plan-034 D4 TC-2: Zero 'import anthropic' / 'from anthropic' in adapter source.
+
+    Grep-asserted per L-S227-1 + D-050 SYSTEMIC + D-052 § Implementation step 1.
+    This IS the D-052 closure acceptance criterion for BC-8 surface.
+    """
+    import packages.infrastructure.analysis.claude_llm_perspective_adapter as mod
+
+    source = open(mod.__file__, encoding="utf-8").read()  # noqa: SIM115, WPS515
+    assert "import anthropic" not in source, (
+        "import anthropic MUST NOT appear in claude_llm_perspective_adapter.py "
+        "per D-050 SYSTEMIC + D-052 § Implementation step 1 + plan-034 DD-5"
+    )
+    assert "from anthropic" not in source, (
+        "from anthropic MUST NOT appear in claude_llm_perspective_adapter.py "
+        "per D-050 SYSTEMIC + D-052 § Implementation step 1 + plan-034 DD-5"
+    )
+
+
+def test_default_transport_function_removed_from_module() -> None:
+    """plan-034 D4 TC-3: _default_transport symbol removed from adapter source.
+
+    Validates DD-5: _default_transport function REMOVED per D-052 step 1.
+    """
+    import packages.infrastructure.analysis.claude_llm_perspective_adapter as mod
+
+    source = open(mod.__file__, encoding="utf-8").read()  # noqa: SIM115, WPS515
+    assert "_default_transport" not in source, (
+        "_default_transport MUST be removed from claude_llm_perspective_adapter.py "
+        "per plan-034 DD-5 + D-052 § Implementation step 1"
+    )
+
+
+def test_existing_stub_injection_still_works_post_flip() -> None:
+    """plan-034 D4 TC-4: Existing _make_stub_transport() pattern works unchanged post-flip.
+
+    Validates DD-9 backward-compat: transport=stub constructor kwarg overrides
+    new default (claude_cli_transport). All existing test patterns unaffected.
+    """
+    calls, stub = _make_stub_transport()
+    adapter = ClaudeLLMPerspectiveAdapter(transport=stub)
+
+    # verify transport is the injected stub not claude_cli_transport
+    from packages.infrastructure.analysis.subagent_transport import claude_cli_transport
+
+    assert adapter.transport is not claude_cli_transport
+    assert adapter.transport is stub
+
+    # verify routing still works through stub
+    _, _, model_id, _ = _run(adapter.call_llm("sys", _CtxStub(), PerspectiveRole.BEAR))
+    assert model_id == "claude-sonnet-4-6"
+    assert len(calls) == 1

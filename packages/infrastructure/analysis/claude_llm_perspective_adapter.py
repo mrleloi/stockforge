@@ -1,12 +1,17 @@
-"""ClaudeLLMPerspectiveAdapter — Anthropic SDK wrapper for perspective agents.
+"""ClaudeLLMPerspectiveAdapter — claude CLI subprocess transport for perspective agents.
 
 Pattern reused from packages/infrastructure/news/claude_llm_extractor.py (S36).
+
+ANTHROPIC SDK NO LONGER USED in production code — default transport is claude CLI
+subprocess via subagent_transport.claude_cli_transport per D-050 SYSTEMIC +
+D-052 § Implementation step 1 final closure (plan-034 S375).
+Tests inject stub transport via constructor kwarg (existing pattern at
+test_adapter.py:24-33 unchanged — explicit kwarg overrides default).
 
 Key features:
 - temperature=0.0 pinned for reproducibility (AC-5)
 - prompt_hash: sha256[:16] of system prompt (reproducibility audit)
 - cost_usd: computed from input + output token counts (Decimal; never float)
-- Lazy Anthropic SDK import: tests inject transport callable → no network in CI
 - context_to_str: converts SharedContext to a user message string
 
 LLM call signature:
@@ -20,6 +25,7 @@ CostBudgetExceeded is not raised here — cost tracking is the use case's job vi
 CostTrackerPort. This adapter only COMPUTES cost_usd per call.
 
 Source: specs/tier2-feature/006-phase-2-track-F-thesis-pipeline.md § B.10 + § B.11.
+ADR D-074 PROPOSED (plan-034 D5): BC-8 Transport Flip + RolePromptPack Foundation.
 """
 
 from __future__ import annotations
@@ -32,6 +38,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 
 from packages.domain.analysis.models.perspective_analysis import PerspectiveRole
+from packages.infrastructure.analysis.subagent_transport import claude_cli_transport
 
 __all__ = ["ClaudeLLMPerspectiveAdapter"]
 
@@ -68,34 +75,6 @@ _ROLE_TO_MODEL: dict[PerspectiveRole, str] = {
     PerspectiveRole.QUANT: _OPUS_MODEL,
 }
 _DEFAULT_MODEL = _OPUS_MODEL  # synthesizer and fallback
-
-
-def _default_transport(
-    model: str, system_prompt: str, user_message: str, temperature: float
-) -> tuple[str, int, int]:
-    """Default Anthropic SDK call. Lazily imported — not needed in tests.
-
-    Returns (response_text, input_tokens, output_tokens).
-    """
-    import anthropic  # type: ignore[import-not-found]
-
-    client = anthropic.Anthropic()
-    response = client.messages.create(
-        model=model,
-        max_tokens=4096,
-        temperature=temperature,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_message}],
-    )
-    text_parts: list[str] = []
-    for block in response.content:
-        text = getattr(block, "text", None)
-        if isinstance(text, str):
-            text_parts.append(text)
-    usage = getattr(response, "usage", None)
-    input_tokens = getattr(usage, "input_tokens", 0) if usage else 0
-    output_tokens = getattr(usage, "output_tokens", 0) if usage else 0
-    return "".join(text_parts), input_tokens, output_tokens
 
 
 def _compute_cost(model: str, input_tokens: int, output_tokens: int) -> Decimal:
@@ -182,10 +161,12 @@ def _context_to_str(context: object) -> str:
 
 @dataclass
 class ClaudeLLMPerspectiveAdapter:
-    """Anthropic SDK wrapper for perspective agent LLM calls.
+    """claude CLI subprocess transport wrapper for perspective agent LLM calls.
 
     `transport`: pluggable (model, system_prompt, user_message, temperature) -> (text, in_tok, out_tok).
-    Default uses anthropic.Anthropic lazily. Tests inject a closure.
+    Default is claude_cli_transport from subagent_transport.py (D-052 § Implementation
+    step 1 final closure; anthropic SDK removed per D-050 SYSTEMIC). Tests inject a
+    stub closure via constructor kwarg — explicit kwarg overrides default.
     `model_override`: global override for all calls (e.g. forcing one model in tests).
     `role_model_overrides`: per-role override applied when `model_override` is None.
         Used by S43b-BULL fix (DEFER-S43b-3): map BULL → haiku to side-step the
@@ -195,7 +176,7 @@ class ClaudeLLMPerspectiveAdapter:
     """
 
     transport: Callable[[str, str, str, float], tuple[str, int, int]] = field(
-        default=_default_transport
+        default=claude_cli_transport
     )
     model_override: str | None = None
     role_model_overrides: dict[PerspectiveRole, str] | None = None

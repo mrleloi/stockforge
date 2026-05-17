@@ -2,7 +2,7 @@
 
 > **Status**: Track 2 deliverable per Decision 002 § Track 2 (REV-2).
 > **Schema source**: [_template.md](_template.md) — every decision file MUST start with the canonical frontmatter.
-> **Last updated**: 2026-05-17 (S368 — D-072 added: VN Claim Extraction Wrapper AUGMENT + transport flip + 2 new ExtractedClaim fields)
+> **Last updated**: 2026-05-17 (S375 — D-074 added: BC-8 Transport Flip + RolePromptPack Foundation + PersonaRegistry + D-052 § Implementation step 1 final closure)
 
 This directory is **append-only with supersession**. Decisions are never deleted; they are marked `SUPERSEDED-BY-D-NNN` or `REVOKED` and remain on disk as the audit trail.
 
@@ -40,6 +40,7 @@ If agent confidence is below threshold for a level, it MUST open a Q&A bundle in
 
 | ID | Title | Level | Status | Date | Source prompt(s) |
 |---|---|---|---|---|---|
+| [D-074](074-bc-8-transport-flip-roleprompt-persona.md) | BC-8 Transport Flip + RolePromptPack Foundation + PersonaRegistry (D-052 § Implementation step 1 final closure) | IMPL | PROPOSED | 2026-05-17 | plan-034-S374 § D DD-1..DD-9 + § E D1-D5; S375 dev IMPL |
 | [D-072](072-vn-claim-extraction-wrapper.md) | VN Claim Extraction Wrapper AUGMENT + anthropic→subagent default-flip + 2 new ExtractedClaim fields (lexicon_score + mentioned_pump_anchors; Rule 16 mode 2 deterministic-pipeline echo) | IMPL | PROPOSED | 2026-05-17 | plan-031-S367 § D DD-1..DD-7 + § E D1-D5; S368 dev IMPL |
 | [D-071](071-vn-sentiment-lexicon.md) | VN Sentiment Lexicon v0 + Calibration Loop — ~220 keywords + 8 cultural anchors; HYPOTHESIS weights; calibration recipe + UNCALIBRATED-V0 ship | ARCH | PROPOSED | 2026-05-17 | sub-plan 030-S364 § D1-D5; plan-030 DD-1..DD-7; S365 dev IMPL |
 | [D-070](070-vn-tokenizer-library.md) | VN Tokenizer Library Selection — pyvi==0.1.1 MIT; STEP 0 CHARTER-TIER GATE did not fire (underthesea v9.4.0 = Apache-2.0) | ARCH | PROPOSED | 2026-05-17 | sub-plan 029-S361 STEP 0 empirical eval; plan-029 § DD-2 |

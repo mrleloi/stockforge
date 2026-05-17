@@ -144,6 +144,30 @@
 
 ---
 
+## S375 — Phase F.1 RolePromptPack + PersonaRegistry + BC-8 transport-flip IMPL DONE (sub-plan 034; S376 verifier pending) — 2026-05-17
+
+**S375 sandwich-dev RETURN** (Sonnet 4.6 FOCUSED_IMPL, AP-1 fresh-context). Sub-plan 034 D1-D5 COMPLETE. All STEP 0 gates evaluated; CHARTER-TIER GATE DID NOT FIRE (claude CLI v2.1.140 available at `C:\Users\PC\.local\bin\claude.exe`).
+
+**D1 RolePromptPack** SHIPPED: `packages/application/analysis/role_prompt_pack.py` (102 LOC; `@dataclass(frozen=True, slots=True)`; 10 fields per DD-7; 9 invariants via `__post_init__`; `RolePromptPackInvariantError`).
+
+**D2 PersonaRegistry** SHIPPED: `packages/application/analysis/persona_registry.py` (156 LOC; stdlib dict wrapper; 4 methods: `register/get/all_role_ids/load_from_json`; D-064 path-safety 5-invariant; sorted tuple return for determinism).
+
+**D3 Transport-flip** SHIPPED: `claude_llm_perspective_adapter.py` (264→245 LOC; `_default_transport` REMOVED; `import anthropic` REMOVED; `from packages.infrastructure.analysis.subagent_transport import claude_cli_transport` ADDED; field default flipped to `claude_cli_transport`).
+
+**D-052 CLOSURE EMPIRICAL**: `grep -rE "^[ \t]*(import anthropic|from anthropic)" packages/ --include="*.py"` → ZERO MATCHES. D-052 § Implementation step 1 CLOSED for BC-8 surface.
+
+**D4 Tests** SHIPPED: test_role_prompt_pack.py (243 LOC; 23 tests PASS) + test_persona_registry.py (289 LOC; 14 PASS + 1 skip Windows symlink) + test_adapter.py 4 regression additions. Test count: 1113 → 1153 (+40).
+
+**D5 ADR D-074 PROPOSED** at `agent-workspace/memory/decisions/074-bc-8-transport-flip-roleprompt-persona.md` (200 LOC). `agent-workspace/role-packs/README.md` placeholder (62 LOC) created.
+
+**Gates**: mypy --strict CLEAN / ruff CLEAN / pytest 1151/1153 PASS (2 skip) / regression floor 35/35 (bear+quant+synthesizer+phase1_gatherer all green) / DC-GATE-7/8/9 PASS.
+
+**No mistakes this session** (1 minor mypy precision fix: `cast(list[object], ...)` in persona_registry.py; not a logic error).
+
+**Next**: dispatch S376 sandwich-verifier AP-1 fresh-context to verify sub-plan 034 per § F DoD 36 items. Plan-034 mv `pending/` → `completed/` at S376 close per DC-BOOK-4 protocol.
+
+---
+
 ## S368 — Phase E.3 VN Claim Extraction Wrapper IMPL DONE (sub-plan 031; S369 verifier pending) — 2026-05-17
 
 **S368 sandwich-dev RETURN** (Opus 4.7 FOCUSED_IMPL, AP-1 fresh-context per M-S365-1). Sub-plan 031 D1-D5 COMPLETE. All 4 STEP 0 CHARTER-TIER GATES DID NOT FIRE.
@@ -193,26 +217,6 @@
 **Cultural anchors**: 8 mandatory entries wired (đội_lái / đu_đỉnh / bắt_đáy / phím_hàng / bơm_thổi / cá_mập / hàng_zin + ASCII forms). `VN_CULTURAL_ANCHORS: frozenset[str]` exported for E.3 sub-plan 031.
 
 **Next**: dispatch S366 sandwich-verifier AP-1 fresh-context to verify sub-plan 030 per § F DoD 35 items.
-
----
-
-## S362 — Phase E.1 VN Tokenization IMPL DONE (sub-plan 029; S363 verifier pending) — 2026-05-17
-
-**S362 sandwich-dev RETURN** (Sonnet 4.6 FOCUSED_IMPL, AP-1 fresh-context). Sub-plan 029-S361-phase-e1-vn-tokenization D1-D4 COMPLETE. 32/33 DoD self-assessed PASS (DC-BOOK-4 deferred to S363 per protocol).
-
-**CHARTER-TIER GATE DID NOT FIRE**: underthesea v9.4.0 = Apache-2.0 (NOT GPL-3.0; historical docs stale). pyvi==0.1.1 selected (MIT; 75.7% quality; 3.6x faster than underthesea; quality gap 6.1% < 10% threshold per plan recommendation). Scorecard at `agent-workspace/calibration/vn_tokenizer_eval_v0.md`.
-
-**Files shipped** (7 new production/test files; total 650 LOC):
-- `packages/application/nlp/ports/text_tokenizer_port.py` (50 LOC; D1 Protocol)
-- `packages/infrastructure/nlp/vn_tokenizer.py` (147 LOC; D2 adapter)
-- `packages/infrastructure/nlp/test_vn_tokenizer.py` (235 LOC; D3 tests; 19/19 PASS)
-- `apps/cli/tokenize_vn_text.py` (186 LOC; D4 CLI)
-- pyproject.toml +1 dep line (pyvi>=0.1.1)
-- ADR D-070 PROPOSED at `memory/decisions/070-vn-tokenizer-library.md`
-
-**Gates**: mypy --strict PASS / ruff PASS / pytest 1053/1053 PASS (1034+19; 0 regressions) / I-S1 CLEAN / D-059 CLEAN / I-S34 CLEAN / firing-tests exit 0.
-
-**Next**: dispatch S363 sandwich-verifier AP-1 fresh-context to verify sub-plan 029 per § F DoD 33 items.
 
 ---
 
