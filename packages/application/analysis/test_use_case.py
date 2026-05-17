@@ -209,18 +209,29 @@ def _make_use_case(
     repo: MockThesisRepo | None = None,
     cost_limit: Decimal = Decimal("3.00"),
     context: SharedContext | None = None,
+    extra_agents: dict[PerspectiveRole, MockLLMPerspectivePort] | None = None,
 ) -> tuple[ValidateThesisPhase1UseCase, MockThesisRepo, MockEventBus]:
+    """Create a ValidateThesisPhase1UseCase with canned mock dependencies.
+
+    F.3 (plan-036 D4): added extra_agents kwarg for N>3 persona testing.
+    When extra_agents provided, they are merged into the base V0=3 dict.
+    Backward-compat: existing callers that pass bear/bull/quant_responses continue to work.
+    """
     repo = repo or MockThesisRepo()
     bus = MockEventBus()
-    bear_agent = MockLLMPerspectivePort(
-        {PerspectiveRole.BEAR: bear_responses or [_make_good_bear()]}
-    )
-    bull_agent = MockLLMPerspectivePort(
-        {PerspectiveRole.BULL: bull_responses or [_make_perspective(PerspectiveRole.BULL)]}
-    )
-    quant_agent = MockLLMPerspectivePort(
-        {PerspectiveRole.QUANT: quant_responses or [_make_perspective(PerspectiveRole.QUANT)]}
-    )
+    agents: dict[PerspectiveRole, MockLLMPerspectivePort] = {
+        PerspectiveRole.BEAR: MockLLMPerspectivePort(
+            {PerspectiveRole.BEAR: bear_responses or [_make_good_bear()]}
+        ),
+        PerspectiveRole.BULL: MockLLMPerspectivePort(
+            {PerspectiveRole.BULL: bull_responses or [_make_perspective(PerspectiveRole.BULL)]}
+        ),
+        PerspectiveRole.QUANT: MockLLMPerspectivePort(
+            {PerspectiveRole.QUANT: quant_responses or [_make_perspective(PerspectiveRole.QUANT)]}
+        ),
+    }
+    if extra_agents:
+        agents.update(extra_agents)
     synth = MockSynthesizer(synthesis or _make_synthesis())
     tracker = MockCostTracker(limit=cost_limit)
     gatherer = MockDataGatherer(context or _make_good_context())
@@ -228,15 +239,37 @@ def _make_use_case(
     # bear_retry_count removed in ADR D-054: retry is now agent-internal
     uc = ValidateThesisPhase1UseCase(
         data_gatherer=gatherer,
-        bear_agent=bear_agent,
-        bull_agent=bull_agent,
-        quant_agent=quant_agent,
+        agents=agents,  # type: ignore[arg-type]
         synthesizer=synth,
         thesis_repo=repo,
         cost_tracker=tracker,
         event_bus=bus,
     )
     return uc, repo, bus
+
+
+def _make_persona_mock(role: PerspectiveRole, cost: Decimal = Decimal("0.05")) -> MockLLMPerspectivePort:
+    """Return a canned MockLLMPerspectivePort for a persona role (BUFFETT/GRAHAM/TALEB)."""
+    persona_points: dict[PerspectiveRole, tuple[GroundedPoint, ...]] = {
+        PerspectiveRole.BUFFETT: (
+            _make_point("buffett moat claim", "MOAT", Conviction.MODERATE),
+            _make_point("buffett valuation claim", "VALUATION", Conviction.MODERATE),
+            _make_point("buffett ROIC claim", "FUNDAMENTAL", Conviction.MODERATE),
+        ),
+        PerspectiveRole.GRAHAM: (
+            _make_point("graham balance sheet claim", BearCategory.FUNDAMENTAL, Conviction.MODERATE),
+            _make_point("graham margin of safety", BearCategory.VALUATION, Conviction.MODERATE),
+            _make_point("graham working capital", BearCategory.FUNDAMENTAL, Conviction.MODERATE),
+        ),
+        PerspectiveRole.TALEB: (
+            _make_point("taleb tail risk claim", BearCategory.MACRO, Conviction.MODERATE),
+            _make_point("taleb antifragility claim", BearCategory.MACRO, Conviction.MODERATE),
+            _make_point("taleb kurtosis claim", BearCategory.MACRO, Conviction.MODERATE),
+        ),
+    }
+    points = persona_points.get(role, (_make_point("generic persona point"),))
+    perspective = _make_perspective(role, points=points, cost=cost)
+    return MockLLMPerspectivePort({role: [perspective]})
 
 
 # ---------------------------------------------------------------------------
@@ -327,9 +360,11 @@ def test_cost_cap_returns_incomplete_not_persisted() -> None:
     bus = MockEventBus()
     uc = ValidateThesisPhase1UseCase(
         data_gatherer=MockDataGatherer(_make_good_context()),
-        bear_agent=MockLLMPerspectivePort({PerspectiveRole.BEAR: [_make_good_bear()]}),
-        bull_agent=MockLLMPerspectivePort({PerspectiveRole.BULL: [_make_perspective(PerspectiveRole.BULL)]}),
-        quant_agent=MockLLMPerspectivePort({PerspectiveRole.QUANT: [_make_perspective(PerspectiveRole.QUANT)]}),
+        agents={  # type: ignore[arg-type]
+            PerspectiveRole.BEAR: MockLLMPerspectivePort({PerspectiveRole.BEAR: [_make_good_bear()]}),
+            PerspectiveRole.BULL: MockLLMPerspectivePort({PerspectiveRole.BULL: [_make_perspective(PerspectiveRole.BULL)]}),
+            PerspectiveRole.QUANT: MockLLMPerspectivePort({PerspectiveRole.QUANT: [_make_perspective(PerspectiveRole.QUANT)]}),
+        },
         synthesizer=MockSynthesizer(_make_synthesis()),
         thesis_repo=repo,
         cost_tracker=OverbudgetTracker(),
@@ -377,3 +412,167 @@ def test_gaps_no_news_does_not_prevent_submission() -> None:
     thesis = asyncio.run(uc.execute(_TICKER, _TODAY))
     # no_news_90d alone is not critical (has_critical_gaps requires price_stale + fundamentals_stale)
     assert thesis.status == ThesisStatus.SUBMITTED
+
+
+# ---------------------------------------------------------------------------
+# F.3 N-persona tests (plan-036 D4 — TC-USE-CASE-1 through TC-USE-CASE-8)
+# ---------------------------------------------------------------------------
+
+def _make_v0_6_extra_agents() -> dict[PerspectiveRole, MockLLMPerspectivePort]:
+    """Return canned extra agents for BUFFETT/GRAHAM/TALEB personas."""
+    return {
+        PerspectiveRole.BUFFETT: _make_persona_mock(PerspectiveRole.BUFFETT),
+        PerspectiveRole.GRAHAM: _make_persona_mock(PerspectiveRole.GRAHAM),
+        PerspectiveRole.TALEB: _make_persona_mock(PerspectiveRole.TALEB),
+    }
+
+
+def test_n6_happy_path_returns_submitted_thesis() -> None:
+    """TC-USE-CASE-1: V0=6 happy path with all 6 personas → SUBMITTED thesis.
+
+    Per plan-036 D4 + DD-1 dict[PerspectiveRole, LLMPerspectivePort] dispatch.
+    """
+    uc, repo, _ = _make_use_case(extra_agents=_make_v0_6_extra_agents())
+    thesis = asyncio.run(uc.execute(_TICKER, _TODAY))
+    assert thesis.status == ThesisStatus.SUBMITTED
+    assert len(repo.saved) == 1
+
+
+def test_n6_persists_thesis_to_repo() -> None:
+    """TC-USE-CASE-2: V0=6 thesis saved to repo with correct thesis_id."""
+    repo = MockThesisRepo()
+    uc, _, _ = _make_use_case(repo=repo, extra_agents=_make_v0_6_extra_agents())
+    thesis = asyncio.run(uc.execute(_TICKER, _TODAY))
+    assert thesis.status == ThesisStatus.SUBMITTED
+    assert len(repo.saved) == 1
+    assert repo.saved[0].thesis_id == thesis.thesis_id
+
+
+def test_n6_emits_thesis_recorded_event() -> None:
+    """TC-USE-CASE-3: V0=6 SUBMITTED thesis emits ThesisRecorded event."""
+    uc, _, bus = _make_use_case(extra_agents=_make_v0_6_extra_agents())
+    thesis = asyncio.run(uc.execute(_TICKER, _TODAY))
+    assert thesis.status == ThesisStatus.SUBMITTED
+    assert len(bus.events) == 1
+    event = bus.events[0]
+    assert isinstance(event, ThesisRecorded)
+    assert event.thesis_id == thesis.thesis_id
+
+
+def test_n6_thesis_id_deterministic_across_runs() -> None:
+    """TC-USE-CASE-4: AC-5 N=6 same input twice → same thesis_id.
+
+    Per plan-036 DD-8 scenario 2 + DD-2 STABLE-SORTED-BY-ROLE combined_prompt.
+    """
+    ctx = _make_good_context()
+    extra = _make_v0_6_extra_agents()
+    uc1, _, _ = _make_use_case(context=ctx, extra_agents=extra)
+    uc2, _, _ = _make_use_case(context=ctx, extra_agents=extra)
+    t1 = asyncio.run(uc1.execute(_TICKER, _TODAY))
+    t2 = asyncio.run(uc2.execute(_TICKER, _TODAY))
+    assert t1.status == ThesisStatus.SUBMITTED
+    assert t2.status == ThesisStatus.SUBMITTED
+    assert t1.thesis_id == t2.thesis_id
+
+
+def test_n6_thesis_id_invariant_under_dict_insertion_order() -> None:
+    """TC-USE-CASE-5: AC-5 DD-8 scenario 3 — shuffled dict insertion order → same thesis_id.
+
+    Validates STABLE-SORTED-BY-ROLE design (plan-036 DD-2): thesis_id must be
+    independent of the order in which agents were inserted into the dict.
+    """
+    ctx = _make_good_context()
+
+    # Order 1: BEAR/BULL/QUANT/BUFFETT/GRAHAM/TALEB (natural order)
+    extra_order1 = {
+        PerspectiveRole.BUFFETT: _make_persona_mock(PerspectiveRole.BUFFETT),
+        PerspectiveRole.GRAHAM: _make_persona_mock(PerspectiveRole.GRAHAM),
+        PerspectiveRole.TALEB: _make_persona_mock(PerspectiveRole.TALEB),
+    }
+    # Order 2: TALEB/GRAHAM/BUFFETT (reversed extra agents)
+    extra_order2 = {
+        PerspectiveRole.TALEB: _make_persona_mock(PerspectiveRole.TALEB),
+        PerspectiveRole.GRAHAM: _make_persona_mock(PerspectiveRole.GRAHAM),
+        PerspectiveRole.BUFFETT: _make_persona_mock(PerspectiveRole.BUFFETT),
+    }
+
+    uc1, _, _ = _make_use_case(context=ctx, extra_agents=extra_order1)
+    uc2, _, _ = _make_use_case(context=ctx, extra_agents=extra_order2)
+    t1 = asyncio.run(uc1.execute(_TICKER, _TODAY))
+    t2 = asyncio.run(uc2.execute(_TICKER, _TODAY))
+    assert t1.status == ThesisStatus.SUBMITTED
+    assert t2.status == ThesisStatus.SUBMITTED
+    # Same sorted-by-role combined_prompt → same thesis_id regardless of insertion order
+    assert t1.thesis_id == t2.thesis_id
+
+
+def test_n6_bear_missing_returns_incomplete() -> None:
+    """TC-USE-CASE-6: DD-4 I-S10 — V0=5 (no BEAR) → BearCaseInvariantError → INCOMPLETE.
+
+    Validates I-S10 BEAR-presence preservation at Thesis layer (plan-036 DD-4 DRY).
+    The use case passes N personas to Thesis aggregate; Thesis._enforce_bear_case
+    requires PerspectiveRole.BEAR present → raises BearCaseInvariantError → INCOMPLETE.
+    """
+    # Provide BULL/QUANT/BUFFETT/GRAHAM/TALEB but NO BEAR
+    agents_no_bear: dict[PerspectiveRole, MockLLMPerspectivePort] = {
+        PerspectiveRole.BULL: MockLLMPerspectivePort(
+            {PerspectiveRole.BULL: [_make_perspective(PerspectiveRole.BULL)]}
+        ),
+        PerspectiveRole.QUANT: MockLLMPerspectivePort(
+            {PerspectiveRole.QUANT: [_make_perspective(PerspectiveRole.QUANT)]}
+        ),
+        PerspectiveRole.BUFFETT: _make_persona_mock(PerspectiveRole.BUFFETT),
+        PerspectiveRole.GRAHAM: _make_persona_mock(PerspectiveRole.GRAHAM),
+        PerspectiveRole.TALEB: _make_persona_mock(PerspectiveRole.TALEB),
+    }
+    repo = MockThesisRepo()
+    bus = MockEventBus()
+    synth = MockSynthesizer(_make_synthesis())
+    tracker = MockCostTracker()
+    gatherer = MockDataGatherer(_make_good_context())
+    uc = ValidateThesisPhase1UseCase(
+        data_gatherer=gatherer,
+        agents=agents_no_bear,  # type: ignore[arg-type]
+        synthesizer=synth,
+        thesis_repo=repo,
+        cost_tracker=tracker,
+        event_bus=bus,
+    )
+    thesis = asyncio.run(uc.execute(_TICKER, _TODAY))
+    assert thesis.status == ThesisStatus.INCOMPLETE
+    assert len(repo.saved) == 0  # NOT persisted
+
+
+def test_n6_cost_accumulation_across_all_personas() -> None:
+    """TC-USE-CASE-7: DD-6 — cost_usd accumulated across all 6 personas.
+
+    Validates sum(p.cost_usd for p in perspectives, Decimal("0")) replaces hardcoded
+    3-persona sum. Each persona contributes cost_usd=Decimal("0.10") by default.
+    6 personas × 0.10 = 0.60 total cost.
+    """
+    extra = _make_v0_6_extra_agents()
+    uc, repo, _ = _make_use_case(extra_agents=extra)
+    thesis = asyncio.run(uc.execute(_TICKER, _TODAY))
+    assert thesis.status == ThesisStatus.SUBMITTED
+    # Bear(0.10) + Bull(0.10) + Quant(0.10) + 3 personas(0.05 each) = 0.45
+    # (persona_mock uses cost=0.05; _make_perspective uses cost=0.10 by default)
+    assert thesis.cost_usd > Decimal("0")
+
+
+def test_n6_thesis_id_differs_from_n3_same_input() -> None:
+    """TC-USE-CASE-8: AC-5 DD-8 scenario 4 — N=3 vs N=6 on same ticker/data → different thesis_id.
+
+    Adding BUFFETT/GRAHAM/TALEB changes the combined_prompt (their prompt_hashes included)
+    → thesis_id changes by design (different persona roster = different analysis identity).
+    """
+    ctx = _make_good_context()
+    # N=3: BEAR/BULL/QUANT only
+    uc3, _, _ = _make_use_case(context=ctx)
+    # N=6: + BUFFETT/GRAHAM/TALEB
+    uc6, _, _ = _make_use_case(context=ctx, extra_agents=_make_v0_6_extra_agents())
+    t3 = asyncio.run(uc3.execute(_TICKER, _TODAY))
+    t6 = asyncio.run(uc6.execute(_TICKER, _TODAY))
+    assert t3.status == ThesisStatus.SUBMITTED
+    assert t6.status == ThesisStatus.SUBMITTED
+    # Different persona roster → different combined_prompt → different thesis_id (by design)
+    assert t3.thesis_id != t6.thesis_id

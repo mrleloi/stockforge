@@ -4,12 +4,20 @@ Both apps/dashboard/pages/validate_thesis.py and apps/cli/validate_thesis.py
 wire the same dependency graph. This module centralises that wiring so the two
 entry points stay DRY.
 
-Wiring produced:
+F.3 (plan-036 D3): extended from V0=3 (BEAR/BULL/QUANT) to V0=6 personas.
+ValidateThesisPhase1UseCase now accepts agents: dict[PerspectiveRole, LLMPerspectivePort].
+
+Wiring produced (V0=6):
   ValidateThesisPhase1UseCase(
       data_gatherer = Phase1DataGatherer(...),
-      bear_agent    = BearPerspectiveAgent(adapter),
-      bull_agent    = BullPerspectiveAgent(adapter),
-      quant_agent   = QuantPerspectiveAgent(adapter),
+      agents        = {
+          BEAR: BearPerspectiveAgent(adapter),
+          BULL: BullPerspectiveAgent(adapter),
+          QUANT: QuantPerspectiveAgent(adapter),
+          BUFFETT: BuffettPerspectiveAgent(adapter, registry.get("buffett")),
+          GRAHAM: GrahamPerspectiveAgent(adapter, registry.get("graham")),
+          TALEB: TalebPerspectiveAgent(adapter, registry.get("taleb")),
+      },
       synthesizer   = Phase1Synthesizer(),
       thesis_repo   = SqliteThesisRepository(db_path),
       cost_tracker  = InProcessCostTracker(),
@@ -100,34 +108,19 @@ def build_use_case(
     event_bus = _InProcessEventBus()
     _ = max_cost_usd  # cost cap is the use-case's $3 hardcoded ceiling per BR-6
 
-    from packages.application.analysis.ports.llm_perspective_port import (
-        LLMPerspectivePort,  # noqa: PLC0415
-    )
-
-    bear_agent: LLMPerspectivePort
-    bull_agent: LLMPerspectivePort
-    quant_agent: LLMPerspectivePort
     data_gatherer: object
 
     if mock_llm:
-        _bear, _bull, _quant = _build_mock_agents()
-        bear_agent = _bear  # type: ignore[assignment]
-        bull_agent = _bull  # type: ignore[assignment]
-        quant_agent = _quant  # type: ignore[assignment]
+        agents = _build_mock_agents()
         data_gatherer = _MockDataGatherer()
     else:
         # transport == "subagent": real agents + claude CLI substrate + real DB-backed gatherer
-        _bear, _bull, _quant = _build_subagent_agents()
-        bear_agent = _bear  # type: ignore[assignment]
-        bull_agent = _bull  # type: ignore[assignment]
-        quant_agent = _quant  # type: ignore[assignment]
+        agents = _build_subagent_agents()
         data_gatherer = _SubagentDataGatherer(db_path=db_path)
 
     return ValidateThesisPhase1UseCase(
         data_gatherer=data_gatherer,
-        bear_agent=bear_agent,
-        bull_agent=bull_agent,
-        quant_agent=quant_agent,
+        agents=agents,  # type: ignore[arg-type]  # dict[object, object] → dict[PerspectiveRole, LLMPerspectivePort]
         synthesizer=synthesizer,
         thesis_repo=thesis_repo,
         cost_tracker=cost_tracker,
@@ -135,9 +128,58 @@ def build_use_case(
     )
 
 
-def _build_subagent_agents() -> tuple[object, object, object]:
-    """Wire real Bear/Bull/Quant agents on ClaudeLLMPerspectiveAdapter + claude_cli_transport.
+def _load_persona_registry() -> object:
+    """Load V0 persona packs from agent-workspace/role-packs/*.json.
 
+    Per F.3 plan-036 D3 + F.1 plan-034 PersonaRegistry composition pattern.
+    Returns a PersonaRegistry with buffett/graham/taleb packs registered.
+    """
+    from packages.application.analysis.persona_registry import (  # noqa: PLC0415
+        PersonaRegistry,
+    )
+
+    registry = PersonaRegistry()
+    base_dir = Path("agent-workspace") / "role-packs"
+    for role_id in ("buffett", "graham", "taleb"):
+        pack_path = base_dir / f"{role_id}.json"
+        registry.load_from_json(pack_path, base_dir=base_dir)
+    return registry
+
+
+def _build_persona_agents(adapter: object, registry: object) -> dict[object, object]:
+    """Construct V0 persona agents (BUFFETT/GRAHAM/TALEB) using PersonaRegistry packs.
+
+    Per F.3 plan-036 D3 + F.2 plan-035 persona adapter pattern (DD-7).
+    Each persona agent receives the ClaudeLLMPerspectiveAdapter + its RolePromptPack.
+    """
+    from packages.application.analysis.persona_registry import (  # noqa: PLC0415
+        PersonaRegistry,
+    )
+    from packages.domain.analysis.models.perspective_analysis import (  # noqa: PLC0415
+        PerspectiveRole,
+    )
+    from packages.infrastructure.analysis.perspectives.buffett_agent import (  # noqa: PLC0415
+        BuffettPerspectiveAgent,
+    )
+    from packages.infrastructure.analysis.perspectives.graham_agent import (  # noqa: PLC0415
+        GrahamPerspectiveAgent,
+    )
+    from packages.infrastructure.analysis.perspectives.taleb_agent import (  # noqa: PLC0415
+        TalebPerspectiveAgent,
+    )
+
+    assert isinstance(registry, PersonaRegistry)
+    return {
+        PerspectiveRole.BUFFETT: BuffettPerspectiveAgent(adapter, registry.get("buffett")),
+        PerspectiveRole.GRAHAM: GrahamPerspectiveAgent(adapter, registry.get("graham")),
+        PerspectiveRole.TALEB: TalebPerspectiveAgent(adapter, registry.get("taleb")),
+    }
+
+
+def _build_subagent_agents() -> dict[object, object]:
+    """Wire real V0=6 agents on ClaudeLLMPerspectiveAdapter + claude_cli_transport.
+
+    F.3 (plan-036 D3): returns dict[PerspectiveRole, LLMPerspectivePort] with 6 agents.
     Bills against parent Claude Code subscription via OAuth; no ANTHROPIC_API_KEY required.
 
     Per-role model override (S43b-BULL fix; DEFER-S43b-3): BULL → haiku.
@@ -147,21 +189,26 @@ def _build_subagent_agents() -> tuple[object, object, object]:
     sufficient for the bull role's evidence-gathering task. Bear stays on sonnet
     (adversarial nuance valued); Quant stays on opus (deterministic-ratio
     interpretation benefits from strongest model).
+
+    Note per plan-036 DD-9: BUFFETT/GRAHAM/TALEB fall through to _DEFAULT_MODEL Opus
+    in _ROLE_TO_MODEL. F.3 defers _ROLE_TO_MODEL extension to F.4 or inline fix.
     """
-    from packages.domain.analysis.models.perspective_analysis import PerspectiveRole
-    from packages.infrastructure.analysis.claude_llm_perspective_adapter import (
+    from packages.domain.analysis.models.perspective_analysis import (  # noqa: PLC0415
+        PerspectiveRole,
+    )
+    from packages.infrastructure.analysis.claude_llm_perspective_adapter import (  # noqa: PLC0415
         ClaudeLLMPerspectiveAdapter,
     )
-    from packages.infrastructure.analysis.perspectives.bear_agent import (
+    from packages.infrastructure.analysis.perspectives.bear_agent import (  # noqa: PLC0415
         BearPerspectiveAgent,
     )
-    from packages.infrastructure.analysis.perspectives.bull_agent import (
+    from packages.infrastructure.analysis.perspectives.bull_agent import (  # noqa: PLC0415
         BullPerspectiveAgent,
     )
-    from packages.infrastructure.analysis.perspectives.quant_agent import (
+    from packages.infrastructure.analysis.perspectives.quant_agent import (  # noqa: PLC0415
         QuantPerspectiveAgent,
     )
-    from packages.infrastructure.analysis.subagent_transport import (
+    from packages.infrastructure.analysis.subagent_transport import (  # noqa: PLC0415
         claude_cli_transport,
     )
 
@@ -169,11 +216,13 @@ def _build_subagent_agents() -> tuple[object, object, object]:
         transport=claude_cli_transport,
         role_model_overrides={PerspectiveRole.BULL: "claude-haiku-4-5"},
     )
-    return (
-        BearPerspectiveAgent(adapter),
-        BullPerspectiveAgent(adapter),
-        QuantPerspectiveAgent(adapter),
-    )
+    registry = _load_persona_registry()
+    return {
+        PerspectiveRole.BEAR: BearPerspectiveAgent(adapter),
+        PerspectiveRole.BULL: BullPerspectiveAgent(adapter),
+        PerspectiveRole.QUANT: QuantPerspectiveAgent(adapter),
+        **_build_persona_agents(adapter, registry),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -197,17 +246,22 @@ def _check_live_gate() -> None:
     raise NotImplementedError(_DOGFOOD_GATE_MSG)
 
 
-def _build_mock_agents() -> tuple[object, object, object]:
-    """Return (bear, bull, quant) mock perspective agents for offline use."""
-    from datetime import date
+def _build_mock_agents() -> dict[object, object]:
+    """Return V0=6 mock perspective agents for offline use.
 
-    from packages.domain.analysis.models.perspective_analysis import (
+    F.3 (plan-036 D3): returns dict[PerspectiveRole, LLMPerspectivePort] with 6 agents.
+    BUFFETT/GRAHAM/TALEB stubs use generic placeholder points (mock mode only;
+    realistic content not needed for offline/test scenarios).
+    """
+    from datetime import date  # noqa: PLC0415
+
+    from packages.domain.analysis.models.perspective_analysis import (  # noqa: PLC0415
         PerspectiveAnalysis,
         PerspectiveRole,
     )
-    from packages.domain.analysis.value_objects.bear_category import BearCategory
-    from packages.domain.analysis.value_objects.conviction import Conviction
-    from packages.domain.analysis.value_objects.grounded_point import GroundedPoint
+    from packages.domain.analysis.value_objects.bear_category import BearCategory  # noqa: PLC0415
+    from packages.domain.analysis.value_objects.conviction import Conviction  # noqa: PLC0415
+    from packages.domain.analysis.value_objects.grounded_point import GroundedPoint  # noqa: PLC0415
 
     _today = date.today()
     _src = "https://mock.stockforge.local/filing"
@@ -237,6 +291,21 @@ def _build_mock_agents() -> tuple[object, object, object]:
         _pt("P/B below 5-year average per mock ratio calculation."),
         _pt("ROE above sector 75th percentile per mock peer comparison."),
     )
+    buffett_points = (
+        _pt("Mock buffett moat point: durable competitive advantage per mock data.", "MOAT"),
+        _pt("Mock buffett valuation point: intrinsic value margin of safety per mock.", "VALUATION"),
+        _pt("Mock buffett ROIC point: high returns on capital per mock financials.", "ROIC"),
+    )
+    graham_points = (
+        _pt("Mock graham balance sheet: net-net asset value per mock data.", "BALANCE_SHEET"),
+        _pt("Mock graham margin of safety: price below book value per mock.", "VALUATION"),
+        _pt("Mock graham working capital: current ratio above 2x per mock.", "FUNDAMENTAL"),
+    )
+    taleb_points = (
+        _pt("Mock taleb tail risk: fat-tail downside scenario per mock.", "RISK"),
+        _pt("Mock taleb antifragility: stress-resistant business model per mock.", "MACRO"),
+        _pt("Mock taleb kurtosis: extreme event probability elevated per mock.", "RISK"),
+    )
 
     def _pa(role: PerspectiveRole, points: tuple[GroundedPoint, ...]) -> PerspectiveAnalysis:
         return PerspectiveAnalysis(
@@ -255,10 +324,14 @@ def _build_mock_agents() -> tuple[object, object, object]:
         async def analyze(self, _ticker: object, _ctx: object, _role: object) -> PerspectiveAnalysis:
             return self._pa
 
-    bear = _FixedAgent(_pa(PerspectiveRole.BEAR, bear_points))
-    bull = _FixedAgent(_pa(PerspectiveRole.BULL, bull_points))
-    quant = _FixedAgent(_pa(PerspectiveRole.QUANT, quant_points))
-    return bear, bull, quant
+    return {
+        PerspectiveRole.BEAR: _FixedAgent(_pa(PerspectiveRole.BEAR, bear_points)),
+        PerspectiveRole.BULL: _FixedAgent(_pa(PerspectiveRole.BULL, bull_points)),
+        PerspectiveRole.QUANT: _FixedAgent(_pa(PerspectiveRole.QUANT, quant_points)),
+        PerspectiveRole.BUFFETT: _FixedAgent(_pa(PerspectiveRole.BUFFETT, buffett_points)),
+        PerspectiveRole.GRAHAM: _FixedAgent(_pa(PerspectiveRole.GRAHAM, graham_points)),
+        PerspectiveRole.TALEB: _FixedAgent(_pa(PerspectiveRole.TALEB, taleb_points)),
+    }
 
 
 class _InProcessEventBus:

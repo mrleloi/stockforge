@@ -1,16 +1,22 @@
 """Phase1Synthesizer — deterministic multi-perspective synthesis.
 
-Aggregates BEAR / BULL / QUANT perspectives into a Synthesis entity:
+Aggregates N perspectives (V0=6: BEAR/BULL/QUANT/BUFFETT/GRAHAM/TALEB) into a
+Synthesis entity. F.3 plan-036 extends the original 3-persona logic to handle
+N≥4 personas via role-aware dispatch + pairwise disagreement detection.
+
 1. Detects per-dimension disagreement (VALUE/QUALITY/GROWTH/RISK) per spec § A.11:
-   - Disagreement = Bear=STRONG AND Bull=WEAK OR Bear=WEAK AND Bull=STRONG
+   - Disagreement = any pair of personas with opposing STRONG/WEAK verdicts on dim
    - Any disagreement → confluence=DISAGREEMENT, never STRONG_CONSENSUS (I-S12)
-2. Builds TradeOffMatrix from Bear/Bull/Quant evidence per dimension
-3. Computes confluence assessment:
+   - Extended from BEAR-vs-BULL only to ALL-PAIRS via itertools.combinations (DD-5)
+2. Builds TradeOffMatrix from N-persona evidence per dimension
+3. Computes dimension scores: QUANT-favoured; else MAJORITY-CATEGORICAL across N (DD-3)
+4. Computes confluence assessment:
    - Any disagreement → DISAGREEMENT
-   - All dimensions STRONG (Bear weak across all dims, Bull strong) → STRONG_CONSENSUS
+   - All dimensions STRONG → STRONG_CONSENSUS
    - Otherwise → MIXED
-4. Extracts catalysts from Bull key_points and risks from Bear key_points
-5. Writes reasoning_trace for auditability
+5. Extracts catalysts from Bull key_points and risks from Bear key_points
+   (canonical attribution preserved per plan-036 DD-3 architect decision)
+6. Writes reasoning_trace for auditability (includes all N-persona point counts)
 
 IMPORTANT: Phase1Synthesizer is PURE LOGIC — no LLM call. The synthesizer
 does NOT call the Anthropic SDK. Synthesis is deterministic given the perspectives.
@@ -26,6 +32,7 @@ Source: specs/tier2-feature/006-phase-2-track-F-thesis-pipeline.md § B.6 + § A
 
 from __future__ import annotations
 
+import itertools
 import logging
 
 from packages.contracts.types import Ticker
@@ -102,10 +109,15 @@ def _build_dimension_buckets(
 class Phase1Synthesizer:
     """Deterministic Phase 1 synthesizer. No LLM — pure Python logic.
 
-    Detects disagreement between Bear and Bull per-dimension and builds the
-    TradeOffMatrix. Confluence=DISAGREEMENT if any dimension shows opposing
-    conclusions; STRONG_CONSENSUS only if Bear is consistently WEAK and Bull
-    consistently STRONG across all dimensions with evidence.
+    F.3 (plan-036 D2): Extended from 3-persona (BEAR/BULL/QUANT) to N≥4 personas.
+    Key changes:
+    - by_role lookup replaces named BEAR/BULL/QUANT variables (handles any PerspectiveRole)
+    - pairwise disagreement detection via itertools.combinations across ALL N personas (DD-5)
+    - majority-categorical scoring when QUANT absent (DD-3); QUANT-favoured preserved
+    - reasoning_trace logs all N-persona point counts (N-agnostic format)
+
+    Confluence=DISAGREEMENT if any pairwise persona pair shows opposing conclusions;
+    STRONG_CONSENSUS only if all dimension scores are STRONG with no disagreements.
     """
 
     async def synthesize(
@@ -114,95 +126,115 @@ class Phase1Synthesizer:
         perspectives: tuple[PerspectiveAnalysis, ...],
         _context: object,
     ) -> Synthesis:
-        """Produce Synthesis from the 3 perspective analyses.
+        """Produce Synthesis from N perspective analyses.
 
-        Preserves all disagreements (I-S12). Never collapses to HOLD.
+        Preserves all pairwise disagreements across N personas (I-S12). Never collapses.
         """
-        bear = next((p for p in perspectives if p.role == PerspectiveRole.BEAR), None)
-        bull = next((p for p in perspectives if p.role == PerspectiveRole.BULL), None)
-        quant = next((p for p in perspectives if p.role == PerspectiveRole.QUANT), None)
+        # N-perspective dispatch — group by role (handles V0=6: BEAR/BULL/QUANT/BUFFETT/GRAHAM/TALEB)
+        by_role: dict[PerspectiveRole, PerspectiveAnalysis] = {p.role: p for p in perspectives}
+        bear = by_role.get(PerspectiveRole.BEAR)
+        bull = by_role.get(PerspectiveRole.BULL)
+        quant = by_role.get(PerspectiveRole.QUANT)
 
-        bear_buckets = _build_dimension_buckets(bear) if bear else {d: [] for d in DIMENSIONS}
-        bull_buckets = _build_dimension_buckets(bull) if bull else {d: [] for d in DIMENSIONS}
-        quant_buckets = _build_dimension_buckets(quant) if quant else {d: [] for d in DIMENSIONS}
+        # Build dimension buckets for ALL N personas (canonical BEAR/BULL/QUANT + additional)
+        # Each entry: (perspective, its dimension buckets)
+        all_with_buckets: list[tuple[PerspectiveAnalysis, dict[str, list[GroundedPoint]]]] = [
+            (p, _build_dimension_buckets(p)) for p in perspectives
+        ]
+        quant_buckets: dict[str, list[GroundedPoint]] = (
+            _build_dimension_buckets(quant) if quant else {d: [] for d in DIMENSIONS}
+        )
 
-        # Detect disagreements per dimension (§ A.11)
+        # Detect disagreements per dimension — pairwise across ALL N personas (DD-5)
+        # Extends prior BEAR-vs-BULL-only pairwise to ALL-PAIRS via itertools.combinations.
+        # Disagreement field names bear_verdict/bull_verdict RETAINED per plan-036 DD-5
+        # (backward-compat; represent p1/p2 verdict respectively for any persona pair).
+        # Disagreement.note clarifies pairwise semantics per DD-5 extension.
         explicit_disagreements: list[Disagreement] = []
         scores: dict[str, DimensionVerdict] = {}
         evidence: dict[str, tuple[GroundedPoint, ...]] = {}
 
         for dim in DIMENSIONS:
-            bear_verdict = _points_to_verdict(bear_buckets[dim])
-            bull_verdict = _points_to_verdict(bull_buckets[dim])
-            quant_verdict = _points_to_verdict(quant_buckets[dim])
+            dim_disagreements_added: set[tuple[str, str]] = set()  # deduplicate per pair
 
-            # Disagreement detection — two kinds:
-            #   verdict   = opposite STRONG/WEAK extremes (original spec § A.11 rule)
-            #   narrative = asymmetric strength on engaged dimension (P3 extension
-            #               per VF-5 calibration S43e — both perspectives have ≥1
-            #               point on the dimension, but one verdict is STRONG and
-            #               the other NEUTRAL → meaningful narrative tension that
-            #               the original verdict-only rule misses)
-            if (
-                bear_verdict == DimensionVerdict.STRONG
-                and bull_verdict == DimensionVerdict.WEAK
-            ) or (
-                bear_verdict == DimensionVerdict.WEAK
-                and bull_verdict == DimensionVerdict.STRONG
-            ):
-                explicit_disagreements.append(
-                    Disagreement(
-                        dimension=dim,
-                        bear_verdict=str(bear_verdict),
-                        bull_verdict=str(bull_verdict),
-                        note=(
-                            f"Bear {bear_verdict} vs Bull {bull_verdict} on {dim} — "
-                            "opposing conclusions; investigate further."
-                        ),
-                        kind="verdict",
-                    )
-                )
-            elif bear_buckets[dim] and bull_buckets[dim] and (
-                (
-                    bear_verdict == DimensionVerdict.STRONG
-                    and bull_verdict == DimensionVerdict.NEUTRAL
-                )
-                or (
-                    bear_verdict == DimensionVerdict.NEUTRAL
-                    and bull_verdict == DimensionVerdict.STRONG
-                )
-            ):
-                explicit_disagreements.append(
-                    Disagreement(
-                        dimension=dim,
-                        bear_verdict=str(bear_verdict),
-                        bull_verdict=str(bull_verdict),
-                        note=(
-                            f"Bear {bear_verdict} vs Bull {bull_verdict} on {dim} — "
-                            "asymmetric narrative strength; both perspectives engaged "
-                            "but with conviction mismatch. Investigate further (P3)."
-                        ),
-                        kind="narrative",
-                    )
-                )
+            # Pairwise disagreement detection across ALL N personas (per plan-036 DD-5)
+            for (p1, b1), (p2, b2) in itertools.combinations(all_with_buckets, 2):
+                v1 = _points_to_verdict(b1[dim])
+                v2 = _points_to_verdict(b2[dim])
+                pair_key = (p1.role.value, p2.role.value)
 
-            # Synthesize dimension score: favour quant data if available
-            dim_evidence: list[GroundedPoint] = (
-                bear_buckets[dim] + bull_buckets[dim] + quant_buckets[dim]
-            )
+                # Verdict disagreement: opposing STRONG/WEAK extremes (original spec § A.11 rule)
+                if (
+                    pair_key not in dim_disagreements_added
+                    and (
+                        (v1 == DimensionVerdict.STRONG and v2 == DimensionVerdict.WEAK)
+                        or (v1 == DimensionVerdict.WEAK and v2 == DimensionVerdict.STRONG)
+                    )
+                ):
+                    dim_disagreements_added.add(pair_key)
+                    explicit_disagreements.append(
+                        Disagreement(
+                            dimension=dim,
+                            bear_verdict=str(v1),   # p1 verdict (field name retained DD-5)
+                            bull_verdict=str(v2),   # p2 verdict (field name retained DD-5)
+                            note=(
+                                f"{p1.role} {v1} vs {p2.role} {v2} on {dim} — "
+                                "opposing conclusions; investigate further."
+                            ),
+                            kind="verdict",
+                        )
+                    )
+                # Narrative disagreement: asymmetric strength on engaged dimension (P3 extension
+                # per VF-5 calibration S43e — both perspectives have ≥1 point on the dim,
+                # but one verdict is STRONG and the other NEUTRAL).
+                elif (
+                    b1[dim]
+                    and b2[dim]
+                    and pair_key not in dim_disagreements_added
+                    and (
+                        (v1 == DimensionVerdict.STRONG and v2 == DimensionVerdict.NEUTRAL)
+                        or (v1 == DimensionVerdict.NEUTRAL and v2 == DimensionVerdict.STRONG)
+                    )
+                ):
+                    dim_disagreements_added.add(pair_key)
+                    explicit_disagreements.append(
+                        Disagreement(
+                            dimension=dim,
+                            bear_verdict=str(v1),   # p1 verdict
+                            bull_verdict=str(v2),   # p2 verdict
+                            note=(
+                                f"{p1.role} {v1} vs {p2.role} {v2} on {dim} — "
+                                "asymmetric narrative strength; both perspectives engaged "
+                                "but with conviction mismatch. Investigate further (P3)."
+                            ),
+                            kind="narrative",
+                        )
+                    )
+
+            # Dimension scoring: QUANT-favoured (per plan-036 DD-3 preserved);
+            # else MAJORITY-CATEGORICAL across all N personas (DD-3 simplicity-first).
+            dim_evidence: list[GroundedPoint] = []
+            for _, buckets in all_with_buckets:
+                dim_evidence.extend(buckets[dim])
+
             if quant_buckets[dim]:
-                scores[dim] = quant_verdict
+                # QUANT verdict wins when QUANT has evidence on this dimension
+                scores[dim] = _points_to_verdict(quant_buckets[dim])
             elif dim_evidence:
-                # Average bear and bull
-                both_verdicts = [bear_verdict, bull_verdict]
-                strong_count = sum(1 for v in both_verdicts if v == DimensionVerdict.STRONG)
-                weak_count = sum(1 for v in both_verdicts if v == DimensionVerdict.WEAK)
-                if strong_count > weak_count:
+                # MAJORITY-CATEGORICAL: count STRONG vs WEAK across all N personas with evidence
+                all_verdicts = [
+                    _points_to_verdict(buckets[dim])
+                    for _, buckets in all_with_buckets
+                    if buckets[dim]  # only count personas engaged on this dim
+                ]
+                strong_n = sum(1 for v in all_verdicts if v == DimensionVerdict.STRONG)
+                weak_n = sum(1 for v in all_verdicts if v == DimensionVerdict.WEAK)
+                if strong_n > weak_n:
                     scores[dim] = DimensionVerdict.STRONG
-                elif weak_count > strong_count:
+                elif weak_n > strong_n:
                     scores[dim] = DimensionVerdict.WEAK
                 else:
-                    scores[dim] = DimensionVerdict.NEUTRAL
+                    scores[dim] = DimensionVerdict.NEUTRAL  # tie defaults to NEUTRAL (DD-3)
             else:
                 scores[dim] = DimensionVerdict.NEUTRAL
 
@@ -220,19 +252,21 @@ class Phase1Synthesizer:
         else:
             confluence = Confluence.MIXED
 
-        # Catalysts from bull key_points (high conviction)
+        # Catalysts from bull key_points (high conviction) — canonical BULL attribution
+        # preserved per plan-036 DD-3 architect decision; additional personas (BUFFETT/
+        # GRAHAM/TALEB) contribute via TradeOffMatrix.evidence, not catalysts/risks.
         catalysts = tuple(
             p for p in (bull.key_points if bull else ())
             if p.conviction in (Conviction.STRONG, Conviction.MODERATE)
         )[:5]  # top 5
 
-        # Risks from bear key_points
+        # Risks from bear key_points — canonical BEAR attribution preserved per DD-3
         risks = tuple(
             p for p in (bear.key_points if bear else ())
             if p.conviction in (Conviction.STRONG, Conviction.MODERATE)
         )[:5]
 
-        # Build reasoning trace
+        # Build reasoning trace — includes all N-persona point counts (N-agnostic format)
         dims_summary = "; ".join(
             f"{d}={scores.get(d, DimensionVerdict.NEUTRAL)}" for d in DIMENSIONS
         )
@@ -241,14 +275,16 @@ class Phase1Synthesizer:
             if explicit_disagreements
             else "no disagreements detected"
         )
+        persona_count_summary = ", ".join(
+            f"{p.role}: {len(p.key_points)} points"
+            for p in sorted(perspectives, key=lambda p: p.role.value)
+        )
         reasoning_trace = (
             f"Phase1Synthesizer | {ticker.symbol} | "
             f"Dimensions: {dims_summary} | "
             f"Confluence: {confluence} | "
             f"{disagreement_summary} | "
-            f"Bear points: {len(bear.key_points) if bear else 0} | "
-            f"Bull points: {len(bull.key_points) if bull else 0} | "
-            f"Quant points: {len(quant.key_points) if quant else 0}"
+            f"Perspectives ({len(perspectives)}): {persona_count_summary}"
         )
 
         return Synthesis(

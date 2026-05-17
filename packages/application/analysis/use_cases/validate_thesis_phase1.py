@@ -2,7 +2,7 @@
 
 Implements the Phase 1 thesis validation pipeline per spec 006 § B.3:
 1. Gather Tier 1+2 context (deterministic; no LLM)
-2. Run 3 perspective agents in parallel (asyncio.gather)
+2. Run N perspective agents in parallel (asyncio.gather; F.3 plan-036 generalization)
 3. Synthesize perspectives (preserves disagreement per I-S12)
 4. Apply heuristic recommendation + confidence (BR-7; no LLM math)
 5. Build Thesis aggregate (enforces bear-case invariant I-S10)
@@ -148,23 +148,24 @@ class ValidateThesisPhase1UseCase:
     Bear retry is now handled agent-internally (ADR D-054 B5 — 3 attempts
     with re-prompt). The use-case-level bear_retry_count parameter has been
     removed; callers that passed bear_retry_count=N should drop that argument.
+
+    F.3 (plan-036 D1): agents parameter generalised from 3 individual params to
+    dict[PerspectiveRole, LLMPerspectivePort] to support N≥4 personas (V0=6 default).
+    Per DD-1: role-keyed dict matches existing _ROLE_TO_MODEL pattern; allows N>3
+    personas without ctor signature churn; backward-compat at composition root.
     """
 
     def __init__(
         self,
         data_gatherer: object,  # Phase1DataGatherer Protocol
-        bear_agent: LLMPerspectivePort,
-        bull_agent: LLMPerspectivePort,
-        quant_agent: LLMPerspectivePort,
+        agents: dict[PerspectiveRole, LLMPerspectivePort],
         synthesizer: object,  # Phase1Synthesizer Protocol
         thesis_repo: ThesisRepository,
         cost_tracker: CostTrackerPort,
         event_bus: object,  # EventBus Protocol
     ) -> None:
         self._data_gatherer = data_gatherer
-        self._bear_agent = bear_agent
-        self._bull_agent = bull_agent
-        self._quant_agent = quant_agent
+        self._agents = agents
         self._synthesizer = synthesizer
         self._thesis_repo = thesis_repo
         self._cost_tracker = cost_tracker
@@ -212,18 +213,20 @@ class ValidateThesisPhase1UseCase:
         if context.has_critical_gaps():
             return Thesis.incomplete(ticker, as_of, context.gaps)
 
-        # Step 2 — run 3 perspectives in parallel (I-S12 disagreement preserved)
-        # Agent-level retry-validator handles up to 3 attempts for bear (ADR D-054),
-        # so asyncio.gather no longer propagates a bare timeout exception from bear/quant.
-        bear_t = self._bear_agent.analyze(ticker, context, PerspectiveRole.BEAR)
-        bull_t = self._bull_agent.analyze(ticker, context, PerspectiveRole.BULL)
-        quant_t = self._quant_agent.analyze(ticker, context, PerspectiveRole.QUANT)
-        bear_p, bull_p, quant_p = await asyncio.gather(bear_t, bull_t, quant_t)
+        # Step 2 — run N perspectives in parallel (I-S12 disagreement preserved across N pairs)
+        # Per plan-036 D1 + master plan-033 DD-3 ISOLATED-THEN-AGGREGATE (asyncio.gather;
+        # no inter-agent messaging). Agent-level retry-validator handles up to 3 attempts
+        # per agent (ADR D-054); asyncio.gather receives one coroutine per role.
+        tasks = [
+            agent.analyze(ticker, context, role)
+            for role, agent in self._agents.items()
+        ]
+        results = await asyncio.gather(*tasks)
 
-        # Accumulate costs (cumulative cost already captured inside each agent retry loop)
-        budget.add(bear_p.cost_usd + bull_p.cost_usd + quant_p.cost_usd)
-
-        perspectives: tuple[PerspectiveAnalysis, ...] = (bear_p, bull_p, quant_p)
+        # Accumulate costs across all N personas (per plan-036 DD-6 sum comprehension).
+        # start=Decimal("0") required for type correctness (sum default 0 → int + Decimal = Decimal).
+        perspectives: tuple[PerspectiveAnalysis, ...] = tuple(results)
+        budget.add(sum((p.cost_usd for p in perspectives), Decimal("0")))
 
         # Step 3 — synthesize
         synthesis = await self._synthesizer.synthesize(ticker, perspectives, context)  # type: ignore[attr-defined]
@@ -234,9 +237,16 @@ class ValidateThesisPhase1UseCase:
         conf = confidence_from_synthesis(synthesis)
 
         # Compute thesis_id for AC-5 reproducibility
-        # Use combined prompt_hash from all 3 perspectives
-        combined_prompt = ":".join(p.prompt_hash for p in perspectives)
-        model_id = bear_p.model_id  # primary model for ID computation
+        # STABLE-SORTED-BY-ROLE: sort by PerspectiveRole.value (alphabetic) for
+        # deterministic combined_prompt regardless of asyncio.gather completion order
+        # or dict insertion order (per plan-036 DD-2; defense-in-depth vs D-059 R2).
+        # For N=3 (BEAR/BULL/QUANT): sorted = ("bear","bull","quant") = same as prior
+        # implicit dispatch order → existing thesis_id values UNCHANGED (AQ-7 confirmed).
+        sorted_perspectives = sorted(perspectives, key=lambda p: p.role.value)
+        combined_prompt = ":".join(p.prompt_hash for p in sorted_perspectives)
+        # Use first-sorted-role model_id for deterministic thesis_id input.
+        # For V0=6: sorted-first role = "bear" → same as prior bear_p.model_id.
+        model_id = sorted_perspectives[0].model_id if sorted_perspectives else "unknown"
         thesis_id = _compute_thesis_id(
             model_id,
             combined_prompt,
