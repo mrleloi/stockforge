@@ -186,7 +186,10 @@ class ValidateThesisPhase1UseCase:
 
         try:
             with self._cost_tracker.scoped_budget(
-                limit_usd=Decimal("3.00")
+                # BR-6 cap raised $3.00 → $6.00 (D-081, 2026-05-17).
+                # Empirical: S395 6-persona V0=6 run cost $4.24 > $3.00.
+                # $6.00 gives headroom above observed max per user Q1=A auth.
+                limit_usd=Decimal("6.00")
             ) as budget:
                 return await self._run_pipeline(
                     ticker, effective_as_of, budget
