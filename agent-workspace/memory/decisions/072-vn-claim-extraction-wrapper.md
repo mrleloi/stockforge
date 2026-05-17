@@ -1,7 +1,7 @@
 ---
 id: 072
 title: VN Claim Extraction Wrapper — AUGMENT existing extractor + anthropic→subagent default-flip + 2 new ExtractedClaim fields
-status: PROPOSED
+status: ACCEPTED
 date: 2026-05-17
 authors: sandwich-dev S368
 level: IMPL
