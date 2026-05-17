@@ -144,6 +144,31 @@
 
 ---
 
+## S365 — Phase E.2 VN Sentiment Lexicon IMPL DONE (sub-plan 030; S366 verifier pending) — 2026-05-17
+
+**S365 sandwich-dev RETURN** (Sonnet 4.6 FOCUSED_IMPL, AP-1 fresh-context). Sub-plan 030 D1-D5 COMPLETE. 34/35 DoD PASS (DC-BOOK-4 deferred to S366 per protocol).
+
+**CHARTER-TIER GATE (corpus labelling)**: NON-BLOCKING per dispatch brief. STOP-FINDING file written at `human-workspace/notifications/STOP-FINDING-S365-corpus-labelling-source.md`. UNCALIBRATED-V0 ship path taken. Calibration cycle deferred pending user ratification.
+
+**Files shipped** (9 new production/test files; ~1192 LOC production + agent-workspace):
+- `packages/application/nlp/ports/vn_lexicon_port.py` (55 LOC; D1 Protocol)
+- `apps/extraction/__init__.py` (1 LOC; namespace marker)
+- `apps/extraction/sentiment/__init__.py` (15 LOC; exports)
+- `apps/extraction/sentiment/vn_lexicon.py` (494 LOC; D2 adapter + ~220 keywords + cultural anchors)
+- `apps/extraction/sentiment/test_vn_lexicon.py` (395 LOC; D3 tests; 26/27 PASS; 1 pyvi-live skip)
+- `apps/cli/score_vn_sentiment.py` (226 LOC; D5 CLI)
+- `agent-workspace/memory/decisions/071-vn-sentiment-lexicon.md` (150 LOC; ADR D-071 PROPOSED)
+- `agent-workspace/calibration/vn_sentiment_lexicon_v0.md` (172 LOC; D4 calibration recipe)
+- `human-workspace/notifications/STOP-FINDING-S365-corpus-labelling-source.md` (68 LOC)
+
+**Gates**: mypy --strict PASS / ruff PASS / pytest 1079/1079 PASS (1053+26; 0 regressions) / Rule 16 mode-2 CLEAN (zero LLM imports) / I-S34 CLEAN / determinism smoke PASS.
+
+**Cultural anchors**: 8 mandatory entries wired (đội_lái / đu_đỉnh / bắt_đáy / phím_hàng / bơm_thổi / cá_mập / hàng_zin + ASCII forms). `VN_CULTURAL_ANCHORS: frozenset[str]` exported for E.3 sub-plan 031.
+
+**Next**: dispatch S366 sandwich-verifier AP-1 fresh-context to verify sub-plan 030 per § F DoD 35 items.
+
+---
+
 ## S362 — Phase E.1 VN Tokenization IMPL DONE (sub-plan 029; S363 verifier pending) — 2026-05-17
 
 **S362 sandwich-dev RETURN** (Sonnet 4.6 FOCUSED_IMPL, AP-1 fresh-context). Sub-plan 029-S361-phase-e1-vn-tokenization D1-D4 COMPLETE. 32/33 DoD self-assessed PASS (DC-BOOK-4 deferred to S363 per protocol).
