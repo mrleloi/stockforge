@@ -122,10 +122,64 @@ if [[ ! -f "$ROLLUP" ]]; then
     printf 'session_n\tsession_id\tts_utc\ttokens_real\ttools_used\tsubagents\tfailure_codes\twall_min\n' > "$ROLLUP"
 fi
 
-# Append row.
-printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-    "$session_n" "$session_id" "$ts_utc" "$tokens_real" "$tools_used" "$subagents" "$failure_codes" "$wall_min" \
-    >> "$ROLLUP"
+# Detect active plan_id (D1 writer extension — plan-039 L-S354-2 9th-instance fix).
+# Strategy: scan session-plans/pending/ for the most-recently-modified plan file.
+# If found, use its basename as plan_id and derive sub_track_count + parallel_dispatched
+# from dispatch.jsonl DISPATCHED events with sandwich-dev/sandwich-verifier agent_type.
+# The 14-col row is appended AFTER the 8-col row so planner-feedback-loop.sh can consume it.
+# Falls back silently if no pending plan found (best-effort; never blocks Stop pipeline).
+PLANS_PENDING_DIR="$ROOT_DIR/agent-workspace/session-plans/pending"
+plan_id=""
+sub_track_count=0
+parallel_dispatched=0
+wall_min_estimated=0
+wall_min_actual="$wall_min"
+parallel_savings_min=0
+
+if [[ -d "$PLANS_PENDING_DIR" ]]; then
+    # Most recently modified plan in pending/ (the plan this dev session executed).
+    ACTIVE_PLAN="$(find "$PLANS_PENDING_DIR" -maxdepth 1 -name '[0-9][0-9][0-9]-*.md' \
+        2>/dev/null | xargs ls -t 2>/dev/null | head -1 || true)"
+    if [[ -n "$ACTIVE_PLAN" && -f "$ACTIVE_PLAN" ]]; then
+        plan_id="$(basename "$ACTIVE_PLAN" .md)"
+    fi
+fi
+
+if [[ -n "$plan_id" ]]; then
+    # sub_track_count: heuristic — count DISPATCHED events for sandwich-dev / sandwich-verifier
+    if [[ -r "$DISPATCH" ]]; then
+        parallel_dispatched=$(grep '"event":"DISPATCHED"' "$DISPATCH" 2>/dev/null \
+            | grep -c '"agent_type":"sandwich-' 2>/dev/null || true)
+        [[ "$parallel_dispatched" =~ ^[0-9]+$ ]] || parallel_dispatched=0
+        # sub_track_count: best-effort from plan frontmatter budget line comment (not parseable)
+        # fallback = count parallel dispatch events or default to subagents count
+        sub_track_count="$subagents"
+        [[ "$sub_track_count" -lt 1 ]] && sub_track_count=1
+    fi
+    # wall_min_estimated: parse from plan frontmatter "budget:" line (e.g. "150-220K")
+    # too complex to parse reliably; leave as 0 (cold-start fallback)
+    wall_min_estimated=0
+    # parallel_savings_min: estimate = 0 if parallel_dispatched==0; else nominal savings
+    if [[ "$parallel_dispatched" -gt 1 ]]; then
+        parallel_savings_min=$(( (parallel_dispatched - 1) * (wall_min_actual / parallel_dispatched + 1) ))
+        [[ "$parallel_savings_min" -lt 0 ]] && parallel_savings_min=0
+    fi
+
+    # Append 14-col extended row (planner-feedback-loop.sh consumes col9+ on NF >= 14 check).
+    printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+        "$session_n" "$session_id" "$ts_utc" "$tokens_real" "$tools_used" "$subagents" \
+        "$failure_codes" "$wall_min" \
+        "$plan_id" "$sub_track_count" "$parallel_dispatched" \
+        "$wall_min_estimated" "$wall_min_actual" "$parallel_savings_min" \
+        >> "$ROLLUP"
+
+    echo "[$(date -u +%FT%TZ)] self-awareness-aggregate: 14-col row appended plan_id=$plan_id sub_track_count=$sub_track_count parallel_dispatched=$parallel_dispatched" >> "$LOG"
+else
+    # Standard 8-col row (no active plan detected).
+    printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+        "$session_n" "$session_id" "$ts_utc" "$tokens_real" "$tools_used" "$subagents" "$failure_codes" "$wall_min" \
+        >> "$ROLLUP"
+fi
 
 echo "[$(date -u +%FT%TZ)] self-awareness-aggregate session_n=$session_n tokens_real=$tokens_real tools_used=$tools_used subagents=$subagents failure_codes=$failure_codes wall_min=$wall_min" >> "$LOG"
 

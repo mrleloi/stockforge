@@ -42,6 +42,18 @@ For shell hooks: capture `bash -n <hook>.sh` output + `head -50 <hook>.sh`. For 
 modules: capture the relevant function/class signature. The baseline is your contract:
 any deviation in output vs. baseline is a potential regression to flag.
 
+**STEP 0.11 — Ctor-Signature Grep Discipline (L-S382-1 promoted; plan-039 D2.B)**:
+
+When modifying ANY public ctor (`__init__`, `@dataclass`, factory-method) signature
+(adding/removing/renaming param OR changing default), MUST:
+1. `grep -rn "<ClassName>(" packages/ apps/ tests/` — list ALL call-sites
+2. Update each call-site to match new signature
+3. RE-RUN full-project pytest (not sub-package scope) BEFORE commit
+4. Cite the grep result + count in your dev observation
+
+Anti-example: M-S381-1 (ValidateThesisPhase1UseCase ctor changed; _make_use_case test
+helper not updated; 4 pytest failures + 4 mypy errors slipped to verifier).
+
 ### Phase 2: Execute Task by Task
 
 For each task in plan's Task Sequence:
@@ -84,6 +96,27 @@ If task can't be completed as planned:
 Never invent alternative architecture on the fly.
 
 ### Phase 5: Report
+
+**STEP 5.4 — LOC self-report exact-at-end (L-S385-1 promoted; plan-039 D7)**:
+
+At end of session, BEFORE writing observation file or commit message:
+1. Run `wc -l <file>` for each modified/created file
+2. Update observation table to use EXACT INTEGERS (NOT "~" prefix)
+3. "~" approximation prefix is DEPRECATED at L-S345-1 n=12+ cycle
+4. If file edits happened mid-authoring, RE-RUN wc -l final pass before commit
+
+Anti-example: M-S385-1 (3 files >25 LOC off in dev self-report; caused L-S345-1
+PASS-WITH-MINOR-DRIFT at n=11; caught by S385 verifier F1 IMPORTANT via independent wc -l).
+
+**STEP 5.5 — VN_CULTURAL_ANCHORS frozenset provenance (L-S366-3 promoted; plan-039 D6)**:
+
+When modifying `packages/application/news/text_processing/_vn_lexicon.py`
+`VN_CULTURAL_ANCHORS` frozenset OR any cultural anchor dictionary, MUST append a row to
+`agent-workspace/memory/decisions/071-vn-sentiment-lexicon.md` § Anchor Provenance Log
+with: anchor string + session ID + agent ID + rationale + source corpus.
+
+Anti-example: S366 F1 inline-fix added "lai_co_phieu" with no provenance log.
+I-S22 data-lineage invariant requires audit trail for cultural-anchor decisions.
 
 **OBSERVATION FILE (mandatory)**: After your dev session, write a structured observation
 file at `agent-workspace/memory/observations/sandwich-dev-S<N>-<plan-id-slug>.md`

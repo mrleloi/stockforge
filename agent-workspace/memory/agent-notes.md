@@ -3,6 +3,34 @@
 > Append-mostly. Each rule earned through real experience (post-mortem, drift detection, user correction).
 > Rules here have higher status than convention but lower than constitution.
 
+---
+
+## 2026-05-17 (S388): RETIRE decisions from plan-039 harness sweep (DC-IMPL-19)
+
+### RETIRED-1ST-INSTANCE-DUPLICATE-OF-CHARTER: L-S385-3
+**Context**: plan-039 § C candidate 3 — "INCOMPLETE-corpus dogfood = calibrated honesty signal per Charter Principle 6"
+**Rule (RETIRED)**: Promote INCOMPLETE-corpus framing as a template language saying "system working correctly".
+**RETIRE rationale**: Charter Principle 6 (Adversarial by default) ALREADY mandates this framing. Promoting to template would just paraphrase existing charter text = inline accumulation per AP-23 RED FLAG. No new artifact provides leverage beyond existing constitution.
+**AP-7 revisit trigger**: if a 2nd instance fires where dev INCORRECTLY treats INCOMPLETE as failure (not calibrated honesty), then promote with explicit template language.
+**Severity**: LOW (1st-instance; CHARTER already covers)
+**AP-23 outcome**: RETIRED (not promoted; not silently skipped — documented here per AP-23 RETIRE artifact discipline)
+
+### RETIRED-DUPLICATE-OF-MASTER-PLAN: L-S385-4
+**Context**: plan-039 § C candidate 4 — "bundled plan-mv at close-bookkeeping when parallel-eligible per master plan § E.4-5"
+**Rule (RETIRED)**: Promote bundled-plan-mv-when-parallel-eligible as explicit template language.
+**RETIRE rationale**: rule already informally observed at S386 (n=1 evidence); promoting to template would just paraphrase master plan § E.4-5 which already covers parallel-eligible close-bookkeeping. No leverage from new artifact.
+**AP-7 revisit trigger**: if 2nd instance fires where dev FAILS to bundle when parallel-eligible (causing unnecessary double-commit round-trip), then promote with explicit template language.
+**Severity**: LOW (1st-instance; master-plan § E.4-5 already covers)
+**AP-23 outcome**: RETIRED (not promoted; documented here per AP-23 RETIRE artifact discipline)
+
+### RETIRED-SPECULATIVE-ABSTRACTION: L-S371-1
+**Context**: plan-039 § C candidate 9 — "resolver pattern reusable for sector/persona/ticker resolution"
+**Rule (RETIRED)**: Factor out common resolver Protocol from VnTickerResolver for reuse by future VnSectorResolver + VnPersonaResolver.
+**RETIRE rationale**: Only ONE resolver exists: `apps/_shared/entities/vn_ticker_resolver.py`. `packages/application/_shared/resolver.py` does NOT exist (Glob confirmed). Sector + persona resolvers are future hypothetical Phase G-prime extensions. Creating an empty Protocol with one implementation = speculative abstraction per Karpathy P2 "no abstractions for single-use code".
+**AP-7 revisit trigger**: WHEN a 2nd concrete resolver implementation lands (e.g. VnSectorResolver OR VnPersonaResolver), THEN architect dispatches a refactor session to factor out common base AT THAT TIME (refactor-to-3, not predict-from-1).
+**Severity**: LOW (1st-instance; Karpathy P2 explicitly prohibits)
+**AP-23 outcome**: RETIRED (not promoted; documented here per AP-23 RETIRE artifact discipline)
+
 ## Rule Format
 
 Use this template:

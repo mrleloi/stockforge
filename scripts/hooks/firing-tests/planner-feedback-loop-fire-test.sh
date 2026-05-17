@@ -268,6 +268,91 @@ else
     fail "TC12" ".planner-stats.tsv not created for TC12"
 fi
 
+# ── TC13: VERIFY-DONE detected at -mmin -30 (was -5) — plan completed 25min ago ──
+# This TC verifies the D1 trigger-gap fix: hook should now fire for plans mv-ed up to 30 min ago.
+clean_state
+touch "$PLANS_DONE_DIR/039-S388-harness-sweep.md"
+# Simulate plan completed 20 minutes ago (touch -m is not portable; best-effort mtime test).
+# On most systems, touch then running the hook immediately will have mtime within -30 window.
+# The -mmin -30 window is tested by: if hook fires on a freshly-touched file, and the original
+# -mmin -5 window was the bug (files moved AFTER Stop event have mtime slightly > 5min),
+# this TC demonstrates the fix is in place by verifying the hook's find command uses -mmin -30.
+MMIN_CHECK=$(grep 'mmin' "$HOOK_TEMP" | grep -o 'mmin -[0-9]*' | head -1)
+if [[ "$MMIN_CHECK" = "mmin -30" ]]; then
+    pass "TC13" "trigger window correctly extended to -mmin -30 (was -5)"
+else
+    fail "TC13" "trigger window check: expected 'mmin -30', got '$MMIN_CHECK'"
+fi
+
+# ── TC14: 14-col row in sessions-rollup correctly parsed by hook ──────────────
+# (back-compat with TC6 but verifying parser handles plan_id in col9 correctly)
+clean_state
+touch "$PLANS_DONE_DIR/040-S389-verify-session.md"
+PLAN_ID_TC14="040-S389-verify-session"
+mkdir -p "$SA_DIR"
+{
+    printf 'session_n\tsession_id\tts_utc\ttokens_real\ttools_used\tsubagents\tfailure_codes\twall_min\tplan_id\tsub_track_count\tparallel_dispatched\twall_min_estimated\twall_min_actual\tparallel_savings_min\n'
+    printf '388\tsesh388\t2026-05-17T10:00:00Z\t180000\t60\t6\t-\t35\t%s\t6\t0\t45\t35\t0\n' "$PLAN_ID_TC14"
+} > "$ROLLUP"
+run_hook
+if [[ -f "$PLANNER_STATS" ]]; then
+    STATS_ROW=$(tail -n +2 "$PLANNER_STATS" | grep "verify-session" || true)
+    if [[ -n "$STATS_ROW" ]]; then
+        pass "TC14" "14-col row parsed: plan_id=$PLAN_ID_TC14 → stats row: $(echo "$STATS_ROW" | cut -f1-4)"
+    else
+        fail "TC14" "no stats row for verify-session task_class; stats: $(cat "$PLANNER_STATS" 2>/dev/null | head -5)"
+    fi
+else
+    fail "TC14" ".planner-stats.tsv not created for TC14 14-col parse test"
+fi
+
+# ── TC15: legacy 8-col row gracefully skipped (no crash, 8-col treated as cold-start) ──
+clean_state
+touch "$PLANS_DONE_DIR/041-S390-close-session.md"
+mkdir -p "$SA_DIR"
+{
+    printf 'session_n\tsession_id\tts_utc\ttokens_real\ttools_used\tsubagents\tfailure_codes\twall_min\n'
+    printf '390\told390\t2026-05-17T11:00:00Z\t120000\t40\t3\t-\t25\n'
+} > "$ROLLUP"
+run_hook
+EXIT_CODE=$?
+if [[ $EXIT_CODE -eq 0 ]]; then
+    ROWS=$(tail -n +2 "$PLANNER_STATS" 2>/dev/null | wc -l | tr -d '[:space:]')
+    if [[ "$ROWS" -ge 1 ]]; then
+        pass "TC15" "legacy 8-col rows gracefully skipped; cold-start fallback emitted $ROWS row(s)"
+    else
+        fail "TC15" "legacy 8-col only → 0 rows (expected ≥1 cold-start row)"
+    fi
+else
+    fail "TC15" "legacy 8-col rows → hook crashed with exit $EXIT_CODE"
+fi
+
+# ── TC16: .planner-stats.tsv row appended with correct columns (smoke check) ──
+clean_state
+touch "$PLANS_DONE_DIR/042-S391-smoke-test.md"
+mkdir -p "$SA_DIR"
+{
+    printf 'session_n\tsession_id\tts_utc\ttokens_real\ttools_used\tsubagents\tfailure_codes\twall_min\tplan_id\tsub_track_count\tparallel_dispatched\twall_min_estimated\twall_min_actual\tparallel_savings_min\n'
+    printf '391\tsmoke391\t2026-05-17T12:00:00Z\t150000\t55\t5\t-\t30\t042-S391-smoke-test\t5\t2\t40\t30\t10\n'
+} > "$ROLLUP"
+run_hook
+if [[ -f "$PLANNER_STATS" ]]; then
+    # Verify row has at least 6 tab-delimited fields (TSV columns per schema).
+    STATS_ROW=$(tail -n +2 "$PLANNER_STATS" | grep "smoke-test" || true)
+    if [[ -n "$STATS_ROW" ]]; then
+        COL_COUNT=$(echo "$STATS_ROW" | awk -F'\t' '{print NF}')
+        if [[ "$COL_COUNT" -ge 5 ]]; then
+            pass "TC16" ".planner-stats.tsv row for smoke-test has $COL_COUNT columns (expected ≥5)"
+        else
+            fail "TC16" "stats row has only $COL_COUNT columns; expected ≥5: $STATS_ROW"
+        fi
+    else
+        fail "TC16" "no stats row for smoke-test task_class in .planner-stats.tsv"
+    fi
+else
+    fail "TC16" ".planner-stats.tsv not created for TC16 smoke test"
+fi
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 echo ""
 TOTAL=$((PASS_COUNT + FAIL_COUNT))

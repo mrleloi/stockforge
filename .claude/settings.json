@@ -544,6 +544,10 @@
           },
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/pre-commit-pytest-regression-guard.sh\""
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/hooks/autonomous-block-enforcer.sh\" PreToolUse"
           },
           {

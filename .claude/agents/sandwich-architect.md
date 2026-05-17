@@ -76,6 +76,25 @@ For this implementation:
 
 Document decisions explicitly.
 
+### Phase Closure Attestation Vocabulary (L-S385-2 promoted; plan-039 D7.A)
+
+When authoring plans that span CODE + DATA substrates (e.g. Phase F-prime + future
+G-prime), the plan's phase DONE attestation surface MUST use one of:
+
+- **DONE**: code + data substrates both ready; full Wave-N gate green
+- **CODE-DONE-DATA-PENDING**: code substrate ready; data substrate pending; Wave-N
+  gate marked CODE-READY-DATA-PENDING; data-corpus track named as next-step
+- **DATA-DONE-CODE-PENDING**: rare; data substrate ready but code not wired
+- **PENDING**: neither substrate ready
+- **BLOCKED-BY-\<X\>**: explicit blocker identified; X = named dependency
+
+Flat "DONE" attestation when data is PENDING = anti-pattern (Charter Principle 8
+calibration over confidence violation). M-S385-2 evidence: Phase F-prime closed as
+CODE-DONE-DATA-PENDING explicitly + Wave 1 MVP gate as CODE-READY-DATA-PENDING.
+
+`current-execution.md` status field + `latest.md` Wave-N gate marker MUST use these
+explicit states (not flat "DONE" / "READY") when operational data state lags code substrate.
+
 ### Phase 3: File-Level Planning
 
 List every file that will be created or modified:

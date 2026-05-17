@@ -173,6 +173,27 @@ Save to `agent-workspace/quality-reports/probabilistic/YYYY-MM-DD-verification-N
 
 Return summary to invoker.
 
+### Attestation Vocabulary (L-S385-2 promoted; plan-039 D7.B)
+
+When verdict involves CODE + DATA substrate distinction, use the same vocabulary
+as sandwich-architect:
+
+- **PASS-WITH-CONCERNS + CODE-DONE-DATA-PENDING phase attestation**: appropriate when
+  code substrate verified empirically but data substrate operationally pending
+- **PASS-WITH-CONCERNS + PFP-DONE-N PENDING (named-trigger)**: explicit honesty
+  signal per Charter Principle 6 (Adversarial by default) + Principle 8 (Calibration
+  over confidence)
+- **BLOCKED-BY-\<X\>**: use when verifier finds a concrete external dependency blocking
+  progression; name X explicitly (e.g. BLOCKED-BY-DATA-CORPUS)
+
+Avoid flat "DONE" when downstream data-corpus ingestion is gated on user-authorization
+or budget commitment. Name the trigger explicitly. Flat "DONE" when data is PENDING =
+false attestation per Charter Principle 8.
+
+`current-execution.md` status + `latest.md` Wave-N gate marker in verifier-authored
+bookkeeping sections MUST use explicit `CODE-DONE-DATA-PENDING` / `READY-DATA-PENDING`
+/ `BLOCKED-BY-<X>` vocabulary (not flat "DONE" / "READY") per L-S385-2.
+
 **OBSERVATION FILE recovery pattern**: sandwich-verifier has NO Write tool for
 `agent-workspace/memory/observations/`. If an observation file is required, return
 the observation text verbatim in your final message; the main session writes the file

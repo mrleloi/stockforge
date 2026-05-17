@@ -42,10 +42,13 @@ if [[ ! -d "$PLANS_COMPLETED_DIR" ]]; then
 fi
 
 PLANS_DONE=""
-# Use find with -mmin -5 for plans completed in last 5 minutes.
+# Use find with -mmin -30 for plans completed in last 30 minutes.
+# Rationale (L-S354-2 D1 9th-instance fix): close-bookkeeping plan-mv happens
+# AFTER the dev session's Stop event; -mmin -5 missed the mv window.
+# Extended to -mmin -30 to catch async close-bookkeeping mv-s.
 while IFS= read -r f; do
     PLANS_DONE="${PLANS_DONE}${f}"$'\n'
-done < <(find "$PLANS_COMPLETED_DIR" -maxdepth 1 -name '*.md' -mmin -5 2>/dev/null || true)
+done < <(find "$PLANS_COMPLETED_DIR" -maxdepth 1 -name '*.md' -mmin -30 2>/dev/null || true)
 
 if [[ -z "${PLANS_DONE// /}" ]]; then
     # No VERIFY-DONE this Stop window — silent skip.

@@ -149,3 +149,20 @@ E.3 sub-plan 031 consumer (mentioned_pump_anchors field per parent DD-5 step 5).
   § 3.5 + § 7.3 + § 7.8 (pattern source + cultural anchors + anti-pattern veto)
 - agent-workspace/memory/observations/master-planner-A-01-deepdive-ai-hedge-fund.md
   § 3 C9 (Buffett rubric tier pattern)
+
+## Anchor Provenance Log
+
+> Append-only. Every modification to `VN_CULTURAL_ANCHORS` frozenset MUST add a row here.
+> Required per plan-039 D6 (L-S366-3 promotion) + I-S22 data-lineage invariant.
+> Format: anchor | session | agent | rationale | source corpus
+
+| Anchor | Added (session) | Added by | Rationale | Source corpus |
+|---|---|---|---|---|
+| doi_lai / đội_lái | S365 | sandwich-dev a8b3a3966a14bd85a | Pump-group manipulation marker; dual ASCII+unicode for pyvi tokenizer coverage; plan-030 DD-3 mandatory anchors | n=36 corpus (RM7 reference corpus; HYPOTHESIS weights) |
+| lai_co_phieu | S366 | sandwich-verifier inline-fix F1 | Dict entry had weight -0.6 but was NOT in VN_CULTURAL_ANCHORS frozenset; frozenset drives I-S22 consumer (mentioned_pump_anchors); mismatch = data-lineage gap | inherited from initial corpus; found during S366 adversarial review |
+| du_dinh / đu_đỉnh | S365 | sandwich-dev a8b3a3966a14bd85a | FOMO-at-top retail-trap signal; mandatory per plan-030 DD-3 | n=36 corpus |
+| bat_day / bắt_đáy | S365 | sandwich-dev a8b3a3966a14bd85a | Bottom-fishing risky strategy marker; mandatory per plan-030 DD-3 | n=36 corpus |
+| phim_hang / phím_hàng | S365 | sandwich-dev a8b3a3966a14bd85a | Insider-tip stock pumping; mandatory per plan-030 DD-3 | n=36 corpus |
+| bom_thoi / bơm_thổi | S365 | sandwich-dev a8b3a3966a14bd85a | Classic pump-and-dump; mandatory per plan-030 DD-3 | n=36 corpus |
+| ca_map / cá_mập | S365 | sandwich-dev a8b3a3966a14bd85a | Whale / large-money manipulator; mandatory per plan-030 DD-3 | n=36 corpus |
+| hang_zin / hàng_zin | S365 | sandwich-dev a8b3a3966a14bd85a | Quality stock (positive anchor); mandatory per plan-030 DD-3 | n=36 corpus |
