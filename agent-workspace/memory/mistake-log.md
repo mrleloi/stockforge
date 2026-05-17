@@ -18,6 +18,20 @@
 
 ---
 
+### M-S405-1
+**Date**: 2026-05-17
+**Session**: S405 (architect crashed; re-dispatched as S406)
+**Severity**: medium
+**What happened**: Sandwich-architect dispatched for G.4 sub-plan 044 (background `ae056b21b2cabe171`, ~19min wall-clock / 54 tool uses) CRASHED with API error: "Claude's response exceeded the 64000 output token maximum". ZERO files written to disk despite extensive context work (VBW reads + DD design likely consumed in agent context). plan-044 + observation files NOT on disk. usage report shows tokens_used=316 reflects only the failure-event accounting; actual context build-up much larger. Re-dispatch needed.
+**Root cause** (multi-layer):
+- Layer 1: Architect's return-summary text composition exceeded 64K output cap. Pattern: prior plans grew 720 (S392/plan-041) → 614 (S393/plan-045) → 1093 (S398/plan-043, +52%) → 938 (S402/plan-046, +30%). G.4 likely scoped wider (7-STEP execution with cold-probes + integration smoke + cross-source validation) leading to architect composing a >64K plan-044 + return summary combined.
+- Layer 2: Dispatch brief did NOT specify hard cap on plan LOC or return summary length. CLAUDE.md § Session Types Opus PLAN budget = 150-230K input/processing tokens, but does NOT cap OUTPUT tokens. Anthropic API has 64K output cap per single message.
+- Layer 3: Architect persona pattern is to write plan via Write tool (which doesn't count to output cap) THEN compose return summary (which does count). If plan file is very large + return summary repeats plan content + 9 DDs × verbose rationale × 5 RMs etc. — output cap hit on return summary message.
+**Prevention rule L-S405-1** (1st instance MEDIUM; AP-23 HELD-FOR-PROMOTION on 2nd recurrence within 5 sessions): sandwich-architect dispatch briefs MUST specify hard caps on plan LOC (target ≤700; max 1100) AND return summary length (target ≤2K words ≤ ~8K tokens; verbatim cite "compose return summary CONCISELY: file paths + LOC + verdict + 3-5-bullet handoff; do NOT repeat plan content"). Architect MUST Write plan + observation FIRST before composing return summary; if plan is large, return summary MUST be tighter to compensate. Carry-forward: at 2nd-instance recurrence, promote to deterministic dispatch-brief template with concrete "max output budget" callout.
+**Where applied**: Inline-this-turn: this mistake-log entry + re-dispatch S406 with stricter brief. Severity MEDIUM: no production impact; ~19min wall-clock + ~$0.X Anthropic cost wasted on uncompleted dispatch; pattern is new (1st instance) but high-cost-when-recurs.
+
+---
+
 ### M-S404-NONE + PCG-V404-1
 **Date**: 2026-05-17
 **Session**: S404
