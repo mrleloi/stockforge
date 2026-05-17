@@ -15,9 +15,11 @@ Invariants enforced in __post_init__:
   text quoted (≤500 chars)` per protocol verbatim).
 - Rule 6: at least one of mentioned_tickers / mentioned_sectors non-empty —
   a claim with zero entities is noise and should not be persisted.
+- Rule 16 mode 2: lexicon_score in [-1.0, 1.0] (plan-031 DD-3 bounds).
 
 Source: specs/tier1-strategic/001-four-tier-signal-architecture.md § B.2;
 agent-workspace/constitution/financial-data-protocol.md Rule 6 + Rule 7.
+NEW per plan-031 (S368): lexicon_score + mentioned_pump_anchors per DD-3 + DD-4.
 """
 
 from __future__ import annotations
@@ -57,6 +59,22 @@ class ExtractedClaim:
     mentioned_sectors: tuple[str, ...] = field(default_factory=tuple)
     key_phrases: tuple[str, ...] = field(default_factory=tuple)
     tone_indicators: tuple[str, ...] = field(default_factory=tuple)
+    lexicon_score: float = 0.0
+    """I-S1 + Rule 16 mode 2: deterministic-pipeline echo of
+    VnSentimentLexicon.score(article.body_excerpt).numeric_score.
+    Default 0.0 = neutral / no lexicon scoring performed.
+    Range enforced via __post_init__ to [-1.0, 1.0].
+    LLM never emits this field per Rule 1 NO LLM MATH (system-prompt-enforced).
+    Source: plan-031 DD-3 + DD-4 (S368).
+    """
+    mentioned_pump_anchors: tuple[str, ...] = field(default_factory=tuple)
+    """I-S1 + deterministic frozenset intersection:
+    tuple(sorted(VN_CULTURAL_ANCHORS & set(VnSentimentLexicon.score(body).keyword_hits))).
+    Default empty = no anchors detected OR lexicon unavailable.
+    Sorted for deterministic output order.
+    LLM never emits this field per Rule 1 NO LLM MATH (system-prompt-enforced).
+    Source: plan-031 DD-3 + DD-4 (S368).
+    """
 
     def __post_init__(self) -> None:
         if not self.claim_id.strip():
@@ -79,4 +97,10 @@ class ExtractedClaim:
         if not self.mentioned_tickers and not self.mentioned_sectors:
             raise ExtractedClaimInvariantError(
                 "claim must mention at least one ticker or sector (Rule 6 — entity grounding)"
+            )
+        # NEW per plan-031 DD-3 — Rule 16 mode 2 bounds enforcement
+        if not -1.0 <= self.lexicon_score <= 1.0:
+            raise ExtractedClaimInvariantError(
+                f"lexicon_score {self.lexicon_score} not in [-1.0, 1.0] "
+                "(Rule 16 mode 2 range violation; mirrors SentimentScore bounds)"
             )

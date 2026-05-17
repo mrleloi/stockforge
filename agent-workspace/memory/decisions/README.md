@@ -2,7 +2,7 @@
 
 > **Status**: Track 2 deliverable per Decision 002 § Track 2 (REV-2).
 > **Schema source**: [_template.md](_template.md) — every decision file MUST start with the canonical frontmatter.
-> **Last updated**: 2026-05-17 (S365 — D-071 added: VN Sentiment Lexicon v0 + Calibration Loop)
+> **Last updated**: 2026-05-17 (S368 — D-072 added: VN Claim Extraction Wrapper AUGMENT + transport flip + 2 new ExtractedClaim fields)
 
 This directory is **append-only with supersession**. Decisions are never deleted; they are marked `SUPERSEDED-BY-D-NNN` or `REVOKED` and remain on disk as the audit trail.
 
@@ -40,6 +40,7 @@ If agent confidence is below threshold for a level, it MUST open a Q&A bundle in
 
 | ID | Title | Level | Status | Date | Source prompt(s) |
 |---|---|---|---|---|---|
+| [D-072](072-vn-claim-extraction-wrapper.md) | VN Claim Extraction Wrapper AUGMENT + anthropic→subagent default-flip + 2 new ExtractedClaim fields (lexicon_score + mentioned_pump_anchors; Rule 16 mode 2 deterministic-pipeline echo) | IMPL | PROPOSED | 2026-05-17 | plan-031-S367 § D DD-1..DD-7 + § E D1-D5; S368 dev IMPL |
 | [D-071](071-vn-sentiment-lexicon.md) | VN Sentiment Lexicon v0 + Calibration Loop — ~220 keywords + 8 cultural anchors; HYPOTHESIS weights; calibration recipe + UNCALIBRATED-V0 ship | ARCH | PROPOSED | 2026-05-17 | sub-plan 030-S364 § D1-D5; plan-030 DD-1..DD-7; S365 dev IMPL |
 | [D-070](070-vn-tokenizer-library.md) | VN Tokenizer Library Selection — pyvi==0.1.1 MIT; STEP 0 CHARTER-TIER GATE did not fire (underthesea v9.4.0 = Apache-2.0) | ARCH | PROPOSED | 2026-05-17 | sub-plan 029-S361 STEP 0 empirical eval; plan-029 § DD-2 |
 | [D-056](056-S253-charter-v1.1-principle-11-ratified.md) | PROJECT_CHARTER.md v1.0 → v1.1 APPLIED — Principle 11 (Harness must self-verify firing) ratified at S253 | CHARTER | ACCEPTED | 2026-05-12 | proposals/charter-revision-v1.1-harness-self-verify-firing.md + Q-P4-3 S251 AskUserQuestion |

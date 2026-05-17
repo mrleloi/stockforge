@@ -144,6 +144,33 @@
 
 ---
 
+## S368 — Phase E.3 VN Claim Extraction Wrapper IMPL DONE (sub-plan 031; S369 verifier pending) — 2026-05-17
+
+**S368 sandwich-dev RETURN** (Opus 4.7 FOCUSED_IMPL, AP-1 fresh-context per M-S365-1). Sub-plan 031 D1-D5 COMPLETE. All 4 STEP 0 CHARTER-TIER GATES DID NOT FIRE.
+
+**DD-2 Transport flip SHIPPED**: `_default_transport` REMOVED + `import anthropic` REMOVED + transport default = `field(default_factory=make_claude_cli_news_transport)`. grep `import anthropic packages/infrastructure/news/claude_llm_extractor.py` → ZERO. D-051 deferral closure EXECUTED in code (ADRs D-051/D-052 were pre-existing ACCEPTED but code changes NOT applied; this S368 completes the actual code change).
+
+**DD-3 New ExtractedClaim fields SHIPPED**: `lexicon_score: float = 0.0` + `mentioned_pump_anchors: tuple[str, ...] = ()` with defaults + __post_init__ bounds check [-1.0, 1.0].
+
+**DD-4 Rule 16 mode-2 CONFIRMED**: lexicon_score from `VnSentimentLexicon.score().numeric_score` (pure-function); mentioned_pump_anchors from `tuple(sorted(VN_CULTURAL_ANCHORS & set(keyword_hits)))` (deterministic frozenset intersection). LLM never emits either field. System prompt NOTE clause added.
+
+**DD-5 Tokenizer DI SHIPPED**: `_build_effective_system_prompt()` appends hint ONLY when VnTokenizer injected (not WhitespaceTokenizer fallback).
+
+**Files modified/created** (wc -l):
+- `packages/domain/news/models/extracted_claim.py`: 83 → 106 LOC (+23)
+- `packages/infrastructure/news/claude_llm_extractor.py`: 226 → 289 LOC (+63)
+- `packages/infrastructure/news/test_adapters.py`: 399 → 590 LOC (+191)
+- `apps/cli/extract_vn_claims.py`: NEW 318 LOC
+- `agent-workspace/memory/decisions/072-vn-claim-extraction-wrapper.md`: NEW 133 LOC
+
+**Gates**: ruff PASS / pytest 1085/1085 PASS (1080→1085; +6 new D3 tests; 0 regressions) / I-S34 CLEAN / determinism smoke PASS (cli diff + Python assertion) / Rule 16 mode-2 CLEAN.
+
+**Deviation**: `Ticker.value` → `Ticker.symbol` in D5 CLI (architect had no Bash to verify; dev fixed inline per VBW STEP 0; not a plan architectural defect).
+
+**Next**: dispatch S369 sandwich-verifier AP-1 fresh-context to verify sub-plan 031 per § F DoD 33 items.
+
+---
+
 ## S365 — Phase E.2 VN Sentiment Lexicon IMPL DONE (sub-plan 030; S366 verifier pending) — 2026-05-17
 
 **S365 sandwich-dev RETURN** (Sonnet 4.6 FOCUSED_IMPL, AP-1 fresh-context). Sub-plan 030 D1-D5 COMPLETE. 34/35 DoD PASS (DC-BOOK-4 deferred to S366 per protocol).

@@ -397,6 +397,169 @@ def test_extractor_returns_empty_when_response_is_dict_without_claims() -> None:
     assert extractor.extract(_vhm_article()) == []
 
 
+# --- ClaudeLlmExtractor NEW FIELDS plan-031 (S368 D3) ----------------------
+
+
+def _make_extractor_with_lexicon(
+    response: str,
+) -> ClaudeLlmExtractor:
+    """Factory producing extractor with real VnTokenizer + VnSentimentLexicon."""
+    from apps.extraction.sentiment.vn_lexicon import VnSentimentLexicon
+    from packages.infrastructure.nlp.vn_tokenizer import VnTokenizer
+
+    tokenizer = VnTokenizer()
+    lexicon = VnSentimentLexicon(tokenizer=tokenizer)
+    return ClaudeLlmExtractor(
+        transport=lambda _system, _body: response,
+        clock=lambda: datetime(2026, 5, 17, 10, 0, tzinfo=UTC),
+        tokenizer=tokenizer,
+        lexicon=lexicon,
+    )
+
+
+def _article_with_body(body_excerpt: str) -> NewsArticle:
+    return NewsArticle(
+        article_id="a2",
+        source="vietstock",
+        source_url="https://vietstock.vn/a2.htm",
+        title="Test article",
+        body_excerpt=body_excerpt,
+        published_at=datetime(2026, 5, 17, 8, 0, tzinfo=UTC),
+        ingested_at=datetime(2026, 5, 17, 8, 5, tzinfo=UTC),
+        mentioned_tickers=(Ticker("VHM"),),
+    )
+
+
+def _minimal_claim_response() -> str:
+    return _stub_response(
+        [
+            {
+                "claim_text": "VHM tăng mạnh",
+                "source_text_excerpt": "VHM tăng mạnh phiên này",
+                "sentiment": "bullish",
+                "mentioned_tickers": ["VHM"],
+                "mentioned_sectors": [],
+                "key_phrases": [],
+                "tone_indicators": [],
+                "confidence": 0.8,
+            }
+        ]
+    )
+
+
+def test_extractor_emits_lexicon_score_when_lexicon_injected() -> None:
+    """TC D3-1: lexicon_score > 0 when article contains tier-1 positive keyword."""
+    # "tăng_trần" (hit circuit breaker limit up) = weight 1.0 in lexicon
+    body = "VHM tăng_trần phiên này, cổ đông rất phấn khởi."
+    extractor = _make_extractor_with_lexicon(_minimal_claim_response())
+    article = _article_with_body(body)
+    claims = extractor.extract(article)
+    assert len(claims) == 1, "Expected 1 claim from minimal response"
+    assert claims[0].lexicon_score > 0.0, (
+        f"Expected positive lexicon_score for article with 'tăng_trần', "
+        f"got {claims[0].lexicon_score}"
+    )
+
+
+def test_extractor_emits_mentioned_pump_anchors_when_anchor_in_body() -> None:
+    """TC D3-2: mentioned_pump_anchors contains matched anchor from VN_CULTURAL_ANCHORS."""
+    # "đội_lái" is in VN_CULTURAL_ANCHORS frozenset; weight -0.8 in lexicon
+    body = "Đội_lái đang thao túng cổ phiếu VHM, nhà đầu tư cần cẩn thận."
+    extractor = _make_extractor_with_lexicon(_minimal_claim_response())
+    article = _article_with_body(body)
+    claims = extractor.extract(article)
+    assert len(claims) == 1
+    assert "đội_lái" in claims[0].mentioned_pump_anchors, (
+        f"Expected 'đội_lái' in mentioned_pump_anchors, "
+        f"got {claims[0].mentioned_pump_anchors}"
+    )
+
+
+def test_extractor_emits_zero_lexicon_score_when_lexicon_none() -> None:
+    """TC D3-3: lexicon_score=0.0 + mentioned_pump_anchors=() when lexicon=None (default)."""
+    # Default construction — no lexicon injection
+    body = "VHM tăng_trần và đội_lái đang thao túng."
+    extractor = ClaudeLlmExtractor(
+        transport=lambda _system, _body: _minimal_claim_response(),
+        clock=lambda: datetime(2026, 5, 17, 10, 0, tzinfo=UTC),
+        lexicon=None,  # explicit None = no scoring
+    )
+    article = _article_with_body(body)
+    claims = extractor.extract(article)
+    assert len(claims) == 1
+    assert claims[0].lexicon_score == 0.0, (
+        f"Expected lexicon_score=0.0 with lexicon=None, got {claims[0].lexicon_score}"
+    )
+    assert claims[0].mentioned_pump_anchors == (), (
+        f"Expected empty tuple with lexicon=None, got {claims[0].mentioned_pump_anchors}"
+    )
+
+
+def test_extractor_default_transport_is_make_claude_cli_news_transport() -> None:
+    """TC D3-4: default transport factory present + anthropic NOT in module source."""
+    # Verify transport field default is the CLI factory (not _default_transport)
+    import inspect
+
+    from packages.infrastructure.news import claude_llm_extractor as mod
+
+    # _default_transport symbol must NOT exist on module (DD-2 removal)
+    assert not hasattr(mod, "_default_transport"), (
+        "_default_transport must be REMOVED per plan-031 DD-2 + D-050 SYSTEMIC"
+    )
+    # No-arg construction instantiates correctly (factory is called lazily on field access)
+    ex = ClaudeLlmExtractor(
+        transport=lambda _s, _b: "{}",  # stub to avoid live CLI call
+    )
+    assert type(ex).__name__ == "ClaudeLlmExtractor"
+
+    # Verify source code has zero 'import anthropic' / 'from anthropic' lines
+    source = inspect.getsource(mod)
+    assert "import anthropic" not in source, (
+        "import anthropic MUST NOT appear in claude_llm_extractor.py per D-050 + plan-031 DD-2"
+    )
+    assert "from anthropic" not in source, (
+        "from anthropic MUST NOT appear in claude_llm_extractor.py per D-050 + plan-031 DD-2"
+    )
+
+
+def test_extractor_no_anthropic_import_in_module_source() -> None:
+    """TC D3-5: grep-assert zero anthropic import lines in extractor file."""
+    from pathlib import Path
+
+    extractor_path = (
+        Path(__file__).parent / "claude_llm_extractor.py"
+    )
+    source = extractor_path.read_text(encoding="utf-8")
+    lines_with_anthropic = [
+        line.strip()
+        for line in source.splitlines()
+        if "import anthropic" in line or "from anthropic" in line
+    ]
+    assert len(lines_with_anthropic) == 0, (
+        f"Found anthropic import lines (must be ZERO per L-S227-1 + D-050 + plan-031 DD-2): "
+        f"{lines_with_anthropic}"
+    )
+
+
+def test_extractor_lexicon_score_deterministic_across_runs() -> None:
+    """TC D3-6: lexicon_score identical across 2 calls — D-059 R2 determinism smoke."""
+    body = "VHM tăng_trần, đội_lái đẩy giá."
+    extractor = _make_extractor_with_lexicon(_minimal_claim_response())
+    article = _article_with_body(body)
+    claims1 = extractor.extract(article)
+    claims2 = extractor.extract(article)
+    assert len(claims1) == 1
+    assert len(claims2) == 1
+    assert claims1[0].lexicon_score == claims2[0].lexicon_score, (
+        f"NON-DETERMINISTIC lexicon_score: {claims1[0].lexicon_score} != "
+        f"{claims2[0].lexicon_score}"
+    )
+    assert claims1[0].mentioned_pump_anchors == claims2[0].mentioned_pump_anchors, (
+        f"NON-DETERMINISTIC mentioned_pump_anchors: {claims1[0].mentioned_pump_anchors} != "
+        f"{claims2[0].mentioned_pump_anchors}"
+    )
+
+
 @pytest.mark.parametrize(
     "label,enum",
     [
