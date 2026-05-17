@@ -61,6 +61,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
+from apps._shared.entities.vn_ticker_resolver import ResolutionMethod, VnTickerResolver
 from apps.extraction.sentiment.vn_lexicon import VN_CULTURAL_ANCHORS
 from packages.application.nlp.ports import TextTokenizerPort, VnLexiconPort
 from packages.contracts import Ticker
@@ -76,6 +77,10 @@ __all__ = ["ClaudeLlmExtractor"]
 
 _DEFAULT_MODEL = "claude-sonnet-4-6"
 _DEFAULT_VERSION = "stockforge-news-extractor-0.1"
+
+# Architect default per plan-032 DD-8; mirrors _MIN_CONFIDENCE_THRESHOLD in resolver.
+# E.4 resolver-injected path: only emit ticker when confidence >= this threshold.
+_MIN_RESOLVER_CONFIDENCE_THRESHOLD: float = 0.85
 
 _SYSTEM_PROMPT = """You are a Vietnamese stock-market news claim extractor.
 
@@ -139,6 +144,16 @@ class ClaudeLlmExtractor:
     system_prompt: str = _SYSTEM_PROMPT
     tokenizer: TextTokenizerPort = field(default_factory=WhitespaceTokenizer)
     lexicon: VnLexiconPort | None = None
+    ticker_resolver: VnTickerResolver | None = None
+    """Optional VN ticker resolver injection per plan-032 DD-5.
+
+    Default None: backward-compat 2-4 char uppercase filter preserved (pre-E.4 behavior).
+    Resolver-injected: routes each mentioned_tickers entry through VnTickerResolver.resolve();
+    emits canonical Ticker only when resolution_method not UNKNOWN/AMBIGUOUS and
+    resolution_confidence >= _MIN_RESOLVER_CONFIDENCE_THRESHOLD (0.85).
+    Production wiring (ClaudeLlmExtractor(ticker_resolver=VnTickerResolver())) is a
+    separate decision per plan-032 AQ-8; CLI default remains no-arg for v0.
+    """
 
     def extract(self, article: NewsArticle) -> list[ExtractedClaim]:
         body = self._build_user_message(article)
@@ -235,10 +250,31 @@ class ClaudeLlmExtractor:
             confidence = float(raw.get("confidence", 0.5))
         except (KeyError, ValueError):
             return None
-        tickers = tuple(
-            Ticker(str(t)) for t in raw.get("mentioned_tickers", [])
-            if isinstance(t, str) and t.isupper() and 2 <= len(t) <= 4
-        )
+        raw_tickers = raw.get("mentioned_tickers", [])
+        if self.ticker_resolver is None:
+            # Backward-compat default: 2-4 char uppercase filter (pre-E.4 behavior).
+            # Preserves 1086/1086 baseline test pass rate when resolver not injected.
+            tickers = tuple(
+                Ticker(str(t)) for t in raw_tickers
+                if isinstance(t, str) and t.isupper() and 2 <= len(t) <= 4
+            )
+        else:
+            # E.4 resolver-injected path per plan-032 DD-5.
+            # Emits canonical Ticker only for EXACT/CASE_INSENSITIVE/DIACRITICS_STRIPPED/FUZZY
+            # resolutions above confidence threshold; AMBIGUOUS + UNKNOWN are silently skipped.
+            resolved: list[Ticker] = []
+            for t in raw_tickers:
+                if not isinstance(t, str):
+                    continue
+                result = self.ticker_resolver.resolve(t)
+                if (
+                    result.canonical_ticker is not None
+                    and result.resolution_method != ResolutionMethod.UNKNOWN
+                    and result.resolution_method != ResolutionMethod.AMBIGUOUS
+                    and result.resolution_confidence >= _MIN_RESOLVER_CONFIDENCE_THRESHOLD
+                ):
+                    resolved.append(result.canonical_ticker)
+            tickers = tuple(resolved)
         sectors = tuple(
             str(s) for s in raw.get("mentioned_sectors", [])
             if isinstance(s, str)

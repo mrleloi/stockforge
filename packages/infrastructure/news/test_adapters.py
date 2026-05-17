@@ -588,3 +588,108 @@ def test_extractor_handles_all_sentiment_labels(
     claims = extractor.extract(_vhm_article())
     assert len(claims) == 1
     assert claims[0].sentiment == enum
+
+
+# --- ClaudeLlmExtractor ticker_resolver DI (plan-032 D4) -------------------
+
+
+def test_extractor_d4_1_no_resolver_backward_compat() -> None:
+    """TC-D4-1: Without resolver (default None), 2-4 char uppercase filter preserved.
+
+    Regression floor: existing extractor behavior unchanged when ticker_resolver=None.
+    Plan-032 DD-5 DI default=None; preserves 1086/1086 post-S368 baseline.
+    """
+    response = _stub_response(
+        [
+            {
+                "claim_text": "VHM strong Q1",
+                "source_text_excerpt": "VHM báo lãi Q1",
+                "sentiment": "bullish",
+                "mentioned_tickers": ["VHM", "vinhomes"],  # lowercase fails old filter
+                "mentioned_sectors": [],
+                "confidence": 0.8,
+            }
+        ]
+    )
+    extractor = ClaudeLlmExtractor(
+        transport=lambda _s, _b: response,
+        clock=lambda: __import__("datetime").datetime(2026, 5, 17, 10, 0,
+                                                       tzinfo=__import__("datetime").timezone.utc),
+        ticker_resolver=None,  # explicit None → backward-compat 2-4 char uppercase filter
+    )
+    claims = extractor.extract(_vhm_article())
+    assert len(claims) == 1
+    # Only "VHM" passes the uppercase 2-4 char filter; "vinhomes" is dropped
+    assert Ticker("VHM") in claims[0].mentioned_tickers
+
+
+def test_extractor_d4_2_resolver_resolves_lowercase_vinhomes() -> None:
+    """TC-D4-2: Resolver-injected path resolves 'vinhomes' lowercase → Ticker('VHM').
+
+    Plan-032 DD-5 + dispatch brief example: 'vinhomes' lowercase would fail the old
+    2-4 char uppercase filter but resolver CASE_INSENSITIVE matches to VHM.
+    """
+    from apps._shared.entities.vn_ticker_resolver import VnTickerResolver
+
+    response = _stub_response(
+        [
+            {
+                "claim_text": "vinhomes strong Q1",
+                "source_text_excerpt": "vinhomes báo lãi Q1",
+                "sentiment": "bullish",
+                "mentioned_tickers": ["vinhomes"],  # lowercase: would fail old filter
+                "mentioned_sectors": [],
+                "confidence": 0.8,
+            }
+        ]
+    )
+    resolver = VnTickerResolver()
+    extractor = ClaudeLlmExtractor(
+        transport=lambda _s, _b: response,
+        clock=lambda: __import__("datetime").datetime(2026, 5, 17, 10, 0,
+                                                       tzinfo=__import__("datetime").timezone.utc),
+        ticker_resolver=resolver,
+    )
+    claims = extractor.extract(_vhm_article())
+    assert len(claims) == 1
+    assert Ticker("VHM") in claims[0].mentioned_tickers, (
+        f"Expected Ticker('VHM') from resolver resolving 'vinhomes'; "
+        f"got {claims[0].mentioned_tickers}"
+    )
+
+
+def test_extractor_d4_3_resolver_skips_ambiguous_mention() -> None:
+    """TC-D4-3: Resolver-injected path silently skips AMBIGUOUS mention.
+
+    Plan-032 DD-6: AMBIGUOUS mentions skip cleanly; claim still emitted if
+    other valid tickers or sectors are present.
+    """
+    from apps._shared.entities.vn_ticker_resolver import VnTickerResolver
+
+    response = _stub_response(
+        [
+            {
+                "claim_text": "Market reaction",
+                "source_text_excerpt": "Thị trường phản ứng với tin VHM",
+                "sentiment": "neutral",
+                # "VHM" resolves cleanly; ambiguous_xyz resolves UNKNOWN
+                "mentioned_tickers": ["VHM", "ambiguous_xyz_zyx"],
+                "mentioned_sectors": [],
+                "confidence": 0.7,
+            }
+        ]
+    )
+    resolver = VnTickerResolver()
+    extractor = ClaudeLlmExtractor(
+        transport=lambda _s, _b: response,
+        clock=lambda: __import__("datetime").datetime(2026, 5, 17, 10, 0,
+                                                       tzinfo=__import__("datetime").timezone.utc),
+        ticker_resolver=resolver,
+    )
+    claims = extractor.extract(_vhm_article())
+    assert len(claims) == 1
+    # Only VHM resolves; bogus ambiguous_xyz_zyx is silently dropped
+    assert Ticker("VHM") in claims[0].mentioned_tickers
+    # Verify bogus ticker did NOT produce an invalid Ticker in output
+    ticker_symbols = [t.symbol for t in claims[0].mentioned_tickers]
+    assert "AMB" not in ticker_symbols
