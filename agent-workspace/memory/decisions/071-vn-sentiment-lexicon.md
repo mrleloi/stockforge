@@ -39,10 +39,19 @@ post-user-pick and bumps `VN_SENTIMENT_LEXICON_VERSION` to `"v0.CALIBRATED"`.
 
 ## Authorization
 
-Pending user pick (see STOP-FINDING file):
-- (i) Project-owner manual labelling — highest quality
-- (ii) LLM-bootstrap with 5% spot-check + CHARTER-TIER FLAG for calibration-meta-sampling
-- (iv) DEFER calibration (CURRENT PATH — UNCALIBRATED-V0 shipped)
+**RESOLVED 2026-05-17 S391 via AskUserQuestion mega-bundle**: user pick = **(iv) Continue UNCALIBRATED-V0** [current path]
+
+- Cross-val ≥70% DoD floor remains empirically-unverified — **accepted-risk per user-decision**
+- v0.HYPOTHESIS posture retained at `packages/infrastructure/sentiment/vn_sentiment_lexicon.py`
+- Calibration cycle deferred indefinitely until labelled corpus exists
+- Revisit trigger = systematic-bias evidence in downstream E.3+ sentiment outputs
+- Source notification: `human-workspace/notifications/STOP-FINDING-S365-corpus-labelling-source.md` (status: `answered-2026-05-17-via-AskUserQuestion-S391`)
+
+Historical options offered (for audit trail):
+- (i) Project-owner manual labelling — highest quality (~5-10h owner-time) — NOT PICKED
+- (ii) LLM-bootstrap with 5% spot-check + CHARTER-TIER FLAG for calibration-meta-sampling — NOT PICKED
+- (iii) Distant-labelling via market signals — DEFERRED per architect (noise too high for v0); NOT OFFERED at S391
+- (iv) DEFER calibration / UNCALIBRATED-V0 — **PICKED**
 
 ## Pattern Source
 
