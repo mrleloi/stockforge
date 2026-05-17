@@ -1,0 +1,22 @@
+# SHA-256 manifest for PDF gold-set fixtures
+# Format: <sha256hex>  <filename>  # <source_url>  <commit_date>
+#
+# SOURCE NOTES (RM3 — gold-set sourcing):
+# Real VHM 2023 + HPG 2023 annual report PDFs could not be downloaded during
+# S394 IMPL session due to network restrictions (HTTP 403 / SSL errors).
+# Files below are MINIMAL SYNTHETIC PLACEHOLDERS for structural/contract tests only.
+# These CANNOT be used for meaningful bake-off Metric 1 scoring.
+#
+# ACTION REQUIRED (RM3 deviation documented in observation + STOP-FINDING):
+# Replace with real PDFs from:
+#   VHM: https://vinhomes.vn IR section (2023 Annual Report)
+#   HPG: https://hpg.vn IR section (2023 Annual Report)
+# Both are public disclosure-mandated artifacts per SSC; commit-eligible per I-S34.
+# See: agent-workspace/memory/observations/sandwich-dev-S394-g1-pdf-library-bakeoff-impl.md
+#      human-workspace/notifications/STOP-FINDING-S394-pdf-real-pdfs-needed.md
+#
+# COMMIT DATE: 2026-05-17
+# POPULATED BY: S394 sandwich-dev (synthetic placeholders; replace with real PDFs)
+
+9a5681534004b18a497158cf777d5776e690a12c92ca3fca6649c896afbc24de  vhm-2023-annual.pdf  # SYNTHETIC PLACEHOLDER - replace with real VHM 2023 Annual Report from vinhomes.vn IR
+f8fe4b9655423a6af3a8ecf1c0aab34634160429898b9ef0b3631feedfd021f2  hpg-2023-annual.pdf  # SYNTHETIC PLACEHOLDER - replace with real HPG 2023 Annual Report from hpg.vn IR

@@ -1,0 +1,77 @@
+{
+  "_metadata": {
+    "ticker": "VHM",
+    "company": "Vinhomes JSC",
+    "statement_type": "is",
+    "period_end": "2023-12-31",
+    "currency": "VND",
+    "unit": "billion_vnd",
+    "source": "VHM 2023 Annual Report (Consolidated Financial Statements)",
+    "annotation_status": "PLACEHOLDER - requires real PDF annotation",
+    "annotation_note": "S394 IMPL: PDF download failed (network restrictions). Replace with real VHM 2023 Annual Report values from vinhomes.vn IR. See SHA256.txt RM3 note.",
+    "annotated_by": "PENDING - human annotation required",
+    "annotated_date": "PENDING"
+  },
+  "cells": {
+    "revenue": {
+      "value": null,
+      "value_note": "PLACEHOLDER: Net revenue from VHM 2023 Consolidated IS, unit: billion VND",
+      "page": null,
+      "context": "PLACEHOLDER: Row label expected: 'Doanh thu thuần' or 'Net revenues' in VHM annual report"
+    },
+    "gross_profit": {
+      "value": null,
+      "value_note": "PLACEHOLDER: Gross profit from VHM 2023 Consolidated IS, unit: billion VND",
+      "page": null,
+      "context": "PLACEHOLDER: Row label expected: 'Lợi nhuận gộp' or 'Gross profit'"
+    },
+    "net_income": {
+      "value": null,
+      "value_note": "PLACEHOLDER: Net profit attributable to shareholders from VHM 2023 Consolidated IS",
+      "page": null,
+      "context": "PLACEHOLDER: Row label expected: 'Lợi nhuận sau thuế của cổ đông công ty mẹ'"
+    },
+    "eps": {
+      "value": null,
+      "value_note": "PLACEHOLDER: Basic EPS (VND per share) from VHM 2023 Consolidated IS",
+      "page": null,
+      "context": "PLACEHOLDER: Row label expected: 'Lãi cơ bản trên cổ phiếu' or 'Basic EPS'"
+    },
+    "shares_outstanding": {
+      "value": null,
+      "value_note": "PLACEHOLDER: Weighted average shares outstanding (millions) from VHM 2023",
+      "page": null,
+      "context": "PLACEHOLDER: From EPS note or equity section"
+    },
+    "total_assets": {
+      "value": null,
+      "value_note": "PLACEHOLDER: Total assets from VHM 2023 Consolidated BS, unit: billion VND",
+      "page": null,
+      "context": "PLACEHOLDER: Row label expected: 'Tổng tài sản' or 'Total assets'"
+    },
+    "total_equity": {
+      "value": null,
+      "value_note": "PLACEHOLDER: Total equity from VHM 2023 Consolidated BS, unit: billion VND",
+      "page": null,
+      "context": "PLACEHOLDER: Row label expected: 'Vốn chủ sở hữu' or 'Total equity'"
+    },
+    "total_liabilities": {
+      "value": null,
+      "value_note": "PLACEHOLDER: Total liabilities from VHM 2023 Consolidated BS, unit: billion VND",
+      "page": null,
+      "context": "PLACEHOLDER: Row label expected: 'Nợ phải trả' or 'Total liabilities'"
+    },
+    "book_value_per_share": {
+      "value": null,
+      "value_note": "PLACEHOLDER: Book value per share (VND) = Total equity / Shares outstanding",
+      "page": null,
+      "context": "PLACEHOLDER: Computed from equity section"
+    },
+    "operating_cash_flow": {
+      "value": null,
+      "value_note": "PLACEHOLDER: Net operating cash flow from VHM 2023 Consolidated CF, unit: billion VND",
+      "page": null,
+      "context": "PLACEHOLDER: Row label expected: 'Lưu chuyển tiền thuần từ hoạt động kinh doanh'"
+    }
+  }
+}

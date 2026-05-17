@@ -104,6 +104,15 @@ module = ["packages.domain.*"]
 disallow_any_explicit = true
 disallow_any_generics = true
 
+[[tool.mypy.overrides]]
+# Phase G.1 one-off PDF bake-off probe: optional deps (pdfplumber, docling, pypdf)
+# are NOT in pyproject.toml (isolated-venv probe per DD-8 plan-041 § D3).
+# Allow missing imports + untyped calls; warn_unused_ignores off for probe-tier.
+module = ["apps.cli.bench.pdf_bake_off"]
+ignore_missing_imports = true
+disallow_any_explicit = false
+warn_unused_ignores = false
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
