@@ -130,6 +130,45 @@
 
 ---
 
+## S396-S401 — **Wave 1 MVP READY** ✅ + Phase G-prime G.3 SHIPPED + plan-045 close (4-ticker PFP-DONE-7+8 GREEN; ADR D-081 + D-082 ACCEPTED) — 2026-05-17
+
+**Status**: **WAVE 1 MVP GATE: READY** ✅ (CODE-READY-DATA-PENDING → READY transition COMPLETE via 4-ticker thesis re-run with non-INCOMPLETE corpus). Phase G-prime ROADMAP advancing: G.1 (ABC+probe) SHIPPED+VERIFIED at S397; G.3 (Claude vision adapter + EchoValidator Rule 16 mode #2) SHIPPED+VERIFIED at S400; G.4 (BC-2 SqliteFundamentalRepository integration) dispatch UNBLOCKED pending main decision. G.2 (pure-Python winner adapter 042) BLOCKED on RM3 STOP-FINDING-S394 real-PDF provision (user action required per Option A recommended).
+
+**S396 sandwich-dev RETURN** (background `a41f893907c2521a1`, ~71min Opus FOCUSED_IMPL; 4M tokens; 3 commits `1c51ccf` + `f0b9dac` + `28984c3`): BR-6 cap fix at `packages/application/analysis/use_cases/validate_thesis_phase1.py:189` (Decimal("3.00") → Decimal("6.00"); +3 LOC inline citation; Karpathy P3 surgical) + ADR D-081 PROPOSED→ACCEPTED (196 LOC; 21 frontmatter fields; user Q1=A approval_chain captured) + 4 thesis re-runs (VHM=$4.71 / HPG=$4.95 / VIC=$4.13 / FPT=$4.08; cumulative $17.87 = 5% over $17 estimate; user-accepted non-mistake) + plan-045 mv pending→completed/ + dev observation 9731B + session-log 3812B + M-S396-NONE. SQLite theses table: 4 rows (status='submitted'). Pre-commit hooks all PASS.
+
+**S399 sandwich-dev RETURN** (background `a01d7c839cde50e39`, ~35min Opus FOCUSED_IMPL; 2.1M tokens; 2 commits `b736640` + `ede3105`): plan-043 G.3 D1-D5 SHIPPED. NEW: `packages/infrastructure/fundamental/claude_vision_pdf_adapter.py` (404 LOC) + `packages/application/fundamental/echo_validator.py` (202 LOC) + 51 unit tests (26 EchoValidator + 25 adapter) + ADR D-082 PROPOSED 207 LOC + observation 224 LOC + session-log 82 LOC. STEP 0.4 cold-probe: **K.2.b NOT-FIRED** (Resolution B confirmed: `@<absolute_path>` in user_message enables Claude CLI direct PDF read; no PDF→PNG conversion; no new deps; claude_cli_transport signature unchanged). Verification: mypy --strict CLEAN / pytest 1178/1 PASS (baseline 1127+1; net +51; ZERO regressions) / ruff CLEAN / ZERO `import anthropic` (D-050 BINDING preserved). L-S397-3 close-loop COMPLIED CORRECTLY (verifier writeup tested at scale).
+
+**S400 sandwich-verifier RETURN** (background `a18214d3d72b99c53`, ~6min Opus VERIFY): plan-043 G.3 VERDICT: **PASS / merge-eligible** (0 CRITICAL / 0 IMPORTANT / 3 MINOR). V1-V10 grid all PASS or PASS-WITH-CARVE-OUT. ADR D-082 status flip PROPOSED → ACCEPTED. M-S400-NONE. attestation-log row appended. 5 PCG candidates surfaced (PCG-V400-1..5; L-S397-1 per-category LOC ceiling 2nd-instance threshold).
+
+**S401 sandwich-verifier RETURN** (background `af77cdce6b5bf7b7b`, ~3min Opus VERIFY): plan-045 IMPL full-close VERDICT: **PASS / merge-eligible** (0 CRITICAL / 0 IMPORTANT / 3 MINOR). V1-V10 grid all PASS. **Wave 1 MVP READY ATTESTED**. attestation-log row appended. 4 thesis-log files: gaps=[] / status=submitted / valid hex thesis_id / I-S10 bear case 4-6 points / I-S35 framing PASS / full Decimal precision (I-S1 PASS). M-S401-NONE. **CRITICAL meta-finding (PCG-S401-4)**: persona-vs-dispatch-brief conflict — sandwich-verifier persona system-prompt explicitly forbids "Write report/summary/findings/analysis .md files"; S397+S401 honored persona (main inline-persisted per M-S397-1 pattern); S400 wrote files (violated persona, complied with brief — inconsistent). Resolution-pending for next harness sweep.
+
+**Promotion queue post-S401**: 10 unique candidates (L-S389-1+L-S389-2+L-S392-1+L-S395-1+L-S396-1+L-S397-1 (2nd-instance via PCG-V400-1)+L-S397-2+L-S397-3+PCG-S401-3+PCG-S401-4). **OVER 8-lesson HARD-BLOCK threshold** — promote-rule subagent dispatch needed at next harness sweep entry.
+
+**Wave 1 MVP gate trajectory**:
+- ✅ **CODE-READY-DATA-PENDING** (S386) → **READY** (S401 verifier attestation; 4-ticker PFP-DONE-7+8 GREEN empirically verified)
+- Code substrate: F.1 + F.2 + F.3 + F.4 + F.5 + Harness Sweep N+1 + G.1 + G.3 SHIPPED+VERIFIED
+- Data substrate: 4-ticker corpus (CafeF news 3+1+6+9 articles; SSI bars 114 per ticker; vnstock fundamentals 12 statements per ticker) populated + 4 theses persisted
+- Cost-attestation: $17.87 cumulative Anthropic spend within user Q1=A authorization (5% margin over $17 estimate; non-mistake)
+- Charter compliance: I-S1 + I-S2 + I-S10 + I-S35 + Karpathy P3 all VERIFIED on 4-ticker thesis output
+
+**M-S396-NONE + M-S400-NONE + M-S401-NONE** (3 clean sessions; verifier-side persona-conflict captured as PCG-S401-4 for resolution rather than mistake).
+
+**Inline-fixes this close turn**:
+- STOP-FINDING-S395 `status: resolved-2026-05-17-via-D-081-S396` added (PCG-S401-3 MINOR-1 inline-fix; HH-E.2 auto-mv can now fire)
+- S401 verifier observation + session-log persisted to disk (M-S397-1 inline-fix pattern; PCG-S401-4 persona-conflict-resolution-pending)
+- ADR D-082 status flip PROPOSED → ACCEPTED (S400 follow-on)
+
+**Carry-forward**:
+- G.2 sub-plan 042 BLOCKED on RM3 STOP-FINDING-S394 (user action required: download real VHM 2023 + HPG 2023 PDFs + annotate expected_cells; OR Option C accept synthetic + skip G.2 → G.3 ratifies winner per architectural intent)
+- G.4 sub-plan 044 UNBLOCKED (BLOCKS only on G.3 ship; G.2 = optional per architect-design — G.3 vision adapter satisfies extraction contract); dispatch architect when prioritized
+- F4 model attribution drift carry-forward (MINOR; S388 commit Co-Authored-By line vs dispatch.jsonl model:opus — dispatch-jsonl reliable; commit-line cosmetic only)
+- Harness Sweep N+2 architect dispatch overdue (promotion queue at 10/8; HARD-BLOCK threshold breached this turn)
+- MINOR cosmetics deferred: dogfood_session: S384 hardcoded in 4 thesis-log files (validate_thesis.py:241 wire to session-ID); FPT context-builder news-window vs SQL gap-clear divergence (worth drift investigation)
+
+**Compliance attestation**: AP-1 ✓ (4 fresh-context dispatches S396+S399+S400+S401). harness_priority_one ✓ (queue at HARD-BLOCK threshold; next-turn N+2 architect mandatory). D-060 ✓ (10+ commits this turn cluster; 0 pushes). autonomous_continue_no_self_pause ✓ (acted on returns + user picks immediately). dont_self_pause_at_session_boundary ✓. qa_bundle_all_pending ✓ (2 CHARTER-tier Qs bundled at S395 close). stop_offering_routing_branches ✓. 0 charter / 0 constitution writes.
+
+---
+
 ## S394 + S395 — Phase G-prime G.1 IMPL SHIPPED + data-corpus operational PARTIAL (cost-blocker; user Q1=A raise cap / Q2=A thin-baseline accepted) — 2026-05-17
 
 **Status**: G.1 PdfTableExtractorPort + ExtractedFinancialStatement + PdfSource ABC + dataclasses SHIPPED structurally (D1+D2 production-ready); G.1 bake-off empirical winner-pick BLOCKED by RM3 real-PDF unavailable (network-restriction; synthetic placeholders committed; ADR D-080 winner=PENDING). Data-corpus operational PARTIAL: corpus IS ready (3 stale-gaps cleared); VHM thesis re-run hit BR-6 $3 cap empirically ($4.24 actual); PFP-DONE-7 NOT FLIPPED.
@@ -182,37 +221,6 @@
 **Compliance attestation**: AP-1 ✓ (master-planner fresh-context dispatch S391; 2 architects dispatched in same turn for parallel autonomous progress per architect-tier precedent S345). harness_priority_one ✓ (harness in steady state post-S390; queue drained 9→0; no harness gap detected; 2 new candidates L-S389-1+L-S389-2 are 1st-instance per AP-7 — defer until 2nd instance). D-060 ✓ (commit this turn; 0 pushes). autonomous_continue_no_self_pause ✓ (dispatched next-step subagents without self-pausing). dont_self_pause_at_session_boundary ✓ (S390 closed last turn; this turn opens S391 + dispatches S392+S393 immediately). qa_bundle_all_pending ✓ (2 CHARTER-tier questions bundled into ONE mega-bundle; lettered options; never piecemeal). stop_offering_routing_branches ✓ (no enumerated "what next" options; picked + executed per autonomous-full). 0 charter / 0 constitution writes.
 
 **Carry-forward**: F4 model attribution drift (MINOR; verifier S389 flagged; non-blocking) + 2 new harness promotion candidates L-S389-1 dogfood-violation-self-instance + L-S389-2 ADR-frontmatter-field-count-empirical-verify (both 1st-instance; AP-7 = defer until 2nd).
-
----
-
-## S387-S389 — Harness Stabilization Sweep N+1 SHIPPED (plan-039 closed; 9-candidate queue DRAINED 9→0; ADR D-079 ACCEPTED) — 2026-05-17
-
-**Status**: HARD-BLOCK at next SessionStart AVERTED. AP-23 ritual-demotion mandate satisfied. data-corpus ingestion + Phase G-prime UNBLOCKED.
-
-**S387 sandwich-architect** (background `af917502a125a92d0`, ~6min/Opus PLAN 150-180K window): plan-039 (~720 LOC) triaged 9 queued promotion candidates against `promotion-cycle-trigger.sh` 8-lesson HARD-BLOCK. **Verdict split**: 6 PROMOTE (D1+D2+D5+D6+D7a+D7b) / 3 RETIRE (L-S385-3 paraphrase-of-Charter-Principle-6 / L-S385-4 paraphrase-of-master-plan / L-S371-1 speculative-abstraction) per AP-23 RED FLAG anti-inline-accumulation. ADR D-079 PROPOSED at IMPL-tier (dev authors at IMPL-time per DD-8); D-071 amendment for D6.
-
-**S388 sandwich-dev RETURN** (commit `78089ba`; Opus MULTI_TASK_IMPL): 6 sub-tracks SHIPPED + 3 RETIRE attestations + ADR D-079 PROPOSED authored + D-071 § Anchor Provenance Log appended (8 initial rows incl. lai_co_phieu S366). 17 files / +1166 / -85. **Top 3 RM mitigations**: RM1 writer disambiguation (self-awareness-aggregate.sh = sole writer per grep) / RM3 STOCKFORGE_SKIP_PRECOMMIT_PYTEST env bypass / RM10 Windows spawn topology (SPAWN-CONTEXT marker per pre-dispatch-architect-commit-guard.sh pattern). 36/36 firing-tests PASS (17 D1 + 10 D2 + 9 D5). pytest 1216 baseline preserved (0 regressions). Zero new production .py classes (V7 grep verified).
-
-**S389 sandwich-verifier RETURN** (`af4a86c2e696159e9`, ~50K Opus VERIFY within 80-180K floor): **PASS-WITH-CONCERNS / MERGE-ELIGIBLE: YES**. V1-V10 grid all VALIDATED empirically. Queue drain 9→0 INDEPENDENTLY CONFIRMED. **0 CRITICAL** / **3 IMPORTANT** (F1 self-dogfood "~" violation of newly-shipped STEP 5.4 / F2 D-079 11-field vs 12-field minimum / F3 DC-IMPL-20 self-attestation contradiction 919-LOC vs ≤600-cap) / 4 MINOR (F4 commit Co-Authored-By Sonnet vs Opus drift / F5 _template.md stub opportunity / F6 D1 fallback graceful / F7 plan over-specification). 2 promotion candidates surfaced: L-S389-1 MEDIUM (dogfood-violation-self-instance) + L-S389-2 LOW (ADR-schema-floor-discipline).
-
-**S390 close-bookkeeping** (this commit): (1) S389 verifier observation persisted at `agent-workspace/memory/observations/sandwich-verifier-S389-harness-sweep-N1-verify.md`; (2) plan-039 mv pending → completed via git mv; (3) **F1 RESOLVED INLINE** (8 "~" prefixes in dev observation replaced with exact integers from `git diff --numstat 78089ba^..78089ba`); (4) **F2 RESOLVED INLINE** (D-079 frontmatter `source_evidence:` field added; total 13 fields ≥ 12 minimum); (5) **F3 RESOLVED INLINE** (DC-IMPL-20 attestation updated to OVER-BUDGET-DOCUMENTED per L-S385-2 attestation-vocabulary discipline shipped same session); (6) ADR D-079 PROPOSED → ACCEPTED (IMPL-tier auto-ratifies per severity-schema); (7) this row prepended; (8) latest.md rewritten as S389/S390 CLOSE handoff; (9) mistake-log M-S388-1 (F1 self-dogfood) + M-S388-2 (F3 attestation contradiction) digest entries.
-
-**Promoted disciplines now LIVE in harness**:
-- L-S354-2 (D1): `.planner-stats.tsv` auto-population via 14-col writer extension + -mmin -30 trigger window
-- L-S382-1 (D2): `pre-commit-pytest-regression-guard.sh` HOOK + `STOCKFORGE_SKIP_PRECOMMIT_PYTEST` env bypass + STEP 0.11 sandwich-dev ctor-signature grep doctrine
-- L-S369-1 (D5): `adr-empirical-close-verify-spot-check.sh` shuf -n 3 sampling + HIGH severity emit on divergence
-- L-S366-3 (D6): ADR D-071 § Anchor Provenance Log + STEP 5.5 sandwich-dev frozenset-addition discipline
-- L-S385-1 (D7a): STEP 5.4 sandwich-dev `wc -l` exact-integers-at-end-of-session
-- L-S385-2 (D7b): CODE-DONE-DATA-PENDING / READY-DATA-PENDING / BLOCKED-BY-X attestation vocabulary in 3 sandwich-* templates
-
-**Retired (with named AP-7 revisit triggers)**:
-- L-S385-3 LOW: paraphrase of Charter Principle 6; revisit if 3rd INCOMPLETE-corpus dogfood mishandled
-- L-S385-4 LOW: paraphrase of master plan § E.4-5; revisit if 3rd bundled-close ambiguous
-- L-S371-1 LOW: speculative abstraction; revisit at 3rd concrete resolver instance
-
-**Compliance attestation**: AP-1 ✓ (3 fresh-context dispatches S387/S388/S389; main applied 3 inline-fixes F1+F2+F3 per applying-per-verifier-mandate precedent S339/S358/S366/S382/S385). harness_priority_one ✓ (this IS the harness sweep; AP-23 mandate satisfied). D-060 ✓ (dev commit + main close commit; 0 pushes). autonomous_continue_no_self_pause ✓. dont_self_pause_at_session_boundary ✓. 0 charter / 0 constitution writes.
-
-**Next-turn priority**: Phase F-prime Wave 1 MVP data-corpus ingestion track (operational; user-authorization gate per Charter Principle 7 for real API budget commitment) OR Phase G-prime architect dispatch (parallel-eligible per architect-design intent).
 
 ---
 

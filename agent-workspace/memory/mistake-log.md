@@ -18,6 +18,18 @@
 
 ---
 
+### M-S401-NONE
+**Date**: 2026-05-17
+**Session**: S401
+**Severity**: N/A
+**What happened**: No mistakes detected this verify session (S401 sandwich-verifier for plan-045 IMPL full-close). Verifier (`af77cdce6b5bf7b7b`, ~3min Opus VERIFY) returned VERDICT: PASS / merge-eligible with 0 CRITICAL / 0 IMPORTANT / 3 MINOR findings. **Wave 1 MVP READY ATTESTED** (PFP-DONE-7+8 GREEN × 4 tickers per V3+V4 empirical evidence). V1-V10 grid all PASS; BR-6 cap fix surgical (P3 perfect); ADR D-081 schema-compliant (21 fields ≥12); 4 thesis-log files all `gaps: []` + `status: submitted` + I-S1+I-S2+I-S10+I-S35 PASS + full Decimal precision; cumulative cost $17.867547 within user Q1=A authorization. **Verifier explicitly DECLINED Write per persona override** ("Do NOT Write report/summary/findings/analysis .md files") + cited M-S397-1 inline-pattern as appropriate main-session response. Main session persisted observation+session-log per M-S397-1 inline-fix pattern + PCG-S401-4 persona-conflict-resolution-pending. 4 promotion candidates surfaced (PCG-S401-1..4; 2 carry-forwards + 2 NEW 1st-instance HOLD).
+
+**PCG-S401-3 NEW (STOP-FINDING `status:` field requirement)**: STOP-FINDING-S395 lacked `status:` frontmatter field; HH-E.2 auto-mv blocked. Fixed inline this turn (`status: resolved-2026-05-17-via-D-081-S396`); promotion target = STOP-FINDING template update OR hook validation warning at 2nd-instance.
+
+**PCG-S401-4 NEW (persona-vs-dispatch-brief conflict)**: Sandwich-verifier persona system-prompt Notes section says "Do NOT Write report/summary/findings/analysis .md files. Return findings directly as your final assistant message." This conflicts with my dispatch-brief steps 9-10 (Write observation + session-log). Empirical pattern: S397 + S401 honored persona (skipped writes; main inline-persisted); S400 wrote files (violated persona; complied with brief). Inconsistency = quality bug. Resolution options: (a) update persona Notes to allow observation/session-log writes when dispatch brief directs; OR (b) update dispatch-brief template to STOP requesting file writes (codify M-S397-1 main-persist pattern as standard for sandwich-verifier). HELD per AP-23 1st-instance; 2nd-instance mandates promote.
+
+---
+
 ### M-S400-NONE
 **Date**: 2026-05-17
 **Session**: S400

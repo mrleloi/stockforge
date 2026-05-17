@@ -4,6 +4,9 @@ session: S395
 type: BLOCKER-FINDING
 blocking: PFP-DONE-7 (Wave 1 MVP READY transition)
 authored: 2026-05-17
+status: resolved-2026-05-17-via-D-081-S396
+resolved_at: 2026-05-17T19:40:00Z
+resolution_basis: "ADR D-081 ACCEPTED (BR-6 cap 3.00→6.00); S396 dev shipped fix + 4 thesis re-runs (VHM+HPG+VIC+FPT all status='submitted'; gaps=[]; cumulative cost $17.867547 within user Q1=A authorization); S401 verifier PASS/merge-eligible confirms PFP-DONE-7+8 GREEN × 4; Wave 1 MVP READY. MINOR-1 fix per PCG-S401-3 1st-instance promotion candidate."
 ---
 
 # S395 Finding: validate_thesis Cost Blocker — PFP-DONE-7 NOT MET
