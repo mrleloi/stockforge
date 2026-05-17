@@ -18,6 +18,14 @@
 
 ---
 
+### M-S400-NONE
+**Date**: 2026-05-17
+**Session**: S400
+**Severity**: N/A
+**What happened**: No mistakes detected this session (S400 sandwich-verifier for plan-043 G.3 IMPL). Verifier (`a18214d3d72b99c53`, ~6min Opus VERIFY) returned VERDICT: PASS / merge-eligible with 0 CRITICAL / 0 IMPORTANT / 3 MINOR findings. All V1-V10 grid checks empirically reproduced (pytest 1178/1 EXACT match dev claim; mypy --strict + ruff CLEAN on 12 + 7 files; ZERO `import anthropic` Grep-confirmed; ZERO modified files per Karpathy P3; LOC counts EXACT match dev claim). **L-S397-3 close-loop COMPLIED CORRECTLY** — verifier wrote both observation (207 LOC) + session-log (50 LOC) + attestation-log row before composing return summary; cited exact integers verbatim. M-S397-1 pattern fixed at 1st-instance dispatch-brief reinforcement (no 2nd-instance promotion trigger fires). 5 PCG promotion candidates surfaced (PCG-V400-1..5; mostly 1st-instance HOLD or carry-forwards). ADR D-082 status flip PROPOSED → ACCEPTED APPROVED.
+
+---
+
 ### M-S397-1
 **Date**: 2026-05-17
 **Session**: S397 (caught by main on close-bundling)

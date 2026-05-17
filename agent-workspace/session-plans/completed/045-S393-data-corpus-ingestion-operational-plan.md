@@ -13,8 +13,8 @@ dispatched_by: main session orchestrating Phase F-prime DATA-PENDING gate satisf
 authored: 2026-05-17
 authoring_agent: Claude Opus 4.7 (sandwich-architect subagent; operational-plan task_class; Phase 1b ≥3 sub-tracks INVOKED but COLD-START declared for task_class="data-corpus-operational" — no precedent in .planner-stats.tsv; nearest analog crawler-adapter-impl n=3 from S338+S344+S354 patterns existing-CLI-driver-runs)
 executing_agent: N/A this session (architect); S395 (or S394) sandwich-dev executes per § E sub-tracks STEP 1-7
-status: partial-complete (S395 executed 2026-05-17; corpus ingestion DONE; validate_thesis BLOCKED-BY-cost-cap; escalation in human-workspace/notifications/STOP-FINDING-S395-validate-thesis-cost-blocker.md; PFP-DONE-7 NOT MET; PFP-DONE-8 PARTIAL; plan stays in pending/ until main session resolves cost-blocker)
-executing_agent: S395 sandwich-dev (Claude Sonnet 4.6; dispatched by main session per plan-045 § N)
+status: COMPLETED 2026-05-17 S396 — corpus ingestion DONE (S395); BR-6 cap raised $3→$6 (D-081; S396 D1); VHM+HPG+VIC+FPT re-runs DONE (S396 D3-D4); all 4 theses in SQLite (PFP-DONE-7 FLIPPED GREEN × 4); gaps=[] all tickers; cumulative thesis LLM spend $17.87 (user-authorized full-4; Q1=A)
+executing_agent: S395+S396 sandwich-dev (S395=Claude Sonnet 4.6; S396=Claude Sonnet 4.6; dispatched by main session per plan-045 § N)
 
 pre_flight_active:
   - "R1 destructive-command-guard.sh PreToolUse (per current-execution.md § INCIDENT + RECOVERY 2026-05-14)"
