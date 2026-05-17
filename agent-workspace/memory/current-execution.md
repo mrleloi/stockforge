@@ -130,6 +130,35 @@
 
 ---
 
+## S383-S386 — Phase F-prime Wave 1 MVP CODE-READY-DATA-PENDING (plan-038 F.5 + plan-037 F.4 NO-OP closed; ADR D-078 ACCEPTED) — 2026-05-17
+
+**Phase F-prime attestation**: **CODE-DONE-DATA-PENDING** (NOT full DONE). All code substrate SHIPPED across F.1+F.2+F.3+F.5; data corpus PENDING (data/stockforge.sqlite has zero VHM bars/statements/news → INCOMPLETE-corpus dogfood early-return at $0; theses table count=0; per-persona cost+quality observations not capturable until corpus-ready re-run).
+
+**Wave 1 MVP gate**: **CODE-READY-DATA-PENDING**. Code pipeline FULL READY (V0=6 wired end-to-end + CLI `--run-mode=dogfood|smoke` flag + render path TC-RENDER-V6-1..8 verified). Data ingestion = separable operational track per architect-design intent (plan-038 § A.3 + AQ-3; Karpathy P2 scope discipline).
+
+**PFP-DONE-1..10 grid (verifier-independent attestation)**:
+- ✅ PFP-DONE-1/2/3/4/5/6/9 (7 of 10) PASS
+- ⏸ PFP-DONE-7 PENDING (thesis NOT persisted; INCOMPLETE-corpus path bypasses Step 6 save at use_case:280; trigger=corpus-ready re-run on VHM/HPG/VIC/FPT)
+- ◐ PFP-DONE-8 PARTIAL (I-S35 PASS empirical; I-S1/I-S10/I-S12 by-construction via unit tests; live LLM output empirical validation at corpus-ready re-run)
+- ⏸ PFP-DONE-10 PENDING-this-commit
+
+**S383 architect** (background `ac4c3d5560f...`, ~6min/Opus VERIFY budget 50K): plan-038 authored 704 LOC; DD-1 EXTEND existing CLI (NOT new file per master plan § E.5 reinterpretation); DD-7 `--run-mode` flag; AQ-3 INCOMPLETE-corpus legitimacy.
+
+**S384 sandwich-dev RETURN** (commit `94030a0`; Opus FOCUSED_IMPL): D1+D2+D4+D5 SHIPPED; D3 dogfood ran INCOMPLETE-corpus path (legitimate per AQ-3). Files: `apps/cli/validate_thesis.py` 340→410 LOC + `test_validate_thesis.py` 510→709 LOC (+8 tests TC-RENDER-V6-1..8) + ADR D-078 196 LOC NEW + `thesis-log/2026-05-17-VHM.md` 32 LOC NEW. pytest 1208→1216 (+8; 0 regressions). $0 cost. L-S382-1 ctor discipline SATISFIED (0 new classes in validate_thesis.py per architect DD-4).
+
+**S385 sandwich-verifier RETURN** (`af485e0b6430e2b36`, ~50K Opus VERIFY): **PASS-WITH-CONCERNS / MERGE-ELIGIBLE: YES**. V1-V10 grid all VALIDATED empirically. 0 CRITICAL / 2 IMPORTANT (F1 LOC drift n=11 + F2 attestation distinction) / 3 MINOR (F3+F4+F5). L-S345-1 PASS-WITH-MINOR-DRIFT at n=11 (3 files >25 LOC off; "~" approximation prefix discipline slipping; M-S385-1 LOW; promote candidate L-S385-1 if recurs at n=12). 4 promotion candidates L-S385-1..4 surfaced.
+
+**S386 close-bookkeeping** (this commit): (1) verifier observation persisted at `agent-workspace/memory/observations/sandwich-verifier-S385-f5-vhm-dogfood-verify.md`; (2) plan-037 + plan-038 mv pending → completed (bundled close per DC-CLOSE-1/2); (3) ADR D-078 PROPOSED → ACCEPTED (IMPL-tier auto-ratifies); (4) this row prepended; (5) latest.md rewritten as S386 CLOSE handoff; (6) mistake-log M-S385-1 LOW digest; (7) Phase F-prime attestation CODE-DONE-DATA-PENDING captured.
+
+**Next-turn options** (autonomous-full continues; not enumerating routing branches per `stop_offering_routing_branches`):
+- (a) Data-corpus ingestion track — operational step requiring real API budget (CafeF news + R2/SSI bars + BC-2 fundamentals for VHM/HPG/VIC/FPT); ~10-15 min wall-clock per source per ticker; estimated $X budget; user-authorization gate per Charter Principle 7
+- (b) Phase G-prime unlock — separable from data-corpus per architect-design intent
+- (c) Harness Stabilization Sweep N+1 — 4 promotion candidates L-S385-1..4 + queued L-S354-2 (planner-feedback-loop 9th instance) + L-S382-1 PreCommit pytest regression hook + L-S369-1 ADR empirical_close_verify + L-S366-3 cultural-anchor frozenset audit-trail + L-S371-1 resolver pattern reusable
+
+**Compliance attestation**: AP-1 ✓ (3 fresh-context dispatches S383/S384/S385; main applied 0 inline-fixes this turn per verifier no-CRITICAL); D-060 ✓ (agent commits; 0 pushes); harness_priority_one ✓ (CODE-DONE-DATA-PENDING distinction = harness improvement to Phase closure attestation pattern; L-S385-2 MEDIUM promotion candidate); autonomous_continue_no_self_pause ✓; dont_self_pause_at_session_boundary ✓; 0 charter / 0 constitution writes.
+
+---
+
 ## S346-S347 — Phase D/Harness — Stop Hook Performance Quick Wins IMPL DONE (plan-023; sandwich-dev S347) — 2026-05-16
 
 **S347 sandwich-dev RETURN** (Sonnet 4.6 MULTI_TASK_IMPL, context continuation from S346). Plan-023 all 6 sub-tracks D1-D6 COMPLETE. 28/28 DoD criteria PASS.
@@ -192,31 +221,6 @@
 **Deviation**: `Ticker.value` → `Ticker.symbol` in D5 CLI (architect had no Bash to verify; dev fixed inline per VBW STEP 0; not a plan architectural defect).
 
 **Next**: dispatch S369 sandwich-verifier AP-1 fresh-context to verify sub-plan 031 per § F DoD 33 items.
-
----
-
-## S365 — Phase E.2 VN Sentiment Lexicon IMPL DONE (sub-plan 030; S366 verifier pending) — 2026-05-17
-
-**S365 sandwich-dev RETURN** (Sonnet 4.6 FOCUSED_IMPL, AP-1 fresh-context). Sub-plan 030 D1-D5 COMPLETE. 34/35 DoD PASS (DC-BOOK-4 deferred to S366 per protocol).
-
-**CHARTER-TIER GATE (corpus labelling)**: NON-BLOCKING per dispatch brief. STOP-FINDING file written at `human-workspace/notifications/STOP-FINDING-S365-corpus-labelling-source.md`. UNCALIBRATED-V0 ship path taken. Calibration cycle deferred pending user ratification.
-
-**Files shipped** (9 new production/test files; ~1192 LOC production + agent-workspace):
-- `packages/application/nlp/ports/vn_lexicon_port.py` (55 LOC; D1 Protocol)
-- `apps/extraction/__init__.py` (1 LOC; namespace marker)
-- `apps/extraction/sentiment/__init__.py` (15 LOC; exports)
-- `apps/extraction/sentiment/vn_lexicon.py` (494 LOC; D2 adapter + ~220 keywords + cultural anchors)
-- `apps/extraction/sentiment/test_vn_lexicon.py` (395 LOC; D3 tests; 26/27 PASS; 1 pyvi-live skip)
-- `apps/cli/score_vn_sentiment.py` (226 LOC; D5 CLI)
-- `agent-workspace/memory/decisions/071-vn-sentiment-lexicon.md` (150 LOC; ADR D-071 PROPOSED)
-- `agent-workspace/calibration/vn_sentiment_lexicon_v0.md` (172 LOC; D4 calibration recipe)
-- `human-workspace/notifications/STOP-FINDING-S365-corpus-labelling-source.md` (68 LOC)
-
-**Gates**: mypy --strict PASS / ruff PASS / pytest 1079/1079 PASS (1053+26; 0 regressions) / Rule 16 mode-2 CLEAN (zero LLM imports) / I-S34 CLEAN / determinism smoke PASS.
-
-**Cultural anchors**: 8 mandatory entries wired (đội_lái / đu_đỉnh / bắt_đáy / phím_hàng / bơm_thổi / cá_mập / hàng_zin + ASCII forms). `VN_CULTURAL_ANCHORS: frozenset[str]` exported for E.3 sub-plan 031.
-
-**Next**: dispatch S366 sandwich-verifier AP-1 fresh-context to verify sub-plan 030 per § F DoD 35 items.
 
 ---
 

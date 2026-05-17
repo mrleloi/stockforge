@@ -1,40 +1,38 @@
-# Checkpoint — S347 CLOSE (Stop Hook Performance Quick Wins IMPL DONE; plan-023 6/6 sub-tracks)
+# Checkpoint — S386 CLOSE (Phase F-prime CODE-DONE-DATA-PENDING; Wave 1 MVP CODE-READY-DATA-PENDING)
 
-**Updated**: 2026-05-16
+**Updated**: 2026-05-17
 **Mode**: AUTONOMOUS (full)
-**Predecessor**: S342 CLOSE checkpoint (Harness Stabilization Sweep; 6 of 9 anomalies closed)
-**This turn**: sandwich-dev executed plan-023 (D1-D6) across S346+S347 context windows. All 28 DoD criteria met.
-**Successor**: S348 sandwich-verifier (AP-1 fresh-context, Opus, ~30-50K VERIFY budget)
+**Predecessor**: S347 CLOSE checkpoint (Stop Hook Perf Quick Wins) — *stale by 38 sessions; rolled forward this turn*
+**This turn**: S383 architect plan-038 + S384 sandwich-dev IMPL + S385 sandwich-verifier PASS-WITH-CONCERNS + S386 close-bookkeeping
+**Successor**: data-corpus ingestion track (operational, user-authorization gate) OR Phase G-prime architect dispatch (parallel-eligible per architect-design intent)
 
-## What shipped this turn
+## What shipped this turn (S383-S386 bundle)
 
-**Stop Hook Performance Quick Wins SHIPPED (plan-023 D1-D6)**:
+**Phase F.5 CLI Dogfood VHM Thesis IMPL SHIPPED (plan-038 D1+D2+D4+D5; D3 INCOMPLETE-corpus per AQ-3)**:
 
-- **D1 hoist**: `find-delete` marker-cleanup moved out of `claim_file_slot()` per-file loop body in all 4 .py-scan hooks. Was: 364 files × 1289 dir entries = ~469K checks per hook per Stop. Now: 1 call before SCAN_FILES loop.
-- **D2 cooldown**: `.{hook}-last-full-sweep` marker per hook; 600s threshold; Stop-mode early-exit when fresh. Warm path: 223-280ms per hook vs ~33s cold. PostToolUse bypasses cooldown.
-- **D3 bash-hook-lint**: Eliminated 1070 `$(basename ...)` subprocess calls → `${f##*/}`. SHA batch-precompute `_BHL_SHA_MAP` + `_BHL_CACHED_SET` associative-array cache. Warm: 3914ms vs 51450ms cold.
-- **D4 phase-status-coherence**: Extended regex to accept `[A-Z](-prime)?` letter-phase forms + letter→numeric mapping (A-E → 4, F/G/H-prime → 4). Removed ~25-session "Phase 4 —" surgical workaround from current-execution.md S343-S344 row.
-- **D5 fire-tests**: TC-HOISTED + TC-COOLDOWN added to all 4 .py-scan fire-tests; phase-status-coherence-fire-test.sh extended TC07-TC12 (364 LOC new file).
-- **D6 measurement**: Warm combined = ~939ms for 4 .py-scan hooks + 3914ms bash-hook-lint = **~5s total warm** (vs ~5.3min baseline = 97% reduction). DoD target ≤30s warm: ALL PASS.
+- **D1 V0=6 renderer extension**: `apps/cli/validate_thesis.py` extended +70 LOC (BUFFETT/GRAHAM/TALEB section headers ADDITIVE after BEAR/BULL/QUANT; backward-compat stubs for absent personas)
+- **D2 `--run-mode=dogfood|smoke` flag**: +13 LOC arg parsing + +9 LOC frontmatter conditional (dogfood adds `dogfood: true` + `dogfood_session: S384` + `dogfood_ticker_rationale`)
+- **D3 wall-clock dogfood execution**: INCOMPLETE-corpus path early-return at `validate_thesis_phase1.py:213-214` BEFORE LLM dispatch ($0 cost; `recommendation: incomplete`; `cost_usd: 0`; `real_thesis: false`; gaps `['price_stale', 'fundamentals_stale', 'no_news_90d']`); thesis markdown written to `agent-workspace/memory/thesis-log/2026-05-17-VHM.md` (32 LOC)
+- **D4 8 new tests** TC-RENDER-V6-1..8: `test_validate_thesis.py` 510→709 LOC (+199); pytest 1208→1216 (+8; 0 regressions); ruff/mypy clean on target files
+- **D5 ADR D-078**: 196 LOC at `agent-workspace/memory/decisions/078-bc-8-v0-dogfood-cli-vhm.md` (14 frontmatter fields exceeds 12-field canonical floor; PROPOSED → ACCEPTED this commit per IMPL-tier severity-schema)
 
-**Fire-tests**: atomic-write 21/21 + python-det 20/20 + path-safety 26/26 + html-sep 20/20 + phase-status-coh 29/32 (FAIL=0). ~80 regression-floor fire-tests PASS.
+**Phase F.4 V0=9 Expansion (plan-037)**: NO-OP shipped per master plan § E.4-5 (architect determined no incremental V0 ratification work needed; bundled close per DC-CLOSE-1/2)
+
+## Phase F-prime master plan progress (full Wave 1 MVP code substrate)
+
+- ✅ **F.1 (S375-S376)** — RolePromptPack + PersonaRegistry + BC-8 transport-flip (D-074 ACCEPTED)
+- ✅ **F.2 (S377-S378)** — Buffett + Graham + Taleb persona adapters (D-075 ACCEPTED; DD-10 0 substring matches PERFECT)
+- ✅ **F.3 (S380-S382)** — SynthesizePerspectivesUseCase central aggregation (D-076 ACCEPTED; n-perspective generalization)
+- ✅ **F.4 (S383)** — V0=9 expansion NO-OP (parallel-eligible per § E.4-5)
+- ✅ **F.5 (S383-S386)** — CLI dogfood VHM thesis CODE-DONE (D-078 ACCEPTED; INCOMPLETE-corpus dogfood = system-working-correctly per Charter Principle 6)
+
+**Wave 1 MVP gate status**: **CODE-READY-DATA-PENDING**
+- ✅ CODE substrate: F.1+F.2+F.3+F.5 all SHIPPED; V0=6 wired end-to-end; CLI functional with --run-mode flag
+- ⏸ DATA substrate: data/stockforge.sqlite zero VHM bars/statements/news; theses table count=0; per-persona cost+quality observations not capturable until corpus-ready re-run
 
 ## Mistakes this turn
 
-None. Clean MULTI_TASK_IMPL. No false greening, no architectural deviations, no plan violations.
-
-## Wave 1 master plan progress
-
-- ✅ Phase A — Recovery + Inventory (S323-S325)
-- ✅ Phase B — Wave 0 Substrate Finish (S326-S334)
-- ✅ Phase C — Theme G Charter/Constitution Amendment (S335-S336)
-- ✅ Phase D — Theme L first IMPL cycle (S337-S339)
-- ✅ Harness Stabilization Sweep (S340-S342; 6 of 9 anomalies closed)
-- ✅ Phase D NDH adapter PLAN+IMPL (S343-S344; verified S345 PASS-WITH-CONCERNS)
-- ✅ **Stop Hook Perf Quick Wins IMPL** (S346-S347; plan-023; pending S348 verify)
-- ⏸ Phase D continuation — Vietstock / VietnamBiz adapters
-- ⏸ Phase E — Theme I (Vietnamese NLP)
-- ⏸ Phase F-prime through H-prime
+- **M-S385-1 LOW** (1st instance L-S385-1): dev S384 used "~" approximation prefix at L-S345-1 n=11 cycle; 3 files >25 LOC off (test +29, ADR +31, dev-obs +73). Single EXACT-count file matched exactly so prefix discipline applied correctly, but tolerance widening at n=11 = calibration drift signal. Caught by S385 verifier F1 IMPORTANT via independent wc -l. Prevention: at n=12+, dev runs `wc -l <file>` AT END of session and updates to exact integers (drop "~" prefix); promote to sandwich-dev.md template if recurs.
 
 ## Hard locks active (carry-forward)
 
@@ -42,24 +40,38 @@ None. Clean MULTI_TASK_IMPL. No false greening, no architectural deviations, no 
 - **BEHAVIORAL HOLD § (1)**: SYNC-GRILLING cadence + ROUTINE-IDLE close ritual SUSPENDED
 - **D-060**: agent MAY commit; MUST NOT push
 - **destructive-command-guard + project-integrity-watchdog + daily-backup** R1/R2/R3 ACTIVE
-- **D-059 + D-061 + D-062 + D-064 + D-065 ACCEPTED** (Wave-1 substrate + Theme G ratified)
-- **D-066 PROPOSED** (Theme L adapter contract)
+- **D-074 + D-075 + D-076 + D-078 ACCEPTED** (Phase F-prime full ADR chain)
 - 0 charter edits; 0 constitution writes; 0 PROJECT_CHARTER.md changes
+
+## 4 Promotion candidates queued (next Harness Stabilization Sweep)
+
+1. **L-S385-1 LOW** — sandwich-dev `wc -l` exact-at-end discipline at n=12+ L-S345-1
+2. **L-S385-2 MEDIUM** — Phase closure attestation field `CODE-DONE-DATA-PENDING` (not flat "DONE") + Wave-N gate marker
+3. **L-S385-3 LOW** — INCOMPLETE-corpus dogfood = calibrated honesty signal per Charter Principle 6 (system-working-correctly evidence, not failure)
+4. **L-S385-4 LOW** — parallel-eligible bundled plan-mv at close-bookkeeping when master plan authorizes parallel sequencing
+
+**Plus queued from prior sessions**: L-S382-1 (PreCommit pytest regression hook), L-S354-2 (planner-feedback-loop .planner-stats.tsv auto-population, 9th instance), L-S369-1 (ADR empirical_close_verify drift detection), L-S366-3 (cultural-anchor frozenset audit-trail), L-S371-1 (resolver pattern reusable).
 
 ## Next-turn action
 
-Dispatch S348 sandwich-verifier (AP-1, fresh-context Opus, ~30-50K VERIFY budget) for plan-023
-per plan § successor spec. Verifier brief: 28 DoD criteria, D1-D6 sub-tracks, 5 fire-tests,
-D6 timing measurements. After PASS → commit + plan-023 mv → continue Phase D (Vietstock adapter).
+Per `stop_offering_routing_branches` + autonomous-full mode: continue with whichever option is highest-priority per active-track resolution.
+
+**Option (a) RECOMMENDED**: Data-corpus ingestion track for VHM/HPG/VIC/FPT (CafeF news + BC-2 fundamentals + R2/SSI bars; ~10-15 min wall-clock per source per ticker). Requires user-authorization gate per Charter Principle 7 (real API budget commitment beyond S384's $0 dogfood). Flips PFP-DONE-7+8 to GREEN + enables full I-S1/I-S10/I-S12 live invariant attestation + completes Wave 1 MVP gate from CODE-READY-DATA-PENDING → READY.
+
+**Option (b)**: Phase G-prime architect dispatch (separable from data-corpus per architect-design intent + Karpathy P2 scope discipline; parallel-eligible).
+
+**Option (c)**: Harness Stabilization Sweep N+1 (8 promotion candidates queued L-S385-1..4 + 5 carry-forward).
 
 ## Compliance attestation
 
-- harness_priority_one ✓ (THIS IS harness work; Stop chain 97% warm speedup)
-- AP-1 ✓ (fresh-context sandwich-dev; main NOT reviewing own work; S348 verifier fresh-context)
+- harness_priority_one ✓ (CODE-DONE-DATA-PENDING distinction = harness improvement to Phase closure attestation pattern; L-S385-2 MEDIUM)
+- AP-1 ✓ (3 fresh-context dispatches S383/S384/S385; main applied 0 inline-fixes per verifier no-CRITICAL)
 - dont_self_pause_at_session_boundary ✓
 - autonomous_continue_no_self_pause ✓
-- D-060 ✓ (commit staged; 0 agent pushes)
-- 0 charter / 0 constitution / SYNC-GRILLING not fired
-- L-S345-1 ✓ (wc -l counts reported for all modified files)
-
-End of S347 CLOSE checkpoint.
+- stop_offering_routing_branches ✓ (options listed = continuation surface, not enumerated routing branches awaiting user pick)
+- D-060 ✓ (agent commits this turn; 0 pushes)
+- L-S345-1 ✓ at n=11 (minor drift caught + tracked as M-S385-1)
+- L-S382-1 ✓ (zero new classes in validate_thesis.py per architect DD-4; empirically grep-verified)
+- I-S1 + I-S10 + I-S35 ✓ (no LLM math; bear case by-construction; research-aid framing in dogfood markdown)
+- VBW protocol ✓ (every claim in this checkpoint traces to file:line evidence in verifier observation)
+- 0 charter / 0 constitution / 0 PROJECT_CHARTER.md changes

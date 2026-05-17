@@ -1,10 +1,11 @@
 ---
 decision_id: D-078
 title: "BC-8 V0=6 Dogfood CLI Extension and Wave 1 MVP Attestation"
-status: PROPOSED
+status: ACCEPTED
 type: architecture
 proposed_at: 2026-05-17
-ratified_at: null
+ratified_at: 2026-05-17
+ratified_by: sandwich-verifier S385 PASS-WITH-CONCERNS (af485e0b6430e2b36); IMPL-tier auto-ratifies per severity-schema; 0 CRITICAL / 2 IMPORTANT / 3 MINOR all non-blocking
 proposed_by: sandwich-dev (S384 IMPL; plan-038 D5)
 supersedes: []
 superseded_by: []
@@ -14,10 +15,10 @@ related_to:
   - D-076  # BC-8 N-Perspective Synthesizer + ValidateThesisPhase1UseCase Generalization (F.3)
   - D-060  # commit-policy-agent-may-commit
   - D-059  # Python determinism contract
-source_plan: agent-workspace/session-plans/pending/038-S383-phase-f5-cli-dogfood-vhm-thesis.md
+source_plan: agent-workspace/session-plans/completed/038-S383-phase-f5-cli-dogfood-vhm-thesis.md
 parent_master_plan: agent-workspace/session-plans/pending/033-S373-phase-fprime-multi-perspective-master-plan.md
 session_impl: S384
-session_verify: S385 (pending)
+session_verify: S385 (PASS-WITH-CONCERNS / MERGE-ELIGIBLE: YES / Phase F-prime CODE-DONE-DATA-PENDING / Wave 1 MVP CODE-READY-DATA-PENDING)
 ---
 
 # D-078 — BC-8 V0=6 Dogfood CLI Extension and Wave 1 MVP Attestation
