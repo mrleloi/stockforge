@@ -114,7 +114,7 @@ Do NOT hardcode phase/task paths from memory. Route through:
 | INGEST | 40-80K | 80-150K | Process new data sources into KB |
 | POST-MORTEM | 30-50K | 60-100K | Review thesis outcomes, update calibration |
 
-**Opus-recalibration** (per S345-S361 empirical sample n=10+ dispatches; M-S360-2 silent-overrun pattern): Opus tokens-per-task ~2-3x Sonnet for architect+verifier (denser reasoning + more file reads); ~parity for dev (file-bounded). Cite ACTUAL model + budget in dispatch prompts; do NOT quote aspirational Sonnet numbers when dispatching Opus agents. † Dev on Opus shows under-budget actuals (S349=98K / S354=34K / S357=45K) — file-bounded work resists token inflation; sandwich-dev defaulted back to Sonnet 2026-05-17 per user "few days" edict elapsed.
+**Opus-recalibration** (per S345-S361 empirical sample n=10+ dispatches; M-S360-2 silent-overrun pattern): Opus tokens-per-task ~2-3x Sonnet for architect+verifier (denser reasoning + more file reads); ~parity for dev (file-bounded). Cite ACTUAL model + budget in dispatch prompts; do NOT quote aspirational Sonnet numbers when dispatching Opus agents. † Dev on Opus shows under-budget actuals (S349=98K / S354=34K / S357=45K) — file-bounded work resists token inflation. **All 14 agents on Opus per user directive 2026-05-17 "full opus + follow budget"**: budget discipline = use the Opus column above; main session MUST cite Opus budget in dispatch prompts (M-S365-1 prevention rule).
 
 **Never mix PLAN and IMPL in same session.** (Session 4 catastrophic failure mode.)
 **THESIS sessions are read-only on code.** Output goes to `agent-workspace/memory/thesis-log/`.

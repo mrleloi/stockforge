@@ -146,3 +146,15 @@
 **Prevention rule** (L-S360-2 1st-instance HOLD; 2nd-instance promotes): pre-dispatch budget-honesty check — if dispatch prompt cites "K Opus" budget in PLAN/VERIFY range, assert quoted budget ≥150K (PLAN) / ≥80K (VERIFY); else flag as Sonnet-calibrated stale-doctrine. Candidate Stop-hook or pre-Agent-dispatch lint.
 
 **Carry-forward**: future dispatches quote ACTUAL model + recalibrated budget per CLAUDE.md table.
+
+## M-S365-1 (LOW) — Wrong fix for M-S360-2 budget-overrun: reverted 6 agents to Sonnet when user wanted Opus + budget compliance — 2026-05-17
+
+**What went wrong**: At S362-main commit 19e18af, main session reverted 6 sub-agents (sandwich-dev/ul-auditor/research-scanner/bdd-planner/action-guide-planner/intent-classifier) from Opus back to Sonnet/Haiku, citing user's "for a few days" framing as elapsed. User immediately corrected: "không, vừa full opus vừa follow budget chứ. sửa lại" (= "no, both full opus AND follow budget; fix it").
+
+**Root cause**: Main session misread user's intent. User wanted recalibrated BUDGET (use Opus column in CLAUDE.md table); user did NOT want model revert. The two fixes are orthogonal — budget recalibration is one knob; model assignment is another.
+
+**Fix this turn**: re-edited 6 agents back to Opus + updated CLAUDE.md note: "All 14 agents on Opus per user directive 2026-05-17 'full opus + follow budget': budget discipline = use the Opus column above; main session MUST cite Opus budget in dispatch prompts (M-S365-1 prevention rule)".
+
+**Prevention rule** (L-S365-1 1st-instance HOLD; 2nd instance fires AP-23 promote): When user flags doctrine violation (e.g. budget rule), main session must distinguish multiple orthogonal knobs (model assignment vs budget table) and ASK if ambiguous; do NOT unilaterally tighten on more than one knob. M-S365-1 is also a 2nd-instance of "main applies broader fix than user requested" pattern (1st instance was retention sweeps mistakenly archiving non-target files in S99/S100 era).
+
+**Carry-forward**: future dispatches MUST cite Opus budget from recalibrated CLAUDE.md table (PLAN 150-230K / VERIFY 80-180K / FOCUSED_IMPL 100-150K† / etc.). S365 dev (a1383e9a8e4254474) was dispatched while sandwich-dev was on Sonnet — that in-flight dispatch will complete with Sonnet token usage; subsequent sandwich-dev dispatches will use Opus per re-revert.
