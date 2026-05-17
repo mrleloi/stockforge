@@ -159,3 +159,11 @@
 **Prevention rule** (L-S365-1 1st-instance HOLD; 2nd instance fires AP-23 promote): When user flags doctrine violation (e.g. budget rule), main session must distinguish multiple orthogonal knobs (model assignment vs budget table) and ASK if ambiguous; do NOT unilaterally tighten on more than one knob. M-S365-1 is also a 2nd-instance of "main applies broader fix than user requested" pattern (1st instance was retention sweeps mistakenly archiving non-target files in S99/S100 era).
 
 **Carry-forward**: future dispatches MUST cite Opus budget from recalibrated CLAUDE.md table (PLAN 150-230K / VERIFY 80-180K / FOCUSED_IMPL 100-150K† / etc.). S365 dev (a1383e9a8e4254474) was dispatched while sandwich-dev was on Sonnet — that in-flight dispatch will complete with Sonnet token usage; subsequent sandwich-dev dispatches will use Opus per re-revert.
+
+## M-S371-1 (LOW) — Dev observation LOC soft-drift (357→337 test; 150→147 CLI) — 2026-05-17
+
+S372 verifier F2: dev observation L82+L93 reported `337 LOC + 147 LOC` for test_vn_ticker_resolver.py + resolve_vn_tickers.py; actual wc -l = 357 + 150 (off by 20+3). Dispatch brief + git diff stat + independent wc -l all agree on 357+150. File content correct; all tests pass; functionality unaffected. SOFT drift (likely mid-edit snapshot), NOT fabrication.
+
+L-S345-1 intent guards fabricated LOC claims (where dispatch claims something the file doesn't have). This is the inverse — file is larger than dev's self-report. NOT promote-now per L-S345-1 spirit; tracked as bookkeeping freshness issue (L-S345-1 NOT triggered at n=7).
+
+Prevention: dev observation template should mandate `wc -l` re-run AFTER all edits complete, captured into observation body table same as DC items (L-S372-2 candidate; HOLD).

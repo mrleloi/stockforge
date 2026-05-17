@@ -1,7 +1,7 @@
 ---
 id: D-073
 title: VN Ticker Resolver v0 — Alias Table + difflib Fuzzy Match
-status: PROPOSED
+status: ACCEPTED
 severity: IMPL
 proposed_at: 2026-05-17
 proposed_by: sandwich-dev S371 (IMPL session; plan-032-S370-phase-e4-vn-ticker-resolver.md)
