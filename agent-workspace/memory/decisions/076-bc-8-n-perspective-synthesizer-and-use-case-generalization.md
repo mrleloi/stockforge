@@ -1,7 +1,7 @@
 ---
 decision_id: D-076
 title: "BC-8 N-Perspective Synthesizer and ValidateThesisPhase1UseCase Generalization"
-status: PROPOSED
+status: ACCEPTED
 type: architecture
 proposed_at: 2026-05-17
 ratified_at: null

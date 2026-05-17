@@ -41,7 +41,7 @@ _DISCLAIMER_FOOTER = (
 def render() -> None:
     """Render the Validate Thesis page."""
     st.title("Validate Thesis")
-    st.caption("Run a 3-perspective analysis (Bear / Bull / Quant) on a VN30 ticker.")
+    st.caption("Run a 6-perspective analysis (Bear / Bull / Quant / Buffett / Graham / Taleb) on a VN30 ticker — V0 per Phase F.3 (D-076).")
 
     # --- Inputs ---
     ticker_raw = st.text_input("Ticker", placeholder="e.g. HPG, VHM, FPT")

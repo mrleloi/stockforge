@@ -218,15 +218,27 @@ def _make_use_case(
     data_gatherer: object | None = None,
     cost_tracker: object | None = None,
 ) -> object:
+    """S382 verifier F1 inline-fix per AP-1 applying-per-mandate (S339/S358/S366 precedent):
+    ValidateThesisPhase1UseCase ctor changed at S381 (F.3) from 3-individual-agent params
+    (bear_agent/bull_agent/quant_agent) to single `agents: dict[PerspectiveRole, LLMPerspectivePort]`
+    param per DD-1. Update helper to construct dict + pass `agents=` to ctor; preserves
+    legacy bear/bull/quant kwarg interface for back-compat with all existing test call sites.
+    """
     from packages.application.analysis.use_cases.validate_thesis_phase1 import (  # noqa: PLC0415
         ValidateThesisPhase1UseCase,
     )
+    from packages.domain.analysis.models.perspective_analysis import (  # noqa: PLC0415
+        PerspectiveRole,
+    )
 
+    agents = {
+        PerspectiveRole.BEAR: bear or _MockLLMAgent(_good_bear()),
+        PerspectiveRole.BULL: bull or _MockLLMAgent(_good_bull()),
+        PerspectiveRole.QUANT: quant or _MockLLMAgent(_good_quant()),
+    }
     return ValidateThesisPhase1UseCase(
         data_gatherer=data_gatherer or _MockDataGatherer(),
-        bear_agent=bear or _MockLLMAgent(_good_bear()),
-        bull_agent=bull or _MockLLMAgent(_good_bull()),
-        quant_agent=quant or _MockLLMAgent(_good_quant()),
+        agents=agents,  # type: ignore[arg-type]
         synthesizer=synthesizer or _MockSynthesizer(_synthesis()),
         thesis_repo=_MockThesisRepo(),
         cost_tracker=cost_tracker or _MockCostTracker(),

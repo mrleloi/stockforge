@@ -167,3 +167,25 @@ S372 verifier F2: dev observation L82+L93 reported `337 LOC + 147 LOC` for test_
 L-S345-1 intent guards fabricated LOC claims (where dispatch claims something the file doesn't have). This is the inverse — file is larger than dev's self-report. NOT promote-now per L-S345-1 spirit; tracked as bookkeeping freshness issue (L-S345-1 NOT triggered at n=7).
 
 Prevention: dev observation template should mandate `wc -l` re-run AFTER all edits complete, captured into observation body table same as DC items (L-S372-2 candidate; HOLD).
+
+## M-S381-1 (MEDIUM) — Dev shipped F.3 with ctor-signature-change not propagated to apps/cli/test_validate_thesis.py — 2026-05-17
+
+S382 verifier F1: dev changed ValidateThesisPhase1UseCase ctor from 3-individual-agent params (bear_agent/bull_agent/quant_agent) to single `agents: dict[PerspectiveRole, LLMPerspectivePort]` per DD-1, but DID NOT update `_make_use_case` helper at `apps/cli/test_validate_thesis.py:212-234`. 4 pytest failures + 4 mypy errors result.
+
+Root cause: ctor-signature-change discipline gap — dev didn't grep all callers of modified ctor before commit.
+
+Prevention rule (L-S382-2 HOLD): sandwich-dev STEP 0 doctrine update — when modifying public ctor signature, MUST `grep -rn "<ClassName>(" packages/ apps/ tests/` and update ALL call sites + RE-RUN full pytest (not sub-package scope) before commit.
+
+Inline fix this turn: main session updated _make_use_case to construct agents dict + pass agents= kwarg per AP-1 applying-per-verifier-mandate precedent.
+
+## M-S381-2 (MEDIUM) — Dev commit-message attestation drift (mypy/ruff/pytest scope mismatch) — n=10 L-S345-1 trigger DIRTY — 2026-05-17
+
+S382 verifier F2: dev commit a83578a attested "mypy --strict CLEAN; ruff CLEAN; 1087→1104 tests passing". Empirical verification: mypy strict on apps/cli/test_validate_thesis.py had 4 errors; full-project pytest scope = 1210 collected / 1204 pass / 4 fail (NOT 1104). Dev measured sub-package scope only.
+
+Root cause: pytest scope reporting drift — dev's baseline 1087 was sub-package; full-project baseline was 1190 per S379. Commit claim implicitly extrapolated sub-package CLEAN to full-project CLEAN without verification.
+
+L-S345-1 n=10 trigger DIRTY (cluster: S375 F1 + S339 F2 + S378 F2 + S381 F2). Pattern: "dev commit message claims 'all gates CLEAN' but mypy/pytest empirically fail on adjacent uncovered test surface."
+
+Prevention candidate L-S382-1 HIGH (PROMOTE-NOW threshold): (a) PreCommit hook running pytest on changed-file ancestry + BLOCKing on regression; (b) sandwich-dev STEP 0 doctrine "ctor-signature-change → grep all callers"; (c) plan template § C STOP-AND-ASK refinement (current "30+ regressions" threshold too lax — should be "ANY regression at downstream test surface").
+
+Inline fix this turn: main applied F1 (test helper) + F3 (dashboard caption) inline per AP-1; full pytest post-fix = 1208 passed / 0 failed.
