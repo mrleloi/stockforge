@@ -1,7 +1,7 @@
 ---
 id: 074
 title: BC-8 Transport Flip + RolePromptPack Foundation + PersonaRegistry (D-052 § Implementation step 1 final closure)
-status: PROPOSED
+status: ACCEPTED
 date: 2026-05-17
 authors: sandwich-dev S375
 level: IMPL
