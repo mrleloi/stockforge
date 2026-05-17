@@ -1,9 +1,10 @@
 ---
 id: 071
 title: VN Sentiment Lexicon v0 + Calibration Loop
-status: PROPOSED
+status: ACCEPTED
 date: 2026-05-17
 authors: sandwich-dev S365
+ratified_by: ARCH-tier auto-ratification per severity-schema at S366 verifier PASS-WITH-CONCERNS verdict (2026-05-17)
 level: ARCH
 supersedes: []
 superseded-by: []

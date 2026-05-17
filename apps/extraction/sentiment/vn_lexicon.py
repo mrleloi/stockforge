@@ -336,6 +336,7 @@ VN_CULTURAL_ANCHORS: frozenset[str] = frozenset(
     {
         # ASCII-transliterated forms (what WhitespaceTokenizer may produce)
         "doi_lai",
+        "lai_co_phieu",  # S366 verifier F1 inline-fix: per DD-3 disambiguation; "lái -0.6" stock-manipulator (vs "lai +0.5" profit collision)
         "du_dinh",
         "bat_day",
         "phim_hang",
