@@ -35,7 +35,7 @@ dependencies = [
     "yfinance>=0.2.40",                 # global comparables
 
     # --- Vietnamese NLP ---
-    "pyvi>=0.1.1",                       # VN tokenizer (MIT; STEP 0 eval S362 sub-plan 029)
+    "pyvi==0.1.1",                       # VN tokenizer (MIT; STEP 0 eval S362 sub-plan 029; S363 F2 exact-pin per ADR D-070 RM2 promise)
 
     # --- Scraping ---
     "beautifulsoup4>=4.12.0",

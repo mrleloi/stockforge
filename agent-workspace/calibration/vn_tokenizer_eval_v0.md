@@ -8,7 +8,7 @@
 
 - **N=36 articles** extracted from `data/raw/news/` after corpus expansion via CLIs
 - Source distribution:
-  - NDH = 12 articles (ingest_news_ndh CLI; 2026-05-16 date dir)
+  - NDH = 14 articles (ingest_news_ndh CLI; 2026-05-16 date dir) [S363 F1 correction: dev observation said 12; empirical find/wc -l = 14; total 36 unchanged]
   - Vietstock = 10 articles (ingest_news_vietstock CLI; 2026-05-16 date dir)
   - VietnamBiz = 12 articles (ingest_news_vietnambiz CLI; 2026-05-16 date dir)
   - CafeF = 0 articles (ingest_news_cafef returned 0; likely network/selector issue)
