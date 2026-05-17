@@ -18,6 +18,16 @@
 
 ---
 
+### M-S406-NONE
+**Date**: 2026-05-17
+**Session**: S406
+**Severity**: N/A
+**What happened**: No mistakes detected this session (S406 sandwich-architect re-dispatch for plan-044 G.4 after S405 crashed at 64K cap per M-S405-1). Architect (`a6c35ae64db9443fc`, ~4min Opus PLAN; 170K tokens) authored plan-044 = 450 LOC (well under 700 HARD CAP per L-S405-1) + observation = 70 LOC (under 100 HARD CAP). Return summary CONCISE per L-S405-1 prevention rule (no plan-content repetition; file paths + LOC + 5-bullet handoff only). **L-S405-1 prevention rule WORKED at 1st-instance reinforcement** — re-dispatch with stricter caps produced clean output; no 2nd-instance trigger fires.
+
+G.4 design: 6 sub-tracks D1-D6 (parser DRY-delegates to EchoValidator → mapper → CLI → thesis-log artifact → integration tests ≥5 assertions → ADR D-083); single-adapter G.3-only V0 (G.2 BLOCKED on RM3); IS-only statement-type scope (defer BS+CF); ADDITIVE-ONLY-DEFAULT schema (NO migration; parent plan-040 K.2.c NOT-FIRED); SourceProvider.SCRAPED_OTHER per DD-2. ZERO new charter-tier flags; ZERO new pyproject.toml deps; D-050 anthropic_api_to_subagent preserved transitively via G.3 reuse. File scope: 6 NEW + 1 ADDITIVE __init__ delta.
+
+---
+
 ### M-S405-1
 **Date**: 2026-05-17
 **Session**: S405 (architect crashed; re-dispatched as S406)
