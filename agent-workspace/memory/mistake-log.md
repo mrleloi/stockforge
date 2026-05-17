@@ -18,6 +18,17 @@
 
 ---
 
+### M-S392-1
+**Date**: 2026-05-17
+**Session**: S391 (caught at S392)
+**Severity**: low
+**What happened**: Main session's S392 sandwich-architect dispatch brief contained TWO file-path inaccuracies caught via fresh-context VBW by the architect. Brief stated: (a) "PdfTableExtractorPort ABC in `packages/_shared/pdf/pdf_table_extractor_port.py`"; (b) "model on `packages/_shared/crawl/crawler_adapter.py` from D-066 CrawlerAdapter ABC contract precedent". Architect found: (a) `packages/_shared/__init__.py:1-7` constrains `_shared/` to dep-free pure Python (PDF library imports would violate); parent plan-040 DD-1 canonical source specifies `packages/application/fundamental/pdf_table_extractor_port.py`; (b) D-066 CrawlerAdapter actually lives at `packages/application/news/ports/crawler_adapter.py` (128 LOC; Glob-verified); not at `_shared/crawl/`. Resolution: architect followed parent plan-040 DD-1 per dispatch-brief precedence rule ("read parent plan-040 § D first"); documented in plan-041 DD-1 + STEP 0.5 + RM6 + § P + surfaced as PCG-6 promote candidate.
+**Root cause**: Main session wrote dispatch brief from memory/checkpoint summary without VBW grep of actual file paths in `packages/`. Used speculative `_shared/pdf/` based on D-066 CrawlerAdapter mental model (which was itself misremembered as `_shared/crawl/`). Plan-040 parent had the canonical paths but main session paraphrased instead of citing verbatim. Pattern class: "dispatch-brief VBW pre-flight discipline" — main session must apply VBW to its own dispatch briefs, not just to its own code edits.
+**Prevention rule L-S392-1** (1st instance LOW; AP-23 HELD-FOR-PROMOTION on 2nd recurrence within 5 sessions): main-session dispatch-brief composition MUST grep/Glob actual file paths before citing them; OR cite parent plan/spec verbatim with file:line reference instead of paraphrasing path text. Carry-forward: at L-S392-1 2nd instance (next dispatch-brief path drift caught by architect), promote to deterministic post-write linter checking dispatch-brief text for `packages/**` path mentions + `[ -f ]` existence check before Agent call OR include in pre-dispatch-architect-commit-guard.sh as path-existence pre-flight.
+**Where applied**: Inline-S392 (architect already resolved via parent-plan-precedence; no main-session re-edit needed). Surfaced PCG-6 in plan-041 § J + S392 architect return-summary. Next-harness-sweep architect (post-S396/S397 verifier round) will scan mistake-log + see this entry alongside L-S389-1+L-S389-2 — total 3 promotion candidates queued (still under promotion-cycle-trigger.sh 8-lesson HARD-BLOCK threshold). Severity LOW: no production impact; no defect shipped; fresh-context architect VBW caught it via deterministic Glob; bookkeeping + process discipline issue only.
+
+---
+
 ### M-S391-NONE
 **Date**: 2026-05-17
 **Session**: S391
