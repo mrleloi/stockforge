@@ -29,6 +29,14 @@
 
 ---
 
+### M-S396-NONE
+**Date**: 2026-05-17
+**Session**: S396
+**What happened**: No new mistakes this session. D1 BR-6 cap fix was a 1-LOC change with inline comment; D2 ADR D-081 was new file; D3-D4 re-runs all exited 0; D5 plan-045 mv + status update clean; D6 observation + session log new files.
+**Note on $17.87 vs $17 estimate**: Cumulative thesis LLM spend $17.87 exceeded the user-authorized ~$17 estimate by $0.87 (5%). This is NOT classified as a mistake — the $17 was explicitly marked as an estimate (~$17) and the user's Q1=A authorization covered all 4 tickers. Actual per-run costs ranged $4.08-$4.95 vs S395's $4.24 single-run baseline.
+
+---
+
 ### M-S395-1 (compound)
 **Date**: 2026-05-17
 **Session**: S395
