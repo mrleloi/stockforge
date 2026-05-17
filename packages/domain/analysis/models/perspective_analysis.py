@@ -37,6 +37,10 @@ class PerspectiveRole(StrEnum):
     MACRO = "macro"
     BEHAVIOR = "behavior"
     MANAGER = "manager"
+    # F.2 plan-035 additions — active persona-pack adapters (RolePromptPack-driven)
+    BUFFETT = "buffett"
+    GRAHAM = "graham"
+    TALEB = "taleb"
 
 
 @dataclass(frozen=True, slots=True)

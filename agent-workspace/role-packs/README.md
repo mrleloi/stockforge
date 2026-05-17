@@ -37,9 +37,25 @@ pack = reg.get("buffett")
 
 ## V0 content authoring
 
-Per-persona content (Buffett / Graham / Taleb) authored by Phase F.2 sub-plan 035.
+Per-persona content authored by Phase F.2 sub-plan 035 (S378 IMPL; D-075 PROPOSED).
+
+### Personas authored (F.2)
+
+| File | role_id | Persona | category_universe | model |
+|---|---|---|---|---|
+| `buffett.json` | buffett | Warren Buffett (value + quality + moat) | MOAT / MANAGEMENT / VALUATION / ROIC / BALANCE_SHEET / GROWTH | claude-sonnet-4-6 |
+| `graham.json` | graham | Benjamin Graham (deep value + margin of safety) | EARNINGS_STABILITY / BALANCE_SHEET_STRENGTH / DIVIDEND_RECORD / MARGIN_OF_SAFETY / NCAV / GRAHAM_NUMBER | claude-sonnet-4-6 |
+| `taleb.json` | taleb | Nassim Taleb (antifragility + tail risk + convexity) | FRAGILITY / CONVEXITY / SKIN_IN_GAME / TAIL_RISK / VOLATILITY_REGIME / ANTIFRAGILITY | claude-sonnet-4-6 |
+
+Vietnam-relevance notes included in each pack (≥150 chars per persona per DD-6):
+- **Buffett**: VinGroup cross-holding moat caveat; Vinamilk/MWG/HPG/VCB moat examples; circle of competence vs. pump stocks
+- **Graham**: VN banking NCAV limitations; VN real estate balance-sheet complexity; current ratio relaxation to 1.5; dividend record ≥3y for VN30
+- **Taleb**: VN F0 retail >85% tail-risk regime; 'đội lái' pump fragility; USD/VND turkey problem
+
+Pattern source: ai-hedge-fund (MIT; PATTERN inspiration only per A-01 § 6 LICENSE caveat). Zero verbatim copy. See ADR D-075 for pattern-port attestation.
+
 F.1 (this directory creation, ADR D-074, RolePromptPack dataclass, PersonaRegistry) ships
-substrate only — no persona JSON files yet.
+substrate only — persona JSON files added by F.2.
 
 ## YAML deferral
 
