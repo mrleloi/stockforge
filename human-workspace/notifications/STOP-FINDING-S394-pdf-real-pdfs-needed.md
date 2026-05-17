@@ -5,6 +5,8 @@ created_at: 2026-05-17T00:00:00Z
 trigger: RM3-gold-set-sourcing-network-blocked
 severity: HIGH
 severity_note: "Normalized from IMPLEMENTATION-BLOCKER to HIGH per S397 verifier F4 + L-S397-2 promotion candidate; operational-blocker not charter-tier."
+status: pending-user-pdf-provision
+status_note: "Added 2026-05-17 S404 close per D2 stop-finding-frontmatter-validator hook live-run flag + L-S397-2/PCG-S401-3 disciplines shipped same sweep. PDF provision blocks G.2 sub-plan 042 dispatch ONLY; G.3 (043) shipped via Claude vision @<absolute_path> Resolution B (S399); G.4 (044) architect dispatched in parallel at S405."
 requires_human_decision: true
 k2a_status: NOT-FIRED (K.2.a Trigger B cannot be evaluated without real PDFs)
 ---

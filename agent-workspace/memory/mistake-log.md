@@ -18,6 +18,16 @@
 
 ---
 
+### M-S404-NONE + PCG-V404-1
+**Date**: 2026-05-17
+**Session**: S404
+**Severity**: N/A (verify session; main-side carries PCG-V404-1 HOLD)
+**What happened**: No mistakes detected this verify session (S404 sandwich-verifier for plan-046 harness sweep N+2). Verifier (`a61326480a4caba3f`, ~2min Opus VERIFY) returned VERDICT: PASS / merge-eligible with 0 CRITICAL / 1 IMPORTANT / 2 MINOR findings. **D4.A persona override META-TEST SUCCESSFUL**: verifier honored "Do NOT Write report .md files" constraint shipped same sweep + main session inline-persisted observation+session-log per M-S397-1 canonical pattern. All 8 PROMOTE-NOW sub-tracks empirically verified. Promotion queue drained 10→2 confirmed. D2 hook live-run caught 2 WARN (STOP-FINDING-S365 missing severity + STOP-FINDING-S394 missing status); main inline-fixed STOP-FINDING-S394 this turn (S365 deferred to future bookkeeping).
+
+**PCG-V404-1 NEW (1st-instance HOLD)**: dev pytest invocation scope discipline. S403 dev cited "pytest: 1127 passed, 1 skipped (no regression)" — correct WITHIN packages/ scope; full-project baseline `python -m pytest packages/ tests/` = 1178/1 (preserved; no actual regression). 51-test delta is `tests/unit/` directory added at S399 G.3 IMPL. AP-7 trigger: 2nd-instance dev observation citing pytest count that omits non-packages test directory → promote to dispatch-brief template requiring explicit `python -m pytest packages/ tests/` invocation. Carry-forward: bundle with next harness sweep N+3 promotion-rule architect.
+
+---
+
 ### M-S403-NONE
 **Date**: 2026-05-17
 **Session**: S403
