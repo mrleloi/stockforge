@@ -103,16 +103,18 @@ Do NOT hardcode phase/task paths from memory. Route through:
 
 ## Session Types (choose at start)
 
-| Type | Budget | Purpose |
-|---|---|---|
-| PLAN | 50-80K | Architect subagent, produces session plan |
-| FOCUSED IMPL | 100-150K | Dev, 1-3 tasks from plan |
-| MULTI-TASK IMPL | 150-250K | Dev, 4-10 tasks from plan |
-| VERIFY | 30-60K | Verifier subagent, adversarial review |
-| RECOVERY | 80-150K | Revert + re-plan after failure |
-| THESIS | 60-100K | Multi-perspective adversarial analysis on a stock |
-| INGEST | 40-80K | Process new data sources into KB |
-| POST-MORTEM | 30-50K | Review thesis outcomes, update calibration |
+| Type | Budget (Sonnet) | Budget (Opus) | Purpose |
+|---|---|---|---|
+| PLAN | 50-80K | **150-230K** | Architect subagent, produces session plan |
+| FOCUSED IMPL | 100-150K | 100-150K† | Dev, 1-3 tasks from plan |
+| MULTI-TASK IMPL | 150-250K | 200-330K | Dev, 4-10 tasks from plan |
+| VERIFY | 30-60K | **80-180K** | Verifier subagent, adversarial review |
+| RECOVERY | 80-150K | 130-230K | Revert + re-plan after failure |
+| THESIS | 60-100K | 100-180K | Multi-perspective adversarial analysis on a stock |
+| INGEST | 40-80K | 80-150K | Process new data sources into KB |
+| POST-MORTEM | 30-50K | 60-100K | Review thesis outcomes, update calibration |
+
+**Opus-recalibration** (per S345-S361 empirical sample n=10+ dispatches; M-S360-2 silent-overrun pattern): Opus tokens-per-task ~2-3x Sonnet for architect+verifier (denser reasoning + more file reads); ~parity for dev (file-bounded). Cite ACTUAL model + budget in dispatch prompts; do NOT quote aspirational Sonnet numbers when dispatching Opus agents. † Dev on Opus shows under-budget actuals (S349=98K / S354=34K / S357=45K) — file-bounded work resists token inflation; sandwich-dev defaulted back to Sonnet 2026-05-17 per user "few days" edict elapsed.
 
 **Never mix PLAN and IMPL in same session.** (Session 4 catastrophic failure mode.)
 **THESIS sessions are read-only on code.** Output goes to `agent-workspace/memory/thesis-log/`.

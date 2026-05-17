@@ -144,6 +144,26 @@
 
 ---
 
+## S362 — Phase E.1 VN Tokenization IMPL DONE (sub-plan 029; S363 verifier pending) — 2026-05-17
+
+**S362 sandwich-dev RETURN** (Sonnet 4.6 FOCUSED_IMPL, AP-1 fresh-context). Sub-plan 029-S361-phase-e1-vn-tokenization D1-D4 COMPLETE. 32/33 DoD self-assessed PASS (DC-BOOK-4 deferred to S363 per protocol).
+
+**CHARTER-TIER GATE DID NOT FIRE**: underthesea v9.4.0 = Apache-2.0 (NOT GPL-3.0; historical docs stale). pyvi==0.1.1 selected (MIT; 75.7% quality; 3.6x faster than underthesea; quality gap 6.1% < 10% threshold per plan recommendation). Scorecard at `agent-workspace/calibration/vn_tokenizer_eval_v0.md`.
+
+**Files shipped** (7 new production/test files; total 650 LOC):
+- `packages/application/nlp/ports/text_tokenizer_port.py` (50 LOC; D1 Protocol)
+- `packages/infrastructure/nlp/vn_tokenizer.py` (147 LOC; D2 adapter)
+- `packages/infrastructure/nlp/test_vn_tokenizer.py` (235 LOC; D3 tests; 19/19 PASS)
+- `apps/cli/tokenize_vn_text.py` (186 LOC; D4 CLI)
+- pyproject.toml +1 dep line (pyvi>=0.1.1)
+- ADR D-070 PROPOSED at `memory/decisions/070-vn-tokenizer-library.md`
+
+**Gates**: mypy --strict PASS / ruff PASS / pytest 1053/1053 PASS (1034+19; 0 regressions) / I-S1 CLEAN / D-059 CLEAN / I-S34 CLEAN / firing-tests exit 0.
+
+**Next**: dispatch S363 sandwich-verifier AP-1 fresh-context to verify sub-plan 029 per § F DoD 33 items.
+
+---
+
 ## S343-S344 — Phase 4 — Wave 1 Phase D NDH adapter PLAN+IMPL DONE (S344 dev returned commits f9d4f60+06c9920; S345 verifier DEFERRED per user pause) — 2026-05-16
 
 **S344 sandwich-dev RETURN** (`a6650ff3d2adf656b`, ~31min/116K Opus, AP-1 fresh-context). Per plan-022 STEP 0 + D1-D5. **VERDICT: all 4 STOP-AND-ASK triggers CLEAR**. STEP 0 surfaced canonical-host surprise: `nhipsongkinhdoanh.vn` reached via redirect from `nhipsongdoanhnghiep.vn`; `ndh.vn` DNS-fail entirely; robots `Allow: /` + `Disallow: /misc/language` only; ToS no explicit automated-access prohibition; static HTML no `__NEXT_DATA__` JS markers; selector candidates `h1[class="article__title cms-title"]` + `div.article-content` + `meta[property=article:published_time]`. Files (CORRECTED per S345 verifier F1 — dev observation under-reported LOC + wrong test path): `packages/infrastructure/news/crawler_adapters/ndh_adapter.py` 445 LOC (dev claimed 290) + `packages/infrastructure/news/crawler_adapters/test_ndh_adapter.py` 458 LOC + 22 tests after F2 inline guard added (dev claimed 480 LOC + 21 tests; co-located NOT under `tests/` per CafeF sibling precedent + DC-FILE-3 "either location" clause) + `apps/cli/ingest_news_ndh.py` 366 LOC (dev claimed 290) + 4 modified files + ADR D-066 amended Path A REV-1 (§ Out-of-scope item 12 PENDING-CONSUMER → ANSWERED with NDHAdapter consumer cited). **Test delta 968→990 (+22; 0 regressions)** — was 989 after S344 dev; +1 from F2 regression guard inline. DoD 28/30 PASS (DC-LOC-1 + DC-LOC-3 = ABOVE-CEILING-ACCEPTED per F1 reclass; code quality OK on verifier inspection — docstrings + sub-step audit comments are the LOC drivers; surgical-changes discipline not violated).
@@ -181,44 +201,4 @@
 **Compliance attestation (S343-S344 cycle + Items 1-4 deliverables)**: harness_priority_one ✓ (Items 1-3 are pure harness deep-dives ranked above S345 product dispatch; Item 4 = status synthesis; user-paused before S345 dispatch) / AP-1 ✓ (3 fresh-context dispatches: S343 architect af2939216b11c8554 + S344 dev a6650ff3d2adf656b; verifier deferred per user pause; main NEVER substantively reviewed; main spot-checked dev outputs only) / dont_self_pause_at_session_boundary ✓ (architect → dev shipped one continuous turn; verifier pause is USER-DIRECTED not self-pause) / autonomous_continue_no_self_pause ✓ until user "stop things" directive / stop_offering_routing_branches ✓ (4 observations enumerate decision menus; main does not enumerate routing branches to user) / D-060 ✓ (background dev 2 self-commits f9d4f60 + 06c9920; 0 pushes; D-060 terminal status UNCHANGED per stale-prompt detector — NOT re-opened) / verify_phase_before_next_phase ✓ (main spot-checked dev STEP 0 verdict + 21 new tests + ADR amendment + 5 risk areas) / 0 charter writes (PROJECT_CHARTER.md untouched) / 0 constitution writes (`agent-workspace/constitution/**` untouched) / SYNC-GRILLING NOT fired (BEHAVIORAL HOLD § (1) + `full_autonomous_no_supervised` reserves AskUserQuestion for SCOPE/CHARTER) / project.md PHASE-STATUS-COHERENCE reconciliation ATTEMPTED-PARTIAL prior turn (regex limitation surfaced this turn; surgical workaround applied; proper hook fix queued)
 
 ---
-
-## S354 — Phase D Vietstock Adapter IMPL DONE (plan-026; sandwich-dev S354) — 2026-05-16
-
-**S354 sandwich-dev RETURN** (Sonnet 4.6 FOCUSED_IMPL, fresh-context AP-1 per plan-026). All 5 sub-tracks D1-D5 COMPLETE. Baseline 990 → 1013 tests (+23; 0 regressions). 23/23 new tests PASS. STEP 0 all 4 STOP-AND-ASK triggers CLEAR.
-
-**STEP 0 verdicts**: vietstock.vn status=200 (canonical); finance.vietstock.vn also 200 (separate financial-tools subdomain). robots.txt 200; Allow: /; Disallow: /*.js /*.css /manager /export /cache; no Crawl-delay → 2.0s default applies. ToS: no explicit automated-access prohibition found. JS-rendering: PASS (static HTML). Article URL pattern: `/YYYY/MM/<slug>-<cat_id>-<article_id>.htm`. Selectors: `h1.article-title` (headline primary) + `div#vst_detail[itemprop=articleBody]` (body primary) + `meta[article:published_time]` (date primary).
-
-**D1+D2 (adapter impl + selector authoring)**: `packages/infrastructure/news/crawler_adapters/vietstock_adapter.py` 476 LOC. Strategy A direct-subclass; 2 SelectorChain[T] instances; fmt-string chain for date. DD-7 F2-aware `store_raw=False` in discover() architected from day 1.
-
-**D3 (unit tests)**: `packages/infrastructure/news/crawler_adapters/test_vietstock_adapter.py` 540 LOC; 23 test cases. Tests 7+19 (DD-7 F2-aware regression guard) PASS.
-
-**D4 (registry + CLI)**: `apps/cli/ingest_news_vietstock.py` 370 LOC. CLI smoke: 2 articles scraped + written. Raw HTML at `data/raw/news/vietstock/2026-05-16/`. No listing-page HTML persisted.
-
-**D5 (ADR REV-2)**: D-066 § Amendments REV-2 added. Session log + observation written.
-
-**Next**: dispatch S355 sandwich-verifier (AP-1, fresh-context) for plan-026 verification.
-
----
-
-## S357 — Phase D Theme L FINAL VietnamBiz Adapter IMPL DONE (plan-027; sandwich-dev S357) — 2026-05-16
-
-**S357 sandwich-dev RETURN** (Sonnet 4.6 FOCUSED_IMPL, fresh-context AP-1 per plan-027). All 5 sub-tracks D1-D5 COMPLETE. Baseline 1013 → 1034 tests (+21; 0 regressions). 21/21 new tests PASS. STEP 0 all 4 STOP-AND-ASK triggers CLEAR.
-
-**STEP 0 verdicts**: vietnambiz.vn status=200 (canonical apex; www. redirects to apex). robots.txt 200; Allow: /; no Crawl-delay → 3.0s applies per DD-5 skill flag. ToS: no automated-access prohibition. JS-rendering: PASS (static HTML). Article URL pattern: `/<slug>-<15+digit-timestamp-id>.htm` (root-level, no subdirectory). Selectors: `h1.vnbcb-title` (headline primary) + `div.vnbcb-content` (body primary) + `meta[article:published_time]` (date; **NO timezone offset** → UTC+7 required; M-S357-1 inline-resolved).
-
-**M-S357-1 IMPORTANT (inline-resolved)**: VietnamBiz `meta[article:published_time]` emits Vietnam local time with no timezone suffix (unlike Vietstock which had `+07:00`). Naive UTC would violate Rule 8 (published_at > ingested_at). Fix: `_TZ_VN = timezone(timedelta(hours=7))` throughout `_parse_published_at`. CLI smoke confirmed correct behavior.
-
-**D1+D2 (adapter impl + selector authoring)**: `packages/infrastructure/news/crawler_adapters/vietnambiz_adapter.py` 501 LOC. Strategy A direct-subclass; 2 SelectorChain[T] instances; 3rd + FINAL SelectorChain[T] consumer. DD-7 F2-aware `store_raw=False` in discover() architected from day 1. DD-5 `_DEFAULT_RATE_LIMIT_SECONDS = 3.0` (first per-source rate-bump in BC-5 suite).
-
-**D3 (unit tests)**: `packages/infrastructure/news/crawler_adapters/test_vietnambiz_adapter.py` 490 LOC; 21 test cases. Tests 7+19+21 (DD-7 sextuple-guard items 4+5 + DD-5 rate-limit) PASS. **DD-7 F2 SEXTUPLE-GUARD: ALL 6 GREEN** — L-S345-3 PROMOTE-NOW trigger condition met (pending S358 verifier confirmation).
-
-**D4 (registry + CLI)**: `apps/cli/ingest_news_vietnambiz.py` 373 LOC; `RateLimiter(base_delay=3.0)`. CLI smoke: 1 article scraped + written. `data/raw/news/vietnambiz/2026-05-16/e6a209b91f159f73.html` (1 file; no listing HTML = DC-SMOKE-4 PASS).
-
-**D5 (ADR REV-3)**: D-066 § Amendments REV-3 added. Phase D Theme L per-source rollout CLOSED. Session log + observation written.
-
-**Phase D Theme L status**: CafeF (Strategy B WRAP) + NDH (S344) + Vietstock (S354) + **VietnamBiz (S357) = FINAL** — ALL 4 adapters SHIPPED. Theme L CLOSED pending S358 verifier acceptance.
-
-**5 handoff risks for S358**: (1) UTC+7 fix — confirm published_at values are correct; (2) URL regex anchoring — may miss category-prefixed URLs; (3) LOC 501 vs 400 plan ceiling — same accepted leeway as Vietstock 476; (4) mypy 4 unused-ignore L-S354-1 HOLD pattern; (5) CLI default `--listing /chung-khoan.htm` needs no leading slash on Windows.
-
-**Next**: dispatch S358 sandwich-verifier (AP-1, fresh-context, ~30-50K VERIFY budget) for plan-027 verification. On S358 PASS → Phase E Theme I Vietnamese NLP UNBLOCKED. If sextuple-guard confirmed GREEN → main writes `.claude/skills/crawler-reliability/SKILL.md` L-S345-3 promotion update.
 

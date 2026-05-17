@@ -129,3 +129,20 @@
 **Prevention rule** (AP-23 promote-or-retire calculus — 2nd-instance triggers promote): Add Stop-hook `main-session-no-pause-check.sh` that grep-checks if main's last response contained a fresh-context dispatch OR an explicit AskUserQuestion (charter-tier) — if neither AND no STOP-AND-ASK trigger detected AND autonomous_mode=true → emit WARN to severity-state.tsv. Promote-to-investigation candidate L-S360-1 1st-instance HOLD here; if 3rd-instance fires across sessions → promote to hook.
 
 **Inline fix this turn**: dispatched S361 architect immediately after user prompt.
+
+## M-S360-2 (MEDIUM) — Silent budget-rule overrun pattern (CLAUDE.md table calibrated for Sonnet; sandwich-architect+verifier always on Opus) — 2026-05-17
+
+**What went wrong**: Main session quoted CLAUDE.md Session Types budgets (PLAN 50-80K / VERIFY 30-60K) in dispatch prompts despite knowing sandwich-architect + sandwich-verifier agents were on Opus. Actual dispatches consistently ran 2-3x over quoted budget: PLAN actuals 165-231K (vs 50-80K quoted) / VERIFY actuals 127-186K (vs 30-60K quoted). User flagged "sao không thấy follow budget rule nữa vậy? lỗi harness à?" at S362 dispatch boundary.
+
+**Root cause**: (1) CLAUDE.md table was Sonnet-calibrated (pre-D-004 Opus 4.7 era); (2) sandwich-architect + sandwich-verifier were ALWAYS on Opus per pre-existing agent-template config; (3) main session silently propagated Sonnet-budget quotes into Opus-agent dispatch prompts; (4) Wave 1 plans grew larger over time (1100-1200 LOC architect outputs) which further inflated Opus tokens-per-task.
+
+**Recurrence class**: Similar to M-S360-1 self-pause pattern — main session not flagging harness/budget gaps until user catches them. 2nd-instance of "main silently propagates stale doctrine without empirical recalibration".
+
+**Fix this turn**:
+1. Updated CLAUDE.md Session Types table with Sonnet vs Opus columns + empirical recalibration note + sandwich-dev-back-to-Sonnet attestation
+2. Reverted 6 agents to prior model assignments (sandwich-dev sonnet / ul-auditor sonnet / research-scanner sonnet / bdd-planner sonnet / action-guide-planner sonnet / intent-classifier haiku) per user "few days" edict elapsed (~30hr since 2026-05-16 edit)
+3. Kept 8 originally-Opus agents on Opus: sandwich-architect, sandwich-verifier, master-planner, drift-detector, devils-advocate, lesson-synthesizer, intent-vs-impl-diff, spec-author
+
+**Prevention rule** (L-S360-2 1st-instance HOLD; 2nd-instance promotes): pre-dispatch budget-honesty check — if dispatch prompt cites "K Opus" budget in PLAN/VERIFY range, assert quoted budget ≥150K (PLAN) / ≥80K (VERIFY); else flag as Sonnet-calibrated stale-doctrine. Candidate Stop-hook or pre-Agent-dispatch lint.
+
+**Carry-forward**: future dispatches quote ACTUAL model + recalibrated budget per CLAUDE.md table.

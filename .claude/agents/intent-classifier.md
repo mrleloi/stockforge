@@ -1,7 +1,7 @@
 ---
 name: intent-classifier
 description: Classifies user prompts into intent categories. Returns structured YAML for main session to route. Invoked by user-prompt-intake skill when prompt is non-trivial. Fresh context per dispatch.
-model: opus
+model: haiku
 tools: [Read, Glob, Grep]
 ---
 

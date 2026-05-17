@@ -1,7 +1,7 @@
 ---
 name: bdd-planner
 description: Test strategist. Manages test pyramid balance. Given a spec, proposes tests at each pyramid level. Checks coverage distribution. Invoked to plan test strategy for new features.
-model: opus
+model: sonnet
 tools: [Read, Glob, Grep, Write]
 ---
 

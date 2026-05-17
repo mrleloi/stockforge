@@ -2,7 +2,7 @@
 
 > **Status**: Track 2 deliverable per Decision 002 § Track 2 (REV-2).
 > **Schema source**: [_template.md](_template.md) — every decision file MUST start with the canonical frontmatter.
-> **Last updated**: 2026-05-12 (S253 — D-056 added: charter v1.1 Principle 11 ratification)
+> **Last updated**: 2026-05-17 (S362 — D-070 added: VN Tokenizer Library Selection)
 
 This directory is **append-only with supersession**. Decisions are never deleted; they are marked `SUPERSEDED-BY-D-NNN` or `REVOKED` and remain on disk as the audit trail.
 
@@ -40,6 +40,7 @@ If agent confidence is below threshold for a level, it MUST open a Q&A bundle in
 
 | ID | Title | Level | Status | Date | Source prompt(s) |
 |---|---|---|---|---|---|
+| [D-070](070-vn-tokenizer-library.md) | VN Tokenizer Library Selection — pyvi==0.1.1 MIT; STEP 0 CHARTER-TIER GATE did not fire (underthesea v9.4.0 = Apache-2.0) | ARCH | PROPOSED | 2026-05-17 | sub-plan 029-S361 STEP 0 empirical eval; plan-029 § DD-2 |
 | [D-056](056-S253-charter-v1.1-principle-11-ratified.md) | PROJECT_CHARTER.md v1.0 → v1.1 APPLIED — Principle 11 (Harness must self-verify firing) ratified at S253 | CHARTER | ACCEPTED | 2026-05-12 | proposals/charter-revision-v1.1-harness-self-verify-firing.md + Q-P4-3 S251 AskUserQuestion |
 | [D-054](054-bear-quant-retry-validator-symmetry.md) | Bear/Quant retry-validator symmetry (B5 asymmetric budget) | IMPL | ACCEPTED | 2026-05-10 | observations/track-A-S240-anti-flake-run2.md (L-S240-1) |
 | [D-053](053-S237-bull-A2-retry-validator-promote.md) | Bull A2 retry-validator promoted to production default | IMPL | ACCEPTED | 2026-05-10 | Q-P4-1-AUTO-PICK |

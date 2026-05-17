@@ -1,7 +1,7 @@
 ---
 name: action-guide-planner
 description: Given session brief, figures out exact execution plan — files to read, skills to activate, specs to consult, tests to satisfy. Bridges /session-start output and actual task execution.
-model: opus
+model: sonnet
 tools: [Read, Glob, Grep]
 ---
 
