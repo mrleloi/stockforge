@@ -18,6 +18,27 @@
 
 ---
 
+### M-S395-1 (compound)
+**Date**: 2026-05-17
+**Session**: S395
+**Severity**: medium (operational+architectural composite)
+**What happened**: S395 data-corpus operational IMPL hit TWO empirical gaps not anticipated by plan-045 architect:
+
+**(a) BR-6 cost-cap empirically too tight** — `packages/application/analysis/use_cases/validate_thesis_phase1.py:189` hardcodes `limit_usd=Decimal("3.00")` for the validate_thesis run. Actual single-ticker (VHM) run cost = $4.24 ($1.24 / 41% over cap). `cost_budget_exceeded` raised; thesis NOT persisted (thesis_id=incomplete); `theses` table row count for VHM = 0 post-run; PFP-DONE-7 NOT FLIPPED. The `--max-cost-usd` CLI flag is design-IGNORED (use_case_builder.py:109: `_ = max_cost_usd`); operational scope cannot inline-fix per dev file-scope rules. Architect plan-045 § H RM4 anticipated cost overrun but assumed cap-fix would be a separate dispatch; actual blocker forces decision NOW rather than queue for later. Architect DD-5 cost-budget estimate ≤$12 full-4 vs realistic projection $4.24 × 4 = ~$17 (40% over architect estimate). thesis-log/2026-05-17-VHM.md shows `gaps: ['cost_budget_exceeded']` — confirming the 3 original stale-data gaps DID clear (corpus ingestion correctness verified).
+
+**(b) DD-3 news-quality floor empirically unreachable with single-page crawler** — Plan-045 DD-3 required ≥30 CafeF articles per ticker for sentiment-meaningful baseline. Actual: VHM=3, HPG=1, VIC=6, FPT=9 (cumulative 19; per-ticker mean 4.75). Root cause: `CafeFScraper.discover()` is single-page (~60 articles per section page filtered to ~3-9 per-ticker per-page) — plan assumed paginated crawl yielding ~800 articles per section. `no_news_90d` gap IS cleared per existing detection logic (≥1 article in 90d) so functional requirement met; quality goal NOT met. BC-5 pagination enhancement needed for true DD-3 compliance — separate plan / not inline-fixable.
+
+**Root cause** (multi-layer):
+- Layer 1 (BR-6 cap): Architecture authored conservative $3.00 cap pre-Phase F-prime V0=6 persona expansion; empirical per-persona cost compounded by V0=6 + BULL/Haiku retries. Plan-045 architect did NOT empirically validate BR-6 vs current V0=6 cost reality before scoping operational dispatch.
+- Layer 2 (DD-3 floor): Plan-045 architect assumed CafeFScraper paginated based on cursory Read (file:line citation missing); actual `discover()` method is single-page by design (BC-5 design choice; pagination = separate enhancement).
+- Layer 3 (operational-vs-architectural scope blur): Operational track ran into TWO architectural blockers that should have surfaced at PLAN time, not at IMPL time. Plan-045 § C STEP 0.4 cold-probe DID verify wire works; but did NOT cold-probe FULL validate_thesis run on single ticker to surface cost-blocker before bulk fetch.
+
+**Prevention rule L-S395-1** (1st instance MEDIUM; AP-23 HELD-FOR-PROMOTION on 2nd recurrence — but BR-6 sub-instance MAY warrant immediate promotion if architectural-cap-too-tight pattern recurs even ONCE more): operational-track plans MUST include a FULL-pipeline cold-probe (not just wire-probe) at STEP 0 to surface architectural blockers (cost caps, persona-count, quality thresholds) BEFORE bulk operational work commits resources. Carry-forward: at next operational-track plan author, add architect STEP 0.X = "full-pipeline single-ticker dry-run with cost+quality assertion" before STEP 1 bulk operation. Promote to deterministic plan-template checker if 2nd instance.
+
+**Where applied**: Inline-resolved bookkeeping ONLY this turn (mistake-log entry + STOP-FINDING already authored by S395 dev at `human-workspace/notifications/STOP-FINDING-S395-validate-thesis-cost-blocker.md`). Cost-blocker resolution itself = SCOPE/CHARTER-tier user decision pending via AskUserQuestion bundle this turn. DD-3 news-quality posture = SCOPE-tier user decision pending in same bundle. Wave 1 MVP gate stays in CODE-READY-DATA-READY-CORPUS / THESIS-COST-BLOCKED state (corpus ready; thesis blocked at cost gate). Severity MEDIUM: no production data corruption (corpus integrity verified by SQLite repos using INSERT OR REPLACE); $4.24 spent on failed run (sunk cost; not recoverable); architecture-design vs empirical-cost calibration gap surfaced (Charter Principle 8 violation since BR-6 cap was set without per-persona × V0 empirical evidence).
+
+---
+
 ### M-S392-1
 **Date**: 2026-05-17
 **Session**: S391 (caught at S392)

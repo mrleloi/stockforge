@@ -130,6 +130,36 @@
 
 ---
 
+## S394 + S395 — Phase G-prime G.1 IMPL SHIPPED + data-corpus operational PARTIAL (cost-blocker; user Q1=A raise cap / Q2=A thin-baseline accepted) — 2026-05-17
+
+**Status**: G.1 PdfTableExtractorPort + ExtractedFinancialStatement + PdfSource ABC + dataclasses SHIPPED structurally (D1+D2 production-ready); G.1 bake-off empirical winner-pick BLOCKED by RM3 real-PDF unavailable (network-restriction; synthetic placeholders committed; ADR D-080 winner=PENDING). Data-corpus operational PARTIAL: corpus IS ready (3 stale-gaps cleared); VHM thesis re-run hit BR-6 $3 cap empirically ($4.24 actual); PFP-DONE-7 NOT FLIPPED.
+
+**S394 sandwich-dev RETURN** (background `a01ea2a003622c0b3`, ~44min Opus FOCUSED_IMPL): plan-041 IMPL D1-D5 SHIPPED (commits `ec293fc` + `b9b38be`). 19 new files (~2784 insertions): D1 `packages/application/fundamental/pdf_table_extractor_port.py` 185 LOC ABC (per parent plan-040 DD-1 canonical path; VBW-corrected from my brief's wrong `_shared/pdf/`); D2 `pdf_source.py` 87 LOC + `extracted_financial_statement.py` 117 LOC dataclasses; D3 `apps/cli/bench/pdf_bake_off.py` 785 LOC probe (structurally complete; empirical PENDING real PDFs); D4 23 unit tests (8 ABC + 15 dataclass) + synthetic placeholder fixtures `tests/fixtures/pdf/{vhm-2023-annual.pdf,hpg-2023-annual.pdf}` 690B each + expected_cells JSONs; D5 ADR D-080 PROPOSED 217 LOC + research report 160 LOC. Verification: mypy --strict CLEAN / pytest 1127/1127 PASS + 1 skip (pre-existing Windows symlink) / ruff CLEAN / pre-commit hooks PASS. `pyproject.toml` +8 LOC mypy override for bench probe module ONLY (NOT a dep addition; DD-8 isolated-venv preserved). **RM3 BLOCKER**: STOP-FINDING-S394-pdf-real-pdfs-needed.md authored; G.2 sub-plan 042 dispatch BLOCKED until human downloads real VHM 2023 + HPG 2023 annual reports + annotates expected_cells_*.json; G.3 sub-plan 043 (Claude vision adapter) CAN dispatch without real PDFs (only needs ABC contract D1).
+
+**S395 sandwich-dev RETURN** (background `a536c55b3a6fd40fe`, ~42min Opus MULTI_TASK_IMPL): plan-045 STEP 0-4 + STEP 7 SHIPPED (commits `b4b5ead` + `7503139`); STEP 5 FAILED at cost-blocker; STEP 6 skipped due to STEP 5 failure. **Corpus state empirically verified (12-cell matrix)**: bars 114 × 4 tickers PASS (57 trading days × 2 sources idempotent) / fundamentals 12 statements × 4 tickers PASS (4Q IS+BS+CF) / news 3+1+6+9 articles per VHM/HPG/VIC/FPT (gap-clear PASS at `≥1 article in 90d`; DD-3 ≥30 quality floor MISSED — single-page CafeFScraper.discover() limitation). **VHM thesis-log evidence**: `thesis-log/2026-05-17-VHM.md` shows `gaps: ['cost_budget_exceeded']` — confirming 3 original stale-gaps (price_stale + fundamentals_stale + no_news_90d) DID clear. thesis_id=incomplete; theses table COUNT=0; PFP-DONE-7 NOT FLIPPED. **Cost-blocker**: `packages/application/analysis/use_cases/validate_thesis_phase1.py:189` hardcodes `limit_usd=Decimal("3.00")` BR-6 cap; V0=6 persona run cost $4.24 (BULL/Haiku 2× retries + QUANT/BUFFETT/GRAHAM/TALEB/Opus parallel); `--max-cost-usd` CLI flag design-IGNORED (use_case_builder.py:109). STOP-FINDING-S395-validate-thesis-cost-blocker.md authored.
+
+**User CHARTER-tier decisions this turn** (AskUserQuestion 2-bundle per qa_bundle_all_pending):
+- **Q1 = A** (Raise BR-6 cap $3 → $6, dev-recommended): dispatch sandwich-dev for inline-fix `validate_thesis_phase1.py:189` Decimal("3.00") → Decimal("6.00") + new ADR D-081 documenting empirical $4.24 evidence + VHM re-run + optional HPG/VIC/FPT re-runs. Realistic full-4 = ~$17 (40% over architect's $12 estimate; user explicitly accepts this overrun by picking A over Option B 3-persona reduction). V0=6 Phase F-prime persona architecture preserved.
+- **Q2 = A** (Accept thin news baseline): DD-3 ≥30/ticker plan goal RETROACTIVELY revised to `≥1 article in 90d` matching the `no_news_90d` corpus-gap detection logic. Per-ticker thin baseline (3-9 articles) accepted as functional input for V0=6 persona run; LLM persona output bounded by available evidence + bear case I-S10 mandatory ensures research-aid framing despite thin data. BC-5 CafeF pagination enhancement NOT dispatched this cycle.
+
+**M-S394-1 LOW** (deviation, NOT mistake): synthetic placeholder PDFs committed in lieu of real annual reports due to network restriction blocking download. STOP-FINDING-S394 documents required human action. No production impact; D1+D2 ABC + dataclasses are merge-eligible per S397 verifier independent review (to be dispatched this turn).
+
+**M-S395-1 MEDIUM** (compound; surfaced two architectural blockers at IMPL time vs PLAN time): (a) BR-6 cap empirically too tight (architecture conservative; plan-045 architect did NOT empirically validate cap vs current V0=6 persona reality); (b) DD-3 floor empirically unreachable (architect assumed paginated; actual single-page; mistake-log entry includes L-S395-1 prevention rule = operational-track plans MUST include full-pipeline cold-probe at STEP 0).
+
+**Next-turn dispatches** (both background, parallel-eligible per architect-tier S345 precedent + disjoint file scopes):
+- **S396 sandwich-dev** for plan-045 continuation + BR-6 cap fix (Option A path): touch `packages/application/analysis/use_cases/validate_thesis_phase1.py:189` (Decimal("3.00") → Decimal("6.00")) + new ADR D-081 documenting empirical $4.24 evidence + VHM re-run (mandatory per DD-7) + HPG/VIC/FPT re-runs (per user Q1=A explicit overrun acceptance); ~30min Opus FOCUSED_IMPL ~100K target + ~$13 additional Anthropic spend
+- **S397 sandwich-verifier** for plan-041 G.1 (verify D1+D2 ABC + dataclass mergeability; D3 bake-off probe structural completeness; D4 23-test coverage + RM3 documentation quality; D5 ADR D-080 PENDING-state correctness; flag PDF blocker per K.2.a non-firing): ~80-180K Opus VERIFY; sandwich-verifier should explicitly attest "G.2 sub-plan dispatch BLOCKED on RM3 STOP-FINDING-S394 resolution; G.3 Claude vision adapter dispatch UNBLOCKED (only needs ABC contract per architect plan-040 § N.2)"
+
+**File scope coordination** (no overlap between S396 + S397):
+- S396 BR-6 fix → `packages/application/analysis/use_cases/validate_thesis_phase1.py` + `apps/cli/validate_thesis*.py` (re-run target) + `data/stockforge.sqlite` (theses table write) + `thesis-log/2026-05-17-{VHM,HPG,VIC,FPT}.md` + new ADR D-081 + cost-ledger.tsv + plan-045 mv pending→completed at close
+- S397 plan-041 verify → READ-ONLY on `packages/application/fundamental/` + `apps/cli/bench/` + `tests/fixtures/pdf/` + ADR D-080 + observation file (no production touch; write own verifier observation + attestation-log row)
+
+**Compliance attestation**: AP-1 ✓ (S394+S395 fresh-context dev dispatches; S396+S397 fresh-context follow-on dispatches per AP-1 mandate). harness_priority_one ✓ (BR-6 cap fix IS harness-side empirical-calibration discipline per Charter Principle 8). D-060 ✓ (dev commits + main close commit; 0 pushes). autonomous_continue_no_self_pause ✓. dont_self_pause_at_session_boundary ✓ (act on returns + user picks immediately). qa_bundle_all_pending ✓ (2 CHARTER-tier Qs bundled into ONE mega-bundle; lettered options; never piecemeal). stop_offering_routing_branches ✓ (no enumerated "what next"). 0 charter / 0 constitution writes.
+
+**Carry-forward**: G.2 sub-plan 042 BLOCKED on STOP-FINDING-S394 PDF provision (separate user action OR defer-to-G.3-ratifies-winner path); G.3 sub-plan 043 dispatch UNBLOCKED (parallel-eligible; future-turn architect dispatch). Promotion queue: L-S389-1 + L-S389-2 + L-S392-1 + L-S395-1 = 4 candidates (under 8-lesson HARD-BLOCK threshold).
+
+---
+
 ## S391 — Phase G-prime master plan SHIPPED + Wave 1 MVP DATA-CORPUS authorized + S365 corpus labelling resolved (iv UNCALIBRATED-V0) — 2026-05-17
 
 **Status**: Phase G-prime ROADMAP unlocked. Wave 1 MVP DATA-PENDING gate authorized for real-API ingestion. S365 STOP-FINDING (4h+ pending CHARTER-TIER) closed via user pick (iv).
@@ -183,49 +213,6 @@
 **Compliance attestation**: AP-1 ✓ (3 fresh-context dispatches S387/S388/S389; main applied 3 inline-fixes F1+F2+F3 per applying-per-verifier-mandate precedent S339/S358/S366/S382/S385). harness_priority_one ✓ (this IS the harness sweep; AP-23 mandate satisfied). D-060 ✓ (dev commit + main close commit; 0 pushes). autonomous_continue_no_self_pause ✓. dont_self_pause_at_session_boundary ✓. 0 charter / 0 constitution writes.
 
 **Next-turn priority**: Phase F-prime Wave 1 MVP data-corpus ingestion track (operational; user-authorization gate per Charter Principle 7 for real API budget commitment) OR Phase G-prime architect dispatch (parallel-eligible per architect-design intent).
-
----
-
-## S383-S386 — Phase F-prime Wave 1 MVP CODE-READY-DATA-PENDING (plan-038 F.5 + plan-037 F.4 NO-OP closed; ADR D-078 ACCEPTED) — 2026-05-17
-
-**Phase F-prime attestation**: **CODE-DONE-DATA-PENDING** (NOT full DONE). All code substrate SHIPPED across F.1+F.2+F.3+F.5; data corpus PENDING (data/stockforge.sqlite has zero VHM bars/statements/news → INCOMPLETE-corpus dogfood early-return at $0; theses table count=0; per-persona cost+quality observations not capturable until corpus-ready re-run).
-
-**Wave 1 MVP gate**: **CODE-READY-DATA-PENDING**. Code pipeline FULL READY (V0=6 wired end-to-end + CLI `--run-mode=dogfood|smoke` flag + render path TC-RENDER-V6-1..8 verified). Data ingestion = separable operational track per architect-design intent (plan-038 § A.3 + AQ-3; Karpathy P2 scope discipline).
-
-**PFP-DONE-1..10 grid (verifier-independent attestation)**:
-- ✅ PFP-DONE-1/2/3/4/5/6/9 (7 of 10) PASS
-- ⏸ PFP-DONE-7 PENDING (thesis NOT persisted; INCOMPLETE-corpus path bypasses Step 6 save at use_case:280; trigger=corpus-ready re-run on VHM/HPG/VIC/FPT)
-- ◐ PFP-DONE-8 PARTIAL (I-S35 PASS empirical; I-S1/I-S10/I-S12 by-construction via unit tests; live LLM output empirical validation at corpus-ready re-run)
-- ⏸ PFP-DONE-10 PENDING-this-commit
-
-**S383 architect** (background `ac4c3d5560f...`, ~6min/Opus VERIFY budget 50K): plan-038 authored 704 LOC; DD-1 EXTEND existing CLI (NOT new file per master plan § E.5 reinterpretation); DD-7 `--run-mode` flag; AQ-3 INCOMPLETE-corpus legitimacy.
-
-**S384 sandwich-dev RETURN** (commit `94030a0`; Opus FOCUSED_IMPL): D1+D2+D4+D5 SHIPPED; D3 dogfood ran INCOMPLETE-corpus path (legitimate per AQ-3). Files: `apps/cli/validate_thesis.py` 340→410 LOC + `test_validate_thesis.py` 510→709 LOC (+8 tests TC-RENDER-V6-1..8) + ADR D-078 196 LOC NEW + `thesis-log/2026-05-17-VHM.md` 32 LOC NEW. pytest 1208→1216 (+8; 0 regressions). $0 cost. L-S382-1 ctor discipline SATISFIED (0 new classes in validate_thesis.py per architect DD-4).
-
-**S385 sandwich-verifier RETURN** (`af485e0b6430e2b36`, ~50K Opus VERIFY): **PASS-WITH-CONCERNS / MERGE-ELIGIBLE: YES**. V1-V10 grid all VALIDATED empirically. 0 CRITICAL / 2 IMPORTANT (F1 LOC drift n=11 + F2 attestation distinction) / 3 MINOR (F3+F4+F5). L-S345-1 PASS-WITH-MINOR-DRIFT at n=11 (3 files >25 LOC off; "~" approximation prefix discipline slipping; M-S385-1 LOW; promote candidate L-S385-1 if recurs at n=12). 4 promotion candidates L-S385-1..4 surfaced.
-
-**S386 close-bookkeeping** (this commit): (1) verifier observation persisted at `agent-workspace/memory/observations/sandwich-verifier-S385-f5-vhm-dogfood-verify.md`; (2) plan-037 + plan-038 mv pending → completed (bundled close per DC-CLOSE-1/2); (3) ADR D-078 PROPOSED → ACCEPTED (IMPL-tier auto-ratifies); (4) this row prepended; (5) latest.md rewritten as S386 CLOSE handoff; (6) mistake-log M-S385-1 LOW digest; (7) Phase F-prime attestation CODE-DONE-DATA-PENDING captured.
-
-**Next-turn options** (autonomous-full continues; not enumerating routing branches per `stop_offering_routing_branches`):
-- (a) Data-corpus ingestion track — operational step requiring real API budget (CafeF news + R2/SSI bars + BC-2 fundamentals for VHM/HPG/VIC/FPT); ~10-15 min wall-clock per source per ticker; estimated $X budget; user-authorization gate per Charter Principle 7
-- (b) Phase G-prime unlock — separable from data-corpus per architect-design intent
-- (c) Harness Stabilization Sweep N+1 — 4 promotion candidates L-S385-1..4 + queued L-S354-2 (planner-feedback-loop 9th instance) + L-S382-1 PreCommit pytest regression hook + L-S369-1 ADR empirical_close_verify + L-S366-3 cultural-anchor frozenset audit-trail + L-S371-1 resolver pattern reusable
-
-**Compliance attestation**: AP-1 ✓ (3 fresh-context dispatches S383/S384/S385; main applied 0 inline-fixes this turn per verifier no-CRITICAL); D-060 ✓ (agent commits; 0 pushes); harness_priority_one ✓ (CODE-DONE-DATA-PENDING distinction = harness improvement to Phase closure attestation pattern; L-S385-2 MEDIUM promotion candidate); autonomous_continue_no_self_pause ✓; dont_self_pause_at_session_boundary ✓; 0 charter / 0 constitution writes.
-
----
-
-## S346-S347 — Phase D/Harness — Stop Hook Performance Quick Wins IMPL DONE (plan-023; sandwich-dev S347) — 2026-05-16
-
-**S347 sandwich-dev RETURN** (Sonnet 4.6 MULTI_TASK_IMPL, context continuation from S346). Plan-023 all 6 sub-tracks D1-D6 COMPLETE. 28/28 DoD criteria PASS.
-
-**D1+D2 (.py-scan hooks)**: Hoisted `find-delete` out of `claim_file_slot()` per-file loop body in all 4 hooks (atomic-write, python-det, path-safety, html-sep). Added Stop-mode 600s cooldown marker per hook. Warm path: 223-280ms per hook (vs ~33s cold). **D3 (bash-hook-lint)**: Eliminated 1070 `basename` subprocess calls → `${f##*/}` parameter substitution + SHA batch-precompute `_BHL_SHA_MAP` + `_BHL_CACHED_SET` associative-array cache. Warm: 3914ms (vs 51450ms cold). **D4 (phase-status-coherence)**: Extended line 84 regex to `([0-9]+(\.[0-9]+)?|[A-Z](-prime)?)` + letter→numeric mapping table (A/B/C/D/E → 4; F-prime/G-prime/H-prime → 4). Removed ~25-session surgical "Phase 4 —" workaround from S343-S344 row. **D5 (fire-tests)**: TC-HOISTED + TC-COOLDOWN added to all 4 .py-scan fire-tests; phase-status-coherence-fire-test.sh extended to TC07-TC12 (364 LOC). **D6 (measurement)**: Warm combined = ~939ms for 4 .py-scan hooks + 3914ms bash-hook-lint = ~5s total warm (vs ~5.3min baseline = 97% reduction).
-
-**Fire-test results**: atomic-write 21/21 + python-det 20/20 + path-safety 26/26 + html-sep 20/20 + phase-status-coh 29/32 (FAIL=0; TC12 TOTAL count artifact). All ~80 other fire-tests PASS (regression floor DC-SMOKE-2 confirmed).
-
-**Files modified** (wc -l): atomic-write-check.sh 330 / python-det-check.sh 273 / path-safety-check.sh 354 / html-sep-check.sh 281 / bash-hook-lint.sh 595 / phase-status-coherence.sh 256 / 4 fire-test extensions / phase-status-coh-fire-test.sh 364 (new).
-
-**Next**: dispatch S348 sandwich-verifier (AP-1, fresh-context, ~30-50K VERIFY budget) for plan-023 verification per successor spec.
 
 ---
 
