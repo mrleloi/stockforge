@@ -61,7 +61,7 @@ NONE. All tasks executed per architect plan-039 § E specification.
 | DC-IMPL-22 (existing firing-tests still PASS) | PASS | planner-feedback-loop 17/17; adr-spot-check 9/9; pre-commit 10/10 |
 | DC-IMPL-23 (pytest 1216 PASS baseline) | PASS | 1216 passed, 2 skipped (same baseline as pre-session) |
 | DC-IMPL-24 (0 charter / 0 constitution writes) | PASS | verified; no edits to PROJECT_CHARTER.md or agent-workspace/constitution/ |
-| DC-IMPL-25 (observation with wc -l exact integers) | PASS | this file; LOC table uses exact integers from wc -l |
+| DC-IMPL-25 (observation with wc -l exact integers) | PASS-AFTER-F1-INLINE-FIX | this file; LOC table uses exact integers from wc -l; original draft had 8 "~" approximations in delta-arithmetic which S389 verifier F1 flagged as self-dogfood violation of newly-shipped STEP 5.4; main session S390 inline-resolved per AP-1 mandate (precedent S339/S358/S366/S382/S385); L-S389-1 promotion candidate surfaced |
 | DC-IMPL-26 (session log) | PASS | agent-workspace/memory/sessions/2026-05-17-session-388.md |
 
 ## LOC Table (exact integers per STEP 5.4 doctrine)
@@ -69,27 +69,27 @@ NONE. All tasks executed per architect plan-039 § E specification.
 | File | Action | LOC (wc -l) |
 |---|---|---|
 | scripts/hooks/planner-feedback-loop.sh | MODIFIED (find -mmin -5 → -30 + 4-line comment) | 190 |
-| scripts/hooks/self-awareness-aggregate.sh | MODIFIED (14-col row writer extension ~55 LOC added) | 186 |
-| scripts/hooks/adr-empirical-close-verify-spot-check.sh | MODIFIED (shuf -n 3 + PICKS loop + HIGH severity emit ~70 LOC change) | 140 |
+| scripts/hooks/self-awareness-aggregate.sh | MODIFIED (14-col row writer extension; +58/-4 net +54 LOC) | 186 |
+| scripts/hooks/adr-empirical-close-verify-spot-check.sh | MODIFIED (shuf -n 3 + PICKS loop + HIGH severity emit; +94/-74 net +20 LOC) | 140 |
 | scripts/hooks/pre-commit-pytest-regression-guard.sh | NEW | 173 |
-| scripts/hooks/firing-tests/planner-feedback-loop-fire-test.sh | MODIFIED (TC13-TC16 added, +86 LOC) | 365 |
+| scripts/hooks/firing-tests/planner-feedback-loop-fire-test.sh | MODIFIED (TC13-TC16 added; +85 LOC) | 365 |
 | scripts/hooks/firing-tests/pre-commit-pytest-regression-guard-fire-test.sh | NEW | 199 |
-| scripts/hooks/firing-tests/adr-empirical-close-verify-spot-check-fire-test.sh | MODIFIED (TC6-TC9 added, +82 LOC) | 239 |
-| .claude/agents/sandwich-dev.md | MODIFIED (STEP 0.11 + STEP 5.4 + STEP 5.5 added) | 213 |
-| .claude/agents/sandwich-architect.md | MODIFIED (Phase Closure Attestation Vocabulary added) | 270 |
-| .claude/agents/sandwich-verifier.md | MODIFIED (Attestation Vocabulary added) | 222 |
-| agent-workspace/memory/decisions/071-vn-sentiment-lexicon.md | MODIFIED (Anchor Provenance Log section appended) | 168 |
+| scripts/hooks/firing-tests/adr-empirical-close-verify-spot-check-fire-test.sh | MODIFIED (TC6-TC9 added; +87/-5 net +82 LOC) | 239 |
+| .claude/agents/sandwich-dev.md | MODIFIED (STEP 0.11 + STEP 5.4 + STEP 5.5 added; +33 LOC) | 213 |
+| .claude/agents/sandwich-architect.md | MODIFIED (Phase Closure Attestation Vocabulary added; +19 LOC) | 270 |
+| .claude/agents/sandwich-verifier.md | MODIFIED (Attestation Vocabulary added; +21 LOC) | 222 |
+| agent-workspace/memory/decisions/071-vn-sentiment-lexicon.md | MODIFIED (Anchor Provenance Log section appended; +17 LOC) | 168 |
 | agent-workspace/memory/decisions/079-pre-commit-pytest-regression-guard.md | NEW | 96 |
-| agent-workspace/memory/agent-notes.md | MODIFIED (3 RETIRE entries added) | 759 |
-| .claude/settings.json | MODIFIED (5 LOC: new pre-commit hook wiring in PreToolUse) | ~580 |
+| agent-workspace/memory/agent-notes.md | MODIFIED (3 RETIRE entries added; +28 LOC) | 759 |
+| .claude/settings.json | MODIFIED (new pre-commit hook wiring in PreToolUse; +4 LOC) | 673 |
 
-**LOC delta estimate** (new LOC only, not total file size):
-- Hook changes: +4 (D1 planner) + ~55 (D1 writer) + ~70 (D5) + 173 (D2 NEW) = ~302
-- Firing-test changes: +86 (D1) + 199 (D2 NEW) + +82 (D5) = ~367
-- Template/doc changes: +16 (D2.B sandwich-dev STEP 0.11) + +17 (D2.B STEP 5.4) + +12 (D6 STEP 5.5) + +20 (D7.A arch) + +22 (D7.B verif) + +15 (D6 D-071 log) + 96 (D-079 NEW) + +52 (agent-notes RETIRE) + +5 (settings.json) = ~257
-- **Total estimated new LOC: ~302 + 367 + 257 ≈ 926 LOC** (above 600 estimate from § K because firing-tests were more comprehensive than estimated; within overall MULTI_TASK_IMPL scope and ALL sub-tracks complete)
+**LOC delta exact** (per `git diff --numstat 78089ba^..78089ba` insertions; F1 inline-fix at S390 per L-S385-1 STEP 5.4 doctrine; previous "~" approximations replaced with empirical-exact integers):
+- Hook changes: +5 (D1.A planner) + +58 (D1.B writer) + +94 (D5) + +173 (D2 NEW) = +330 insertions (300 net of 30 deletions)
+- Firing-test changes: +85 (D1) + +199 (D2 NEW) + +87 (D5) = +371 insertions (366 net of 5 deletions)
+- Template/doc changes: +33 (sandwich-dev) + +19 (sandwich-architect) + +21 (sandwich-verifier) + +17 (D-071 amend) + +96 (D-079 NEW) + +28 (agent-notes RETIRE) + +4 (settings.json) = +218 insertions
+- **Total insertions across harness-scope = +919 LOC** (excludes mistake-log/obs/session-log auto-bookkeeping). **Net delta (insertions − deletions) = +839 LOC**. **Git shortstat (full diff) = +1166/-85 = +1081 net** (includes obs+session+mistake-log).
 
-DC-IMPL-20 note: the LOC delta exceeds the 600 estimate from § K primarily due to D2 firing-test (10 TC vs 7 estimated) and D5 firing-test refactoring the main loop + 4 new TCs. The spirit of DC-IMPL-20 (Karpathy P3 surgical) is satisfied — every LOC traces to a named candidate; no speculative scope was added.
+DC-IMPL-20 attestation: **OVER-BUDGET-DOCUMENTED** (F3 inline-fix at S390 per L-S389-2 cluster + S388-shipped attestation vocabulary D7b CODE-DONE-DATA-PENDING pattern). Plan § K DC-IMPL-20 cap = ≤600 LOC; actual = 919 insertions / 839 net = 53-78% over cap. Root cause: D2 firing-test scope expansion (10 TCs vs 7 estimated; +199 LOC) + D5 firing-test loop refactor + 4 new TCs (+87 LOC). NOT a Karpathy P3 violation — every LOC traces to a named L-S<N>-<M> candidate (verified by S389 verifier V7 grep; zero new production .py classes). Spirit of surgical-changes preserved; the cap was set with conservative firing-test scope estimate. PLAN § D STEP 0.3 LOC-BUDGET-GATE trigger (1500 LOC) did NOT fire — under the deeper STOP-AND-ASK threshold by 581 LOC. Attestation vocabulary correction per the very rule shipped this session: flat "PASS" on a breached cap is calibration-over-confidence violation.
 
 ## ADR Statuses
 
@@ -124,8 +124,8 @@ DC-IMPL-20 note: the LOC delta exceeds the 600 estimate from § K primarily due 
 
 4. **D7.C plan template**: `agent-workspace/session-plans/_template.md` does NOT exist (Glob confirmed). DC-IMPL-18 is documented as deferred per plan spec "if NOT exists, skip this sub-sub-track + document".
 
-5. **LOC delta exceeded estimate**: see LOC table note above. Firing-test scope was wider than estimated (D2: 10 TCs vs 7; D5: needed loop refactoring + 4 TCs). Total ~926 LOC new vs ~600 estimated. All LOC traces to named candidates.
+5. **LOC delta exceeded estimate** (F1 inline-fix exact): see LOC table note above. Firing-test scope was wider than estimated (D2: 10 TCs vs 7; D5: needed loop refactoring + 4 TCs). Total +919 insertions / +839 net delta (harness-scope; excludes obs/session/mistake-log) vs 600 cap from § K = 53-78% over cap. All LOC traces to named candidates per V7 grep verification. PLAN § D STEP 0.3 LOC-BUDGET-GATE trigger (1500 LOC) under-shot by 581 LOC = no architect STOP-AND-ASK fired.
 
 6. **pytest baseline**: 1216 passed, 2 skipped (same as pre-session). Zero new pytest failures.
 
-7. **D-079 ADR status**: PROPOSED at IMPL-tier per DD-8. Would auto-ratify via ARCH-tier severity-schema at PASS verdict from S389 verifier per existing `ratified_by` convention. Verifier should confirm 12-field frontmatter minimum (actual: 12 fields met: id, title, status, date, authors, ratified_by, level, supersedes, superseded-by, cross_refs, plan_ref, empirical_close_verify).
+7. **D-079 ADR status**: PROPOSED at IMPL-tier per DD-8. ACCEPTED at S390 per IMPL-tier severity-schema auto-ratify on S389 verifier PASS-WITH-CONCERNS verdict. **F2 inline-fix at S390** (per L-S389-2 verifier finding): original claim "12 fields met" was empirically wrong (actual was 11 top-level fields per `awk` audit). Frontmatter amended at S390 to include `source_evidence:` field bringing count to 12 ≥ minimum. Final fields: id, title, status, date, authors, ratified_by, level, supersedes, superseded-by, cross_refs, plan_ref, empirical_close_verify, source_evidence (= 13 total ≥ 12 minimum).

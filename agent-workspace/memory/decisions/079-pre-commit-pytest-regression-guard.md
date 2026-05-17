@@ -1,10 +1,10 @@
 ---
 id: 079
 title: Pre-Commit Pytest Regression Guard
-status: PROPOSED
+status: ACCEPTED
 date: 2026-05-17
 authors: sandwich-dev S388
-ratified_by: IMPL-tier no-cool-down per severity-schema (conditional on D2 hook shipping — D2 shipped S388)
+ratified_by: sandwich-verifier S389 PASS-WITH-CONCERNS (af4a86c2e696159e9); IMPL-tier auto-ratifies per severity-schema; 0 CRITICAL / 3 IMPORTANT (all documentation-layer F1+F2+F3 inline-resolved by main S390) / 4 MINOR
 level: IMPL
 supersedes: []
 superseded-by: []
@@ -13,7 +13,12 @@ cross_refs:
   - D-060 (agent-may-commit policy — the commit boundary this hook guards)
   - D-064 (path-safety 5-invariant — file-path helpers if extended)
   - D-062 (atomic-write doctrine — marker write for cache key uses atomic-ish touch)
-plan_ref: plan-039 D2 (S387 architect; S388 dev)
+plan_ref: agent-workspace/session-plans/completed/039-S387-harness-stabilization-sweep-N1.md (S387 architect; S388 dev; S389 verifier; S390 close)
+source_evidence:
+  - "scripts/hooks/pre-commit-pytest-regression-guard.sh (173 LOC NEW; F2 inline-fix at S390 added this field per L-S389-2 verifier finding)"
+  - "scripts/hooks/firing-tests/pre-commit-pytest-regression-guard-fire-test.sh (199 LOC NEW; 10 TCs PASS)"
+  - "agent-workspace/memory/observations/sandwich-dev-S388-harness-sweep-N1-impl.md (D2 sub-track section)"
+  - "agent-workspace/memory/observations/sandwich-verifier-S389-harness-sweep-N1-verify.md (V8 settings.json wiring + V6 firing-test 10/10 empirical re-run)"
 empirical_close_verify:
   - "scripts/hooks/pre-commit-pytest-regression-guard.sh exists and bash -n clean"
   - "grep STOCKFORGE_SKIP_PRECOMMIT_PYTEST scripts/hooks/pre-commit-pytest-regression-guard.sh = ≥1 hits"

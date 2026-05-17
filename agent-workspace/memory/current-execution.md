@@ -130,6 +130,37 @@
 
 ---
 
+## S387-S389 — Harness Stabilization Sweep N+1 SHIPPED (plan-039 closed; 9-candidate queue DRAINED 9→0; ADR D-079 ACCEPTED) — 2026-05-17
+
+**Status**: HARD-BLOCK at next SessionStart AVERTED. AP-23 ritual-demotion mandate satisfied. data-corpus ingestion + Phase G-prime UNBLOCKED.
+
+**S387 sandwich-architect** (background `af917502a125a92d0`, ~6min/Opus PLAN 150-180K window): plan-039 (~720 LOC) triaged 9 queued promotion candidates against `promotion-cycle-trigger.sh` 8-lesson HARD-BLOCK. **Verdict split**: 6 PROMOTE (D1+D2+D5+D6+D7a+D7b) / 3 RETIRE (L-S385-3 paraphrase-of-Charter-Principle-6 / L-S385-4 paraphrase-of-master-plan / L-S371-1 speculative-abstraction) per AP-23 RED FLAG anti-inline-accumulation. ADR D-079 PROPOSED at IMPL-tier (dev authors at IMPL-time per DD-8); D-071 amendment for D6.
+
+**S388 sandwich-dev RETURN** (commit `78089ba`; Opus MULTI_TASK_IMPL): 6 sub-tracks SHIPPED + 3 RETIRE attestations + ADR D-079 PROPOSED authored + D-071 § Anchor Provenance Log appended (8 initial rows incl. lai_co_phieu S366). 17 files / +1166 / -85. **Top 3 RM mitigations**: RM1 writer disambiguation (self-awareness-aggregate.sh = sole writer per grep) / RM3 STOCKFORGE_SKIP_PRECOMMIT_PYTEST env bypass / RM10 Windows spawn topology (SPAWN-CONTEXT marker per pre-dispatch-architect-commit-guard.sh pattern). 36/36 firing-tests PASS (17 D1 + 10 D2 + 9 D5). pytest 1216 baseline preserved (0 regressions). Zero new production .py classes (V7 grep verified).
+
+**S389 sandwich-verifier RETURN** (`af4a86c2e696159e9`, ~50K Opus VERIFY within 80-180K floor): **PASS-WITH-CONCERNS / MERGE-ELIGIBLE: YES**. V1-V10 grid all VALIDATED empirically. Queue drain 9→0 INDEPENDENTLY CONFIRMED. **0 CRITICAL** / **3 IMPORTANT** (F1 self-dogfood "~" violation of newly-shipped STEP 5.4 / F2 D-079 11-field vs 12-field minimum / F3 DC-IMPL-20 self-attestation contradiction 919-LOC vs ≤600-cap) / 4 MINOR (F4 commit Co-Authored-By Sonnet vs Opus drift / F5 _template.md stub opportunity / F6 D1 fallback graceful / F7 plan over-specification). 2 promotion candidates surfaced: L-S389-1 MEDIUM (dogfood-violation-self-instance) + L-S389-2 LOW (ADR-schema-floor-discipline).
+
+**S390 close-bookkeeping** (this commit): (1) S389 verifier observation persisted at `agent-workspace/memory/observations/sandwich-verifier-S389-harness-sweep-N1-verify.md`; (2) plan-039 mv pending → completed via git mv; (3) **F1 RESOLVED INLINE** (8 "~" prefixes in dev observation replaced with exact integers from `git diff --numstat 78089ba^..78089ba`); (4) **F2 RESOLVED INLINE** (D-079 frontmatter `source_evidence:` field added; total 13 fields ≥ 12 minimum); (5) **F3 RESOLVED INLINE** (DC-IMPL-20 attestation updated to OVER-BUDGET-DOCUMENTED per L-S385-2 attestation-vocabulary discipline shipped same session); (6) ADR D-079 PROPOSED → ACCEPTED (IMPL-tier auto-ratifies per severity-schema); (7) this row prepended; (8) latest.md rewritten as S389/S390 CLOSE handoff; (9) mistake-log M-S388-1 (F1 self-dogfood) + M-S388-2 (F3 attestation contradiction) digest entries.
+
+**Promoted disciplines now LIVE in harness**:
+- L-S354-2 (D1): `.planner-stats.tsv` auto-population via 14-col writer extension + -mmin -30 trigger window
+- L-S382-1 (D2): `pre-commit-pytest-regression-guard.sh` HOOK + `STOCKFORGE_SKIP_PRECOMMIT_PYTEST` env bypass + STEP 0.11 sandwich-dev ctor-signature grep doctrine
+- L-S369-1 (D5): `adr-empirical-close-verify-spot-check.sh` shuf -n 3 sampling + HIGH severity emit on divergence
+- L-S366-3 (D6): ADR D-071 § Anchor Provenance Log + STEP 5.5 sandwich-dev frozenset-addition discipline
+- L-S385-1 (D7a): STEP 5.4 sandwich-dev `wc -l` exact-integers-at-end-of-session
+- L-S385-2 (D7b): CODE-DONE-DATA-PENDING / READY-DATA-PENDING / BLOCKED-BY-X attestation vocabulary in 3 sandwich-* templates
+
+**Retired (with named AP-7 revisit triggers)**:
+- L-S385-3 LOW: paraphrase of Charter Principle 6; revisit if 3rd INCOMPLETE-corpus dogfood mishandled
+- L-S385-4 LOW: paraphrase of master plan § E.4-5; revisit if 3rd bundled-close ambiguous
+- L-S371-1 LOW: speculative abstraction; revisit at 3rd concrete resolver instance
+
+**Compliance attestation**: AP-1 ✓ (3 fresh-context dispatches S387/S388/S389; main applied 3 inline-fixes F1+F2+F3 per applying-per-verifier-mandate precedent S339/S358/S366/S382/S385). harness_priority_one ✓ (this IS the harness sweep; AP-23 mandate satisfied). D-060 ✓ (dev commit + main close commit; 0 pushes). autonomous_continue_no_self_pause ✓. dont_self_pause_at_session_boundary ✓. 0 charter / 0 constitution writes.
+
+**Next-turn priority**: Phase F-prime Wave 1 MVP data-corpus ingestion track (operational; user-authorization gate per Charter Principle 7 for real API budget commitment) OR Phase G-prime architect dispatch (parallel-eligible per architect-design intent).
+
+---
+
 ## S383-S386 — Phase F-prime Wave 1 MVP CODE-READY-DATA-PENDING (plan-038 F.5 + plan-037 F.4 NO-OP closed; ADR D-078 ACCEPTED) — 2026-05-17
 
 **Phase F-prime attestation**: **CODE-DONE-DATA-PENDING** (NOT full DONE). All code substrate SHIPPED across F.1+F.2+F.3+F.5; data corpus PENDING (data/stockforge.sqlite has zero VHM bars/statements/news → INCOMPLETE-corpus dogfood early-return at $0; theses table count=0; per-persona cost+quality observations not capturable until corpus-ready re-run).
@@ -194,33 +225,6 @@
 **No mistakes this session** (1 minor mypy precision fix: `cast(list[object], ...)` in persona_registry.py; not a logic error).
 
 **Next**: dispatch S376 sandwich-verifier AP-1 fresh-context to verify sub-plan 034 per § F DoD 36 items. Plan-034 mv `pending/` → `completed/` at S376 close per DC-BOOK-4 protocol.
-
----
-
-## S368 — Phase E.3 VN Claim Extraction Wrapper IMPL DONE (sub-plan 031; S369 verifier pending) — 2026-05-17
-
-**S368 sandwich-dev RETURN** (Opus 4.7 FOCUSED_IMPL, AP-1 fresh-context per M-S365-1). Sub-plan 031 D1-D5 COMPLETE. All 4 STEP 0 CHARTER-TIER GATES DID NOT FIRE.
-
-**DD-2 Transport flip SHIPPED**: `_default_transport` REMOVED + `import anthropic` REMOVED + transport default = `field(default_factory=make_claude_cli_news_transport)`. grep `import anthropic packages/infrastructure/news/claude_llm_extractor.py` → ZERO. D-051 deferral closure EXECUTED in code (ADRs D-051/D-052 were pre-existing ACCEPTED but code changes NOT applied; this S368 completes the actual code change).
-
-**DD-3 New ExtractedClaim fields SHIPPED**: `lexicon_score: float = 0.0` + `mentioned_pump_anchors: tuple[str, ...] = ()` with defaults + __post_init__ bounds check [-1.0, 1.0].
-
-**DD-4 Rule 16 mode-2 CONFIRMED**: lexicon_score from `VnSentimentLexicon.score().numeric_score` (pure-function); mentioned_pump_anchors from `tuple(sorted(VN_CULTURAL_ANCHORS & set(keyword_hits)))` (deterministic frozenset intersection). LLM never emits either field. System prompt NOTE clause added.
-
-**DD-5 Tokenizer DI SHIPPED**: `_build_effective_system_prompt()` appends hint ONLY when VnTokenizer injected (not WhitespaceTokenizer fallback).
-
-**Files modified/created** (wc -l):
-- `packages/domain/news/models/extracted_claim.py`: 83 → 106 LOC (+23)
-- `packages/infrastructure/news/claude_llm_extractor.py`: 226 → 289 LOC (+63)
-- `packages/infrastructure/news/test_adapters.py`: 399 → 590 LOC (+191)
-- `apps/cli/extract_vn_claims.py`: NEW 318 LOC
-- `agent-workspace/memory/decisions/072-vn-claim-extraction-wrapper.md`: NEW 133 LOC
-
-**Gates**: ruff PASS / pytest 1085/1085 PASS (1080→1085; +6 new D3 tests; 0 regressions) / I-S34 CLEAN / determinism smoke PASS (cli diff + Python assertion) / Rule 16 mode-2 CLEAN.
-
-**Deviation**: `Ticker.value` → `Ticker.symbol` in D5 CLI (architect had no Bash to verify; dev fixed inline per VBW STEP 0; not a plan architectural defect).
-
-**Next**: dispatch S369 sandwich-verifier AP-1 fresh-context to verify sub-plan 031 per § F DoD 33 items.
 
 ---
 
