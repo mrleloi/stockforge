@@ -1,8 +1,10 @@
 ---
 level: ALERT
 created_at: 2026-05-17T00:00:00Z
-status: pending-user-pick
+status: answered-2026-05-17-via-AskUserQuestion-S391
 decision_class: CHARTER-TIER
+resolved_at: 2026-05-17T13:06:00Z
+user_pick: (iv) Continue UNCALIBRATED-V0 [current path]
 ---
 
 # STOP-AND-ASK — Corpus labelling source (S365 sub-plan 030 STEP 0.5)
@@ -66,3 +68,19 @@ S365 dev proceeded with:
 - Record user pick in ADR D-071 § Authorization field once received
 
 Awaiting user pick at owner's convenience (NOT blocking E.3).
+
+---
+
+## RESOLUTION — 2026-05-17T13:06 SEAST (S391 AskUserQuestion)
+
+**User pick: (iv) Continue UNCALIBRATED-V0 [current path]**
+
+Confirmation of the path S365 dev already shipped. No retrospective action required:
+- E.2 lexicon at `v0.HYPOTHESIS` posture retained
+- Calibration recipe at `agent-workspace/calibration/vn_sentiment_lexicon_v0.md` remains the audit trail
+- Cross-validation ≥70% DoD floor remains **unverified empirically** — accepted-risk per user-decision
+- Revisit trigger: if downstream E.3+ sentiment outputs surface systematic-bias evidence (e.g., calibration-drift event) → re-fire AskUserQuestion bundle with options (i)+(ii) reweighted
+
+**Follow-on bookkeeping** (next sweep, NON-BLOCKING): ADR D-071 § Authorization field append `- 2026-05-17 S391 corpus-labelling-source = (iv) UNCALIBRATED-V0 deferred-indefinitely per user-pick`.
+
+**STATUS**: closed.

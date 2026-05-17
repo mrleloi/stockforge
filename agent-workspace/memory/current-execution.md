@@ -130,6 +130,31 @@
 
 ---
 
+## S391 — Phase G-prime master plan SHIPPED + Wave 1 MVP DATA-CORPUS authorized + S365 corpus labelling resolved (iv UNCALIBRATED-V0) — 2026-05-17
+
+**Status**: Phase G-prime ROADMAP unlocked. Wave 1 MVP DATA-PENDING gate authorized for real-API ingestion. S365 STOP-FINDING (4h+ pending CHARTER-TIER) closed via user pick (iv).
+
+**S391 master-planner RETURN** (background `a33a45f387e65a06f`, ~7min wall-clock / 189K Opus PLAN within 150-230K target): plan-040 ~824 LOC / 106KB authored at `agent-workspace/session-plans/pending/040-S391-phase-gprime-master-plan.md` with 4 sub-plans (G.1=041 empirical library bake-off + PdfTableExtractorPort ABC / G.2=042 pure-Python winner adapter / G.3=043 Claude vision adapter + EchoValidator Rule 16 mode #2 gate / G.4=044 VHM annual-report dogfood + BC-2 SqliteFundamentalRepository integration smoke). Source-evidence chain (≥3 candidate libraries per L-S32-1): pdfplumber+camelot + docling + pypdf (+4 deferred candidates: pymupdf AGPL / unstructured bloat / Anthropic-direct memory-rule / paid cloud OCR cost-defer). 3 NON-BLOCKING K.2 charter-tier-surface FLAGS (G.1 pymupdf license escalation / G.3 Claude CLI vision feasibility / G.4 FinancialStatement ADDITIVE-ONLY schema migration). Budget envelope ~720-1160K Opus cumulative across 12-16 sessions (revised UPWARD from parent plan-033 § 6.4.4 ~400-600K). Return-summary observation 9.3KB at `agent-workspace/memory/observations/master-planner-S391-phase-gprime-master-plan.md`.
+
+**User decisions this turn** (AskUserQuestion mega-bundle; 2 CHARTER-tier Qs per `qa_bundle_all_pending`):
+- **Q1 = A** (Full corpus 4 tickers × 3 sources): real-API data-corpus ingestion AUTHORIZED for VHM+HPG+VIC+FPT × (CafeF news + R2/SSI bars + BC-2 fundamentals). Wave 1 MVP CODE-READY-DATA-PENDING → READY transition unblocked. ~1-2h wall-clock; Anthropic spend bounded by per-persona token cap per architect DD-5 cost-budget; CafeF/SSI vendor APIs free-tier.
+- **Q2 = D** (Continue UNCALIBRATED-V0 [current path]): S365 STOP-FINDING resolved. v0.HYPOTHESIS posture retained; calibration cycle deferred indefinitely until labelled corpus exists; cross-val ≥70% DoD floor remains **unverified empirically** — accepted-risk per user-decision. Revisit trigger = systematic-bias evidence in downstream E.3+ sentiment outputs.
+
+**Next-turn dispatches** (both background, parallel-eligible per architect-tier precedent S345 + plan-040 § N.2 + Wave 1 MVP DATA-PENDING user-authorization):
+- **S392 sandwich-architect** for G.1 sub-plan 041 (empirical PDF library bake-off pdfplumber/camelot/docling/pypdf + PdfTableExtractorPort ABC contract design; ~150-230K Opus PLAN)
+- **S393 sandwich-architect** for data-corpus operational plan 045 (number 045 = next free; 041..044 reserved by plan-040; fetch VHM+HPG+VIC+FPT × CafeF news + R2/SSI bars + BC-2 fundamentals; populate `data/stockforge.sqlite`; verify non-zero row counts; re-run `apps/cli/validate_thesis.py --ticker VHM` with non-INCOMPLETE corpus to flip PFP-DONE-7+8 to GREEN; ~150-230K Opus PLAN)
+
+**File scope coordination** (no overlap between the 2 architects):
+- S392 G.1 plan → BC-2 fundamental (PDF table extraction; pure-Python library bake-off in `packages/infrastructure/fundamental/` or new `packages/_shared/pdf/`)
+- S393 ingestion plan → operational only (uses existing BC-5 CafeF crawler + BC-1 SSI adapter + BC-2 vnstock adapter; touches `data/stockforge.sqlite` + `apps/cli/`)
+- Main session avoids both file scopes until either returns
+
+**Compliance attestation**: AP-1 ✓ (master-planner fresh-context dispatch S391; 2 architects dispatched in same turn for parallel autonomous progress per architect-tier precedent S345). harness_priority_one ✓ (harness in steady state post-S390; queue drained 9→0; no harness gap detected; 2 new candidates L-S389-1+L-S389-2 are 1st-instance per AP-7 — defer until 2nd instance). D-060 ✓ (commit this turn; 0 pushes). autonomous_continue_no_self_pause ✓ (dispatched next-step subagents without self-pausing). dont_self_pause_at_session_boundary ✓ (S390 closed last turn; this turn opens S391 + dispatches S392+S393 immediately). qa_bundle_all_pending ✓ (2 CHARTER-tier questions bundled into ONE mega-bundle; lettered options; never piecemeal). stop_offering_routing_branches ✓ (no enumerated "what next" options; picked + executed per autonomous-full). 0 charter / 0 constitution writes.
+
+**Carry-forward**: F4 model attribution drift (MINOR; verifier S389 flagged; non-blocking) + 2 new harness promotion candidates L-S389-1 dogfood-violation-self-instance + L-S389-2 ADR-frontmatter-field-count-empirical-verify (both 1st-instance; AP-7 = defer until 2nd).
+
+---
+
 ## S387-S389 — Harness Stabilization Sweep N+1 SHIPPED (plan-039 closed; 9-candidate queue DRAINED 9→0; ADR D-079 ACCEPTED) — 2026-05-17
 
 **Status**: HARD-BLOCK at next SessionStart AVERTED. AP-23 ritual-demotion mandate satisfied. data-corpus ingestion + Phase G-prime UNBLOCKED.
@@ -201,30 +226,6 @@
 **Files modified** (wc -l): atomic-write-check.sh 330 / python-det-check.sh 273 / path-safety-check.sh 354 / html-sep-check.sh 281 / bash-hook-lint.sh 595 / phase-status-coherence.sh 256 / 4 fire-test extensions / phase-status-coh-fire-test.sh 364 (new).
 
 **Next**: dispatch S348 sandwich-verifier (AP-1, fresh-context, ~30-50K VERIFY budget) for plan-023 verification per successor spec.
-
----
-
-## S375 — Phase F.1 RolePromptPack + PersonaRegistry + BC-8 transport-flip IMPL DONE (sub-plan 034; S376 verifier pending) — 2026-05-17
-
-**S375 sandwich-dev RETURN** (Sonnet 4.6 FOCUSED_IMPL, AP-1 fresh-context). Sub-plan 034 D1-D5 COMPLETE. All STEP 0 gates evaluated; CHARTER-TIER GATE DID NOT FIRE (claude CLI v2.1.140 available at `C:\Users\PC\.local\bin\claude.exe`).
-
-**D1 RolePromptPack** SHIPPED: `packages/application/analysis/role_prompt_pack.py` (102 LOC; `@dataclass(frozen=True, slots=True)`; 10 fields per DD-7; 9 invariants via `__post_init__`; `RolePromptPackInvariantError`).
-
-**D2 PersonaRegistry** SHIPPED: `packages/application/analysis/persona_registry.py` (156 LOC; stdlib dict wrapper; 4 methods: `register/get/all_role_ids/load_from_json`; D-064 path-safety 5-invariant; sorted tuple return for determinism).
-
-**D3 Transport-flip** SHIPPED: `claude_llm_perspective_adapter.py` (264→245 LOC; `_default_transport` REMOVED; `import anthropic` REMOVED; `from packages.infrastructure.analysis.subagent_transport import claude_cli_transport` ADDED; field default flipped to `claude_cli_transport`).
-
-**D-052 CLOSURE EMPIRICAL**: `grep -rE "^[ \t]*(import anthropic|from anthropic)" packages/ --include="*.py"` → ZERO MATCHES. D-052 § Implementation step 1 CLOSED for BC-8 surface.
-
-**D4 Tests** SHIPPED: test_role_prompt_pack.py (243 LOC; 23 tests PASS) + test_persona_registry.py (289 LOC; 14 PASS + 1 skip Windows symlink) + test_adapter.py 4 regression additions. Test count: 1113 → 1153 (+40).
-
-**D5 ADR D-074 PROPOSED** at `agent-workspace/memory/decisions/074-bc-8-transport-flip-roleprompt-persona.md` (200 LOC). `agent-workspace/role-packs/README.md` placeholder (62 LOC) created.
-
-**Gates**: mypy --strict CLEAN / ruff CLEAN / pytest 1151/1153 PASS (2 skip) / regression floor 35/35 (bear+quant+synthesizer+phase1_gatherer all green) / DC-GATE-7/8/9 PASS.
-
-**No mistakes this session** (1 minor mypy precision fix: `cast(list[object], ...)` in persona_registry.py; not a logic error).
-
-**Next**: dispatch S376 sandwich-verifier AP-1 fresh-context to verify sub-plan 034 per § F DoD 36 items. Plan-034 mv `pending/` → `completed/` at S376 close per DC-BOOK-4 protocol.
 
 ---
 
