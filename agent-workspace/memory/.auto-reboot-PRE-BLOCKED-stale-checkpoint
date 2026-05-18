@@ -1,0 +1,3 @@
+pre_blocked_at=2026-05-17T23:11:14+07:00 session_id=unknown
+tokens=493884 wind_down=180000 cliff=220000
+checkpoint_age_s=35462 threshold_s=7200

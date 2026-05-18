@@ -1,0 +1,1 @@
+session=firing-test-smoke-80332 ts=2026-05-15T18:45:09+07:00 state=RED-2 high=2 medium=0 low=0 skip=2 details=HH-2-USERPROMPT-NOT-FIRING=HIGH(recent_10min=0);HH-6-DISPATCH-STALE=HIGH(stale=4);

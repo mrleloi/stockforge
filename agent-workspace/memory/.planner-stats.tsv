@@ -1,1 +1,4 @@
 task_class	sample_size	avg_wall_min	parallel_hit_rate	parallel_savings_avg	last_updated
+data-corpus	1	26072.0	100	25760.0	2026-05-17T12:30:18Z
+harness-stabilization	4	25894.4	100	25505.0	2026-05-17T15:18:17Z
+phase-gprime	50	26057.6	100	25764.9	2026-05-17T16:05:54Z

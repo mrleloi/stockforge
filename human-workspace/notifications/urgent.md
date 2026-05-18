@@ -1,76 +1,47 @@
 # URGENT notifications stream
 
-_Auto-rotated 2026-05-16T11:12:46+07:00 — previous content archived to urgent-archived-2026-05-16.md (4435 bytes)._
+_Auto-rotated 2026-05-17T22:39:14+07:00 — previous content archived to urgent-archived-2026-05-17.md (4345 bytes)._
 
 _Append-only stream; rotates when size > 4096 bytes via urgent-md-rotate.sh Stop hook._
 
 ---
 
-## ESCALATION — 2026-05-16T11:12:46+07:00 — 2 HIGH-severity items (event=Stop)
+## [2026-05-17T22:39:14+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
 
-Fired by: scripts/hooks/escalation-engine.sh
-Action: review the HIGH-severity notification(s) below. These are informational
-escalations (no pending Q&A bundle) — no AskUserQuestion required.
+**Session**: unknown
+**Tokens**: 454573 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 33541 seconds (>7200 threshold)
 
-- `human-workspace/notifications/html-separator-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
-- `human-workspace/notifications/path-safety-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
 
----
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
 
-## ESCALATION — 2026-05-16T12:35:55+07:00 — 2 HIGH-severity items (event=UserPromptSubmit)
+## [2026-05-17T22:44:32+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
 
-Fired by: scripts/hooks/escalation-engine.sh
-Action: review the HIGH-severity notification(s) below. These are informational
-escalations (no pending Q&A bundle) — no AskUserQuestion required.
+**Session**: unknown
+**Tokens**: 460555 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 33860 seconds (>7200 threshold)
 
-- `human-workspace/notifications/html-separator-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
-- `human-workspace/notifications/path-safety-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
 
----
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
 
-## ESCALATION — 2026-05-16T12:40:48+07:00 — 2 HIGH-severity items (event=Stop)
+## [2026-05-17T23:05:52+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
 
-Fired by: scripts/hooks/escalation-engine.sh
-Action: review the HIGH-severity notification(s) below. These are informational
-escalations (no pending Q&A bundle) — no AskUserQuestion required.
+**Session**: unknown
+**Tokens**: 468103 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 35140 seconds (>7200 threshold)
 
-- `human-workspace/notifications/html-separator-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
-- `human-workspace/notifications/path-safety-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
 
----
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.
 
-## ESCALATION — 2026-05-16T13:16:44+07:00 — 3 HIGH-severity items (event=Stop)
+## [2026-05-17T23:11:14+07:00] HH-H.4 AUTO-REBOOT BLOCKED — STALE CHECKPOINT
 
-Fired by: scripts/hooks/escalation-engine.sh
-Action: review the HIGH-severity notification(s) below. These are informational
-escalations (no pending Q&A bundle) — no AskUserQuestion required.
+**Session**: unknown
+**Tokens**: 493884 (wind_down=180000 cliff=220000)
+**Checkpoint age**: 35462 seconds (>7200 threshold)
 
-- `human-workspace/notifications/html-separator-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
-- `human-workspace/notifications/path-safety-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
-- `human-workspace/notifications/python-determinism-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
+**Action required**: write a fresh `agent-workspace/memory/checkpoints/latest.md` BEFORE the next reboot fires. Auto-reboot path is blocked until the marker `.auto-reboot-PRE-BLOCKED-stale-checkpoint` is cleared — happens automatically once checkpoint mtime is within 2h.
 
----
-
-## ESCALATION — 2026-05-16T13:20:41+07:00 — 3 HIGH-severity items (event=SessionStart)
-
-Fired by: scripts/hooks/escalation-engine.sh
-Action: review the HIGH-severity notification(s) below. These are informational
-escalations (no pending Q&A bundle) — no AskUserQuestion required.
-
-- `human-workspace/notifications/html-separator-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
-- `human-workspace/notifications/path-safety-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
-- `human-workspace/notifications/python-determinism-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
-
----
-
-## ESCALATION — 2026-05-16T13:20:45+07:00 — 3 HIGH-severity items (event=UserPromptSubmit)
-
-Fired by: scripts/hooks/escalation-engine.sh
-Action: review the HIGH-severity notification(s) below. These are informational
-escalations (no pending Q&A bundle) — no AskUserQuestion required.
-
-- `human-workspace/notifications/html-separator-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
-- `human-workspace/notifications/path-safety-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
-- `human-workspace/notifications/python-determinism-warn.md` (age=0h, action=ESCALATE-ASKUSERQUESTION)
-
----
+**Override**: set `STOCKFORGE_FORCE_REBOOT=1` env to bypass HH-H.1 strict guard if manual reboot needed.

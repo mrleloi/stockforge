@@ -4,10 +4,10 @@ effort: max
 thinking: enabled
 task_class:
   - VERIFY
-samples_count: 3
+samples_count: 7
 status: BIASED-PRE-REBUILD-S65 (user 2026-05-06 flagged tracking gap; rebuild after cost-ledger.tsv accumulates ≥10 sessions)
-sample_sessions: [S21, S29, S64]
-last_updated: 2026-05-06T00:17:45+07:00
+sample_sessions: [S21, S29, S64, S397, S401, S404, S408]
+last_updated: 2026-05-17T23:11:14+07:00
 source: manual session log review + sandwich-verifier observations (S48 sequence had ZERO VERIFY sessions — Phase 2.5 governance work consolidated under FOCUSED_IMPL with smoke-test self-verification per ship; phase-boundary VERIFY sandwich-verifier dispatch deferred to Phase 2.5 close)
 ---
 

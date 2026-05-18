@@ -1,5 +1,5 @@
 ---
-rendered_at: 2026-05-16T13:36:10+07:00
+rendered_at: 2026-05-17T23:11:16+07:00
 cache_ttl_hours: 1
 purpose: compact-bootstrap-context-for-reboot
 fallback: read current-execution.md + checkpoint/latest.md if mtime > 1h or content stale
@@ -14,11 +14,11 @@ fallback: read current-execution.md + checkpoint/latest.md if mtime > 1h or cont
 
 ## Recent ADRs (last 5; review for binding context)
 ```
-066-bc5-crawler-adapter-contract.md
-065-theme-g-i-s1-1-ratification.md
-064-path-safety-5-invariant-contract.md
-063-html-comment-separator-doctrine.md
-062-atomic-write-doctrine.md
+083-vhm-pdf-dogfood-and-bc2-integration.md
+082-pdf-claude-vision-adapter-and-echo-validator.md
+081-br-6-cost-cap-empirical-recalibration.md
+080-pdf-table-extractor-port-and-library-winner.md
+079-pre-commit-pytest-regression-guard.md
 ```
 
 ## Recent mistakes (last 3 M-S<N>-<M>)

@@ -1,0 +1,16 @@
+1. check a bit harness settings. first, stop hooks, at the last 10 hooks, run very slow, check deepdive again, some
+  hook take a lot of time, maybe few minutes, unacceptable. optimize the hooks. then second, from the last time we
+  upgrade the harness to include the "block/ask user for approved", its a lot of time claude code stop, need user
+  intervent. i am not sure human all need to involve in these scenario, my idea when create this feature is, except
+  some especially "blocking feature", that really need to stop and need human to intervent, then stop, otherwise, its
+  will be "pending", human can verify them later, and if more than 6 hours, the harness system trigger the "telegram
+  notification" to let human know. check deepdive again, because i want the "autonomous mode" really can self-decide
+  what to do, with at least human effort and intervent. the third things about harness, i need you to check to
+  skill/agent, which create the plan, i feel the number of task, number of agent/subagent that can run at once time, i
+  mean in parralel, is not much. i need the planner to be more wiser, it can see the tracking log to learn, improve
+  it self, to decide the more effective plan, more subagent running in parralel without causing any error or wrong
+  direction, the planner make claudecode run faster to achieve the goals. lastly, after all things above done, its
+  about the project, how is the current project going, from the last time we analyze the "research" folder and
+  integrate the idea into old project? human need to verify or answer anything? about project business or system
+  design? any decision? from old/pending/stale q&a, answer, decision, etc... to make you clear everything, ready to
+  ship the final product?

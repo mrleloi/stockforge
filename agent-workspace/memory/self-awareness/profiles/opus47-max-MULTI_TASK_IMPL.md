@@ -4,10 +4,10 @@ effort: max
 thinking: enabled
 task_class:
   - MULTI_TASK_IMPL
-samples_count: 12
+samples_count: 15
 status: BIASED-PRE-REBUILD-S65 (user 2026-05-06 flagged tracking gap; rebuild after cost-ledger.tsv accumulates ≥10 sessions)
-sample_sessions: [S27, S33, S34, S20, S48m, S66, S99, S250, S322, S327, S332, S338]
-last_updated: 2026-05-16T12:40:48+07:00
+sample_sessions: [S27, S33, S34, S20, S48m, S66, S99, S250, S322, S327, S332, S338, S388, S403, S407]
+last_updated: 2026-05-17T23:05:53+07:00
 source: agent-workspace/memory/sessions-rollup.tsv (S18 row only) + manual session log review S20-S34 (S48 sequence had ZERO MULTI_TASK_IMPL — all S48b..h ran as FOCUSED_IMPL; observed S48 governance pattern fits FOCUSED_IMPL band)
 ---
 

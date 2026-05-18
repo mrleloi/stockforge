@@ -1,1 +1,5 @@
 mistake_id	session	severity	prevention_status	hook_path	recurrence_count
+M-S392-1	S388	N/A	OPEN	none	0
+M-S395-1	S395	medium	OPEN	none	0
+M-S397-1	S396	low	OPEN	none	7
+M-S405-1	S400	N/A	OPEN	none	1

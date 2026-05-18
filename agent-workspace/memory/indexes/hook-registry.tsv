@@ -25,6 +25,7 @@ diagnostic-subagentstop-stash.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/d
 dispatch-jsonl-backfill.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/dispatch-jsonl-backfill-fire-test.sh	see-fs
 dispatch-jsonl-recorder.sh	PreToolUse,PostToolUse,SubagentStop	ACTIVE	none	scripts/hooks/firing-tests/dispatch-jsonl-recorder-fire-test.sh	see-fs
 dispatch-pending-rotation.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/dispatch-pending-rotation-fire-test.sh	see-fs
+dogfood-the-promotion.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/dogfood-the-promotion-fire-test.sh	see-fs
 drift-rollup-daily.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/drift-rollup-daily-fire-test.sh	see-fs
 drift-signals-D1-D9.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/drift-signals-D1-D9-fire-test.sh	see-fs
 drift-signals-log-rotate.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/drift-signals-log-rotate-fire-test.sh	see-fs
@@ -56,12 +57,16 @@ metric-failure-mode-rate.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/metric
 no-anthropic-sdk-d10.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/no-anthropic-sdk-d10-fire-test.sh	see-fs
 observation-orphan-detector.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/observation-orphan-detector-fire-test.sh	see-fs
 path-safety-check.sh	Stop,PostToolUse	ACTIVE	none	scripts/hooks/firing-tests/path-safety-check-fire-test.sh	see-fs
+pending-queue-escalator.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/pending-queue-escalator-fire-test.sh	see-fs
 phase-status-coherence.sh	SessionStart,UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/phase-status-coherence-fire-test.sh	see-fs
+planner-feedback-loop.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/planner-feedback-loop-fire-test.sh	see-fs
 post-dev-dispatch-attestation-check.sh	SubagentStop	ACTIVE	none	scripts/hooks/firing-tests/post-dev-dispatch-attestation-check-fire-test.sh	see-fs
 post-tool-citation-grep.sh	PostToolUse	ACTIVE	none	scripts/hooks/firing-tests/post-tool-citation-grep-fire-test.sh	see-fs
 pre-checkpoint-close-verifier.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/pre-checkpoint-close-verifier-fire-test.sh	see-fs
 pre-clear-handoff-guard.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/pre-clear-handoff-guard-fire-test.sh	see-fs
+pre-commit-pytest-regression-guard.sh	PreToolUse	ACTIVE	none	scripts/hooks/firing-tests/pre-commit-pytest-regression-guard-fire-test.sh	see-fs
 pre-dispatch-adr-number-check.sh	PreToolUse	ACTIVE	none	scripts/hooks/firing-tests/pre-dispatch-adr-number-check-fire-test.sh	see-fs
+pre-dispatch-architect-commit-guard.sh	PreToolUse	ACTIVE	none	scripts/hooks/firing-tests/pre-dispatch-architect-commit-guard-fire-test.sh	see-fs
 precompact-thesis-state-dump.sh	PreCompact	ACTIVE	none	scripts/hooks/firing-tests/precompact-thesis-state-dump-fire-test.sh	see-fs
 profile-template-auto-populate.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/profile-template-auto-populate-fire-test.sh	see-fs
 project-integrity-watchdog.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/project-integrity-watchdog-fire-test.sh	see-fs
@@ -87,6 +92,7 @@ settings-inline-env-prefix-detector.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-t
 severity-classifier.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/severity-classifier-fire-test.sh	see-fs
 single-claude-instance-lock.sh	SessionStart	ACTIVE	none	scripts/hooks/firing-tests/single-claude-instance-lock-fire-test.sh	see-fs
 stale-prompt-detector.sh	UserPromptSubmit	ACTIVE	none	scripts/hooks/firing-tests/stale-prompt-detector-fire-test.sh	see-fs
+stop-finding-frontmatter-validator.sh	Stop	ACTIVE	none	scripts/hooks/firing-tests/stop-finding-frontmatter-validator-fire-test.sh	see-fs
 sub-plan-completion-coherence.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/sub-plan-completion-coherence-fire-test.sh	see-fs
 subagent-budget-classifier.sh	ORPHAN	ORPHAN	none	scripts/hooks/firing-tests/subagent-budget-classifier-fire-test.sh	see-fs
 subagent-stop-logger.sh	SubagentStop	ACTIVE	none	scripts/hooks/firing-tests/subagent-stop-logger-fire-test.sh	see-fs

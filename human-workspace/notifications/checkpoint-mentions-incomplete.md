@@ -1,19 +1,25 @@
 # Checkpoint mentions incomplete (L-S67-5 / M-S67-3 prevention)
 
-**Detected at**: 2026-05-16T06:20:40Z (Stop hook)
+**Detected at**: 2026-05-17T06:32:05Z (Stop hook)
 **Checkpoint**: `agent-workspace/memory/checkpoints/latest.md`
-**Checkpoint mtime > session start**: 1778912099 > 1778904637
+**Checkpoint mtime > session start**: 1778998813 > 1778997486
 
 ## Git-status entries NOT mentioned by basename in checkpoint (after whitelist filter)
 
+- `agent-workspace/memory/current-execution.md`
 - `agent-workspace/memory/sync-tracker/events.tsv`
-- `human-workspace/q-and-a/pending/qa-2026-05-15-wave-1-bis.md`
+- `agent-workspace/memory/sync-tracker/state.tsv`
+- `Agent`
 - `Append-only.`
-- `Companion`
-- `Measured`
-- `Numbered,`
-- `Run`
-- `Stock-specific`
+- `Calibration`
+- `Empirical`
+- `Hardcoded`
+- `"Source"`
+- `human-workspace/user_prompt/20260516_01.txt`
+- `scripts/hooks/block-control.sh.bak-S348`
+- `scripts/hooks/escalation-engine.sh.bak-S348`
+- `scripts/hooks/severity-classifier.sh.bak-S348`
+- `"Audience"`
 
 ## Recommended action
 
