@@ -1,21 +1,17 @@
-# severity-state.tsv — generated 2026-05-17T23:11:14+07:00 by severity-classifier.sh
+# severity-state.tsv — generated 2026-05-19T01:30:53+07:00 by severity-classifier.sh
 # columns: severity\tartifact_path\tage_hours\tnext_action\tclassified_at\tblock_tier
 # block_tier: HARD | PENDING | SOFT  (NEW S348 — drives escalation-engine routing per ADR D-068)
 # severity: CRITICAL | HIGH | MEDIUM | LOW
 # next_action: BLOCK | BLOCK-PENDING | ESCALATE-ASKUSERQUESTION | DIGEST | LOG-ONLY
-CRITICAL	agent-workspace/memory/.auto-reboot-PRE-BLOCKED-stale-checkpoint	0	BLOCK-PENDING	2026-05-17T23:11:14+07:00	PENDING
-LOW	agent-workspace/memory/decisions/062-atomic-write-doctrine.md	51	LOG-ONLY	2026-05-17T23:11:14+07:00	SOFT
-LOW	agent-workspace/memory/decisions/063-html-comment-separator-doctrine.md	51	LOG-ONLY	2026-05-17T23:11:14+07:00	SOFT
-LOW	agent-workspace/memory/decisions/064-path-safety-5-invariant-contract.md	52	LOG-ONLY	2026-05-17T23:11:14+07:00	SOFT
-LOW	agent-workspace/memory/decisions/066-bc5-crawler-adapter-contract.md	23	LOG-ONLY	2026-05-17T23:11:14+07:00	SOFT
-LOW	agent-workspace/memory/decisions/068-block-ask-gate-3-tier-model.md	26	LOG-ONLY	2026-05-17T23:11:14+07:00	SOFT
-LOW	agent-workspace/memory/decisions/069-planner-self-calibration-protocol.md	26	LOG-ONLY	2026-05-17T23:11:14+07:00	SOFT
-MEDIUM	agent-workspace/memory/decisions/070-vn-tokenizer-library.md	16	DIGEST	2026-05-17T23:11:14+07:00	SOFT
-LOW	human-workspace/notifications/N-INFO-file-pattern-lint.md	0	LOG-ONLY	2026-05-17T23:11:14+07:00	SOFT
-LOW	human-workspace/notifications/STOP-FINDING-S394-pdf-real-pdfs-needed.md	0	LOG-ONLY	2026-05-17T23:11:14+07:00	SOFT
-LOW	human-workspace/notifications/bash-hook-lint-warn.md	0	LOG-ONLY	2026-05-17T23:11:14+07:00	SOFT
-LOW	human-workspace/notifications/checkpoint-mentions-incomplete.md	9	LOG-ONLY	2026-05-17T23:11:14+07:00	SOFT
-MEDIUM	human-workspace/notifications/html-separator-warn.md	0	DIGEST	2026-05-17T23:11:14+07:00	SOFT
-MEDIUM	human-workspace/notifications/path-safety-warn.md	0	DIGEST	2026-05-17T23:11:14+07:00	SOFT
-MEDIUM	human-workspace/notifications/python-determinism-warn.md	0	DIGEST	2026-05-17T23:11:14+07:00	SOFT
-LOW	human-workspace/notifications/tracking-retention-cap-breach.md	0	LOG-ONLY	2026-05-17T23:11:14+07:00	SOFT
+CRITICAL	agent-workspace/memory/.auto-reboot-PRE-BLOCKED-stale-checkpoint	0	BLOCK-PENDING	2026-05-19T01:30:53+07:00	PENDING
+LOW	agent-workspace/memory/decisions/062-atomic-write-doctrine.md	77	LOG-ONLY	2026-05-19T01:30:53+07:00	SOFT
+LOW	agent-workspace/memory/decisions/063-html-comment-separator-doctrine.md	77	LOG-ONLY	2026-05-19T01:30:53+07:00	SOFT
+LOW	agent-workspace/memory/decisions/064-path-safety-5-invariant-contract.md	79	LOG-ONLY	2026-05-19T01:30:53+07:00	SOFT
+LOW	agent-workspace/memory/decisions/066-bc5-crawler-adapter-contract.md	50	LOG-ONLY	2026-05-19T01:30:53+07:00	SOFT
+LOW	agent-workspace/memory/decisions/068-block-ask-gate-3-tier-model.md	52	LOG-ONLY	2026-05-19T01:30:53+07:00	SOFT
+LOW	agent-workspace/memory/decisions/069-planner-self-calibration-protocol.md	52	LOG-ONLY	2026-05-19T01:30:53+07:00	SOFT
+MEDIUM	agent-workspace/memory/decisions/070-vn-tokenizer-library.md	42	DIGEST	2026-05-19T01:30:53+07:00	SOFT
+MEDIUM	human-workspace/notifications/html-separator-warn.md	0	DIGEST	2026-05-19T01:30:53+07:00	SOFT
+MEDIUM	human-workspace/notifications/path-safety-warn.md	0	DIGEST	2026-05-19T01:30:53+07:00	SOFT
+MEDIUM	human-workspace/notifications/python-determinism-warn.md	0	DIGEST	2026-05-19T01:30:53+07:00	SOFT
+LOW	human-workspace/notifications/tracking-retention-cap-breach.md	0	LOG-ONLY	2026-05-19T01:30:53+07:00	SOFT

@@ -5,13 +5,10 @@ status: pending
 
 # python-determinism-check — ALERT
 
-Determinism violations detected: 6
+Determinism violations detected: 3
 
   - R1 [ERR]: apps/_shared/crawl/rate_limiter.py — datetime.now() without timezone (1 occurrence(s)) — use datetime.now(timezone.utc)
-  - R1 [ERR]: apps/_shared/entities/vn_ticker_resolver.py — datetime.now() without timezone (1 occurrence(s)) — use datetime.now(timezone.utc)
   - R1 [ERR]: apps/cli/extract_vn_claims.py — datetime.now() without timezone (1 occurrence(s)) — use datetime.now(timezone.utc)
-  - R1 [ERR]: apps/cli/resolve_vn_tickers.py — datetime.now() without timezone (1 occurrence(s)) — use datetime.now(timezone.utc)
-  - R1 [ERR]: apps/cli/score_vn_sentiment.py — datetime.now() without timezone (1 occurrence(s)) — use datetime.now(timezone.utc)
   - R1 [ERR]: apps/cli/tokenize_vn_text.py — datetime.now() without timezone (1 occurrence(s)) — use datetime.now(timezone.utc)
 
 ## Fix guidance

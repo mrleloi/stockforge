@@ -1,1 +1,1 @@
-session=unknown ts=2026-05-17T23:05:00+07:00 green=NO hh=YELLOW ie=GREEN pc=GREEN urgent_lines=27 unattested=26 up_delta_hr=28 qa_bundles=0 qa_delta_hr=55 qg_open=0
+session=unknown ts=2026-05-19T00:58:39+07:00 green=NO hh=RED-1 ie=GREEN pc=GREEN urgent_lines=47 unattested=29 up_delta_hr=54 qa_bundles=0 qa_delta_hr=81 qg_open=0

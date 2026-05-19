@@ -718,3 +718,4 @@ session_n	session_id	ts_utc	tokens_real	tools_used	subagents	failure_codes	wall_
 404	f97abf12-dbeb-4644-af65-20a53683eb5b	2026-05-17T15:44:32Z	460555	5006	143	-	26275	044-S406-phase-gprime-g4-vhm-annual-report-dogfood-and-bc2-integration	143	88	0	26275	26013
 407	f97abf12-dbeb-4644-af65-20a53683eb5b	2026-05-17T16:05:53Z	474622	5081	144	-	26296	040-S391-phase-gprime-master-plan	144	89	0	26296	26048
 408	f97abf12-dbeb-4644-af65-20a53683eb5b	2026-05-17T16:11:14Z	493884	5118	144	-	26298	040-S391-phase-gprime-master-plan	144	89	0	26298	26048
+408	unknown	2026-05-18T18:30:54Z	424619	0	152	-	27880	040-S391-phase-gprime-master-plan	152	89	0	27880	27632

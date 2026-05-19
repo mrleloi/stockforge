@@ -1,5 +1,5 @@
 ---
-rendered_at: 2026-05-17T23:11:16+07:00
+rendered_at: 2026-05-19T01:30:55+07:00
 cache_ttl_hours: 1
 purpose: compact-bootstrap-context-for-reboot
 fallback: read current-execution.md + checkpoint/latest.md if mtime > 1h or content stale
